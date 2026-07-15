@@ -113,6 +113,52 @@ def test_completed_migration_never_reimports_stale_legacy_true(monkeypatch):
     assert cfg.reconcile_hardcover_sync(legacy_auto_fetch_enabled=True) is False
 
 
+def test_reconciliation_persists_across_real_sqlite_restart(tmp_path, monkeypatch):
+    """The one-time marker must survive a process restart in a real app.db."""
+    from cryptography.fernet import Fernet
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from cps import config_sql
+
+    monkeypatch.setenv("FLASK_DEBUG", "1")
+    engine = create_engine(f"sqlite:///{tmp_path / 'app.db'}")
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    key = Fernet.generate_key()
+    config_sql.load_configuration(session, key)
+
+    first = config_sql.ConfigSQL()
+    first._session = session
+    first._settings = None
+    first._fernet = Fernet(key)
+    first.load()
+    assert first.reconcile_hardcover_sync(legacy_auto_fetch_enabled=True) is True
+    assert session.query(config_sql._Settings).one().config_hardcover_sync_migrated is True
+    session.close()
+
+    restarted_session = Session()
+    restarted = config_sql.ConfigSQL()
+    restarted._session = restarted_session
+    restarted._settings = None
+    restarted._fernet = Fernet(key)
+    restarted.load()
+
+    # Simulate an operator disabling the canonical setting while an older
+    # cwa.db still contains true. The stale legacy value must not resurrect.
+    restarted.config_hardcover_sync = False
+    restarted.save()
+    assert restarted.reconcile_hardcover_sync(legacy_auto_fetch_enabled=True) is False
+
+    restarted_session.close()
+    final_session = Session()
+    final = final_session.query(config_sql._Settings).one()
+    assert final.config_hardcover_sync is False
+    assert final.config_hardcover_sync_migrated is True
+    final_session.close()
+    engine.dispose()
+
+
 def test_environment_override_is_effective_but_not_persisted_by_migration(monkeypatch):
     cfg = _bare_config()
     monkeypatch.setenv("HARDCOVER_SYNC_ENABLED", "true")
@@ -179,6 +225,37 @@ def test_admin_save_has_one_hardcover_sync_coercion_path():
     assert source.count('_config_checkbox(to_save, "config_hardcover_sync")') == 1
     assert '_config_checkbox_int(to_save, "config_hardcover_sync")' not in source
     assert 'hardcover_sync_source() == "database"' in source
+
+
+def test_applying_cwa_defaults_restores_the_rollback_mirror():
+    from cps import cwa_functions
+
+    writes = []
+
+    class FakeDB:
+        def execute_write(self, query, params):
+            writes.append((query, params))
+
+    missing = object()
+    original = getattr(cwa_functions.config, "config_hardcover_sync", missing)
+    try:
+        cwa_functions.config.config_hardcover_sync = True
+        cwa_functions._mirror_hardcover_sync_for_rollback(FakeDB())
+    finally:
+        if original is missing:
+            del cwa_functions.config.config_hardcover_sync
+        else:
+            cwa_functions.config.config_hardcover_sync = original
+
+    assert writes == [
+        ("UPDATE cwa_settings SET hardcover_auto_fetch_enabled = ?", (1,))
+    ]
+
+    source = (REPO_ROOT / "cps/cwa_functions.py").read_text(encoding="utf-8")
+    defaults_branch = source.split(
+        'elif request.form[\'submit_button\'] == "Apply Default Settings":', 1
+    )[1]
+    assert "_mirror_hardcover_sync_for_rollback(cwa_db)" in defaults_branch
 
 
 def test_scheduler_logs_disabled_and_missing_token_as_distinct_states(

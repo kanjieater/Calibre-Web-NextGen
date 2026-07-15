@@ -56,6 +56,14 @@ cwa_internal = Blueprint('cwa_internal', __name__)
 
 log = logger.create()
 
+
+def _mirror_hardcover_sync_for_rollback(cwa_db):
+    """Keep the retired CWA flag aligned for safe downgrade/rollback."""
+    cwa_db.execute_write(
+        "UPDATE cwa_settings SET hardcover_auto_fetch_enabled = ?",
+        (int(bool(getattr(config, 'config_hardcover_sync', False))),),
+    )
+
 ##——————————————————————————————GLOBAL VARIABLES——————————————————————————————##
 
 # Folder where the log files are stored
@@ -1062,6 +1070,10 @@ def set_cwa_settings():
             except Exception as e:
                 log.warning("[cwa-duplicates] Could not compare duplicate criteria defaults: %s", str(e))
             cwa_db.set_default_settings(force=True)
+            # Applying CWA defaults resets every legacy column, including the
+            # retired Hardcover flag. Restore its canonical app.db mirror so a
+            # rollback cannot unexpectedly disable sync.
+            _mirror_hardcover_sync_for_rollback(cwa_db)
             cwa_settings = cwa_db.get_cwa_settings()
             if duplicate_criteria_changed:
                 try:

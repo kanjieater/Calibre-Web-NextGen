@@ -266,12 +266,6 @@ def _schedule_duplicate_scan(scheduler, timezone_info):
 def _schedule_hardcover_auto_fetch(scheduler, timezone_info):
     """Schedule background Hardcover auto-fetch from the unified setting."""
     try:
-        import sys as _sys
-        if '/app/calibre-web-automated/scripts/' not in _sys.path:
-            _sys.path.insert(1, '/app/calibre-web-automated/scripts/')
-        from cwa_db import CWA_DB
-        from .tasks.auto_hardcover_id import TaskAutoHardcoverID
-
         enabled, cwa_settings = reconcile_hardcover_configuration()
         token_available = bool(config.resolved_hardcover_token())
         token_source = config.hardcover_token_source()
