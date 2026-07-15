@@ -39,6 +39,7 @@ def _shelf_item(shelf, uid):
         "icon": shelf.icon or "🪄",
         "is_public": bool(shelf.is_public),
         "is_owner": shelf.user_id == uid,
+        "is_system": bool(getattr(shelf, "is_system", False)),
     }
 
 
@@ -86,6 +87,7 @@ def magic_shelf_books(shelf_id):
     display_name = magic_shelf.system_magic_shelf_display_name(shelf)
     if query_filter is None:
         return jsonify({"id": shelf.id, "name": display_name, "icon": shelf.icon or "🪄",
+                        "is_system": bool(getattr(shelf, "is_system", False)),
                         "is_owner": (shelf.user_id == uid),
                         "items": [], "page": 1, "per_page": per_page, "total": 0})
 
@@ -95,6 +97,7 @@ def magic_shelf_books(shelf_id):
         True, config.config_read_column, *series_join)
     return jsonify({
         "id": shelf.id, "name": display_name, "icon": shelf.icon or "🪄",
+        "is_system": bool(getattr(shelf, "is_system", False)),
         "is_owner": (shelf.user_id == uid),
         # rules included so the builder can load this shelf for editing
         "rules": shelf.rules or {"condition": "AND", "rules": []},

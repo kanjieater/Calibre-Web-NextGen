@@ -184,6 +184,7 @@ def test_locale_change_invalidates_translated_magic_shelf_names():
     profile_success = source[source.index("export function useUpdateProfile"):
                              source.index("export function useChangePassword")]
     assert "invalidateQueries({ queryKey: ['magicshelves'] })" in profile_success
+    assert "invalidateQueries({ queryKey: ['magicshelf'] })" in profile_success
 
 
 def test_no_spa_anchored_msgid_is_fuzzy_in_any_locale():

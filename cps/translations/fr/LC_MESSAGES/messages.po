@@ -2619,12 +2619,12 @@ msgstr "Lire {title}"
 
 #: cps/spa_strings.py:41
 msgid "Series order"
-msgstr ""
+msgstr "Ordre de série"
 
 
 #: cps/spa_strings.py:42
 msgid "Series order (reverse)"
-msgstr ""
+msgstr "Ordre de série (inverse)"
 
 
 #: cps/spa_strings.py:46 cps/templates/detail.html:965
@@ -3008,7 +3008,7 @@ msgstr "Modifier {title}"
 
 #: cps/spa_strings.py:149
 msgid "Failed to load books."
-msgstr ""
+msgstr "Impossible de charger les livres."
 
 
 #: cps/spa_strings.py:150
@@ -3133,7 +3133,7 @@ msgstr "Aucun livre ici."
 #: cps/spa_strings.py:178
 #, python-brace-format
 msgid "No results for \"{q}\"."
-msgstr ""
+msgstr "Aucun résultat pour « {q} »."
 
 
 #: cps/spa_strings.py:179
@@ -3143,7 +3143,7 @@ msgstr ""
 #: cps/spa_strings.py:180
 #, python-brace-format
 msgid "No {filter} books here."
-msgstr ""
+msgstr "Aucun livre {filter} ici."
 
 #: cps/spa_strings.py:181
 msgid "Password changed."
@@ -3495,7 +3495,7 @@ msgstr ""
 
 #: cps/spa_strings.py:258
 msgid "Grid view"
-msgstr ""
+msgstr "Vue en grille"
 
 
 #: cps/spa_strings.py:259
@@ -3504,7 +3504,7 @@ msgstr "Bibliothèque"
 
 #: cps/spa_strings.py:260
 msgid "List view"
-msgstr ""
+msgstr "Vue en liste"
 
 
 #: cps/spa_strings.py:261
@@ -3935,12 +3935,12 @@ msgstr ""
 
 #: cps/spa_strings.py:375
 msgid "Book density"
-msgstr ""
+msgstr "Densité des livres"
 
 
 #: cps/spa_strings.py:376
 msgid "Rows per load"
-msgstr ""
+msgstr "Lignes par chargement"
 
 
 #: cps/spa_strings.py:377 cps/templates/cwa_settings.html:376
@@ -4715,7 +4715,7 @@ msgstr ""
 
 #: cps/spa_strings.py:543 cps/templates/cover_picker.html:87
 msgid "Loading…"
-msgstr ""
+msgstr "Chargement…"
 
 
 #: cps/spa_strings.py:544 cps/templates/cover_picker.html:37
@@ -5267,7 +5267,7 @@ msgstr "Sélectionner"
 
 #: cps/spa_strings.py:666
 msgid "Select multiple"
-msgstr ""
+msgstr "Sélection multiple"
 
 
 #: cps/spa_strings.py:667 cps/templates/detail.html:1191
@@ -5296,7 +5296,7 @@ msgstr ""
 
 #: cps/spa_strings.py:672
 msgid "Series view"
-msgstr ""
+msgstr "Vue par séries"
 
 
 #: cps/spa_strings.py:673
@@ -5356,7 +5356,7 @@ msgstr ""
 
 #: cps/spa_strings.py:686
 msgid "Show Discover section"
-msgstr ""
+msgstr "Afficher la section Découvrir"
 
 
 #: cps/spa_strings.py:687

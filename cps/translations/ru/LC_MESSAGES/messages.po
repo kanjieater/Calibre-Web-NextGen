@@ -3730,12 +3730,12 @@ msgstr "Основные настройки"
 
 #: cps/spa_strings.py:375
 msgid "Book density"
-msgstr ""
+msgstr "Плотность отображения книг"
 
 
 #: cps/spa_strings.py:376
 msgid "Rows per load"
-msgstr ""
+msgstr "Строк за загрузку"
 
 
 #: cps/spa_strings.py:377 cps/templates/cwa_settings.html:376
@@ -4980,7 +4980,7 @@ msgstr "Номер в серии"
 
 #: cps/spa_strings.py:672
 msgid "Series view"
-msgstr ""
+msgstr "Просмотр серий"
 
 
 #: cps/spa_strings.py:673

@@ -47,7 +47,9 @@ def test_system_shelf_api_localizes_display_name_without_mutating_identity(monke
     )
 
     assert magicshelves._shelf_item(system, 3)["name"] == "Lecture en cours"
+    assert magicshelves._shelf_item(system, 3)["is_system"] is True
     assert magicshelves._shelf_item(custom, 3)["name"] == "Currently Reading"
+    assert magicshelves._shelf_item(custom, 3)["is_system"] is False
     assert system.name == "Currently Reading"
 
 

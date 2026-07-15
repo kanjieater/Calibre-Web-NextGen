@@ -818,6 +818,7 @@ export function useUpdateProfile() {
       // Refetch them after a locale change so request-local display text does
       // not remain cached in the previous language (#886).
       void qc.invalidateQueries({ queryKey: ['magicshelves'] });
+      void qc.invalidateQueries({ queryKey: ['magicshelf'] });
     },
   });
 }
@@ -921,7 +922,7 @@ export function useEditMagicShelf(id: string | number) {
   });
 }
 
-export interface MagicShelfItem { id: number; name: string; icon: string; is_public: boolean; is_owner: boolean }
+export interface MagicShelfItem { id: number; name: string; icon: string; is_public: boolean; is_owner: boolean; is_system: boolean }
 
 export function useMagicShelves() {
   return useQuery<{ items: MagicShelfItem[] }>({
@@ -932,7 +933,7 @@ export function useMagicShelves() {
 }
 
 export function useMagicShelfBooks(id: string | number, page = 1) {
-  return useQuery<{ id: number; name: string; icon: string; is_owner: boolean } & BooksPage>({
+  return useQuery<{ id: number; name: string; icon: string; is_owner: boolean; is_system: boolean } & BooksPage>({
     queryKey: ['magicshelf', String(id), page],
     queryFn: () => apiGet(`/api/v1/magicshelf/${id}?page=${page}`),
     enabled: String(id).length > 0,

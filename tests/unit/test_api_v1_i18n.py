@@ -286,6 +286,24 @@ def test_reporter_catalog_controls_have_accessible_translations(locale):
     assert [key for key in keys if not catalog.get(key)] == []
 
 
+@pytest.mark.parametrize(
+    ("locale", "keys"),
+    [
+        ("fr", (
+            "Book density", "Grid view", "List view", "Loading…", "Rows per load",
+            "Select multiple", "Series order", "Series order (reverse)", "Series view",
+            "Show Discover section", "Failed to load books.",
+            'No results for "{q}".', "No {filter} books here.",
+        )),
+        ("ru", ("Book density", "Rows per load", "Series view")),
+    ],
+)
+def test_household_and_reporter_catalog_surface_is_complete(locale, keys):
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    assert [key for key in keys if not catalog.get(key)] == []
+
+
 @pytest.mark.unit
 def test_i18n_endpoint_is_public():
     """The auth gate must let the catalog through (login screen needs strings)."""
