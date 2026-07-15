@@ -18,6 +18,14 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- Hardcover setup no longer hides token status behind a disabled sync switch,
+  points secret-file users at the wrong environment variable, or shows two
+  conflicting enable checkboxes. One server-wide switch now controls both
+  reading-progress sync and scheduled Hardcover ID fetching, existing enabled
+  installations are preserved during migration, and compose deployments can
+  manage it with `HARDCOVER_SYNC_ENABLED`. Startup logs report enabled/token
+  presence and their sources without exposing the token. ([#897](https://github.com/new-usemame/Calibre-Web-NextGen/issues/897), [#898](https://github.com/new-usemame/Calibre-Web-NextGen/issues/898), [#899](https://github.com/new-usemame/Calibre-Web-NextGen/issues/899), [#900](https://github.com/new-usemame/Calibre-Web-NextGen/issues/900))
+
 - Admin → Theme no longer says "Settings saved." and then changes nothing. The
   picker stored its choice in an old numbering the theme system stopped reading,
   so "Light" always came back dark. It is now the default theme for **new

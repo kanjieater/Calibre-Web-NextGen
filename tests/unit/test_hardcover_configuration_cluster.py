@@ -123,6 +123,41 @@ def test_environment_override_is_effective_but_not_persisted_by_migration(monkey
     assert cfg.config_hardcover_sync_migrated is True
 
 
+def test_legacy_rollback_mirror_tracks_persisted_value_not_env_override(monkeypatch):
+    import sys
+    from types import ModuleType, SimpleNamespace
+
+    import cps.schedule as schedule
+
+    writes = []
+
+    class FakeDB:
+        def get_cwa_settings(self):
+            return {"hardcover_auto_fetch_enabled": False}
+
+        def execute_write(self, query, params):
+            writes.append((query, params))
+
+    fake_module = ModuleType("cwa_db")
+    fake_module.CWA_DB = FakeDB
+    monkeypatch.setitem(sys.modules, "cwa_db", fake_module)
+
+    cfg = SimpleNamespace(
+        config_hardcover_sync=True,
+        # Models HARDCOVER_SYNC_ENABLED=false while the stored fallback is true.
+        reconcile_hardcover_sync=lambda legacy_auto_fetch_enabled: False,
+        hardcover_sync_enabled=lambda: False,
+    )
+    monkeypatch.setattr(schedule, "config", cfg)
+
+    effective, _settings = schedule.reconcile_hardcover_configuration()
+
+    assert effective is False
+    assert writes == [
+        ("UPDATE cwa_settings SET hardcover_auto_fetch_enabled = ?", (1,))
+    ]
+
+
 def test_admin_template_has_one_sync_control_and_ungated_token_status():
     template = (REPO_ROOT / "cps/templates/config_edit.html").read_text(
         encoding="utf-8"
@@ -143,6 +178,7 @@ def test_admin_save_has_one_hardcover_sync_coercion_path():
     source = (REPO_ROOT / "cps/admin.py").read_text(encoding="utf-8")
     assert source.count('_config_checkbox(to_save, "config_hardcover_sync")') == 1
     assert '_config_checkbox_int(to_save, "config_hardcover_sync")' not in source
+    assert 'hardcover_sync_source() == "database"' in source
 
 
 def test_scheduler_logs_disabled_and_missing_token_as_distinct_states(
@@ -168,6 +204,7 @@ def test_scheduler_logs_disabled_and_missing_token_as_distinct_states(
     monkeypatch.setitem(sys.modules, "cwa_db", fake_module)
 
     cfg = SimpleNamespace(
+        config_hardcover_sync=False,
         reconcile_hardcover_sync=lambda legacy_auto_fetch_enabled: False,
         hardcover_sync_enabled=lambda: False,
         hardcover_sync_source=lambda: "database",
@@ -210,6 +247,7 @@ def test_scheduler_logs_presence_and_source_without_token_value(monkeypatch, cap
     monkeypatch.setitem(sys.modules, "cwa_db", fake_module)
 
     cfg = SimpleNamespace(
+        config_hardcover_sync=False,
         reconcile_hardcover_sync=lambda legacy_auto_fetch_enabled: True,
         hardcover_sync_enabled=lambda: True,
         hardcover_sync_source=lambda: "HARDCOVER_SYNC_ENABLED",

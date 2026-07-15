@@ -752,7 +752,14 @@ def set_cwa_settings():
     integer_settings = ['ingest_timeout_minutes', 'ingest_stale_temp_minutes', 'ingest_stale_temp_interval', 'auto_send_delay_minutes', 'hardcover_auto_fetch_batch_size', 'hardcover_auto_fetch_schedule_hour', 'duplicate_scan_hour', 'duplicate_scan_chunk_size', 'duplicate_scan_debounce_seconds', 'duplicate_auto_resolve_cooldown_minutes', 'archived_cleanup_schedule_hour', 'cover_download_max_mb']  # Special handling for integer settings
     float_settings = ['hardcover_auto_fetch_min_confidence', 'hardcover_auto_fetch_rate_limit']  # Special handling for float settings
     json_settings = ['metadata_provider_hierarchy', 'metadata_providers_enabled', 'duplicate_format_priority']  # Special handling for JSON settings
-    skip_settings = ['auto_convert_ignored_formats', 'auto_ingest_ignored_formats', 'auto_convert_retained_formats']  # Handled through individual format checkboxes
+    skip_settings = [
+        'auto_convert_ignored_formats',
+        'auto_ingest_ignored_formats',
+        'auto_convert_retained_formats',
+        # Retired as runtime input by #900. It remains in cwa.db only as a
+        # rollback mirror of app.db's config_hardcover_sync.
+        'hardcover_auto_fetch_enabled',
+    ]
     
     for setting in cwa_default_settings:
         if setting in integer_settings or setting in float_settings or setting in json_settings or setting in skip_settings:
@@ -988,6 +995,12 @@ def set_cwa_settings():
             # Save Kobo Sync Magic Shelves setting (stored in app.db, not cwa.db)
             config.config_kobo_sync_magic_shelves = 'config_kobo_sync_magic_shelves' in request.form
             config.save()
+
+            # Preserve the legacy CWA column for downgrade compatibility;
+            # this page no longer owns a second Hardcover enable switch.
+            result['hardcover_auto_fetch_enabled'] = int(
+                bool(getattr(config, 'config_hardcover_sync', False))
+            )
 
             duplicate_criteria_changed = False
             try:

@@ -1023,7 +1023,7 @@ def do_edit_book(book_id, upload_formats=None):
         modify_date |= edit_all_cc_data(book_id, book, to_save)
 
         # Handle hardcover sync blacklist settings
-        if config.config_kobo_sync and config.config_hardcover_sync:
+        if config.config_kobo_sync and config.hardcover_sync_enabled():
             modify_date |= edit_hardcover_blacklist(book_id, to_save)
 
         if to_save.get("pubdate"):

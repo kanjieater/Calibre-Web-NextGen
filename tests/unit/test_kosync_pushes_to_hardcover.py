@@ -156,7 +156,7 @@ class TestPushReadingStateToHardcoverNoActiveContext:
         # Mock the global config flag, the blacklist query, and the
         # Hardcover client.
         mock_config = MagicMock()
-        mock_config.config_hardcover_sync = True
+        mock_config.hardcover_sync_enabled.return_value = True
 
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
@@ -200,7 +200,7 @@ class TestPushReadingStateToHardcoverGuardsAndFailures:
         user, book = self._user_and_book()
         constructed = []
         service = SimpleNamespace(HardcoverClient=lambda token: constructed.append(token))
-        with patch.object(kobo_mod, "config", SimpleNamespace(config_hardcover_sync=False)), \
+        with patch.object(kobo_mod, "config", SimpleNamespace(hardcover_sync_enabled=lambda: False)), \
                 patch.object(kobo_mod, "hardcover", service):
             push_reading_state_to_hardcover(user, book, 47)
 
@@ -216,7 +216,7 @@ class TestPushReadingStateToHardcoverGuardsAndFailures:
         session = MagicMock()
         session.query.return_value.filter.return_value.first.return_value = None
 
-        with patch.object(kobo_mod, "config", SimpleNamespace(config_hardcover_sync=True)), \
+        with patch.object(kobo_mod, "config", SimpleNamespace(hardcover_sync_enabled=lambda: True)), \
                 patch.object(kobo_mod, "ub", SimpleNamespace(session=session, HardcoverBookBlacklist=MagicMock())), \
                 patch.object(kobo_mod, "hardcover", service):
             # The method intentionally returns normally: Kobo/KOReader must not

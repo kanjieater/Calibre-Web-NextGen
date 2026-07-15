@@ -2588,8 +2588,6 @@ def _configuration_update_helper():
         if not prev_kobo_sync and bool(config.config_kobo_sync):
             config.config_kobo_cover_padding_enabled = 1
 
-        _config_checkbox_int(to_save, "config_hardcover_sync")
-
         if "config_upload_formats" in to_save:
             to_save["config_upload_formats"] = ','.join(
                 helper.uniq([x.strip().lower() for x in to_save["config_upload_formats"].split(',')]))
@@ -2631,7 +2629,11 @@ def _configuration_update_helper():
                                                config.config_use_goodreads)
 
         # Hardcover configuration
-        _config_checkbox(to_save, "config_hardcover_sync")
+        # A deployment-managed override disables the checkbox in HTML, so it
+        # submits no value. Preserve the stored fallback rather than silently
+        # clearing it on an unrelated Basic Configuration save.
+        if config.hardcover_sync_source() == "database":
+            _config_checkbox(to_save, "config_hardcover_sync")
         _config_checkbox(to_save, "config_hardcover_annotations_sync")
         _config_string(to_save, "config_hardcover_token")
 
@@ -2730,6 +2732,9 @@ def _configuration_update_helper():
         _configuration_result(_("Oops! Database Error: %(error)s.", error=e.orig))
 
     config.save()
+    # Keep the retired cwa.db auto-fetch flag synchronized solely for safe
+    # rollback. Runtime consumers use ConfigSQL.hardcover_sync_enabled().
+    schedule.reconcile_hardcover_configuration()
     apply_https_runtime_config()
     if reboot_required:
         web_server.stop(True)

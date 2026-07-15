@@ -436,7 +436,7 @@ Without this, CWA may see different client IPs across requests and trigger Sessi
 
 Hardcover then appears in the Fetch Metadata modal.
 
-If you set the token through the `HARDCOVER_TOKEN` environment variable, the **Hardcover API Key** field in the admin UI stays empty — that field only shows a key entered through the UI, and an environment-supplied token is not echoed back into the page. When an environment token is active, the admin page shows a note under the field saying so; a key typed into the field overrides the environment value.
+If you set the token through the `HARDCOVER_TOKEN` environment variable, the **Hardcover API Key** field in the admin UI stays empty — that field only shows a key entered through the UI, and an environment-supplied token is not echoed back into the page. The admin page identifies whether `HARDCOVER_TOKEN` or `HARDCOVER_TOKEN_FILE` is active without displaying its value; a key typed into the field overrides either environment source.
 
 To keep the token out of your compose file entirely, point `HARDCOVER_TOKEN_FILE` at a file containing just the token (docker-secrets style):
 
@@ -445,6 +445,14 @@ To keep the token out of your compose file entirely, point `HARDCOVER_TOKEN_FILE
 ```
 
 Precedence: UI-configured key → `HARDCOVER_TOKEN` → `HARDCOVER_TOKEN_FILE`.
+
+Enable the server-wide integration once under Admin → Edit Basic Configuration → **Enable Hardcover Sync**. This single switch controls both scheduled Hardcover ID fetching and Kobo/KOReader reading-progress sync. A declarative deployment can override it instead:
+
+```yaml
+   - HARDCOVER_SYNC_ENABLED=true
+```
+
+Accepted true values are `true`, `1`, `yes`, and `on`; false values are `false`, `0`, `no`, and `off` (case-insensitive). When the variable is set, the UI shows the effective state but leaves changes to the deployment configuration.
 
 ### KOReader sync
 
