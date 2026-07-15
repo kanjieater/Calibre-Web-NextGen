@@ -37,20 +37,28 @@ def _msgstr(cat, msgid):
 
 @pytest.mark.unit
 def test_no_locale_translates_mark_as_read_as_unread():
-    """The bug class: any locale where both strings are translated must keep
+    """The bug class: any locale *served at runtime* for both strings must keep
     them different — identical strings mean the "read" side carries the
-    "unread" sense (that is how all 17 broken locales were broken)."""
-    checked = 0
+    "unread" sense (that is how all 17 broken locales were broken).
+
+    Fuzzy values never reach msgfmt or the SPA catalog and therefore cannot be
+    counted as coverage.  #879 deliberately clears those unreviewed guesses.
+    """
+    checked = set()
     offenders = []
     for po in sorted(_TRANSLATIONS.glob("*/LC_MESSAGES/messages.po")):
         cat = _catalog(po)
+        mar_msg = cat.get("Mark as read")
+        mau_msg = cat.get("Mark as unread")
         mar = _msgstr(cat, "Mark as read")
         mau = _msgstr(cat, "Mark as unread")
-        if mar and mau:
-            checked += 1
+        if mar and mau and not mar_msg.fuzzy and not mau_msg.fuzzy:
+            locale = po.parts[-3]
+            checked.add(locale)
             if mar == mau:
-                offenders.append(po.parts[-3])
-    assert checked >= 20, "expected the msgid pair in most shipped locales"
+                offenders.append(locale)
+    assert {"fr", "ru", "de", "hu"} <= checked
+    assert len(checked) >= 10, "expected ten reviewed runtime locale pairs"
     assert offenders == [], (
         "locales translating 'Mark as read' identically to 'Mark as unread': %s"
         % offenders
