@@ -18,6 +18,11 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- **Classic catalog cards now use the same read checkbox state as book details:**
+  checked means read and empty means unread, while the tooltip still names the
+  action clicking will perform. Thanks @darkmatterpelican for the cache-free,
+  list-versus-detail reproduction (#771).
+
 - **Dismissing the classic-view “Try the new UI” banner now keeps it dismissed
   after updates.** It is a one-time adoption cue, not a What's New notice, so a
   previous version-specific dismissal is migrated to one durable browser choice.
