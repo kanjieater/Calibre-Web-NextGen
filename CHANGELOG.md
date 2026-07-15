@@ -18,6 +18,11 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- The classic smart-shelf editor now actually offers working “In the past N
+  days” and “Not in the past N days” choices for Publication Date and Date
+  Added. Both editors now read the same rule schema, preventing fields and
+  operators from silently drifting apart again. Reported by @Glennza1962
+  ([#467](https://github.com/new-usemame/Calibre-Web-NextGen/issues/467)).
 - KOReader: deleting a highlight on your device now removes it from Calibre-Web
   NextGen too. Previously the highlight stayed in the book's highlights list
   forever, however many times you synced. Reported by @iroQuai (#905). Update the
