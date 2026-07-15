@@ -18,6 +18,10 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- **Tags can now be renamed from their New UI page.** Editors previously reached
+  a read-only tag page with no rename action; the corrected name now updates the
+  shared tag in the library and every linked book. Thanks @chloeroform (#914).
+
 - Admin → Theme no longer says "Settings saved." and then changes nothing. The
   picker stored its choice in an old numbering the theme system stopped reading,
   so "Light" always came back dark. It is now the default theme for **new
