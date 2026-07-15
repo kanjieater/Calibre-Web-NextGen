@@ -114,6 +114,7 @@ test('hidden+archived remains recoverable through Show hidden, while Archived ke
 });
 
 test('hiding is per-user and a non-delete user still receives Hide', async ({ page, browser, baseURL }) => {
+  test.setTimeout(90_000); // real user creation + password hashing is intentionally expensive
   await page.goto('/app');
   const book = await firstBook(page);
   test.skip(!book, 'seed has no books');
