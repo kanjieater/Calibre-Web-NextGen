@@ -179,6 +179,7 @@ def test_fr_reporter_residual_spa_strings_are_served():
                 "contains": "contient",
                 "Standard (username / password)": "Standard (nom d’utilisateur / mot de passe)",
                 "Simple (service account)": "Simple (compte de service)",
+                "Help & support": "Aide et assistance",
             },
         ),
         (
@@ -195,6 +196,7 @@ def test_fr_reporter_residual_spa_strings_are_served():
                 "contains": "содержит",
                 "Standard (username / password)": "Стандартный (имя пользователя / пароль)",
                 "Simple (service account)": "Простая (служебная учётная запись)",
+                "Help & support": "Помощь и поддержка",
             },
         ),
         (
@@ -211,6 +213,7 @@ def test_fr_reporter_residual_spa_strings_are_served():
                 "contains": "enthält",
                 "Standard (username / password)": "Standard (Benutzername / Passwort)",
                 "Simple (service account)": "Einfach (Dienstkonto)",
+                "Help & support": "Hilfe und Support",
             },
         ),
         (
@@ -227,6 +230,7 @@ def test_fr_reporter_residual_spa_strings_are_served():
                 "contains": "tartalmazza",
                 "Standard (username / password)": "Normál (felhasználónév / jelszó)",
                 "Simple (service account)": "Egyszerű (szolgáltatási fiók)",
+                "Help & support": "Súgó és támogatás",
             },
         ),
     ],

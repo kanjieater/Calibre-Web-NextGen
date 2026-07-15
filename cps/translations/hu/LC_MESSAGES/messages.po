@@ -3351,11 +3351,11 @@ msgstr ""
 
 #: cps/spa_strings.py:249
 msgid "What's new"
-msgstr ""
+msgstr "Újdonságok"
 
 #: cps/spa_strings.py:250
 msgid "Help — new updates available"
-msgstr ""
+msgstr "Súgó — új frissítések érhetők el"
 
 
 #: cps/spa_strings.py:251
@@ -3782,7 +3782,7 @@ msgstr "Archiválva"
 
 #: cps/spa_strings.py:360
 msgid "Ask in Discord"
-msgstr ""
+msgstr "Kérdés a Discordon"
 
 #: cps/spa_strings.py:361
 msgid "Authentication"
@@ -4248,7 +4248,7 @@ msgstr ""
 
 #: cps/spa_strings.py:460
 msgid "Documentation"
-msgstr ""
+msgstr "Dokumentáció"
 
 
 #: cps/spa_strings.py:461
@@ -4472,7 +4472,7 @@ msgstr ""
 
 #: cps/spa_strings.py:509
 msgid "Help & support"
-msgstr ""
+msgstr "Súgó és támogatás"
 
 #: cps/spa_strings.py:510
 msgid "Help menu"
@@ -5072,11 +5072,11 @@ msgstr ""
 
 #: cps/spa_strings.py:642
 msgid "Report Issue on Discord"
-msgstr ""
+msgstr "Probléma jelentése a Discordon"
 
 #: cps/spa_strings.py:643
 msgid "Report Issue on GitHub"
-msgstr ""
+msgstr "Probléma jelentése a GitHubon"
 
 #: cps/spa_strings.py:644
 msgid "Require group membership"

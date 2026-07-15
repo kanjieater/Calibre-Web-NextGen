@@ -13,9 +13,11 @@
  */
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
+import { useI18n } from '../i18n';
 
 export function useRouteA11y(instanceName?: string): void {
   const [location] = useLocation();
+  const { locale, ready } = useI18n();
   const firstRun = useRef(true);
 
   useEffect(() => {
@@ -28,15 +30,23 @@ export function useRouteA11y(instanceName?: string): void {
       main?.focus();
     }
 
-    // Defer a frame so the destination route's <h1> has rendered before we read
-    // it for the title.
+  }, [location]);
+
+  useEffect(() => {
+    // The route can render once with the identity translator while its catalog
+    // is loading. Waiting for i18n prevents that transient English heading from
+    // becoming the persistent browser/SR page title (#886).
+    if (!ready) return;
+
+    // Defer a frame so the translated destination <h1> has rendered before we
+    // read it for the title.
     const raf = requestAnimationFrame(() => {
       const heading = document.querySelector('main h1')?.textContent?.trim();
       const base = instanceName || 'Calibre-Web NextGen';
       document.title = heading ? `${heading} · ${base}` : base;
     });
     return () => cancelAnimationFrame(raf);
-  }, [location, instanceName]);
+  }, [location, instanceName, locale, ready]);
 }
 
 /** Zero-DOM component that runs route a11y side-effects. Mount inside <Router>. */
