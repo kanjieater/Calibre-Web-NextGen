@@ -376,6 +376,7 @@ export function BookDetail() {
 
             {/* Archive (sync-pause) */}
             <button
+              data-testid="archive-book-toggle"
               className={book.archived ? styles.readToggleActive : styles.readToggleGhost}
               onClick={() => toggleArchived.mutate()}
               disabled={toggleArchived.isPending}
@@ -454,6 +455,7 @@ export function BookDetail() {
             {!me?.role?.anonymous && (me?.features?.hide_books || book.hidden) && (
               <button
                 type="button"
+                data-testid="hide-book-toggle"
                 className={book.hidden ? styles.readToggleActive : styles.readToggleGhost}
                 onClick={() => toggleHidden.mutate(!book.hidden)}
                 disabled={toggleHidden.isPending}

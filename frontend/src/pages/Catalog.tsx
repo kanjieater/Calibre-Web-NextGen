@@ -450,6 +450,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
             <button
               key={rf.value}
               type="button"
+              data-testid="catalog-view-settings"
               className={readFilter === rf.value ? styles.segActive : styles.seg}
               aria-pressed={readFilter === rf.value}
               disabled={!!search && !filtered}
@@ -533,6 +534,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
                   <label className={styles.settingsItem}>
                     <input
                       type="checkbox"
+                      data-testid="show-hidden-books"
                       className={styles.settingsCheck}
                       checked={showHidden}
                       onChange={(e) => setShowHidden(e.target.checked)}

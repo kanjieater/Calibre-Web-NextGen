@@ -55,7 +55,8 @@ export function BookCard({
         </span>
       )}
       {book.hidden && (
-        <span className={styles.hiddenBadge} role="img" aria-label={t('Hidden')}>
+        <span className={styles.hiddenBadge} role="img" aria-label={t('Hidden')}
+          data-testid="hidden-book-badge">
           <EyeOff size={12} aria-hidden="true" focusable={false} />
           {t('Hidden')}
         </span>
