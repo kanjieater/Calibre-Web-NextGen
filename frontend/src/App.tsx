@@ -48,10 +48,10 @@ function Library({ defaultFilter }: { defaultFilter?: AdvancedSearchParams }) {
   return defaultFilter ? <AdvancedSearch defaultFilter={defaultFilter} /> : <Catalog />;
 }
 
-function AuthenticatedAuthLanding({ defaultFilter }: { defaultFilter?: AdvancedSearchParams }) {
+function AuthenticatedAuthLanding() {
   const redirectAfterAuth = usePostAuthRedirect();
   useEffect(() => { redirectAfterAuth(); }, [redirectAfterAuth]);
-  return <Library defaultFilter={defaultFilter} />;
+  return <SpinnerCentered size={40} />;
 }
 
 export function App() {
@@ -139,8 +139,8 @@ export function App() {
         <Route>
           <AppShell userName={me.name} instanceName={me.instance_name} onLogout={() => logout.mutate()}>
             <Switch>
-          <Route path={AUTH_ROUTES.login}>{() => <AuthenticatedAuthLanding defaultFilter={me.catalog?.default_filter ?? undefined} />}</Route>
-          <Route path={AUTH_ROUTES.magicLink}>{() => <AuthenticatedAuthLanding defaultFilter={me.catalog?.default_filter ?? undefined} />}</Route>
+          <Route path={AUTH_ROUTES.login}>{() => <AuthenticatedAuthLanding />}</Route>
+          <Route path={AUTH_ROUTES.magicLink}>{() => <AuthenticatedAuthLanding />}</Route>
           <Route path={SPA_ROUTES.editBook}>{(p) => <EditBook id={p.id} />}</Route>
           <Route path={SPA_ROUTES.coverPicker}>{(p) => <CoverPicker id={p.id} />}</Route>
           <Route path={SPA_ROUTES.annotations}>{(p) => <Annotations id={p.id} />}</Route>
