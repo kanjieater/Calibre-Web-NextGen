@@ -1352,13 +1352,6 @@ class CalibreDB:
         allow_show_hidden=False,
         extra_filter=None,
     ):
-        hidden_book_ids = []
-        if not current_user.is_anonymous:
-            hidden_books = (ub.session.query(ub.UserHiddenBook)
-                            .filter(ub.UserHiddenBook.user_id == int(current_user.id))
-                            .all())
-            hidden_book_ids = [h.book_id for h in hidden_books]
-
         if not allow_show_archived:
             archived_books = (ub.session.query(ub.ArchivedBook)
                               .filter(ub.ArchivedBook.user_id==int(current_user.id))
@@ -1372,6 +1365,10 @@ class CalibreDB:
         # Per-user hidden books — fork issue #64. allow_show_hidden=True is the
         # /hidden listing's escape hatch (so users can see + unhide).
         if not allow_show_hidden and not current_user.is_anonymous:
+            hidden_books = (ub.session.query(ub.UserHiddenBook)
+                            .filter(ub.UserHiddenBook.user_id == int(current_user.id))
+                            .all())
+            hidden_book_ids = [h.book_id for h in hidden_books]
             hidden_filter = Books.id.notin_(hidden_book_ids)
         else:
             hidden_filter = true()

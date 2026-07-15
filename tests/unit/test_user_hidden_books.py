@@ -188,6 +188,27 @@ class TestCommonFiltersHiddenBranch:
         assert "99" in compiled
         assert "NOT IN" in compiled.upper()
 
+    def test_allow_show_hidden_does_not_query_hidden_rows(self):
+        """Recovery/detail callers already opted out of the exclusion query."""
+        from cps import db as cps_db
+
+        cdb = MagicMock(spec=cps_db.CalibreDB)
+        cdb.config = MagicMock(config_restricted_column=0)
+        mock_user = MagicMock(id=7, is_anonymous=False)
+        mock_user.filter_language.return_value = "all"
+        mock_user.list_denied_tags.return_value = ['']
+        mock_user.list_allowed_tags.return_value = ['']
+        mock_ub = MagicMock()
+
+        with patch("cps.db.current_user", mock_user), patch("cps.db.ub", mock_ub):
+            cps_db.CalibreDB.common_filters(
+                cdb,
+                allow_show_archived=True,
+                allow_show_hidden=True,
+            )
+
+        mock_ub.session.query.assert_not_called()
+
 
 @pytest.mark.unit
 class TestHideRouteShape:
