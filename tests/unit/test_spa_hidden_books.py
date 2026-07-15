@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 import flask
 import pytest
+from sqlalchemy import MetaData, Table, create_engine, inspect as sa_inspect, text
+from sqlalchemy.orm import sessionmaker
 
 
 pytestmark = pytest.mark.unit
@@ -33,6 +35,69 @@ def test_hide_books_is_enabled_for_new_instances_by_default():
     default = _Settings.__table__.c.config_user_hide_enabled.default
     assert default is not None
     assert default.arg is True
+
+
+def _settings_engine_without_hide_flag(tmp_path):
+    """Build the populated schema an install from before #319 would have."""
+    from cps.config_sql import _Settings
+
+    engine = create_engine(f"sqlite:///{tmp_path / 'legacy-app.db'}")
+    metadata = MetaData()
+    Table(
+        "settings",
+        metadata,
+        *(column.copy() for column in _Settings.__table__.columns
+          if column.name != "config_user_hide_enabled"),
+    )
+    metadata.create_all(engine)
+    with engine.begin() as connection:
+        connection.execute(text("INSERT INTO settings (id) VALUES (1)"))
+    return engine
+
+
+def test_existing_app_db_missing_hide_flag_migrates_enabled(tmp_path):
+    """The real reflection migration must make Hide reachable after upgrade."""
+    from cps.config_sql import _Settings, _migrate_table
+
+    engine = _settings_engine_without_hide_flag(tmp_path)
+    session = sessionmaker(bind=engine)()
+    try:
+        assert "config_user_hide_enabled" not in {
+            column["name"] for column in sa_inspect(engine).get_columns("settings")
+        }
+        _migrate_table(session, _Settings)
+        migrated = next(
+            column for column in sa_inspect(engine).get_columns("settings")
+            if column["name"] == "config_user_hide_enabled"
+        )
+        assert str(migrated["default"]).strip("()'") == "1"
+        assert session.execute(text(
+            "SELECT config_user_hide_enabled FROM settings WHERE id=1"
+        )).scalar_one() == 1
+    finally:
+        session.close()
+        engine.dispose()
+
+
+def test_existing_admin_kill_switch_choice_stays_disabled(tmp_path):
+    """Changing the model default must never overwrite an explicit stored OFF."""
+    from cps.config_sql import _Settings, _migrate_table
+
+    engine = create_engine(f"sqlite:///{tmp_path / 'configured-app.db'}")
+    _Settings.__table__.create(engine)
+    with engine.begin() as connection:
+        connection.execute(text(
+            "INSERT INTO settings (id, config_user_hide_enabled) VALUES (1, 0)"
+        ))
+    session = sessionmaker(bind=engine)()
+    try:
+        _migrate_table(session, _Settings)
+        assert session.execute(text(
+            "SELECT config_user_hide_enabled FROM settings WHERE id=1"
+        )).scalar_one() == 0
+    finally:
+        session.close()
+        engine.dispose()
 
 
 def test_book_list_items_expose_hidden_state_for_a_visible_marker():
