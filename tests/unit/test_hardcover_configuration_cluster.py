@@ -57,6 +57,15 @@ def test_token_source_distinguishes_database_environment_file_and_none(
     assert cfg.hardcover_token_source() == "database"
 
 
+def test_whitespace_database_token_falls_through_to_environment(monkeypatch):
+    cfg = _bare_config()
+    cfg.config_hardcover_token = "   \t"
+    monkeypatch.setenv("HARDCOVER_TOKEN", " environment-value ")
+
+    assert cfg.resolved_hardcover_token() == "environment-value"
+    assert cfg.hardcover_token_source() == "HARDCOVER_TOKEN"
+
+
 @pytest.mark.parametrize(
     ("raw", "expected"),
     [
@@ -204,6 +213,29 @@ def test_legacy_rollback_mirror_tracks_persisted_value_not_env_override(monkeypa
     ]
 
 
+def test_cwa_database_system_exit_degrades_to_app_database_fallback(monkeypatch, caplog):
+    import sys
+    from types import ModuleType, SimpleNamespace
+
+    import cps.schedule as schedule
+
+    class FailingDB:
+        def __init__(self):
+            raise SystemExit(0)
+
+    fake_module = ModuleType("cwa_db")
+    fake_module.CWA_DB = FailingDB
+    monkeypatch.setitem(sys.modules, "cwa_db", fake_module)
+    monkeypatch.setattr(
+        schedule,
+        "config",
+        SimpleNamespace(hardcover_sync_enabled=lambda: True),
+    )
+
+    assert schedule.reconcile_hardcover_configuration() == (True, None)
+    assert "Unable to reconcile Hardcover configuration" in caplog.text
+
+
 def test_admin_template_has_one_sync_control_and_ungated_token_status():
     template = (REPO_ROOT / "cps/templates/config_edit.html").read_text(
         encoding="utf-8"
@@ -225,6 +257,43 @@ def test_admin_save_has_one_hardcover_sync_coercion_path():
     assert source.count('_config_checkbox(to_save, "config_hardcover_sync")') == 1
     assert '_config_checkbox_int(to_save, "config_hardcover_sync")' not in source
     assert 'hardcover_sync_source() == "database"' in source
+    assert "prev_hardcover_sync = config.hardcover_sync_enabled()" in source
+    assert "schedule.register_scheduled_tasks(config.schedule_reconnect)" in source
+
+
+def test_auto_fetch_task_rechecks_effective_enable_before_database_or_network(monkeypatch, caplog):
+    from types import SimpleNamespace
+
+    from cps.tasks import auto_hardcover_id
+
+    monkeypatch.setattr(
+        auto_hardcover_id,
+        "config",
+        SimpleNamespace(hardcover_sync_enabled=lambda: False),
+    )
+    monkeypatch.setattr(
+        auto_hardcover_id.db,
+        "CalibreDB",
+        lambda *args, **kwargs: pytest.fail("disabled task opened the database"),
+    )
+    task = auto_hardcover_id.TaskAutoHardcoverID()
+    completed = []
+    monkeypatch.setattr(task, "_handleSuccess", lambda: completed.append(True))
+
+    task.run(None)
+
+    assert completed == [True]
+    assert "disabled" in caplog.text.lower()
+
+
+def test_manual_auto_fetch_endpoint_checks_effective_enable_first():
+    source = (REPO_ROOT / "cps/admin.py").read_text(encoding="utf-8")
+    endpoint = source.split("def trigger_hardcover_auto_fetch():", 1)[1].split(
+        "@admi.route", 1
+    )[0]
+    gate_pos = endpoint.index("config.hardcover_sync_enabled()")
+    token_pos = endpoint.index("config.resolved_hardcover_token()")
+    assert gate_pos < token_pos
 
 
 def test_applying_cwa_defaults_restores_the_rollback_mirror():
