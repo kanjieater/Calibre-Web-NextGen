@@ -44,6 +44,9 @@ def test_canonical_schema_covers_engine_and_dynamic_columns():
     assert fields["custom_column_72"]["values"] == {"Calm": "Calm", "Tense": "Tense"}
 
     for field_id in ("pubdate", "timestamp"):
+        assert fields[field_id]["type"] == "datetime", (
+            "QueryBuilder only exposes relative-date operators to datetime fields"
+        )
         assert "in_last_days" in fields[field_id]["operators"]
         assert "not_in_last_days" in fields[field_id]["operators"]
     assert "in_last_days" not in fields["title"]["operators"]
@@ -51,6 +54,11 @@ def test_canonical_schema_covers_engine_and_dynamic_columns():
 
     operator_ids = {operator["type"] for operator in schema["operators"]}
     assert {"in_last_days", "not_in_last_days"} <= operator_ids
+    relative_operators = {
+        operator["type"]: operator for operator in schema["operators"]
+        if operator["type"] in {"in_last_days", "not_in_last_days"}
+    }
+    assert all(operator["apply_to"] == ["datetime"] for operator in relative_operators.values())
     assert all(set(field["operators"]) <= operator_ids for field in schema["fields"])
 
 

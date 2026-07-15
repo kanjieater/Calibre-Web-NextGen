@@ -891,7 +891,7 @@ export interface MagicRuleSet { condition: 'AND' | 'OR'; rules: MagicRule[] }
 export interface MagicRuleField {
   id: string;
   label: string;
-  type: 'string' | 'integer' | 'double' | 'date';
+  type: 'string' | 'integer' | 'double' | 'date' | 'datetime';
   input?: 'select' | 'radio';
   values?: Record<string, string | number>;
   operators: string[];

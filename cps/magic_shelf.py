@@ -66,10 +66,10 @@ _NATIVE_RULE_FIELDS = (
      'values': {value: value for value in range(1, 11)},
      'description': 'Book rating (1-10)', 'operators': _NUMBER_OPERATORS,
      '_binding': (db.Ratings, 'rating')},
-    {'id': 'pubdate', 'label': 'Publication Date', 'type': 'date',
+    {'id': 'pubdate', 'label': 'Publication Date', 'type': 'datetime',
      'validation': {'format': 'YYYY-MM-DD'}, 'description': 'Original publication date',
      'operators': _DATE_OPERATORS, '_binding': (db.Books, 'pubdate')},
-    {'id': 'timestamp', 'label': 'Date Added', 'type': 'date',
+    {'id': 'timestamp', 'label': 'Date Added', 'type': 'datetime',
      'validation': {'format': 'YYYY-MM-DD'}, 'description': 'When the book was added',
      'operators': _DATE_OPERATORS, '_binding': (db.Books, 'timestamp')},
     {'id': 'has_cover', 'label': 'Has Cover', 'type': 'integer', 'input': 'radio',
@@ -139,7 +139,7 @@ def build_rule_schema(languages=None, custom_columns=None):
         elif datatype == 'float':
             field.update(type='double', operators=list(_NUMBER_OPERATORS))
         elif datatype == 'datetime':
-            field.update(type='date', validation={'format': 'YYYY-MM-DD'},
+            field.update(type='datetime', validation={'format': 'YYYY-MM-DD'},
                          operators=list(_ABSOLUTE_DATE_OPERATORS))
         elif datatype == 'enumeration' and column.get('enum_values'):
             values = {value: value for value in column['enum_values']}

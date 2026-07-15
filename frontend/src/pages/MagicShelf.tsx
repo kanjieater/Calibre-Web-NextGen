@@ -83,7 +83,7 @@ export function MagicShelf({ editId }: { editId?: string }) {
     .filter((operator): operator is MagicRuleOperator => Boolean(operator));
   const inputType = (field: MagicRuleField, operator: MagicRuleOperator) => {
     if (operator.type === 'in_last_days' || operator.type === 'not_in_last_days') return 'number';
-    if (field.type === 'date') return 'date';
+    if (field.type === 'date' || field.type === 'datetime') return 'date';
     if (field.type === 'integer' || field.type === 'double') return 'number';
     return 'text';
   };
