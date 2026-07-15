@@ -586,6 +586,18 @@ $(function() {
         operatorLabels[operator.type] = operator.label;
     });
 
+    // QueryBuilder's bundled renderer ignores labels on custom operator
+    // objects. Replace only raw, untranslated IDs; built-in regional labels
+    // remain untouched.
+    $('#builder').on('afterCreateRuleOperators.queryBuilder', function() {
+        $(this).find('.rule-operator-container option').each(function() {
+            var type = $(this).val();
+            if ($(this).text().trim() === type && operatorLabels[type]) {
+                $(this).text(operatorLabels[type]);
+            }
+        });
+    });
+
     var rules = {{ rules_json|safe }};
 
     // Date validation helper
@@ -623,7 +635,6 @@ $(function() {
         plugins: ['bt-tooltip-errors'],
         filters: fields,
         operators: operators,
-        lang: {operators: operatorLabels},
         rules: rules
     });
     

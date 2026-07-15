@@ -13,12 +13,14 @@ These tests pin one backend-owned schema and prove that its two relative-date
 rules select real database rows, rather than merely compiling an expression.
 """
 from datetime import datetime, timedelta, timezone
+import inspect
 
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from cps import db, magic_shelf
+from cps.api import magicshelves
 
 
 @pytest.mark.unit
@@ -60,6 +62,12 @@ def test_canonical_schema_covers_engine_and_dynamic_columns():
     }
     assert all(operator["apply_to"] == ["datetime"] for operator in relative_operators.values())
     assert all(set(field["operators"]) <= operator_ids for field in schema["fields"])
+
+
+@pytest.mark.unit
+def test_rule_schema_route_requires_an_authenticated_user():
+    source = inspect.getsource(magicshelves.magic_shelf_rule_schema)
+    assert "@user_login_required" in source
 
 
 def _books_session():

@@ -13,7 +13,7 @@ from . import api_v1
 from .books import _row_to_item
 from .. import ub, config, db, calibre_db, logger, magic_shelf
 from ..cw_login import current_user
-from ..usermanagement import login_required_if_no_ano
+from ..usermanagement import login_required_if_no_ano, user_login_required
 
 log = logger.create()
 
@@ -52,7 +52,7 @@ def list_magic_shelves():
 
 
 @api_v1.route("/magicshelves/rule-schema")
-@login_required_if_no_ano
+@user_login_required
 def magic_shelf_rule_schema():
     """The engine-owned field/operator contract consumed by both editors."""
     return jsonify(magic_shelf.build_rule_schema_for_locale(get_locale()))
