@@ -243,7 +243,9 @@ export function AdvancedSearch({ defaultFilter }: { defaultFilter?: AdvancedSear
           ) : (
             <>
               <p className={styles.resultCount}>
-                {total} result{total !== 1 ? 's' : ''}
+                {total === 1
+                  ? t('{count} result', { count: total })
+                  : t('{count} results', { count: total })}
                 {data?.criteria ? ` · ${data.criteria}` : ''}
               </p>
               <div className={styles.resultsGrid}>

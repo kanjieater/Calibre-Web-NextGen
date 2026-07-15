@@ -174,6 +174,8 @@ def test_fr_reporter_residual_spa_strings_are_served():
                 "Smart shelves": "Étagères intelligentes",
                 "Table view": "Vue en tableau",
                 "{count} books": "{count} livres",
+                "Hot — Most Downloaded": "Populaires — Les plus téléchargés",
+                "Comfortable": "Confortable",
             },
         ),
         (
@@ -185,6 +187,8 @@ def test_fr_reporter_residual_spa_strings_are_served():
                 "Smart shelves": "Смарт-полки",
                 "Table view": "Табличный вид",
                 "{count} books": "Книг: {count}",
+                "Discover — Random Picks": "Открытия — Случайная подборка",
+                "Page {number}": "Страница {number}",
             },
         ),
         (
@@ -196,6 +200,8 @@ def test_fr_reporter_residual_spa_strings_are_served():
                 "Smart shelves": "Intelligente Regale",
                 "Table view": "Tabellenansicht",
                 "{count} books": "{count} Bücher",
+                "Hot — Most Downloaded": "Beliebt — Am häufigsten heruntergeladen",
+                "Compact": "Kompakt",
             },
         ),
         (
@@ -207,6 +213,8 @@ def test_fr_reporter_residual_spa_strings_are_served():
                 "Smart shelves": "Intelligens polcok",
                 "Table view": "Táblázatos nézet",
                 "{count} books": "{count} könyv",
+                "Discover — Random Picks": "Felfedezés — Véletlenszerű válogatás",
+                "Page {number}": "{number}. oldal",
             },
         ),
     ],

@@ -310,8 +310,8 @@ export function BookDetail() {
                 <Link href={`/series/${book.series.id}`} className={styles.metaLink}>
                   {book.series.name}
                 </Link>
-                {' · Book '}
-                {book.series_index}
+                {' · '}
+                {t('Book {number}', { number: book.series_index })}
               </p>
             )}
             {/* Rating — star parity with the classic detail page. Calibre stores

@@ -90,6 +90,11 @@ for po in "$ROOT_DIR"/cps/translations/*/LC_MESSAGES/messages.po; do
     fi
 done
 
+# Existing fuzzy SPA entries are never safe to compile, and newly introduced
+# ones indicate that a manual edit bypassed the no-fuzzy merge policy. Keep the
+# all-locale catalog invariant explicit instead of silently dropping them.
+"$PYTHON_CMD" "$SCRIPT_DIR/check_spa_fuzzy.py"
+
 # 3. Final validation and compile
 for po in "$ROOT_DIR"/cps/translations/*/LC_MESSAGES/messages.po; do
     mo="${po%.po}.mo"

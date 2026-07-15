@@ -18,12 +18,13 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
-- New UI labels no longer fall back to English when translation tooling marks
-  an unreviewed guess as fuzzy. Residual navigation, shelf, status, error, and
-  accessibility text is now translatable, built-in smart-shelf names follow
-  the signed-in user's language without renaming the shelf, and the affected
-  French, Russian, German, and Hungarian strings have been reviewed (#879,
-  #886).
+- New UI translation updates no longer manufacture fuzzy guesses that look
+  complete but disappear at runtime. Legacy SPA guesses are now an explicit
+  untranslated review queue, an all-locale gate prevents fuzzy entries from
+  returning, and reviewed French, Russian, German, and Hungarian navigation,
+  shelf, status, error, and accessibility text now renders in those languages.
+  Built-in smart-shelf names also follow the signed-in user's language without
+  renaming the shelf (#879, #886).
 
 - **Syncing highlights from a second KOReader device no longer wipes the
   highlights from your first one.** Opening a book on another device could

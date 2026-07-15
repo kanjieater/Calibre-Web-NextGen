@@ -17,6 +17,8 @@ generator can never disagree.
 import importlib.util
 import os
 import re
+import subprocess
+import sys
 
 import pytest
 
@@ -25,6 +27,7 @@ pytestmark = pytest.mark.unit
 
 _REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _SCRIPT = os.path.join(_REPO, "scripts", "extract_spa_strings.py")
+_FUZZY_SCRIPT = os.path.join(_REPO, "scripts", "check_spa_fuzzy.py")
 
 
 def _load_extractor():
@@ -120,3 +123,79 @@ def test_accessible_names_and_empty_states_are_not_raw_english_literals():
                     line = source.count("\n", 0, match.start()) + 1
                     offenders.append(f"{os.path.relpath(path, extractor._REPO)}:{line}: {match.group(0)}")
     assert offenders == []
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "raw_snippet"),
+    [
+        ("pages/Upload.tsx", "e.message : 'Upload failed.'"),
+        ("pages/Upload.tsx", "file\n                {result.queued.length"),
+        ("pages/AdvancedSearch.tsx", "{total} result{total !== 1"),
+        ("pages/NativeReader.tsx", "alt={`Page ${page + 1}`}"),
+        ("pages/BookDetail.tsx", "{' · Book '}"),
+        ("pages/Catalog.tsx", "t(choice === 'comfortable'"),
+    ],
+)
+def test_known_residual_raw_spa_copy_does_not_return(relative_path, raw_snippet):
+    """Source-pin the raw-copy shapes found by the #886 adversarial sweep.
+
+    The general anchor extractor covers the replacement ``t()`` calls; these
+    pins cover the syntactic forms that previously escaped that extractor.
+    """
+    path = os.path.join(extractor.FRONTEND_SRC, relative_path)
+    with open(path, encoding="utf-8") as source_file:
+        assert raw_snippet not in source_file.read()
+
+
+@pytest.mark.parametrize(
+    "msgid",
+    [
+        "Hot — Most Downloaded",
+        "Discover — Random Picks",
+        "Comfortable",
+        "Compact",
+        "Dense",
+        "{count} files queued for import",
+        "{count} results",
+        "Page {number}",
+        "Book {number}",
+    ],
+)
+def test_dynamic_and_interpolated_residual_keys_are_anchored(msgid):
+    assert msgid in extractor.parse_anchored()
+
+
+def test_no_spa_anchored_msgid_is_fuzzy_in_any_locale():
+    """#879 all-locale quality gate: fuzzy guesses are unsafe to compile and
+    silently absent from the SPA, so the update pipeline must reject them.
+    """
+    result = subprocess.run(
+        [sys.executable, _FUZZY_SCRIPT],
+        cwd=_REPO,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_legacy_fuzzy_migration_clears_guess_instead_of_compiling_it(tmp_path):
+    spec = importlib.util.spec_from_file_location("check_spa_fuzzy", _FUZZY_SCRIPT)
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    po = tmp_path / "messages.po"
+    po.write_text(
+        '#, fuzzy, python-brace-format\n'
+        '#| msgid "Wrong longer label"\n'
+        'msgid "Read {title}"\n'
+        'msgstr "Semantically wrong {title}"\n',
+        encoding="utf-8",
+    )
+    assert checker.process(po, {"Read {title}"}, clear=False) == ["Read {title}"]
+    assert "fuzzy" in po.read_text(encoding="utf-8")
+    assert checker.process(po, {"Read {title}"}, clear=True) == ["Read {title}"]
+    migrated = po.read_text(encoding="utf-8")
+    assert "fuzzy" not in migrated
+    assert "#, python-brace-format" in migrated
+    assert 'msgstr ""' in migrated
+    assert "Semantically wrong" not in migrated
