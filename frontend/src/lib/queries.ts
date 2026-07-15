@@ -250,7 +250,8 @@ export function useToggleArchived(id: string | number) {
 export function useToggleHidden(id: string | number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => apiPost<{ hidden: boolean }>(`/api/v1/books/${id}/hidden`),
+    mutationFn: (hidden: boolean) =>
+      apiPost<{ hidden: boolean }>(`/api/v1/books/${id}/hidden`, { hidden }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['book', String(id)] });
       void qc.invalidateQueries({ queryKey: ['books'] });

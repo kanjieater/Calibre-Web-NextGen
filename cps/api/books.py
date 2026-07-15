@@ -5,7 +5,7 @@ from datetime import timezone
 
 from flask import jsonify, request
 from flask_babel import get_locale
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, or_
 from sqlalchemy.sql.functions import coalesce
 
 from . import api_v1
@@ -78,6 +78,17 @@ def _hidden_book_ids():
         return set()
     rows = (ub.session.query(ub.UserHiddenBook.book_id)
             .filter(ub.UserHiddenBook.user_id == user_id).all())
+    return {int(row[0]) for row in rows}
+
+
+def _archived_book_ids():
+    """Current user's truly archived ids for the SPA recovery filter."""
+    user_id = _real_user_id()
+    if user_id is None:
+        return set()
+    rows = (ub.session.query(ub.ArchivedBook.book_id)
+            .filter(ub.ArchivedBook.user_id == user_id)
+            .filter(ub.ArchivedBook.is_archived.is_(True)).all())
     return {int(row[0]) for row in rows}
 
 
@@ -180,7 +191,7 @@ def list_books():
     # ordinary list and keep the response/action surface coherent with the 401
     # mutation guard.
     show_hidden = bool(show_hidden and _real_user_id() is not None)
-    hidden_ids = _hidden_book_ids()
+    hidden_ids = _hidden_book_ids() if show_hidden else set()
     to_items = lambda entries: [_row_to_item(e, hidden_ids) for e in entries]
 
     if search:
@@ -311,10 +322,24 @@ def list_books():
 
     # series_join is needed when order references db.Series.name (authaz/authza)
     series_join = (db.books_series_link, db.Books.id == db.books_series_link.c.book, db.Series)
+    listing_options = {}
+    if show_hidden:
+        # SPA-only recovery rule: include this user's hidden+archived books so
+        # they can be unhidden, but do not reveal ordinary archived-only books.
+        # common_filters() itself stays strict for classic/OPDS/Kobo/shelves.
+        archived_ids = _archived_book_ids()
+        listing_options = {
+            "allow_show_hidden": True,
+            "allow_show_archived": True,
+            "extra_filter": or_(
+                db.Books.id.notin_(archived_ids),
+                db.Books.id.in_(hidden_ids),
+            ),
+        }
     entries, _random, pagination = calibre_db.fill_indexpage(
         page, per_page, db.Books, db_filter, order,
         True, config.config_read_column, *series_join,
-        allow_show_hidden=show_hidden,
+        **listing_options,
     )
     return jsonify({
         "items": to_items(entries),

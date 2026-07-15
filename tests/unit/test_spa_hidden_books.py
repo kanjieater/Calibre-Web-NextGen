@@ -121,10 +121,13 @@ def test_show_hidden_query_opts_only_the_spa_list_into_hidden_rows():
              patch.object(books_mod.config, "config_read_column", 0, create=True), \
              patch.object(books_mod, "current_user",
                           SimpleNamespace(id=11, is_authenticated=True, is_anonymous=False)), \
-             patch.object(books_mod, "_hidden_book_ids", return_value={7}):
+             patch.object(books_mod, "_hidden_book_ids", return_value={7}), \
+             patch.object(books_mod, "_archived_book_ids", return_value={7, 8}):
             response = inspect.unwrap(books_mod.list_books)()
 
     assert fill.call_args.kwargs["allow_show_hidden"] is True
+    assert fill.call_args.kwargs["allow_show_archived"] is True
+    assert "extra_filter" in fill.call_args.kwargs
     body = json.loads(response.get_data(as_text=True))
     assert body["items"][0]["hidden"] is True
 
@@ -145,6 +148,7 @@ def test_default_spa_list_keeps_hidden_exclusion_enabled():
             inspect.unwrap(books_mod.list_books)()
 
     assert fill.call_args.kwargs.get("allow_show_hidden", False) is False
+    assert fill.call_args.kwargs.get("allow_show_archived", False) is False
 
 
 def test_show_hidden_applies_to_library_search_and_marks_results():

@@ -1366,12 +1366,6 @@ class CalibreDB:
                               .all())
             archived_book_ids = [archived_book.book_id for archived_book in archived_books]
             archived_filter = Books.id.notin_(archived_book_ids)
-            # A book can be both hidden (personal declutter) and archived
-            # (sync-pause). The explicit hidden-books escape hatch must still
-            # reach that combination so the user can unhide it; archived-only
-            # books remain out of the normal library.
-            if allow_show_hidden and hidden_book_ids:
-                archived_filter = or_(archived_filter, Books.id.in_(hidden_book_ids))
         else:
             archived_filter = true()
 
@@ -1471,7 +1465,11 @@ class CalibreDB:
     def fill_indexpage(self, page, pagesize, database, db_filter, order,
                        join_archive_read=False, config_read_column=0, *join, **kwargs):
         self.ensure_session()
-        return self.fill_indexpage_with_archived_books(page, database, pagesize, db_filter, order, False,
+        # Opt-in passthrough for callers that need archived rows while retaining
+        # the historical default for classic/OPDS/Kobo/shelf callers.
+        allow_show_archived = kwargs.pop('allow_show_archived', False)
+        return self.fill_indexpage_with_archived_books(page, database, pagesize, db_filter, order,
+                                                       allow_show_archived,
                                                        join_archive_read, config_read_column, *join, **kwargs)
 
     def fill_indexpage_with_archived_books(self, page, database, pagesize, db_filter, order, allow_show_archived,

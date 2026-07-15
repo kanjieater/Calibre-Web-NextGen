@@ -455,7 +455,7 @@ export function BookDetail() {
               <button
                 type="button"
                 className={book.hidden ? styles.readToggleActive : styles.readToggleGhost}
-                onClick={() => toggleHidden.mutate()}
+                onClick={() => toggleHidden.mutate(!book.hidden)}
                 disabled={toggleHidden.isPending}
                 aria-label={book.hidden ? t('Unhide') : t('Hide')}
               >

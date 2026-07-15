@@ -32,10 +32,13 @@ test('Hide persists across reload; Show hidden reveals a marked book and provide
   }
 
   try {
+    const before = await page.request.get('/api/v1/books?per_page=60').then((r) => r.json());
     await hide.click();
     await expect(page.getByRole('button', { name: 'Unhide', exact: true })).toBeVisible();
 
     await page.goto('/app');
+    const afterHide = await page.request.get('/api/v1/books?per_page=60').then((r) => r.json());
+    expect(afterHide.total).toBe(before.total - 1);
     await expect(page.getByRole('link', { name: `Open details for ${book!.title}` })).toHaveCount(0);
     await page.reload();
     await expect(page.getByRole('link', { name: `Open details for ${book!.title}` })).toHaveCount(0);
@@ -45,6 +48,8 @@ test('Hide persists across reload; Show hidden reveals a marked book and provide
     await expect(showHidden).not.toBeChecked();
     await showHidden.check();
     expect(await page.evaluate(() => localStorage.getItem('cwng_show_hidden_books_v1'))).toBe('1');
+    const revealed = await page.request.get('/api/v1/books?per_page=60&show_hidden=1').then((r) => r.json());
+    expect(revealed.total).toBe(before.total);
 
     const card = page.getByRole('link', { name: `Open details for ${book!.title}` });
     await expect(card).toBeVisible();
@@ -129,6 +134,33 @@ test('hiding is per-user and a non-delete user still receives Hide', async ({ pa
     const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json()).catch(() => null);
     if (detail?.hidden) await page.request.post(`/api/v1/books/${book!.id}/hidden`, { headers });
     await page.request.post(`/api/v1/admin/users/${user.id}/delete`, { headers });
+  }
+});
+
+test('two stale tabs requesting Hide converge on hidden state', async ({ page, browser, baseURL }) => {
+  await page.goto('/app');
+  const book = await firstBook(page);
+  test.skip(!book, 'seed has no books');
+  const second = await browser.newContext({
+    baseURL,
+    storageState: await page.context().storageState(),
+  });
+  const secondPage = await second.newPage();
+  const headers = await csrfHeaders(page);
+  try {
+    await Promise.all([
+      page.request.post(`/api/v1/books/${book!.id}/hidden`, { headers, data: { hidden: true } }),
+      secondPage.request.post(`/api/v1/books/${book!.id}/hidden`, {
+        headers: await csrfHeaders(secondPage), data: { hidden: true },
+      }),
+    ]);
+    const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json());
+    expect(detail.hidden).toBe(true);
+  } finally {
+    await page.request.post(`/api/v1/books/${book!.id}/hidden`, {
+      headers, data: { hidden: false },
+    });
+    await second.close();
   }
 });
 

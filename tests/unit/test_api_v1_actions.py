@@ -124,6 +124,30 @@ def test_hidden_hide_allowed_when_feature_enabled():
     mock_ub.session.add.assert_called_once()
 
 
+@pytest.mark.unit
+def test_hidden_desired_state_is_idempotent_across_stale_tabs():
+    from cps.api import actions as mod
+    mock_ub = MagicMock()
+    existing = SimpleNamespace()
+    mock_ub.session.query.return_value.filter.return_value.first.return_value = existing
+    with _ctx("/api/v1/books/5/hidden", body={"hidden": True}):
+        with patch.object(mod, "current_user", _user()), patch.object(mod, "ub", mock_ub), \
+             patch.object(mod, "config", SimpleNamespace(config_user_hide_enabled=True)):
+            resp = inspect.unwrap(mod.toggle_book_hidden)(5)
+    assert _body(resp)["hidden"] is True
+    mock_ub.session.delete.assert_not_called()
+
+
+@pytest.mark.unit
+def test_hidden_rejects_non_boolean_desired_state():
+    from cps.api import actions as mod
+    with _ctx("/api/v1/books/5/hidden", body={"hidden": "yes"}):
+        with patch.object(mod, "current_user", _user()):
+            resp = inspect.unwrap(mod.toggle_book_hidden)(5)
+    assert resp[1] == 400
+    assert _body(resp)["error"]["code"] == "invalid_request"
+
+
 # ── send to e-reader ──────────────────────────────────────────────────────────
 
 @pytest.mark.unit
