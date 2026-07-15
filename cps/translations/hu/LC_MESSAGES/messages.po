@@ -2589,17 +2589,17 @@ msgstr ""
 
 #: cps/spa_strings.py:75
 msgid "Match condition"
-msgstr ""
+msgstr "Egyezési feltétel"
 
 
 #: cps/spa_strings.py:76
 msgid "Rule field"
-msgstr ""
+msgstr "Szabály mezője"
 
 
 #: cps/spa_strings.py:77
 msgid "Rule operator"
-msgstr ""
+msgstr "Szabály operátora"
 
 #: cps/spa_strings.py:80
 msgid "Appearance"
@@ -2668,7 +2668,7 @@ msgstr ""
 
 #: cps/spa_strings.py:102
 msgid "Add rule"
-msgstr ""
+msgstr "Szabály hozzáadása"
 
 
 #: cps/spa_strings.py:103 cps/templates/detail.html:786
@@ -2816,7 +2816,7 @@ msgstr "Borító frissítve."
 
 #: cps/spa_strings.py:132
 msgid "Create smart shelf"
-msgstr ""
+msgstr "Intelligens polc létrehozása"
 
 
 #: cps/spa_strings.py:133
@@ -3131,7 +3131,7 @@ msgstr ""
 
 #: cps/spa_strings.py:198
 msgid "Save changes"
-msgstr ""
+msgstr "Módosítások mentése"
 
 
 #: cps/spa_strings.py:199
@@ -3151,7 +3151,7 @@ msgstr ""
 
 #: cps/spa_strings.py:202 cps/templates/shelf_order.html:33
 msgid "Saving…"
-msgstr ""
+msgstr "Mentés…"
 
 
 #: cps/spa_strings.py:204
@@ -3859,7 +3859,7 @@ msgstr "Kiadási dátum"
 
 #: cps/spa_strings.py:378
 msgid "Date Added"
-msgstr ""
+msgstr "Hozzáadás dátuma"
 
 
 #: cps/spa_strings.py:379
@@ -4070,7 +4070,7 @@ msgstr ""
 
 #: cps/spa_strings.py:422
 msgid "Could not create the shelf."
-msgstr ""
+msgstr "Nem sikerült létrehozni a polcot."
 
 
 #: cps/spa_strings.py:423
@@ -4105,7 +4105,7 @@ msgstr ""
 
 #: cps/spa_strings.py:429
 msgid "Could not save the shelf."
-msgstr ""
+msgstr "Nem sikerült menteni a polcot."
 
 
 #: cps/spa_strings.py:430
@@ -4308,7 +4308,7 @@ msgstr ""
 
 #: cps/spa_strings.py:473
 msgid "Edit smart shelf"
-msgstr ""
+msgstr "Intelligens polc szerkesztése"
 
 
 #: cps/spa_strings.py:474 cps/templates/admin.html:15
@@ -4429,7 +4429,7 @@ msgstr ""
 
 #: cps/spa_strings.py:500
 msgid "Give your smart shelf a name."
-msgstr ""
+msgstr "Adjon nevet az intelligens polcnak."
 
 #: cps/spa_strings.py:501
 msgid "Go to your library"
@@ -4514,7 +4514,7 @@ msgstr "Népszerű"
 
 #: cps/spa_strings.py:518
 msgid "Icon"
-msgstr ""
+msgstr "Ikon"
 
 #: cps/spa_strings.py:519
 msgid "Identifier type"
@@ -4699,7 +4699,7 @@ msgstr "Legyen olvasatlan"
 
 #: cps/spa_strings.py:560
 msgid "Match"
-msgstr ""
+msgstr "Egyezés"
 
 #: cps/spa_strings.py:561
 msgid "Max"
@@ -4758,7 +4758,7 @@ msgstr ""
 
 #: cps/spa_strings.py:573
 msgid "Name"
-msgstr ""
+msgstr "Név"
 
 #: cps/spa_strings.py:574
 msgid "Need to report an issue? Try the new"
@@ -4787,7 +4787,7 @@ msgstr ""
 
 #: cps/spa_strings.py:580
 msgid "New smart shelf"
-msgstr ""
+msgstr "Új intelligens polc"
 
 
 #: cps/spa_strings.py:581
@@ -5047,7 +5047,7 @@ msgstr ""
 
 #: cps/spa_strings.py:637
 msgid "Remove rule"
-msgstr ""
+msgstr "Szabály eltávolítása"
 
 
 #: cps/spa_strings.py:638
@@ -5448,7 +5448,7 @@ msgstr "Táblázatos nézet"
 
 #: cps/spa_strings.py:723
 msgid "Tag"
-msgstr ""
+msgstr "Címke"
 
 
 #: cps/spa_strings.py:724 cps/templates/book_edit.html:139
@@ -5705,11 +5705,11 @@ msgstr ""
 
 #: cps/spa_strings.py:778
 msgid "all rules"
-msgstr ""
+msgstr "minden szabály"
 
 #: cps/spa_strings.py:779
 msgid "any rule"
-msgstr ""
+msgstr "bármely szabály"
 
 
 #: cps/spa_strings.py:780
@@ -5724,7 +5724,7 @@ msgstr ""
 
 #: cps/spa_strings.py:782
 msgid "books match"
-msgstr ""
+msgstr "könyv egyezik"
 
 
 #: cps/spa_strings.py:783
@@ -5747,7 +5747,7 @@ msgstr ""
 
 #: cps/spa_strings.py:787
 msgid "e.g. Unread sci-fi"
-msgstr ""
+msgstr "pl. olvasatlan sci-fi"
 
 #: cps/spa_strings.py:788
 msgid "eReader email subject"
@@ -5785,7 +5785,7 @@ msgstr ""
 
 #: cps/spa_strings.py:796
 msgid "value"
-msgstr ""
+msgstr "érték"
 
 #: cps/spa_strings.py:797
 msgid "you"

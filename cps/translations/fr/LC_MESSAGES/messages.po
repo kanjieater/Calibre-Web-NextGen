@@ -2696,17 +2696,17 @@ msgstr ""
 
 #: cps/spa_strings.py:75
 msgid "Match condition"
-msgstr ""
+msgstr "Condition de correspondance"
 
 
 #: cps/spa_strings.py:76
 msgid "Rule field"
-msgstr ""
+msgstr "Champ de la règle"
 
 
 #: cps/spa_strings.py:77
 msgid "Rule operator"
-msgstr ""
+msgstr "Opérateur de la règle"
 
 #: cps/spa_strings.py:80
 msgid "Appearance"
@@ -2775,7 +2775,7 @@ msgstr ""
 
 #: cps/spa_strings.py:102
 msgid "Add rule"
-msgstr ""
+msgstr "Ajouter une règle"
 
 
 #: cps/spa_strings.py:103 cps/templates/detail.html:786
@@ -2845,7 +2845,7 @@ msgstr "Fermer"
 
 #: cps/spa_strings.py:116
 msgid "Close menu"
-msgstr ""
+msgstr "Fermer le menu"
 
 
 #: cps/spa_strings.py:117
@@ -2924,7 +2924,7 @@ msgstr ""
 
 #: cps/spa_strings.py:132
 msgid "Create smart shelf"
-msgstr ""
+msgstr "Créer l’étagère intelligente"
 
 
 #: cps/spa_strings.py:133
@@ -3028,7 +3028,7 @@ msgstr ""
 
 #: cps/spa_strings.py:153
 msgid "Help"
-msgstr ""
+msgstr "Aide"
 
 #: cps/spa_strings.py:154
 msgid "Highlight color"
@@ -3237,7 +3237,7 @@ msgstr ""
 
 #: cps/spa_strings.py:198
 msgid "Save changes"
-msgstr ""
+msgstr "Enregistrer les modifications"
 
 
 #: cps/spa_strings.py:199
@@ -3257,7 +3257,7 @@ msgstr ""
 
 #: cps/spa_strings.py:202 cps/templates/shelf_order.html:33
 msgid "Saving…"
-msgstr ""
+msgstr "Enregistrement…"
 
 
 #: cps/spa_strings.py:204
@@ -3339,7 +3339,7 @@ msgstr ""
 
 #: cps/spa_strings.py:222
 msgid "Skip to content"
-msgstr ""
+msgstr "Aller au contenu"
 
 #: cps/spa_strings.py:223
 msgid "Some fields could not be saved."
@@ -3658,16 +3658,16 @@ msgstr ""
 
 #: cps/spa_strings.py:298
 msgid "Customize navigation"
-msgstr ""
+msgstr "Personnaliser la navigation"
 
 
 #: cps/spa_strings.py:299 cps/templates/_book_organizer.html:164
 msgid "Done"
-msgstr ""
+msgstr "Terminé"
 
 #: cps/spa_strings.py:300
 msgid "Reset to default"
-msgstr ""
+msgstr "Rétablir les valeurs par défaut"
 
 
 #: cps/spa_strings.py:301
@@ -3676,25 +3676,25 @@ msgstr ""
 
 #: cps/spa_strings.py:302
 msgid "Editing sidebar. Reorder or hide sections, then tap Done."
-msgstr ""
+msgstr "Modification de la barre latérale. Réorganisez ou masquez des sections, puis appuyez sur Terminé."
 
 #: cps/spa_strings.py:303
 msgid "Editing cancelled."
-msgstr ""
+msgstr "Modification annulée."
 
 #: cps/spa_strings.py:304
 msgid ""
 "Drag to reorder. Tap ✕ to hide a section. Arrow keys move the focused handle."
-msgstr ""
+msgstr "Faites glisser pour réorganiser. Appuyez sur ✕ pour masquer une section. Les touches fléchées déplacent la poignée active."
 
 #: cps/spa_strings.py:305
 msgid "Sidebar saved."
-msgstr ""
+msgstr "Barre latérale enregistrée."
 
 
 #: cps/spa_strings.py:306
 msgid "Sidebar reset to default."
-msgstr ""
+msgstr "Barre latérale réinitialisée."
 
 #: cps/spa_strings.py:307
 #, python-brace-format
@@ -3732,7 +3732,7 @@ msgstr ""
 
 #: cps/spa_strings.py:313
 msgid "Could not save sidebar. Please try again."
-msgstr ""
+msgstr "Impossible d’enregistrer la barre latérale. Veuillez réessayer."
 
 
 #: cps/spa_strings.py:320
@@ -3787,7 +3787,7 @@ msgstr "À propos"
 #: cps/spa_strings.py:340
 #, python-brace-format
 msgid "Account: {name}"
-msgstr ""
+msgstr "Compte : {name}"
 
 
 #: cps/spa_strings.py:341
@@ -3921,7 +3921,7 @@ msgstr ""
 
 #: cps/spa_strings.py:372
 msgid "Back to the classic view"
-msgstr ""
+msgstr "Revenir à l’affichage classique"
 
 
 #: cps/spa_strings.py:373
@@ -3950,7 +3950,7 @@ msgstr "Date de publication"
 
 #: cps/spa_strings.py:378
 msgid "Date Added"
-msgstr ""
+msgstr "Date d’ajout"
 
 
 #: cps/spa_strings.py:379
@@ -4164,7 +4164,7 @@ msgstr ""
 
 #: cps/spa_strings.py:422
 msgid "Could not create the shelf."
-msgstr ""
+msgstr "Impossible de créer l’étagère."
 
 
 #: cps/spa_strings.py:423
@@ -4199,7 +4199,7 @@ msgstr ""
 
 #: cps/spa_strings.py:429
 msgid "Could not save the shelf."
-msgstr ""
+msgstr "Impossible d’enregistrer l’étagère."
 
 
 #: cps/spa_strings.py:430
@@ -4401,7 +4401,7 @@ msgstr ""
 
 #: cps/spa_strings.py:473
 msgid "Edit smart shelf"
-msgstr ""
+msgstr "Modifier l’étagère intelligente"
 
 
 #: cps/spa_strings.py:474 cps/templates/admin.html:15
@@ -4522,7 +4522,7 @@ msgstr ""
 
 #: cps/spa_strings.py:500
 msgid "Give your smart shelf a name."
-msgstr ""
+msgstr "Donnez un nom à votre étagère intelligente."
 
 #: cps/spa_strings.py:501
 msgid "Go to your library"
@@ -4607,7 +4607,7 @@ msgstr "Populaires"
 
 #: cps/spa_strings.py:518
 msgid "Icon"
-msgstr ""
+msgstr "Icône"
 
 #: cps/spa_strings.py:519
 msgid "Identifier type"
@@ -4789,7 +4789,7 @@ msgstr "Marquer comme non lu"
 
 #: cps/spa_strings.py:560
 msgid "Match"
-msgstr ""
+msgstr "Correspondance"
 
 #: cps/spa_strings.py:561
 msgid "Max"
@@ -4841,12 +4841,12 @@ msgstr ""
 
 #: cps/spa_strings.py:572
 msgid "My account"
-msgstr ""
+msgstr "Mon compte"
 
 
 #: cps/spa_strings.py:573
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: cps/spa_strings.py:574
 msgid "Need to report an issue? Try the new"
@@ -4875,7 +4875,7 @@ msgstr ""
 
 #: cps/spa_strings.py:580
 msgid "New smart shelf"
-msgstr ""
+msgstr "Nouvelle étagère intelligente"
 
 
 #: cps/spa_strings.py:581
@@ -4977,7 +4977,7 @@ msgstr ""
 
 #: cps/spa_strings.py:604
 msgid "Open navigation"
-msgstr ""
+msgstr "Ouvrir la navigation"
 
 
 #: cps/spa_strings.py:605
@@ -5124,7 +5124,7 @@ msgstr ""
 
 #: cps/spa_strings.py:637
 msgid "Remove rule"
-msgstr ""
+msgstr "Supprimer la règle"
 
 
 #: cps/spa_strings.py:638
@@ -5398,7 +5398,7 @@ msgstr ""
 
 #: cps/spa_strings.py:695
 msgid "Show Table view"
-msgstr ""
+msgstr "Afficher la vue en tableau"
 
 
 #: cps/spa_strings.py:696
@@ -5435,7 +5435,7 @@ msgstr ""
 
 #: cps/spa_strings.py:703
 msgid "Sign out"
-msgstr ""
+msgstr "Se déconnecter"
 
 #: cps/spa_strings.py:704
 msgid "Signing in…"
@@ -5518,7 +5518,7 @@ msgstr "Vue en tableau"
 
 #: cps/spa_strings.py:723
 msgid "Tag"
-msgstr ""
+msgstr "Étiquette"
 
 
 #: cps/spa_strings.py:724 cps/templates/book_edit.html:139
@@ -5771,11 +5771,11 @@ msgstr ""
 
 #: cps/spa_strings.py:778
 msgid "all rules"
-msgstr ""
+msgstr "toutes les règles"
 
 #: cps/spa_strings.py:779
 msgid "any rule"
-msgstr ""
+msgstr "au moins une règle"
 
 
 #: cps/spa_strings.py:780
@@ -5789,7 +5789,7 @@ msgstr "livres"
 
 #: cps/spa_strings.py:782
 msgid "books match"
-msgstr ""
+msgstr "livres correspondent"
 
 
 #: cps/spa_strings.py:783
@@ -5812,7 +5812,7 @@ msgstr ""
 
 #: cps/spa_strings.py:787
 msgid "e.g. Unread sci-fi"
-msgstr ""
+msgstr "ex. Science-fiction non lue"
 
 #: cps/spa_strings.py:788
 msgid "eReader email subject"
@@ -5850,7 +5850,7 @@ msgstr ""
 
 #: cps/spa_strings.py:796
 msgid "value"
-msgstr ""
+msgstr "valeur"
 
 #: cps/spa_strings.py:797
 msgid "you"

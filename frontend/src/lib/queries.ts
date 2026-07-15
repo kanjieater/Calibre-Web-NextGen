@@ -814,6 +814,10 @@ export function useUpdateProfile() {
       qc.setQueryData(['account'], data);
       // name/locale also surface in the top bar via useMe
       void qc.invalidateQueries({ queryKey: ['me'] });
+      // Built-in magic-shelf names are translated by the authenticated API.
+      // Refetch them after a locale change so request-local display text does
+      // not remain cached in the previous language (#886).
+      void qc.invalidateQueries({ queryKey: ['magicshelves'] });
     },
   });
 }

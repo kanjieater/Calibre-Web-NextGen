@@ -177,6 +177,15 @@ def test_magic_shelf_operator_labels_are_translated_at_render_time():
     assert "{o.label}" not in source
 
 
+def test_locale_change_invalidates_translated_magic_shelf_names():
+    queries = os.path.join(extractor.FRONTEND_SRC, "lib", "queries.ts")
+    with open(queries, encoding="utf-8") as source_file:
+        source = source_file.read()
+    profile_success = source[source.index("export function useUpdateProfile"):
+                             source.index("export function useChangePassword")]
+    assert "invalidateQueries({ queryKey: ['magicshelves'] })" in profile_success
+
+
 def test_no_spa_anchored_msgid_is_fuzzy_in_any_locale():
     """#879 all-locale quality gate: fuzzy guesses are unsafe to compile and
     silently absent from the SPA, so the update pipeline must reject them.

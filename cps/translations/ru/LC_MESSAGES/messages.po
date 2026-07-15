@@ -2611,17 +2611,17 @@ msgstr "Применить к {n} книгам"
 
 #: cps/spa_strings.py:75
 msgid "Match condition"
-msgstr ""
+msgstr "Условие совпадения"
 
 
 #: cps/spa_strings.py:76
 msgid "Rule field"
-msgstr ""
+msgstr "Поле правила"
 
 
 #: cps/spa_strings.py:77
 msgid "Rule operator"
-msgstr ""
+msgstr "Оператор правила"
 
 #: cps/spa_strings.py:80
 msgid "Appearance"
@@ -3465,7 +3465,7 @@ msgstr "Пользовательский фильтр"
 
 #: cps/spa_strings.py:298
 msgid "Customize navigation"
-msgstr ""
+msgstr "Настроить навигацию"
 
 
 #: cps/spa_strings.py:299 cps/templates/_book_organizer.html:164
@@ -3745,7 +3745,7 @@ msgstr "Дата публикации"
 
 #: cps/spa_strings.py:378
 msgid "Date Added"
-msgstr ""
+msgstr "Дата добавления"
 
 
 #: cps/spa_strings.py:379
@@ -5077,7 +5077,7 @@ msgstr ""
 
 #: cps/spa_strings.py:695
 msgid "Show Table view"
-msgstr ""
+msgstr "Показывать табличный вид"
 
 
 #: cps/spa_strings.py:696
@@ -5193,7 +5193,7 @@ msgstr "Табличный вид"
 
 #: cps/spa_strings.py:723
 msgid "Tag"
-msgstr ""
+msgstr "Тег"
 
 
 #: cps/spa_strings.py:724 cps/templates/book_edit.html:139

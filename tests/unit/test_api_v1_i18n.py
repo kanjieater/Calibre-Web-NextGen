@@ -260,6 +260,24 @@ def test_newly_wrapped_shelf_states_are_translated(locale):
         assert catalog[msgid] != msgid
 
 
+@pytest.mark.parametrize("locale", ["fr", "ru", "de", "hu"])
+def test_smart_shelf_editor_copy_is_runtime_catalog_eligible(locale):
+    """#886: the whole named Smart shelves surface, not only its operators,
+    must survive the runtime empty/fuzzy filter in the target locales.
+    """
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    keys = (
+        "Add rule", "Could not create the shelf.", "Could not save the shelf.",
+        "Create smart shelf", "Date Added", "Edit smart shelf",
+        "Give your smart shelf a name.", "Icon", "Match", "Match condition",
+        "Name", "New smart shelf", "Remove rule", "Rule field",
+        "Rule operator", "Save changes", "Saving…", "Tag", "all rules",
+        "any rule", "books match", "e.g. Unread sci-fi", "value",
+    )
+    assert [key for key in keys if not catalog.get(key)] == []
+
+
 @pytest.mark.unit
 def test_i18n_endpoint_is_public():
     """The auth gate must let the catalog through (login screen needs strings)."""
