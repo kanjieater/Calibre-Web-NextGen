@@ -236,6 +236,35 @@ def test_cwa_database_system_exit_degrades_to_app_database_fallback(monkeypatch,
     assert "Unable to reconcile Hardcover configuration" in caplog.text
 
 
+def test_scheduler_skips_job_when_cwa_settings_are_unavailable(monkeypatch, caplog):
+    from types import SimpleNamespace
+
+    import cps.schedule as schedule
+
+    monkeypatch.setattr(
+        schedule,
+        "reconcile_hardcover_configuration",
+        lambda: (True, None),
+    )
+    monkeypatch.setattr(
+        schedule,
+        "config",
+        SimpleNamespace(
+            hardcover_sync_source=lambda: "database",
+            resolved_hardcover_token=lambda: "present-not-logged",
+            hardcover_token_source=lambda: "database",
+        ),
+    )
+    jobs = []
+    schedule._schedule_hardcover_auto_fetch(
+        SimpleNamespace(schedule_task=lambda *args, **kwargs: jobs.append(True)),
+        None,
+    )
+
+    assert jobs == []
+    assert "CWA settings are unavailable" in caplog.text
+
+
 def test_admin_template_has_one_sync_control_and_ungated_token_status():
     template = (REPO_ROOT / "cps/templates/config_edit.html").read_text(
         encoding="utf-8"
@@ -257,8 +286,12 @@ def test_admin_save_has_one_hardcover_sync_coercion_path():
     assert source.count('_config_checkbox(to_save, "config_hardcover_sync")') == 1
     assert '_config_checkbox_int(to_save, "config_hardcover_sync")' not in source
     assert 'hardcover_sync_source() == "database"' in source
-    assert "prev_hardcover_sync = config.hardcover_sync_enabled()" in source
-    assert "schedule.register_scheduled_tasks(config.schedule_reconnect)" in source
+    helper = source.split("def _configuration_update_helper():", 1)[1].split(
+        "def _configuration_result", 1
+    )[0]
+    assert "prev_hardcover_sync = config.hardcover_sync_enabled()" in helper
+    assert "schedule.end_scheduled_tasks()" in helper
+    assert "schedule.register_scheduled_tasks(config.schedule_reconnect)" in helper
 
 
 def test_auto_fetch_task_rechecks_effective_enable_before_database_or_network(monkeypatch, caplog):
@@ -286,6 +319,39 @@ def test_auto_fetch_task_rechecks_effective_enable_before_database_or_network(mo
     assert "disabled" in caplog.text.lower()
 
 
+def test_auto_fetch_task_stops_when_disabled_after_it_started(monkeypatch, caplog):
+    from types import SimpleNamespace
+
+    from cps.tasks import auto_hardcover_id
+
+    states = iter((True, True, False))
+    monkeypatch.setattr(
+        auto_hardcover_id,
+        "config",
+        SimpleNamespace(
+            hardcover_sync_enabled=lambda: next(states),
+            resolved_hardcover_token=lambda: "present-not-logged",
+        ),
+    )
+    fake_calibre = SimpleNamespace(session=SimpleNamespace(close=lambda: None))
+    monkeypatch.setattr(auto_hardcover_id.db, "CalibreDB", lambda **kwargs: fake_calibre)
+    task = auto_hardcover_id.TaskAutoHardcoverID()
+    monkeypatch.setattr(task, "_get_books_without_hardcover_id", lambda: [7])
+    monkeypatch.setattr(task, "_get_books_for_batch", lambda ids: [SimpleNamespace(id=7)])
+    monkeypatch.setattr(
+        task,
+        "_process_book",
+        lambda book: pytest.fail("task processed a book after sync was disabled"),
+    )
+    completed = []
+    monkeypatch.setattr(task, "_handleSuccess", lambda: completed.append(True))
+
+    task.run(None)
+
+    assert completed == [True]
+    assert "stopped" in caplog.text.lower()
+
+
 def test_manual_auto_fetch_endpoint_checks_effective_enable_first():
     source = (REPO_ROOT / "cps/admin.py").read_text(encoding="utf-8")
     endpoint = source.split("def trigger_hardcover_auto_fetch():", 1)[1].split(
@@ -294,6 +360,14 @@ def test_manual_auto_fetch_endpoint_checks_effective_enable_first():
     gate_pos = endpoint.index("config.hardcover_sync_enabled()")
     token_pos = endpoint.index("config.resolved_hardcover_token()")
     assert gate_pos < token_pos
+
+
+def test_cwa_schedule_changes_refresh_jobs_without_restart():
+    source = (REPO_ROOT / "cps/cwa_functions.py").read_text(encoding="utf-8")
+    endpoint = source.split("def set_cwa_settings():", 1)[1].split(
+        "def get_next_duplicate_scan_run", 1
+    )[0]
+    assert "schedule.register_scheduled_tasks(config.schedule_reconnect)" in endpoint
 
 
 def test_applying_cwa_defaults_restores_the_rollback_mirror():

@@ -41,9 +41,12 @@ def reconcile_hardcover_configuration():
             (1 if bool(getattr(config, 'config_hardcover_sync', False)) else 0,),
         )
         return effective, cwa_settings
-    except Exception:
+    except (Exception, SystemExit):
         log.exception("Unable to reconcile Hardcover configuration")
-        return config.hardcover_sync_enabled(), {}
+        # CWA_DB historically raises SystemExit on a connection failure.
+        # Keep the app.db setting usable, but signal that CWA-backed schedule
+        # details and the downgrade mirror were unavailable.
+        return config.hardcover_sync_enabled(), None
 
 def get_scheduled_tasks(reconnect=True):
     tasks = list()
@@ -278,6 +281,13 @@ def _schedule_hardcover_auto_fetch(scheduler, timezone_info):
             log.info("Hardcover token is configured via %s", token_source)
         else:
             log.info("Hardcover token is not configured")
+
+        if cwa_settings is None:
+            log.warning(
+                "Hardcover auto-fetch was not scheduled because CWA settings "
+                "are unavailable"
+            )
+            return
 
         if not enabled or not token_available:
             return

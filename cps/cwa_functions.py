@@ -1086,6 +1086,16 @@ def set_cwa_settings():
         cwa_db = CWA_DB()
         cwa_settings = cwa_db.get_cwa_settings()
 
+    if request.method == 'POST':
+        # Schedule controls live on this page even though the enable switch
+        # now lives in Basic Configuration. Rebuild jobs from the just-saved
+        # values so changes take effect without a container restart.
+        try:
+            from . import schedule
+            schedule.register_scheduled_tasks(config.schedule_reconnect)
+        except Exception:
+            log.exception("Unable to refresh scheduled tasks after CWA settings update")
+
     # Check if Hardcover token is available
     hardcover_token_available = bool(config.resolved_hardcover_token())
 

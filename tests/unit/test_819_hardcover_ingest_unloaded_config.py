@@ -95,15 +95,14 @@ def test_resolvers_use_getattr_not_raw_attr():
 
     from cps.config_sql import ConfigSQL
 
+    resolver_src = inspect.getsource(ConfigSQL._resolved_hardcover_token_and_source)
+    assert "self.config_hardcover_token" not in resolver_src
+    assert 'getattr(self, "config_hardcover_token"' in resolver_src.replace("'", '"')
+
     for name in ("resolved_hardcover_token", "hardcover_token_source"):
         src = inspect.getsource(getattr(ConfigSQL, name))
-        assert "self.config_hardcover_token" not in src, (
-            f"{name} reads self.config_hardcover_token directly; use "
-            f'getattr(self, "config_hardcover_token", None) so an unloaded '
-            f"config (ingest subprocess) does not raise — fork #819"
-        )
-        assert 'getattr(self, "config_hardcover_token"' in src.replace("'", '"'), (
-            f"{name} must resolve the token via getattr with a default"
+        assert "_resolved_hardcover_token_and_source()" in src, (
+            f"{name} must delegate to the shared defensive value/source resolver"
         )
 
     hint_src = inspect.getsource(ConfigSQL.hardcover_token_from_env)

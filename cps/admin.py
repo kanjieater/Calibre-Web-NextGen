@@ -241,6 +241,12 @@ def trigger_hardcover_auto_fetch():
     show_text = {}
     
     try:
+        if not config.hardcover_sync_enabled():
+            show_text['text'] = _(
+                'Error: Hardcover sync is disabled. Enable it in Basic Configuration or with HARDCOVER_SYNC_ENABLED.'
+            )
+            return json.dumps(show_text), 400
+
         # Check if token is available
         token_available = bool(config.resolved_hardcover_token())
 
@@ -2548,6 +2554,7 @@ def _db_configuration_update_helper():
 def _configuration_update_helper():
     reboot_required = False
     to_save = request.form.to_dict()
+    prev_hardcover_sync = config.hardcover_sync_enabled()
     try:
         reboot_required |= _config_string(to_save, "config_trustedhosts")
         reboot_required |= _config_string(to_save, "config_keyfile")
@@ -2734,7 +2741,10 @@ def _configuration_update_helper():
     config.save()
     # Keep the retired cwa.db auto-fetch flag synchronized solely for safe
     # rollback. Runtime consumers use ConfigSQL.hardcover_sync_enabled().
-    schedule.reconcile_hardcover_configuration()
+    effective_hardcover_sync, _ = schedule.reconcile_hardcover_configuration()
+    if effective_hardcover_sync != prev_hardcover_sync:
+        schedule.end_scheduled_tasks()
+        schedule.register_scheduled_tasks(config.schedule_reconnect)
     apply_https_runtime_config()
     if reboot_required:
         web_server.stop(True)

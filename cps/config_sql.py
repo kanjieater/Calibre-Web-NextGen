@@ -415,6 +415,28 @@ class ConfigSQL(object):
                 storage[k] = v
         return storage
 
+    @staticmethod
+    def _normalize_hardcover_token(raw):
+        if not isinstance(raw, str):
+            return ""
+        return raw.replace("Bearer ", "", 1).strip()
+
+    def _resolved_hardcover_token_and_source(self):
+        """Resolve value and diagnostic source through one precedence path."""
+        candidates = (
+            ("database", getattr(self, "config_hardcover_token", None)),
+            ("HARDCOVER_TOKEN", os.environ.get("HARDCOVER_TOKEN")),
+            (
+                "HARDCOVER_TOKEN_FILE",
+                _read_secret_file(os.environ.get("HARDCOVER_TOKEN_FILE")),
+            ),
+        )
+        for source, raw in candidates:
+            token = self._normalize_hardcover_token(raw)
+            if token:
+                return token, source
+        return "", None
+
     def resolved_hardcover_token(self):
         """Global Hardcover token: the admin-configured value, else the
         HARDCOVER_TOKEN environment variable, else the file named by
@@ -434,23 +456,11 @@ class ConfigSQL(object):
         # (and other unloaded/CLI contexts) the wrapper is not loaded, so a
         # raw column access raises AttributeError and aborts the whole fetch —
         # fork #819. The env/file fallbacks must still resolve.
-        raw = (
-            getattr(self, "config_hardcover_token", None)
-            or os.environ.get("HARDCOVER_TOKEN")
-            or _read_secret_file(os.environ.get("HARDCOVER_TOKEN_FILE"))
-            or ""
-        )
-        return raw.replace("Bearer ", "").strip()
+        return self._resolved_hardcover_token_and_source()[0]
 
     def hardcover_token_source(self):
         """Return the active global token source without exposing its value."""
-        if (getattr(self, "config_hardcover_token", None) or "").strip():
-            return "database"
-        if (os.environ.get("HARDCOVER_TOKEN") or "").strip():
-            return "HARDCOVER_TOKEN"
-        if _read_secret_file(os.environ.get("HARDCOVER_TOKEN_FILE")):
-            return "HARDCOVER_TOKEN_FILE"
-        return None
+        return self._resolved_hardcover_token_and_source()[1]
 
     def hardcover_token_from_env(self):
         """True when the active global token comes from the environment —
