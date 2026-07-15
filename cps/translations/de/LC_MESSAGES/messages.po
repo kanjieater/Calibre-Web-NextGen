@@ -4505,7 +4505,7 @@ msgstr "Verstecke"
 
 #: cps/spa_strings.py:512
 msgid "Hide Discover section"
-msgstr ""
+msgstr "Entdeckungsbereich ausblenden"
 
 
 #: cps/spa_strings.py:513
@@ -5014,7 +5014,7 @@ msgstr ""
 
 #: cps/spa_strings.py:627
 msgid "Read status filter"
-msgstr ""
+msgstr "Lesestatusfilter"
 
 
 #: cps/spa_strings.py:628
@@ -5368,7 +5368,7 @@ msgstr ""
 
 #: cps/spa_strings.py:701
 msgid "Shuffle picks"
-msgstr ""
+msgstr "Auswahl neu mischen"
 
 #: cps/spa_strings.py:702
 msgid "Sign in with a magic link"
@@ -5427,7 +5427,7 @@ msgstr ""
 
 #: cps/spa_strings.py:715
 msgid "Sort order"
-msgstr ""
+msgstr "Sortierreihenfolge"
 
 
 #: cps/spa_strings.py:716

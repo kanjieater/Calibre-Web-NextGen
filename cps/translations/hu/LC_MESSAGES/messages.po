@@ -4485,7 +4485,7 @@ msgstr "Elrejtés"
 
 #: cps/spa_strings.py:512
 msgid "Hide Discover section"
-msgstr ""
+msgstr "Felfedezés szakasz elrejtése"
 
 
 #: cps/spa_strings.py:513
@@ -4998,7 +4998,7 @@ msgstr ""
 
 #: cps/spa_strings.py:627
 msgid "Read status filter"
-msgstr ""
+msgstr "Olvasási állapot szűrő"
 
 
 #: cps/spa_strings.py:628
@@ -5353,7 +5353,7 @@ msgstr ""
 
 #: cps/spa_strings.py:701
 msgid "Shuffle picks"
-msgstr ""
+msgstr "Válogatás keverése"
 
 #: cps/spa_strings.py:702
 msgid "Sign in with a magic link"
@@ -5415,7 +5415,7 @@ msgstr "Valami hiba történt. Próbáld újra."
 
 #: cps/spa_strings.py:715
 msgid "Sort order"
-msgstr ""
+msgstr "Rendezési sorrend"
 
 
 #: cps/spa_strings.py:716

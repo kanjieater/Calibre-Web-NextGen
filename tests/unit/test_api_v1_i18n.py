@@ -278,6 +278,14 @@ def test_smart_shelf_editor_copy_is_runtime_catalog_eligible(locale):
     assert [key for key in keys if not catalog.get(key)] == []
 
 
+@pytest.mark.parametrize("locale", ["fr", "ru", "de", "hu"])
+def test_reporter_catalog_controls_have_accessible_translations(locale):
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    keys = ("Read status filter", "Sort order", "Shuffle picks", "Hide Discover section")
+    assert [key for key in keys if not catalog.get(key)] == []
+
+
 @pytest.mark.unit
 def test_i18n_endpoint_is_public():
     """The auth gate must let the catalog through (login screen needs strings)."""

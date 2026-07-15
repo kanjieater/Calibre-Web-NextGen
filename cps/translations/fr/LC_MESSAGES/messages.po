@@ -4578,7 +4578,7 @@ msgstr "Cacher"
 
 #: cps/spa_strings.py:512
 msgid "Hide Discover section"
-msgstr ""
+msgstr "Masquer la section Découvrir"
 
 
 #: cps/spa_strings.py:513
@@ -5075,7 +5075,7 @@ msgstr "Statut de lecture"
 
 #: cps/spa_strings.py:627
 msgid "Read status filter"
-msgstr ""
+msgstr "Filtre de statut de lecture"
 
 
 #: cps/spa_strings.py:628
@@ -5426,7 +5426,7 @@ msgstr ""
 
 #: cps/spa_strings.py:701
 msgid "Shuffle picks"
-msgstr ""
+msgstr "Mélanger la sélection"
 
 #: cps/spa_strings.py:702
 msgid "Sign in with a magic link"
@@ -5485,7 +5485,7 @@ msgstr ""
 
 #: cps/spa_strings.py:715
 msgid "Sort order"
-msgstr ""
+msgstr "Ordre de tri"
 
 
 #: cps/spa_strings.py:716
