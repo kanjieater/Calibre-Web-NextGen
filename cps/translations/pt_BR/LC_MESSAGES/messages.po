@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-14 22:20+0000\n"
+"POT-Creation-Date: 2026-07-15 05:06+0000\n"
 "PO-Revision-Date: 2025-12-02 12:00+0000\n"
 "Last-Translator: Alex <298750+alexantao@users.noreply.github.com>\n"
 "Language-Team: pt_BR <LL@li.org>\n"
@@ -436,7 +436,7 @@ msgstr "Sucesso ! Conta Gmail Verificada."
 #: cps/admin.py:2846 cps/admin.py:3108 cps/editbooks.py:1152
 #: cps/editbooks.py:2054 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
 #: cps/shelf.py:332 cps/shelf.py:389 cps/shelf.py:464 cps/shelf.py:547
-#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3121
+#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3130
 #, python-format
 msgid "Oops! Database Error: %(error)s."
 msgstr "Ops ! Erro de banco de dados: %(error)s."
@@ -543,7 +543,7 @@ msgid "Settings DB is not Writeable"
 msgstr "Settings DB não é gravável"
 
 #: cps/admin.py:2098 cps/opds.py:316 cps/opds.py:354 cps/opds.py:357
-#: cps/web.py:3037 cps/web.py:3172
+#: cps/web.py:3046 cps/web.py:3181
 #, fuzzy
 msgid "title"
 msgstr "Título"
@@ -739,7 +739,7 @@ msgstr "Impossível excluir Convidado"
 msgid "No admin user remaining, can't delete user"
 msgstr "Nenhum usuário administrador restante, não é possível apagar o usuário"
 
-#: cps/admin.py:3059 cps/web.py:2852
+#: cps/admin.py:3059 cps/web.py:2861
 msgid "Email can't be empty and has to be a valid Email"
 msgstr "O Email não pode ser vazio e deve ter endereço válido"
 
@@ -1392,8 +1392,8 @@ msgstr ""
 msgid "File to be uploaded must have an extension"
 msgstr "O arquivo a ser carregado deve ter uma extensão"
 
-#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3302
-#: cps/web.py:3484 cps/web.py:3634
+#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3311
+#: cps/web.py:3493 cps/web.py:3643
 msgid ""
 "Oops! Selected book is unavailable. File does not exist or is not accessible"
 msgstr ""
@@ -6098,7 +6098,7 @@ msgstr "Por favor espere um minuto para registrar o próximo usuário"
 msgid "Register"
 msgstr "Registre-se"
 
-#: cps/web.py:2520 cps/web.py:2680
+#: cps/web.py:2520 cps/web.py:2689
 #, fuzzy
 msgid "Connection error to limiter backend, please contact your administrator"
 msgstr ""
@@ -6128,7 +6128,7 @@ msgstr ""
 "Instancia do Calibre-Web não configurado, por favor contacte o seu "
 "administrador"
 
-#: cps/web.py:2654
+#: cps/web.py:2663
 #, fuzzy
 msgid ""
 "OAuth authentication is not properly configured. Please contact "
@@ -6137,36 +6137,36 @@ msgstr ""
 "O servidor de E-Mail não está configurado, por favor contacte o seu "
 "administrador!"
 
-#: cps/web.py:2659 cps/web.py:2686
+#: cps/web.py:2668 cps/web.py:2695
 #, fuzzy
 msgid "Cannot activate LDAP authentication"
 msgstr "Não é possível ativar a autenticação LDAP"
 
-#: cps/web.py:2668
+#: cps/web.py:2677
 msgid "Standard login is disabled."
 msgstr ""
 
-#: cps/web.py:2676
+#: cps/web.py:2685
 msgid "Please wait one minute before next login"
 msgstr "Por favor, espere um minuto para o próximo login"
 
-#: cps/web.py:2694
+#: cps/web.py:2703
 msgid "Username cannot be empty"
 msgstr ""
 
-#: cps/web.py:2706
+#: cps/web.py:2715
 #, fuzzy, python-format
 msgid "you are now logged in as: '%(nickname)s'"
 msgstr "Agora você está logado como: '%(nickname)s'"
 
-#: cps/web.py:2725
+#: cps/web.py:2734
 #, fuzzy, python-format
 msgid ""
 "Welcome! Your account has been automatically created. You are now logged in "
 "as: '%(nickname)s'"
 msgstr "Sucesso! Agora você está logado como: '%(nickname)s'"
 
-#: cps/web.py:2730 cps/web.py:2733
+#: cps/web.py:2739 cps/web.py:2742
 #, fuzzy
 msgid ""
 "Authentication successful, but account creation failed. Please contact your "
@@ -6175,13 +6175,13 @@ msgstr ""
 "Instancia do Calibre-Web não configurado, por favor contacte o seu "
 "administrador"
 
-#: cps/web.py:2737
+#: cps/web.py:2746
 msgid ""
 "Authentication successful, but no local account found. Please contact your "
 "administrator to create your account."
 msgstr ""
 
-#: cps/web.py:2745
+#: cps/web.py:2754
 #, fuzzy, python-format
 msgid ""
 "Fallback Login as: '%(nickname)s', LDAP Server not reachable, or user not "
@@ -6190,60 +6190,60 @@ msgstr ""
 "Login de reserva como:'%(nickname)s', servidor LDAP não acessível ou usuário "
 "desconhecido"
 
-#: cps/web.py:2751
+#: cps/web.py:2760
 #, fuzzy, python-format
 msgid "Could not login: %(message)s"
 msgstr "Não foi possível fazer o login: %(message)s"
 
-#: cps/web.py:2774 cps/web.py:2775 cps/web.py:2818
+#: cps/web.py:2783 cps/web.py:2784 cps/web.py:2827
 #, fuzzy
 msgid "Wrong Username or Password"
 msgstr "Nome de Usuário ou Senha incorretos"
 
-#: cps/web.py:2783
+#: cps/web.py:2792
 #, fuzzy
 msgid "New Password was sent to your email address"
 msgstr "Nova Senha foi enviada para seu endereço de e-mail"
 
-#: cps/web.py:2787
+#: cps/web.py:2796
 #, fuzzy
 msgid "An unknown error occurred. Please try again later."
 msgstr "Ocorreu um erro desconhecido. Por favor, tente novamente mais tarde."
 
-#: cps/web.py:2789
+#: cps/web.py:2798
 #, fuzzy
 msgid "Please enter valid username to reset password"
 msgstr "Por favor, digite um nome de usuário válido para redefinir a senha"
 
-#: cps/web.py:2797
+#: cps/web.py:2806
 #, fuzzy, python-format
 msgid "You are now logged in as: '%(nickname)s'"
 msgstr "Agora você está logado como: '%(nickname)s'"
 
-#: cps/web.py:3110
+#: cps/web.py:3119
 #, fuzzy
 msgid "Success! Profile Updated"
 msgstr "Perfil atualizado"
 
-#: cps/web.py:3116
+#: cps/web.py:3125
 msgid "Oops! An account already exists for this Email."
 msgstr "Encontrada uma conta existente para este endereço de e-mail."
 
-#: cps/web.py:3250
+#: cps/web.py:3259
 msgid "App-password label must be 1-64 characters."
 msgstr ""
 
-#: cps/web.py:3285
+#: cps/web.py:3294
 #, python-format
 msgid "App password '%(label)s' revoked."
 msgstr ""
 
-#: cps/web.py:3497
+#: cps/web.py:3506
 #, fuzzy
 msgid "Invalid book ID."
 msgstr "ID de livro inválido."
 
-#: cps/progress_syncing/protocols/kosync.py:613
+#: cps/progress_syncing/protocols/kosync.py:631
 msgid "KOReader Sync Plugin"
 msgstr "Plugin de Sincronização KOReader"
 

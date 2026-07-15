@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-14 22:20+0000\n"
+"POT-Creation-Date: 2026-07-15 05:06+0000\n"
 "PO-Revision-Date: 2025-11-24 17:12+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian\n"
@@ -436,7 +436,7 @@ msgstr "Tutto OK! Account Gmail verificato."
 #: cps/admin.py:2846 cps/admin.py:3108 cps/editbooks.py:1152
 #: cps/editbooks.py:2054 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
 #: cps/shelf.py:332 cps/shelf.py:389 cps/shelf.py:464 cps/shelf.py:547
-#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3121
+#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3130
 #, python-format
 msgid "Oops! Database Error: %(error)s."
 msgstr "Errore nel database: %(error)s."
@@ -542,7 +542,7 @@ msgid "Settings DB is not Writeable"
 msgstr "Il DB delle impostazioni non è scrivibile"
 
 #: cps/admin.py:2098 cps/opds.py:316 cps/opds.py:354 cps/opds.py:357
-#: cps/web.py:3037 cps/web.py:3172
+#: cps/web.py:3046 cps/web.py:3181
 #, fuzzy
 msgid "title"
 msgstr "Titolo"
@@ -740,7 +740,7 @@ msgstr ""
 "Non rimarrebbe nessun utente amministratore, non è possibile eliminare "
 "l'utente"
 
-#: cps/admin.py:3059 cps/web.py:2852
+#: cps/admin.py:3059 cps/web.py:2861
 msgid "Email can't be empty and has to be a valid Email"
 msgstr "L'e-mail non può essere vuota e deve essere un'e-mail valida"
 
@@ -1383,8 +1383,8 @@ msgstr ""
 msgid "File to be uploaded must have an extension"
 msgstr "Il file da caricare deve avere un'estensione"
 
-#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3302
-#: cps/web.py:3484 cps/web.py:3634
+#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3311
+#: cps/web.py:3493 cps/web.py:3643
 msgid ""
 "Oops! Selected book is unavailable. File does not exist or is not accessible"
 msgstr ""
@@ -6071,7 +6071,7 @@ msgstr "Attendi un minuto per registrare il prossimo utente"
 msgid "Register"
 msgstr "Registrati"
 
-#: cps/web.py:2520 cps/web.py:2680
+#: cps/web.py:2520 cps/web.py:2689
 msgid "Connection error to limiter backend, please contact your administrator"
 msgstr ""
 "Il server e-mail non è configurato, per favore contatta l'amministratore"
@@ -6098,7 +6098,7 @@ msgid ""
 msgstr ""
 "L'istanza Calibre-Web non è configurata, per favore contatta l'amministratore"
 
-#: cps/web.py:2654
+#: cps/web.py:2663
 #, fuzzy
 msgid ""
 "OAuth authentication is not properly configured. Please contact "
@@ -6106,35 +6106,35 @@ msgid ""
 msgstr ""
 "Il server e-mail non è configurato, per favore contatta l'amministratore."
 
-#: cps/web.py:2659 cps/web.py:2686
+#: cps/web.py:2668 cps/web.py:2695
 msgid "Cannot activate LDAP authentication"
 msgstr "Impossibile attivare l'autenticazione LDAP"
 
-#: cps/web.py:2668
+#: cps/web.py:2677
 msgid "Standard login is disabled."
 msgstr ""
 
-#: cps/web.py:2676
+#: cps/web.py:2685
 msgid "Please wait one minute before next login"
 msgstr "Attendi un minuto prima del prossimo accesso"
 
-#: cps/web.py:2694
+#: cps/web.py:2703
 msgid "Username cannot be empty"
 msgstr ""
 
-#: cps/web.py:2706
+#: cps/web.py:2715
 #, python-format
 msgid "you are now logged in as: '%(nickname)s'"
 msgstr "ora sei connesso come: '%(nickname)s'"
 
-#: cps/web.py:2725
+#: cps/web.py:2734
 #, fuzzy, python-format
 msgid ""
 "Welcome! Your account has been automatically created. You are now logged in "
 "as: '%(nickname)s'"
 msgstr "Tutto OK! Ora sei connesso come: %(nickname)s"
 
-#: cps/web.py:2730 cps/web.py:2733
+#: cps/web.py:2739 cps/web.py:2742
 #, fuzzy
 msgid ""
 "Authentication successful, but account creation failed. Please contact your "
@@ -6142,13 +6142,13 @@ msgid ""
 msgstr ""
 "L'istanza Calibre-Web non è configurata, per favore contatta l'amministratore"
 
-#: cps/web.py:2737
+#: cps/web.py:2746
 msgid ""
 "Authentication successful, but no local account found. Please contact your "
 "administrator to create your account."
 msgstr ""
 
-#: cps/web.py:2745
+#: cps/web.py:2754
 #, python-format
 msgid ""
 "Fallback Login as: '%(nickname)s', LDAP Server not reachable, or user not "
@@ -6157,54 +6157,54 @@ msgstr ""
 "Accesso di riserva come: '%(nickname)s', il server LDAP non è raggiungibile "
 "o l'utente è sconosciuto"
 
-#: cps/web.py:2751
+#: cps/web.py:2760
 #, python-format
 msgid "Could not login: %(message)s"
 msgstr "Impossibile accedere: %(message)s"
 
-#: cps/web.py:2774 cps/web.py:2775 cps/web.py:2818
+#: cps/web.py:2783 cps/web.py:2784 cps/web.py:2827
 msgid "Wrong Username or Password"
 msgstr "Nome utente o password errati"
 
-#: cps/web.py:2783
+#: cps/web.py:2792
 msgid "New Password was sent to your email address"
 msgstr "La nuova password è stata inviata al tuo indirizzo e-mail"
 
-#: cps/web.py:2787
+#: cps/web.py:2796
 msgid "An unknown error occurred. Please try again later."
 msgstr "Si è verificato un errore sconosciuto, riprova più tardi."
 
-#: cps/web.py:2789
+#: cps/web.py:2798
 msgid "Please enter valid username to reset password"
 msgstr "Inserisci un nome utente valido per reimpostare la password"
 
-#: cps/web.py:2797
+#: cps/web.py:2806
 #, python-format
 msgid "You are now logged in as: '%(nickname)s'"
 msgstr "Ora sei connesso come: '%(nickname)s'"
 
-#: cps/web.py:3110
+#: cps/web.py:3119
 msgid "Success! Profile Updated"
 msgstr "Tutto OK! Profilo aggiornato"
 
-#: cps/web.py:3116
+#: cps/web.py:3125
 msgid "Oops! An account already exists for this Email."
 msgstr "Esiste già un account per questa e-mail."
 
-#: cps/web.py:3250
+#: cps/web.py:3259
 msgid "App-password label must be 1-64 characters."
 msgstr ""
 
-#: cps/web.py:3285
+#: cps/web.py:3294
 #, python-format
 msgid "App password '%(label)s' revoked."
 msgstr ""
 
-#: cps/web.py:3497
+#: cps/web.py:3506
 msgid "Invalid book ID."
 msgstr "Book ID non valido."
 
-#: cps/progress_syncing/protocols/kosync.py:613
+#: cps/progress_syncing/protocols/kosync.py:631
 msgid "KOReader Sync Plugin"
 msgstr "KOReader Sync Plugin"
 

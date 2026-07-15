@@ -127,13 +127,36 @@ def classic_index_redirects_to_spa():
     is NOT the SPA's own 'back to classic' marker (``cwng_feedback``), and the
     client wants HTML (not an API/OPDS machine client). Web index only — never
     books_list, authors, OPDS, Kobo, API, or login (#739 design)."""
-    if not spa_available():
-        return False
     if request.args.get("cwng_feedback"):
+        return False
+    return preferred_spa_html_request()
+
+
+def preferred_spa_html_request():
+    """Whether this browser should use the SPA for an HTML surface.
+
+    Unlike :func:`classic_index_redirects_to_spa`, this has no route-specific
+    ``cwng_feedback`` exception, so it can also route the anonymous login page.
+    The destination remains the app-owned SPA shell; callers must never redirect
+    directly to a user-controlled ``next`` value.
+    """
+    if not spa_available():
         return False
     if request.cookies.get(PREFER_SPA_COOKIE) != "1":
         return False
     return bool(request.accept_mimetypes.accept_html)
+
+
+def spa_shell_url():
+    """Return the local, prefix-aware URL for the SPA shell.
+
+    ``url_for`` includes ``request.script_root`` verbatim.  That value normally
+    comes from a trusted reverse proxy, but a malformed forwarded prefix such as
+    ``//evil.example`` would turn a redirect into a scheme-relative off-site
+    destination.  Reuse the same strict prefix sanitizer that protects the SPA
+    shell's asset and API URLs, then append the fixed app-owned route.
+    """
+    return f"{_mount_prefix()}/app/"
 
 
 def _render_shell(index_path, prefix):

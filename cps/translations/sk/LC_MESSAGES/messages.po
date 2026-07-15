@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-14 22:20+0000\n"
+"POT-Creation-Date: 2026-07-15 05:06+0000\n"
 "PO-Revision-Date: 2023-11-01 06:12+0100\n"
 "Last-Translator: Branislav Hanáček <brango@brango.sk>\n"
 "Language-Team: \n"
@@ -429,7 +429,7 @@ msgstr "Úspech! Gmail konto bolo verifikované."
 #: cps/admin.py:2846 cps/admin.py:3108 cps/editbooks.py:1152
 #: cps/editbooks.py:2054 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
 #: cps/shelf.py:332 cps/shelf.py:389 cps/shelf.py:464 cps/shelf.py:547
-#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3121
+#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3130
 #, python-format
 msgid "Oops! Database Error: %(error)s."
 msgstr "Chyba databázy: %(error)s."
@@ -535,7 +535,7 @@ msgid "Settings DB is not Writeable"
 msgstr "Nie je možné zapisovať do databázy nastavení"
 
 #: cps/admin.py:2098 cps/opds.py:316 cps/opds.py:354 cps/opds.py:357
-#: cps/web.py:3037 cps/web.py:3172
+#: cps/web.py:3046 cps/web.py:3181
 #, fuzzy
 msgid "title"
 msgstr "Názov"
@@ -731,7 +731,7 @@ msgstr "Nie je možné zmazať používateľa Hosť"
 msgid "No admin user remaining, can't delete user"
 msgstr "Nezostáva žiadny používateľ, nie je možné odobrať rolu správcu"
 
-#: cps/admin.py:3059 cps/web.py:2852
+#: cps/admin.py:3059 cps/web.py:2861
 msgid "Email can't be empty and has to be a valid Email"
 msgstr "E-mailová adresa nemôže byť prázdna a musí byť platná"
 
@@ -1371,8 +1371,8 @@ msgstr "Prípona súboru '%(ext)s' nemôže byť nahraná na tento server"
 msgid "File to be uploaded must have an extension"
 msgstr "Súbor ktorý sa má nahrať musí mať príponu"
 
-#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3302
-#: cps/web.py:3484 cps/web.py:3634
+#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3311
+#: cps/web.py:3493 cps/web.py:3643
 msgid ""
 "Oops! Selected book is unavailable. File does not exist or is not accessible"
 msgstr ""
@@ -6046,7 +6046,7 @@ msgstr "Počkajte, prosím minútku pred registráciou ďalšieho používateľa
 msgid "Register"
 msgstr "Registrovať"
 
-#: cps/web.py:2520 cps/web.py:2680
+#: cps/web.py:2520 cps/web.py:2689
 #, fuzzy
 msgid "Connection error to limiter backend, please contact your administrator"
 msgstr "Poštový server nie je nastavený, kontaktujte prosím správcu."
@@ -6072,42 +6072,42 @@ msgid ""
 msgstr ""
 "Inštancia Calibre-Web nie je nastavené, kontaktujte prosím vašeho správcu"
 
-#: cps/web.py:2654
+#: cps/web.py:2663
 #, fuzzy
 msgid ""
 "OAuth authentication is not properly configured. Please contact "
 "administrator."
 msgstr "Poštový server nie je nastavený, kontaktujte prosím správcu."
 
-#: cps/web.py:2659 cps/web.py:2686
+#: cps/web.py:2668 cps/web.py:2695
 msgid "Cannot activate LDAP authentication"
 msgstr "Nie je možné aktivovať LDAP autentifikáciu"
 
-#: cps/web.py:2668
+#: cps/web.py:2677
 msgid "Standard login is disabled."
 msgstr ""
 
-#: cps/web.py:2676
+#: cps/web.py:2685
 msgid "Please wait one minute before next login"
 msgstr "Počkajte, prosím minútku pred opätovným prihlásením"
 
-#: cps/web.py:2694
+#: cps/web.py:2703
 msgid "Username cannot be empty"
 msgstr ""
 
-#: cps/web.py:2706
+#: cps/web.py:2715
 #, python-format
 msgid "you are now logged in as: '%(nickname)s'"
 msgstr "ste prihlásený ako: '%(nickname)s'"
 
-#: cps/web.py:2725
+#: cps/web.py:2734
 #, fuzzy, python-format
 msgid ""
 "Welcome! Your account has been automatically created. You are now logged in "
 "as: '%(nickname)s'"
 msgstr "Úspech! Teraz ste prihlásený ako: %(nickname)s"
 
-#: cps/web.py:2730 cps/web.py:2733
+#: cps/web.py:2739 cps/web.py:2742
 #, fuzzy
 msgid ""
 "Authentication successful, but account creation failed. Please contact your "
@@ -6115,13 +6115,13 @@ msgid ""
 msgstr ""
 "Inštancia Calibre-Web nie je nastavené, kontaktujte prosím vašeho správcu"
 
-#: cps/web.py:2737
+#: cps/web.py:2746
 msgid ""
 "Authentication successful, but no local account found. Please contact your "
 "administrator to create your account."
 msgstr ""
 
-#: cps/web.py:2745
+#: cps/web.py:2754
 #, python-format
 msgid ""
 "Fallback Login as: '%(nickname)s', LDAP Server not reachable, or user not "
@@ -6130,55 +6130,55 @@ msgstr ""
 "Záložné prihlásenie ako: '%(nickname)s', LDAP server je nedostupný alebo "
 "používateľ je neznámy"
 
-#: cps/web.py:2751
+#: cps/web.py:2760
 #, python-format
 msgid "Could not login: %(message)s"
 msgstr "Nemôžem prihlásiť: %(message)s"
 
-#: cps/web.py:2774 cps/web.py:2775 cps/web.py:2818
+#: cps/web.py:2783 cps/web.py:2784 cps/web.py:2827
 msgid "Wrong Username or Password"
 msgstr "Nesprávne používateľské meno alebo heslo"
 
-#: cps/web.py:2783
+#: cps/web.py:2792
 msgid "New Password was sent to your email address"
 msgstr "Na vašu e-mailovú adresu bolo odoslané nové heslo"
 
-#: cps/web.py:2787
+#: cps/web.py:2796
 msgid "An unknown error occurred. Please try again later."
 msgstr "Vyskytla sa neočakávaná chyba. Prosím, skúste to opäť neskôr."
 
-#: cps/web.py:2789
+#: cps/web.py:2798
 msgid "Please enter valid username to reset password"
 msgstr "Na resetovanie hesla zadajte platné používateľské meno"
 
-#: cps/web.py:2797
+#: cps/web.py:2806
 #, python-format
 msgid "You are now logged in as: '%(nickname)s'"
 msgstr "Teraz ste prihlásený ako: '%(nickname)s'"
 
-#: cps/web.py:3110
+#: cps/web.py:3119
 msgid "Success! Profile Updated"
 msgstr "Úspech! Profil bol aktualizovaný"
 
-#: cps/web.py:3116
+#: cps/web.py:3125
 msgid "Oops! An account already exists for this Email."
 msgstr "Účet s touto e-mailovou adresou už existuje."
 
-#: cps/web.py:3250
+#: cps/web.py:3259
 msgid "App-password label must be 1-64 characters."
 msgstr ""
 
-#: cps/web.py:3285
+#: cps/web.py:3294
 #, python-format
 msgid "App password '%(label)s' revoked."
 msgstr ""
 
-#: cps/web.py:3497
+#: cps/web.py:3506
 #, fuzzy
 msgid "Invalid book ID."
 msgstr "Neplatná rola"
 
-#: cps/progress_syncing/protocols/kosync.py:613
+#: cps/progress_syncing/protocols/kosync.py:631
 msgid "KOReader Sync Plugin"
 msgstr ""
 

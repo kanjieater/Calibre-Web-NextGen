@@ -88,12 +88,20 @@ def test_touch_read_now_actions_share_a_bottom_baseline():
     assert ".readNow" in css and "margin-top: auto;" in css
 
 
-def test_spa_magic_shelf_builder_exposes_relative_date_fields():
+def test_spa_magic_shelf_builder_reads_fields_from_the_shared_schema():
+    """The field and operator lists are the engine's to own (#467): a duplicate
+    hard-coded copy here is what let classic and the New UI drift apart. Pin the
+    builder to the served schema; the field/operator contents themselves are
+    pinned server-side in test_467_magic_shelf_rule_schema.py."""
     builder = source("frontend/src/pages/MagicShelf.tsx")
-    for token in ("pubdate", "timestamp", "Publication Date", "Date Added",
-                  "in_last_days", "not_in_last_days"):
-        assert token in builder
-    assert "type={inputType(r)}" in builder
+    assert "useMagicShelfRuleSchema()" in builder
+    assert "schemaQuery.data?.fields" in builder
+    assert "schemaQuery.data?.operators" in builder
+    # Field ids and their human labels are the duplicated state that drifted;
+    # keying render logic off an operator.type string is fine and stays.
+    for hardcoded in ("'pubdate'", '"pubdate"', "Publication Date", "Date Added"):
+        assert hardcoded not in builder
+    assert "type={inputType(field, operator)}" in builder
 
 
 def test_spa_magic_shelf_create_does_not_fetch_an_empty_id_and_mobile_rules_fit():

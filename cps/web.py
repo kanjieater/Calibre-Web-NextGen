@@ -1329,7 +1329,7 @@ def index(page):
     # to the new UI rather than silently reverting (and re-nagging). Same
     # web-index-only scope; the helper also gates on SPA available + accepts HTML.
     if spa.classic_index_redirects_to_spa():
-        return redirect(url_for("spa.spa_shell"))
+        return redirect(spa.spa_shell_url())
 
     return render_books_list("newest", sort_param, 1, page)
 
@@ -2594,6 +2594,15 @@ def render_login(username="", password=""):
 def login():
     if current_user is not None and current_user.is_authenticated:
         return redirect(url_for('web.index'))
+
+    # #908: the UI preference is intentionally per-browser, not per-user, so it
+    # remains readable after logout. Route an anonymous HTML browser into the
+    # SPA's logged-out tree before rendering the Classic login template.
+    if spa.preferred_spa_html_request():
+        # The destination is fixed and app-owned. spa_shell_url() preserves a
+        # valid reverse-proxy subpath while rejecting hostile forwarded prefixes;
+        # never redirect to the user-controlled ``next`` query parameter.
+        return redirect(spa.spa_shell_url())
 
     # Handle OAuth-only authentication mode
     if config.config_login_type == constants.LOGIN_OAUTH:

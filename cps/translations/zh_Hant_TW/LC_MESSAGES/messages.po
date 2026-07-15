@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-14 22:20+0000\n"
+"POT-Creation-Date: 2026-07-15 05:06+0000\n"
 "PO-Revision-Date: 2020-09-27 22:18+0800\n"
 "Last-Translator: xlivevil <xlivevil@aliyun.com>\n"
 "Language-Team: zh_Hans_CN <LL@li.org>\n"
@@ -410,7 +410,7 @@ msgstr ""
 #: cps/admin.py:2846 cps/admin.py:3108 cps/editbooks.py:1152
 #: cps/editbooks.py:2054 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
 #: cps/shelf.py:332 cps/shelf.py:389 cps/shelf.py:464 cps/shelf.py:547
-#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3121
+#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3130
 #, python-format
 msgid "Oops! Database Error: %(error)s."
 msgstr "數據庫錯誤：%(error)s。"
@@ -510,7 +510,7 @@ msgid "Settings DB is not Writeable"
 msgstr ""
 
 #: cps/admin.py:2098 cps/opds.py:316 cps/opds.py:354 cps/opds.py:357
-#: cps/web.py:3037 cps/web.py:3172
+#: cps/web.py:3046 cps/web.py:3181
 #, fuzzy
 msgid "title"
 msgstr "標題"
@@ -707,7 +707,7 @@ msgstr "無法刪除訪客用戶"
 msgid "No admin user remaining, can't delete user"
 msgstr "管理員賬戶不存在，無法刪除用戶"
 
-#: cps/admin.py:3059 cps/web.py:2852
+#: cps/admin.py:3059 cps/web.py:2861
 msgid "Email can't be empty and has to be a valid Email"
 msgstr ""
 
@@ -1347,8 +1347,8 @@ msgstr "不能上傳文件附檔名為“%(ext)s”的文件到此服務器"
 msgid "File to be uploaded must have an extension"
 msgstr "要上傳的文件必須具有附檔名"
 
-#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3302
-#: cps/web.py:3484 cps/web.py:3634
+#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3311
+#: cps/web.py:3493 cps/web.py:3643
 msgid ""
 "Oops! Selected book is unavailable. File does not exist or is not accessible"
 msgstr "糟糕！選擇書名無法打開。文件不存在或者文件不可訪問"
@@ -6003,7 +6003,7 @@ msgstr ""
 msgid "Register"
 msgstr "註冊"
 
-#: cps/web.py:2520 cps/web.py:2680
+#: cps/web.py:2520 cps/web.py:2689
 #, fuzzy
 msgid "Connection error to limiter backend, please contact your administrator"
 msgstr "郵件服務未配置，請聯繫網站管理員！"
@@ -6028,116 +6028,116 @@ msgid ""
 "contact your administrator."
 msgstr "Calibre-Web 實例未配置，請聯繫您的系統管理員！"
 
-#: cps/web.py:2654
+#: cps/web.py:2663
 #, fuzzy
 msgid ""
 "OAuth authentication is not properly configured. Please contact "
 "administrator."
 msgstr "郵件服務未配置，請聯繫網站管理員！"
 
-#: cps/web.py:2659 cps/web.py:2686
+#: cps/web.py:2668 cps/web.py:2695
 #, fuzzy
 msgid "Cannot activate LDAP authentication"
 msgstr "無法激活LDAP認證"
 
-#: cps/web.py:2668
+#: cps/web.py:2677
 msgid "Standard login is disabled."
 msgstr ""
 
-#: cps/web.py:2676
+#: cps/web.py:2685
 msgid "Please wait one minute before next login"
 msgstr ""
 
-#: cps/web.py:2694
+#: cps/web.py:2703
 msgid "Username cannot be empty"
 msgstr ""
 
-#: cps/web.py:2706
+#: cps/web.py:2715
 #, fuzzy, python-format
 msgid "you are now logged in as: '%(nickname)s'"
 msgstr "您現在已以“%(nickname)s”身份登入"
 
-#: cps/web.py:2725
+#: cps/web.py:2734
 #, fuzzy, python-format
 msgid ""
 "Welcome! Your account has been automatically created. You are now logged in "
 "as: '%(nickname)s'"
 msgstr "您現在已以“%(nickname)s”身份登入"
 
-#: cps/web.py:2730 cps/web.py:2733
+#: cps/web.py:2739 cps/web.py:2742
 #, fuzzy
 msgid ""
 "Authentication successful, but account creation failed. Please contact your "
 "administrator."
 msgstr "Calibre-Web 實例未配置，請聯繫您的系統管理員！"
 
-#: cps/web.py:2737
+#: cps/web.py:2746
 msgid ""
 "Authentication successful, but no local account found. Please contact your "
 "administrator to create your account."
 msgstr ""
 
-#: cps/web.py:2745
+#: cps/web.py:2754
 #, fuzzy, python-format
 msgid ""
 "Fallback Login as: '%(nickname)s', LDAP Server not reachable, or user not "
 "known"
 msgstr "備援登入“%(nickname)s”：無法訪問LDAP伺服器，或用戶未知"
 
-#: cps/web.py:2751
+#: cps/web.py:2760
 #, fuzzy, python-format
 msgid "Could not login: %(message)s"
 msgstr "無法登入：%(message)s"
 
-#: cps/web.py:2774 cps/web.py:2775 cps/web.py:2818
+#: cps/web.py:2783 cps/web.py:2784 cps/web.py:2827
 #, fuzzy
 msgid "Wrong Username or Password"
 msgstr "用戶名或密碼錯誤"
 
-#: cps/web.py:2783
+#: cps/web.py:2792
 #, fuzzy
 msgid "New Password was sent to your email address"
 msgstr "新密碼已發送到您的郵箱"
 
-#: cps/web.py:2787
+#: cps/web.py:2796
 #, fuzzy
 msgid "An unknown error occurred. Please try again later."
 msgstr "發生一個未知錯誤，請稍後再試。"
 
-#: cps/web.py:2789
+#: cps/web.py:2798
 #, fuzzy
 msgid "Please enter valid username to reset password"
 msgstr "請輸入有效的用戶名進行密碼重置"
 
-#: cps/web.py:2797
+#: cps/web.py:2806
 #, fuzzy, python-format
 msgid "You are now logged in as: '%(nickname)s'"
 msgstr "您現在已以“%(nickname)s”身份登入"
 
-#: cps/web.py:3110
+#: cps/web.py:3119
 #, fuzzy
 msgid "Success! Profile Updated"
 msgstr "資料已更新"
 
-#: cps/web.py:3116
+#: cps/web.py:3125
 msgid "Oops! An account already exists for this Email."
 msgstr "使用此郵箱的賬號已經存在。"
 
-#: cps/web.py:3250
+#: cps/web.py:3259
 msgid "App-password label must be 1-64 characters."
 msgstr ""
 
-#: cps/web.py:3285
+#: cps/web.py:3294
 #, python-format
 msgid "App password '%(label)s' revoked."
 msgstr ""
 
-#: cps/web.py:3497
+#: cps/web.py:3506
 #, fuzzy
 msgid "Invalid book ID."
 msgstr "無效角色"
 
-#: cps/progress_syncing/protocols/kosync.py:613
+#: cps/progress_syncing/protocols/kosync.py:631
 msgid "KOReader Sync Plugin"
 msgstr ""
 

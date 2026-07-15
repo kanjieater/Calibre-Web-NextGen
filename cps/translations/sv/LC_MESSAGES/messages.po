@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-14 22:20+0000\n"
+"POT-Creation-Date: 2026-07-15 05:06+0000\n"
 "PO-Revision-Date: 2021-05-13 11:00+0000\n"
 "Last-Translator: Jonatan Nyberg <jonatan.nyberg.karl@gmail.com>\n"
 "Language-Team: \n"
@@ -428,7 +428,7 @@ msgstr ""
 #: cps/admin.py:2846 cps/admin.py:3108 cps/editbooks.py:1152
 #: cps/editbooks.py:2054 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
 #: cps/shelf.py:332 cps/shelf.py:389 cps/shelf.py:464 cps/shelf.py:547
-#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3121
+#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3130
 #, python-format
 msgid "Oops! Database Error: %(error)s."
 msgstr "Databasfel: %(error)s."
@@ -534,7 +534,7 @@ msgid "Settings DB is not Writeable"
 msgstr ""
 
 #: cps/admin.py:2098 cps/opds.py:316 cps/opds.py:354 cps/opds.py:357
-#: cps/web.py:3037 cps/web.py:3172
+#: cps/web.py:3046 cps/web.py:3181
 #, fuzzy
 msgid "title"
 msgstr "Titel"
@@ -733,7 +733,7 @@ msgstr "Det går inte att ta bort gästanvändaren"
 msgid "No admin user remaining, can't delete user"
 msgstr "Ingen adminstratörsanvändare kvar, kan inte ta bort användaren"
 
-#: cps/admin.py:3059 cps/web.py:2852
+#: cps/admin.py:3059 cps/web.py:2861
 msgid "Email can't be empty and has to be a valid Email"
 msgstr ""
 
@@ -1373,8 +1373,8 @@ msgstr "Filändelsen '%(ext)s' får inte laddas upp till den här servern"
 msgid "File to be uploaded must have an extension"
 msgstr "Filen som ska laddas upp måste ha en ändelse"
 
-#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3302
-#: cps/web.py:3484 cps/web.py:3634
+#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:782 cps/web.py:3311
+#: cps/web.py:3493 cps/web.py:3643
 msgid ""
 "Oops! Selected book is unavailable. File does not exist or is not accessible"
 msgstr ""
@@ -6051,7 +6051,7 @@ msgstr ""
 msgid "Register"
 msgstr "Registrera"
 
-#: cps/web.py:2520 cps/web.py:2680
+#: cps/web.py:2520 cps/web.py:2689
 #, fuzzy
 msgid "Connection error to limiter backend, please contact your administrator"
 msgstr "E-postservern är inte konfigurerad, kontakta din administratör!"
@@ -6076,116 +6076,116 @@ msgid ""
 "contact your administrator."
 msgstr "E-postservern är inte konfigurerad, kontakta din administratör!"
 
-#: cps/web.py:2654
+#: cps/web.py:2663
 #, fuzzy
 msgid ""
 "OAuth authentication is not properly configured. Please contact "
 "administrator."
 msgstr "E-postservern är inte konfigurerad, kontakta din administratör!"
 
-#: cps/web.py:2659 cps/web.py:2686
+#: cps/web.py:2668 cps/web.py:2695
 #, fuzzy
 msgid "Cannot activate LDAP authentication"
 msgstr "Det går inte att aktivera LDAP-autentisering"
 
-#: cps/web.py:2668
+#: cps/web.py:2677
 msgid "Standard login is disabled."
 msgstr ""
 
-#: cps/web.py:2676
+#: cps/web.py:2685
 msgid "Please wait one minute before next login"
 msgstr ""
 
-#: cps/web.py:2694
+#: cps/web.py:2703
 msgid "Username cannot be empty"
 msgstr ""
 
-#: cps/web.py:2706
+#: cps/web.py:2715
 #, fuzzy, python-format
 msgid "you are now logged in as: '%(nickname)s'"
 msgstr "du är nu inloggad som: \"%(nickname)s\""
 
-#: cps/web.py:2725
+#: cps/web.py:2734
 #, fuzzy, python-format
 msgid ""
 "Welcome! Your account has been automatically created. You are now logged in "
 "as: '%(nickname)s'"
 msgstr "du är nu inloggad som: \"%(nickname)s\""
 
-#: cps/web.py:2730 cps/web.py:2733
+#: cps/web.py:2739 cps/web.py:2742
 #, fuzzy
 msgid ""
 "Authentication successful, but account creation failed. Please contact your "
 "administrator."
 msgstr "E-postservern är inte konfigurerad, kontakta din administratör!"
 
-#: cps/web.py:2737
+#: cps/web.py:2746
 msgid ""
 "Authentication successful, but no local account found. Please contact your "
 "administrator to create your account."
 msgstr ""
 
-#: cps/web.py:2745
+#: cps/web.py:2754
 #, python-format
 msgid ""
 "Fallback Login as: '%(nickname)s', LDAP Server not reachable, or user not "
 "known"
 msgstr ""
 
-#: cps/web.py:2751
+#: cps/web.py:2760
 #, fuzzy, python-format
 msgid "Could not login: %(message)s"
 msgstr "Det gick inte att logga in: %(message)s"
 
-#: cps/web.py:2774 cps/web.py:2775 cps/web.py:2818
+#: cps/web.py:2783 cps/web.py:2784 cps/web.py:2827
 #, fuzzy
 msgid "Wrong Username or Password"
 msgstr "Fel användarnamn eller lösenord"
 
-#: cps/web.py:2783
+#: cps/web.py:2792
 #, fuzzy
 msgid "New Password was sent to your email address"
 msgstr "Nytt lösenord skickades till din e-postadress"
 
-#: cps/web.py:2787
+#: cps/web.py:2796
 #, fuzzy
 msgid "An unknown error occurred. Please try again later."
 msgstr "Ett okänt fel uppstod. Försök igen senare."
 
-#: cps/web.py:2789
+#: cps/web.py:2798
 #, fuzzy
 msgid "Please enter valid username to reset password"
 msgstr "Ange giltigt användarnamn för att återställa lösenordet"
 
-#: cps/web.py:2797
+#: cps/web.py:2806
 #, fuzzy, python-format
 msgid "You are now logged in as: '%(nickname)s'"
 msgstr "du är nu inloggad som: \"%(nickname)s\""
 
-#: cps/web.py:3110
+#: cps/web.py:3119
 #, fuzzy
 msgid "Success! Profile Updated"
 msgstr "Profilen uppdaterad"
 
-#: cps/web.py:3116
+#: cps/web.py:3125
 msgid "Oops! An account already exists for this Email."
 msgstr "Hittade ett befintligt konto för den här e-postadressen"
 
-#: cps/web.py:3250
+#: cps/web.py:3259
 msgid "App-password label must be 1-64 characters."
 msgstr ""
 
-#: cps/web.py:3285
+#: cps/web.py:3294
 #, python-format
 msgid "App password '%(label)s' revoked."
 msgstr ""
 
-#: cps/web.py:3497
+#: cps/web.py:3506
 #, fuzzy
 msgid "Invalid book ID."
 msgstr "Ogiltig roll"
 
-#: cps/progress_syncing/protocols/kosync.py:613
+#: cps/progress_syncing/protocols/kosync.py:631
 msgid "KOReader Sync Plugin"
 msgstr ""
 
