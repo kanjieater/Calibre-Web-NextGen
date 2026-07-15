@@ -70,7 +70,11 @@ export default defineConfig({
       ? [{
           name: 'subpath',
           testMatch: /subpath\.spec\.ts/,
-          use: { ...devices['Desktop Chrome'], baseURL: process.env.E2E_SUBPATH_URL, storageState: STORAGE },
+          use: {
+            ...devices['Desktop Chrome'],
+            baseURL: `${process.env.E2E_SUBPATH_URL.replace(/\/$/, '')}/`,
+            storageState: STORAGE,
+          },
           dependencies: ['setup'],
         }]
       : []),
