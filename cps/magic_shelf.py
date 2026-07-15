@@ -7,6 +7,7 @@
 
 from . import db, ub, logger
 from .cw_login import current_user
+from flask_babel import lazy_gettext as N_
 from sqlalchemy import and_, or_
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta, timezone
@@ -154,6 +155,10 @@ def get_visible_magic_shelves_for_user(user_id):
 SYSTEM_SHELF_TEMPLATES = {
     'recently_added': {
         'name': 'Recently Added',
+        # Keep ``name`` as stable English identity in app.db.  ``display_name``
+        # is request-local UI copy: persisting the lazy translation would make
+        # template matching and migrations depend on the user's locale.
+        'display_name': N_('Recently Added'),
         'icon': '⏰',
         'description': 'Books added to your library in the last 30 days',
         'rules': {
@@ -172,6 +177,7 @@ SYSTEM_SHELF_TEMPLATES = {
     },
     'highly_rated': {
         'name': 'Highly Rated',
+        'display_name': N_('Highly Rated'),
         'icon': '⭐',
         'description': 'Books with a rating of 8 or higher',
         'rules': {
@@ -208,6 +214,7 @@ SYSTEM_SHELF_TEMPLATES = {
     # },
     'currently_reading': {
         'name': 'Currently Reading',
+        'display_name': N_('Currently Reading'),
         'icon': '📖',
         'description': 'Books you are currently reading (synced via KOSync/Kobo)',
         'rules': {
@@ -224,6 +231,7 @@ SYSTEM_SHELF_TEMPLATES = {
     },
     'yet_to_read': {
         'name': 'Yet to Read',
+        'display_name': N_('Yet to Read'),
         'icon': '📚',
         'description': 'Books you haven\'t read yet',
         'rules': {
@@ -240,6 +248,7 @@ SYSTEM_SHELF_TEMPLATES = {
     },
     'recent_publications': {
         'name': 'Recent Publications',
+        'display_name': N_('Recent Publications'),
         'icon': '🌱',
         'description': 'Books published in the last 2 years',
         'rules': {
@@ -276,6 +285,36 @@ SYSTEM_SHELF_TEMPLATES = {
     # }
 
 }
+
+
+def system_magic_shelf_template(shelf):
+    """Return the template backing a system shelf, or ``None``.
+
+    The schema predates stable template keys on ``MagicShelf`` rows, so the
+    canonical English name is still the identity used by migrations and hide
+    preferences.  User-created shelves are deliberately excluded even if a
+    user chose the same name as a built-in template.
+    """
+    if not getattr(shelf, 'is_system', False):
+        return None
+    shelf_name = getattr(shelf, 'name', None)
+    return next(
+        (template for template in SYSTEM_SHELF_TEMPLATES.values()
+         if template['name'] == shelf_name),
+        None,
+    )
+
+
+def system_magic_shelf_display_name(shelf):
+    """Translate only built-in shelf display text in the active request.
+
+    Returning the raw name for custom/legacy shelves preserves user data and
+    safely handles a system row whose old name no longer maps to a template.
+    """
+    template = system_magic_shelf_template(shelf)
+    if template is None:
+        return getattr(shelf, 'name', '')
+    return str(template['display_name'])
 
 # Mapping from UI field names to database models and columns
 FIELD_MAP = {

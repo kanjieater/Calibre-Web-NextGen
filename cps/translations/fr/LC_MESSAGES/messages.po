@@ -1873,6 +1873,26 @@ msgstr ""
 msgid "Kobo Setup"
 msgstr "Configuration Kobo"
 
+#: cps/magic_shelf.py:161
+msgid "Recently Added"
+msgstr "Ajoutés récemment"
+
+#: cps/magic_shelf.py:180
+msgid "Highly Rated"
+msgstr "Les mieux notés"
+
+#: cps/magic_shelf.py:217 cps/opds.py:200
+msgid "Currently Reading"
+msgstr "Lecture en cours"
+
+#: cps/magic_shelf.py:234
+msgid "Yet to Read"
+msgstr "À lire"
+
+#: cps/magic_shelf.py:251
+msgid "Recent Publications"
+msgstr "Publications récentes"
+
 #: cps/oauth_bb.py:287
 #, python-format
 msgid "Register with %(provider)s"
@@ -2104,11 +2124,6 @@ msgstr "Montrer des livres au hasard"
 msgid "Read Books"
 msgstr "Livres lus"
 
-#: cps/opds.py:200
-#, fuzzy
-msgid "Currently Reading"
-msgstr "Version actuelle"
-
 #: cps/opds.py:201
 #, fuzzy
 msgid "Books currently being read"
@@ -2322,7 +2337,7 @@ msgstr "Afficher les livres archivés"
 
 #: cps/render_template.py:132 cps/spa_strings.py:487
 msgid "Favorites"
-msgstr ""
+msgstr "Favoris"
 
 #: cps/render_template.py:134
 msgid "Show Favorites"
@@ -3733,9 +3748,8 @@ msgid ">"
 msgstr ""
 
 #: cps/spa_strings.py:336
-#, fuzzy
 msgid "A few random picks from your library"
-msgstr "Masquer cette étagère dans votre barre latérale"
+msgstr "Une sélection aléatoire de votre bibliothèque"
 
 #: cps/spa_strings.py:337
 msgid ""
@@ -4571,7 +4585,7 @@ msgstr "Hauteur"
 
 #: cps/spa_strings.py:517
 msgid "Hot"
-msgstr ""
+msgstr "Populaires"
 
 #: cps/spa_strings.py:518
 msgid "Icon"
@@ -4675,7 +4689,7 @@ msgstr "Paramètres d'affichage de la barre latérale"
 
 #: cps/spa_strings.py:541
 msgid "Load more"
-msgstr ""
+msgstr "Charger plus"
 
 #: cps/spa_strings.py:542
 msgid "Loading new Discover picks."
@@ -5426,9 +5440,8 @@ msgid "Smart shelf not found."
 msgstr "Étagère introuvable"
 
 #: cps/spa_strings.py:709
-#, fuzzy
 msgid "Smart shelves"
-msgstr "Etagères"
+msgstr "Étagères intelligentes"
 
 #: cps/spa_strings.py:710
 msgid "Solid: average colour of the cover"
@@ -5481,9 +5494,8 @@ msgstr ""
 "Synchroniser uniquement les livres dans les étagères sélectionnées avec Kobo"
 
 #: cps/spa_strings.py:722
-#, fuzzy
 msgid "Table view"
-msgstr "Vue invalide"
+msgstr "Vue en tableau"
 
 #: cps/spa_strings.py:723
 #, fuzzy
@@ -5556,9 +5568,8 @@ msgid "Token URL"
 msgstr ""
 
 #: cps/spa_strings.py:739
-#, fuzzy
 msgid "Top Rated"
-msgstr "Livres les mieux notés"
+msgstr "Les mieux notés"
 
 #: cps/spa_strings.py:740
 #, fuzzy

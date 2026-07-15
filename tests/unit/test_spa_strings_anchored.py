@@ -52,11 +52,14 @@ def test_every_static_spa_translation_key_is_anchored():
 @pytest.mark.parametrize(
     "msgid",
     [
+        "A few random picks from your library",
         "Table view",
         "Smart shelves",
         "Formats",
+        "Favorites",
         "Hot",
         "Top Rated",
+        "Load more",
         "Full user table & restrictions",
         "Basic configuration",
         "Database & library path",
