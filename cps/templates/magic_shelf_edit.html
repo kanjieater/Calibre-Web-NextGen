@@ -579,9 +579,11 @@ $(function() {
     var ruleSchema = JSON.parse(document.getElementById('magic-shelf-rule-schema').textContent);
     var fields = ruleSchema.fields;
     var operators = ruleSchema.operators;
+    var operatorLabels = {};
     operators.forEach(function(operator) {
         if (operator.type === 'in_last_days') operator.label = {{_('In the past N days')|tojson}};
         if (operator.type === 'not_in_last_days') operator.label = {{_('Not in the past N days')|tojson}};
+        operatorLabels[operator.type] = operator.label;
     });
 
     var rules = {{ rules_json|safe }};
@@ -621,6 +623,7 @@ $(function() {
         plugins: ['bt-tooltip-errors'],
         filters: fields,
         operators: operators,
+        lang: {operators: operatorLabels},
         rules: rules
     });
     

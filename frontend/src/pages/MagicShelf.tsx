@@ -223,14 +223,16 @@ export function MagicShelf({ editId }: { editId?: string }) {
         </button>
       </div>
 
-      {previewData && (
-        <div className={styles.preview} role="status">
-          <strong>{previewData.count}</strong> {t('books match')}
-          {previewData.sample.length > 0 && (
-            <span className={styles.sample}> — {previewData.sample.slice(0, 5).join(', ')}…</span>
-          )}
-        </div>
-      )}
+      <div className={previewData ? styles.preview : undefined} role="status">
+        {previewData && (
+          <>
+            <strong>{previewData.count}</strong> {t('books match')}
+            {previewData.sample.length > 0 && (
+              <span className={styles.sample}> — {previewData.sample.slice(0, 5).join(', ')}…</span>
+            )}
+          </>
+        )}
+      </div>
 
       {err && <p className={styles.err} role="alert" id="magic-shelf-error">{err}</p>}
 

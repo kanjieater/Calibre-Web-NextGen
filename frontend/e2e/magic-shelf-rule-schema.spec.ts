@@ -29,10 +29,29 @@ test('Classic and New UI consume the canonical rule schema and date rules previe
   }
 
   await page.goto('/magicshelf');
-  const classicFields = await page.locator('#builder .rule-filter-container select').first().locator('option').evaluateAll((options) =>
+  const classicFilter = page.locator('#builder .rule-filter-container select').first();
+  const classicFields = (await classicFilter.locator('option').evaluateAll((options) =>
     options.map((option) => ({ value: (option as HTMLOptionElement).value, text: option.textContent?.trim() || '' })),
-  );
+  )).filter((option) => option.value !== '-1');
   expect(classicFields).toEqual(expectedFields);
+
+  for (const fieldId of DATE_FIELDS) {
+    await classicFilter.selectOption(fieldId);
+    const classicOperator = page.locator('#builder .rule-operator-container select').first();
+    await expect(classicOperator).toContainText('In the past N days');
+    await expect(classicOperator).toContainText('Not in the past N days');
+    await classicOperator.selectOption('in_last_days');
+    await page.locator('#builder .rule-value-container input').first().fill('30');
+    const previewResponse = page.waitForResponse((response) =>
+      response.url().includes('/magicshelf/preview') && response.request().method() === 'POST',
+    );
+    await page.locator('#preview-btn').click();
+    const response = await previewResponse;
+    expect(response.status()).toBe(200);
+    const payload = await response.json() as { success: boolean; count: number };
+    expect(payload.success).toBe(true);
+    expect(payload.count).toBeGreaterThanOrEqual(0);
+  }
 
   await page.goto('/app/magic');
   await expect(page.getByRole('heading', { name: 'New smart shelf' })).toBeVisible();

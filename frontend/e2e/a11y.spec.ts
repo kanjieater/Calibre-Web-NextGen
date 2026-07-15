@@ -79,6 +79,12 @@ test('edit book: no critical/serious a11y violations', async ({ page }) => {
   await axeScan(page, 'edit-book');
 });
 
+test('smart shelf builder: no critical/serious a11y violations', async ({ page }) => {
+  await page.goto('/app/magic');
+  await expect(page.getByRole('heading', { name: 'New smart shelf' })).toBeVisible();
+  await axeScan(page, 'smart-shelf-builder');
+});
+
 for (const [label, path] of [
   ['account', '/app/account'],
   ['advanced-search', '/app/search'],
