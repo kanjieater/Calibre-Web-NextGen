@@ -141,6 +141,28 @@ def test_fr_read_toggle_strings_are_correct():
 
 
 @pytest.mark.unit
+def test_fr_reporter_residual_spa_strings_are_served():
+    """#615/#886: the exact residual labels reported after v4.1.12 must
+    survive extraction and msgfmt-equivalent fuzzy filtering.
+
+    This tests the catalog the SPA actually consumes, rather than accepting a
+    fuzzy or empty ``msgstr`` that looks translated in messages.po but is
+    intentionally omitted at runtime.
+    """
+    body, _ = _call_view("fr")
+    catalog = body["catalog"]
+    assert catalog.get("A few random picks from your library") == (
+        "Une sélection aléatoire de votre bibliothèque"
+    )
+    assert catalog.get("Favorites") == "Favoris"
+    assert catalog.get("Hot") == "Populaires"
+    assert catalog.get("Top Rated") == "Les mieux notés"
+    assert catalog.get("Table view") == "Vue en tableau"
+    assert catalog.get("Smart shelves") == "Étagères intelligentes"
+    assert catalog.get("Load more") == "Charger plus"
+
+
+@pytest.mark.unit
 def test_i18n_endpoint_is_public():
     """The auth gate must let the catalog through (login screen needs strings)."""
     from cps.api import _PUBLIC_ENDPOINTS

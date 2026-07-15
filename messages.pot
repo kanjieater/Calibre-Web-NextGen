@@ -1683,6 +1683,26 @@ msgstr ""
 msgid "Kobo Setup"
 msgstr ""
 
+#: cps/magic_shelf.py:161
+msgid "Recently Added"
+msgstr ""
+
+#: cps/magic_shelf.py:180
+msgid "Highly Rated"
+msgstr ""
+
+#: cps/magic_shelf.py:217 cps/opds.py:200
+msgid "Currently Reading"
+msgstr ""
+
+#: cps/magic_shelf.py:234
+msgid "Yet to Read"
+msgstr ""
+
+#: cps/magic_shelf.py:251
+msgid "Recent Publications"
+msgstr ""
+
 #: cps/oauth_bb.py:287
 #, python-format
 msgid "Register with %(provider)s"
@@ -1880,10 +1900,6 @@ msgstr ""
 
 #: cps/opds.py:194 cps/opds.py:195 cps/render_template.py:94 cps/web.py:1022
 msgid "Read Books"
-msgstr ""
-
-#: cps/opds.py:200
-msgid "Currently Reading"
 msgstr ""
 
 #: cps/opds.py:201
@@ -11087,4 +11103,3 @@ msgstr ""
 #: cps/templates/user_table.html:158
 msgid "Show Read/Unread Section"
 msgstr ""
-
