@@ -18,6 +18,11 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- **Dismissing the classic-view “Try the new UI” banner now keeps it dismissed
+  after updates.** It is a one-time adoption cue, not a What's New notice, so a
+  previous version-specific dismissal is migrated to one durable browser choice.
+  Thanks @darkmatterpelican (#907).
+
 - **Advanced server settings now say before you click that they open in the
   classic view.** Those deep configuration pages intentionally remain in the
   proven server-rendered interface during the hybrid cutover; the New UI no
