@@ -164,10 +164,10 @@ class TestCustomColumnFilterSemantics:
 @pytest.mark.unit
 class TestSourcePins:
     def test_web_excludes_deleted_and_exception_columns(self):
-        from cps import web
-        src = inspect.getsource(web._build_custom_columns_json)
+        from cps import magic_shelf
+        src = inspect.getsource(magic_shelf.get_rule_custom_columns)
         assert "cc_exceptions" in src, (
-            "_build_custom_columns_json must exclude composite/series "
+            "the canonical rule schema must exclude composite/series "
             "datatypes (db.cc_exceptions) — they aren't queryable"
         )
         assert "mark_for_delete" in src, (
@@ -179,13 +179,13 @@ class TestSourcePins:
             encoding="utf-8"
         )
         assert re.search(
-            r'<script type="application/json" id="custom-columns-data">', tpl
+            r'<script type="application/json" id="magic-shelf-rule-schema">', tpl
         ), (
-            "custom columns must be embedded as a JSON script island, not "
+            "the canonical schema must be embedded as a JSON script island, not "
             "interpolated into executable JS (XSS-resistant: tojson escapes "
             "<, >, & as unicode escapes)"
         )
-        assert "custom-columns-data" in tpl.split("JSON.parse")[1][:200], (
+        assert "magic-shelf-rule-schema" in tpl.split("JSON.parse")[1][:200], (
             "the JS must parse the island via JSON.parse(...textContent)"
         )
 

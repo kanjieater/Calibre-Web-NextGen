@@ -169,19 +169,15 @@ class TestQueryBuilderTemplateExposesThreeRadioValues:
     through the UI even though the Python side still supports it."""
 
     def test_template_declares_integer_radio_with_three_values(self):
-        import pathlib
+        from cps import magic_shelf
 
-        template_path = pathlib.Path(__file__).resolve().parents[2] / "cps" / "templates" / "magic_shelf_edit.html"
-        content = template_path.read_text(encoding="utf-8")
-        assert "type: 'integer'" in content, (
+        fields = {field["id"]: field for field in magic_shelf.build_rule_schema()["fields"]}
+        read_status = fields["read_status"]
+        assert read_status["type"] == "integer", (
             "The QueryBuilder read_status field must declare "
             "type: 'integer' so all three values (0=Unread, "
             "1=Read, 2=Currently Reading) are valid. 'boolean' "
             "collapses to 0/1 only."
         )
-        # All three radio values must be present in the QueryBuilder
-        # values map for read_status. Order can vary (Unread/CR/Read
-        # is the backport order); only presence matters.
-        assert "'Currently Reading'" in content
-        assert "'Unread'" in content
-        assert "'Read'" in content
+        assert read_status["input"] == "radio"
+        assert read_status["values"] == {0: "Unread", 2: "Currently Reading", 1: "Read"}
