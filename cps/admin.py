@@ -2555,6 +2555,7 @@ def _configuration_update_helper():
     reboot_required = False
     to_save = request.form.to_dict()
     prev_hardcover_sync = config.hardcover_sync_enabled()
+    prev_hardcover_token_available = bool(config.resolved_hardcover_token())
     try:
         reboot_required |= _config_string(to_save, "config_trustedhosts")
         reboot_required |= _config_string(to_save, "config_keyfile")
@@ -2742,7 +2743,9 @@ def _configuration_update_helper():
     # Keep the retired cwa.db auto-fetch flag synchronized solely for safe
     # rollback. Runtime consumers use ConfigSQL.hardcover_sync_enabled().
     effective_hardcover_sync, _ = schedule.reconcile_hardcover_configuration()
-    if effective_hardcover_sync != prev_hardcover_sync:
+    hardcover_token_available = bool(config.resolved_hardcover_token())
+    if (effective_hardcover_sync != prev_hardcover_sync
+            or hardcover_token_available != prev_hardcover_token_available):
         schedule.refresh_hardcover_auto_fetch()
     apply_https_runtime_config()
     if reboot_required:

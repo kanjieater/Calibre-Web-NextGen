@@ -6,6 +6,7 @@
 # See CONTRIBUTORS for full list of authors.
 
 import datetime
+import threading
 
 from . import config, constants, logger
 from .services.background_scheduler import BackgroundScheduler, CronTrigger, IntervalTrigger, use_APScheduler, DateTrigger
@@ -18,6 +19,7 @@ from .tasks.metadata_backup import TaskBackupMetadata
 from .tasks.auto_hardcover_id import TaskAutoHardcoverID
 
 log = logger.create()
+_hardcover_schedule_lock = threading.Lock()
 
 
 def reconcile_hardcover_configuration():
@@ -354,16 +356,17 @@ def _schedule_hardcover_auto_fetch(scheduler, timezone_info):
 
 def refresh_hardcover_auto_fetch():
     """Replace only Hardcover's recurring job, preserving one-shot jobs."""
-    scheduler = BackgroundScheduler()
-    if not scheduler:
-        return
+    with _hardcover_schedule_lock:
+        scheduler = BackgroundScheduler()
+        if not scheduler:
+            return
 
-    for job in scheduler.get_jobs():
-        if getattr(job, "name", None) == "hardcover auto-fetch":
-            scheduler.remove_job(job.id)
+        for job in scheduler.get_jobs():
+            if getattr(job, "name", None) == "hardcover auto-fetch":
+                scheduler.remove_job(job.id)
 
-    timezone_info = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
-    _schedule_hardcover_auto_fetch(scheduler, timezone_info)
+        timezone_info = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+        _schedule_hardcover_auto_fetch(scheduler, timezone_info)
 
 
 def _schedule_archived_book_cleanup(scheduler, timezone_info):

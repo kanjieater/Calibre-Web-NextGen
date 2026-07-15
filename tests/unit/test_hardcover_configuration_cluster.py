@@ -290,8 +290,10 @@ def test_admin_save_has_one_hardcover_sync_coercion_path():
         "def _configuration_result", 1
     )[0]
     assert "prev_hardcover_sync = config.hardcover_sync_enabled()" in helper
+    assert "prev_hardcover_token_available = bool(config.resolved_hardcover_token())" in helper
     assert "schedule.refresh_hardcover_auto_fetch()" in helper
     assert "schedule.register_scheduled_tasks" not in helper
+    assert "hardcover_token_available != prev_hardcover_token_available" in helper
 
 
 def test_auto_fetch_task_rechecks_effective_enable_before_database_or_network(monkeypatch, caplog):
@@ -400,6 +402,49 @@ def test_hardcover_refresh_preserves_unrelated_pending_jobs(monkeypatch):
 
     assert removed == ["hardcover-old"]
     assert len(scheduled) == 1
+
+
+def test_concurrent_hardcover_refreshes_leave_one_recurring_job(monkeypatch):
+    import threading
+    from types import SimpleNamespace
+
+    import cps.schedule as schedule
+
+    jobs = []
+    snapshots = threading.Barrier(2)
+
+    class FakeScheduler:
+        def get_jobs(self):
+            snapshot = list(jobs)
+            try:
+                snapshots.wait(timeout=0.1)
+            except threading.BrokenBarrierError:
+                pass
+            return snapshot
+
+        def remove_job(self, job_id):
+            jobs[:] = [job for job in jobs if job.id != job_id]
+
+    monkeypatch.setattr(schedule, "BackgroundScheduler", lambda: FakeScheduler())
+    monkeypatch.setattr(
+        schedule,
+        "_schedule_hardcover_auto_fetch",
+        lambda scheduler, timezone_info: jobs.append(
+            SimpleNamespace(
+                id=f"hardcover-{len(jobs)}",
+                name="hardcover auto-fetch",
+            )
+        ),
+    )
+
+    threads = [threading.Thread(target=schedule.refresh_hardcover_auto_fetch) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=2)
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert len(jobs) == 1
 
 
 def test_applying_cwa_defaults_restores_the_rollback_mirror():
