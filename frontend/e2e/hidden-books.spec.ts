@@ -122,7 +122,12 @@ test('hiding is per-user and a non-delete user still receives Hide', async ({ pa
   const password = 'CWNG-hidden-E2E-42!';
   const created = await page.request.post('/api/v1/admin/users', {
     headers,
-    data: { name: username, password, roles: { viewer: true, download: true, delete_books: false } },
+    data: {
+      name: username,
+      email: `${username}@example.test`,
+      password,
+      roles: { viewer: true, download: true, delete_books: false },
+    },
   });
   expect(created.ok(), await created.text()).toBeTruthy();
   const other = await playwright.request.newContext({ baseURL });
