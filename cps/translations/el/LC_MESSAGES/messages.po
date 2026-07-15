@@ -1998,9 +1998,9 @@ msgid "Read Books"
 msgstr "Βιβλία που Διαβάστηκαν"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "Τρέχουσα έκδοση"
+msgstr ""
+
 
 #: cps/opds.py:201
 #, fuzzy

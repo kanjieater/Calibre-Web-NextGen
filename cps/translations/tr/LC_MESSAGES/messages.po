@@ -1947,9 +1947,9 @@ msgid "Read Books"
 msgstr "Okunanlar"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "Geçerli sürüm"
+msgstr ""
+
 
 #: cps/opds.py:201
 #, fuzzy
@@ -7822,9 +7822,9 @@ msgid "LDAP Encryption"
 msgstr "Şifreleme"
 
 #: cps/templates/config_edit.html:360
-#, fuzzy
 msgid "TLS"
-msgstr "SSL/TLS"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:361
 msgid "SSL"

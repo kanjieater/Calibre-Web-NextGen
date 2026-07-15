@@ -1941,9 +1941,9 @@ msgid "Read Books"
 msgstr "已讀書籍"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "當前版本"
+msgstr ""
+
 
 #: cps/opds.py:201
 #, fuzzy

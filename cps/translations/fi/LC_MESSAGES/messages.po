@@ -1947,9 +1947,9 @@ msgid "Read Books"
 msgstr "Luetut kirjat"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "Nykyinen versio"
+msgstr ""
+
 
 #: cps/opds.py:201
 #, fuzzy
@@ -7824,14 +7824,14 @@ msgid "LDAP Encryption"
 msgstr "SSL"
 
 #: cps/templates/config_edit.html:360
-#, fuzzy
 msgid "TLS"
-msgstr "SSL/TLS"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:361
-#, fuzzy
 msgid "SSL"
-msgstr "SSL/TLS"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:365
 msgid ""
@@ -7853,14 +7853,14 @@ msgid "LDAP Authentication"
 msgstr "Käytä LDAP kirjautumista"
 
 #: cps/templates/config_edit.html:390
-#, fuzzy
 msgid "Anonymous"
-msgstr "Nimetön selaus"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:391
-#, fuzzy
 msgid "Unauthenticated"
-msgstr "Käytä oletuskirjautumista"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:392
 msgid "Simple"

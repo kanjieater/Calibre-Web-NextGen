@@ -3884,19 +3884,19 @@ msgstr ""
 
 #: cps/spa_strings.py:379
 msgid "in the past N days"
-msgstr ""
+msgstr "in den letzten N Tagen"
 
 #: cps/spa_strings.py:380
 msgid "not in the past N days"
-msgstr ""
+msgstr "nicht in den letzten N Tagen"
 
 #: cps/spa_strings.py:381
 msgid "on or after"
-msgstr ""
+msgstr "am oder nach dem"
 
 #: cps/spa_strings.py:382
 msgid "on or before"
-msgstr ""
+msgstr "am oder vor dem"
 
 #: cps/spa_strings.py:383 cps/templates/detail.html:739
 #: cps/templates/detail.html:740
@@ -5727,7 +5727,7 @@ msgstr ""
 
 #: cps/spa_strings.py:780
 msgid "begins with"
-msgstr ""
+msgstr "beginnt mit"
 
 
 #: cps/spa_strings.py:781
@@ -5742,7 +5742,7 @@ msgstr ""
 
 #: cps/spa_strings.py:783
 msgid "contains"
-msgstr ""
+msgstr "enthält"
 
 #: cps/spa_strings.py:784
 msgid "copies"
@@ -5750,7 +5750,7 @@ msgstr ""
 
 #: cps/spa_strings.py:785
 msgid "does not contain"
-msgstr ""
+msgstr "enthält nicht"
 
 
 #: cps/spa_strings.py:786
@@ -5769,16 +5769,16 @@ msgstr ""
 
 #: cps/spa_strings.py:789
 msgid "ends with"
-msgstr ""
+msgstr "endet mit"
 
 #: cps/spa_strings.py:790
 msgid "is"
-msgstr ""
+msgstr "ist"
 
 
 #: cps/spa_strings.py:791
 msgid "is not"
-msgstr ""
+msgstr "ist nicht"
 
 #: cps/spa_strings.py:792
 msgid "or continue with"
@@ -12685,3 +12685,11 @@ msgstr "Kompakt"
 
 msgid "Dense"
 msgstr "Dicht"
+
+#: cps/spa_strings.py:51
+msgid "Standard (username / password)"
+msgstr "Standard (Benutzername / Passwort)"
+
+#: cps/spa_strings.py:56
+msgid "Simple (service account)"
+msgstr "Einfach (Dienstkonto)"

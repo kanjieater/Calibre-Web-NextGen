@@ -170,7 +170,7 @@ export function MagicShelf({ editId }: { editId?: string }) {
                 {FIELDS.map((f) => <option key={f.id} value={f.id}>{t(f.label)}</option>)}
               </select>
               <select aria-label={t('Rule operator')} value={r.operator} onChange={(e) => setRule(r._k, { operator: e.target.value })}>
-                {ops.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                {ops.map((o) => <option key={o.id} value={o.id}>{t(o.label)}</option>)}
               </select>
               <input value={r.value} onChange={(e) => setRule(r._k, { value: e.target.value })}
                 placeholder={t('value')} type={inputType(r)} min={isDate(r.id) && inputType(r) === 'number' ? 1 : undefined} />

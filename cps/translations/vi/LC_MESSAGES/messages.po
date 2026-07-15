@@ -1940,9 +1940,9 @@ msgid "Read Books"
 msgstr "Sách đã đọc"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "Phiên bản hiện tại"
+msgstr ""
+
 
 #: cps/opds.py:201
 #, fuzzy
@@ -7802,14 +7802,14 @@ msgid "LDAP Encryption"
 msgstr "SSL"
 
 #: cps/templates/config_edit.html:360
-#, fuzzy
 msgid "TLS"
-msgstr "SSL/TLS"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:361
-#, fuzzy
 msgid "SSL"
-msgstr "SSL/TLS"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:365
 msgid ""
@@ -7830,9 +7830,9 @@ msgid "LDAP Authentication"
 msgstr ""
 
 #: cps/templates/config_edit.html:390
-#, fuzzy
 msgid "Anonymous"
-msgstr "Ẩn danh"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:391
 msgid "Unauthenticated"

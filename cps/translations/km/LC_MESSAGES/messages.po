@@ -1933,9 +1933,9 @@ msgid "Read Books"
 msgstr "សៀវភៅដែលបានអានរួច"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "លេខ version ដែលបានតម្លើង"
+msgstr ""
+
 
 #: cps/opds.py:201
 #, fuzzy
@@ -7743,14 +7743,14 @@ msgid "LDAP Encryption"
 msgstr "SSL"
 
 #: cps/templates/config_edit.html:360
-#, fuzzy
 msgid "TLS"
-msgstr "SSL/TLS"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:361
-#, fuzzy
 msgid "SSL"
-msgstr "SSL/TLS"
+msgstr ""
+
 
 #: cps/templates/config_edit.html:365
 msgid ""

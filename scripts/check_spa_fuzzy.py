@@ -53,24 +53,29 @@ def _entry_msgid(lines: list[str]) -> str | None:
 
 
 def _clear_fuzzy_entry(entry: str, spa_msgids: set[str]) -> tuple[str, str | None]:
-    if entry.startswith("#~") or "fuzzy" not in entry:
+    if entry.startswith("#~"):
         return entry, None
     lines = entry.splitlines(keepends=True)
+    flag_index = None
+    flags: list[str] = []
+    for index, line in enumerate(lines):
+        match = _FLAGS.match(line.rstrip("\n"))
+        if match:
+            flag_index = index
+            flags = [flag.strip() for flag in match.group(1).split(",") if flag.strip()]
+            break
+    if flag_index is None or "fuzzy" not in flags:
+        return entry, None
+
     msgid = _entry_msgid(lines)
     if not msgid or msgid not in spa_msgids:
         return entry, None
 
-    for index, line in enumerate(lines):
-        match = _FLAGS.match(line.rstrip("\n"))
-        if not match:
-            continue
-        flags = [flag.strip() for flag in match.group(1).split(",")]
-        flags = [flag for flag in flags if flag and flag != "fuzzy"]
-        if flags:
-            lines[index] = "#, " + ", ".join(flags) + "\n"
-        else:
-            del lines[index]
-        break
+    flags = [flag for flag in flags if flag != "fuzzy"]
+    if flags:
+        lines[flag_index] = "#, " + ", ".join(flags) + "\n"
+    else:
+        del lines[flag_index]
 
     msgstr_index = next(
         (index for index, line in enumerate(lines) if line.startswith("msgstr ")),

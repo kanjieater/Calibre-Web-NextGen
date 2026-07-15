@@ -1957,9 +1957,9 @@ msgid "Read Books"
 msgstr "Přečtené knihy"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "Současná verze"
+msgstr ""
+
 
 #: cps/opds.py:201
 #, fuzzy

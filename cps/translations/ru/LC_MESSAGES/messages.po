@@ -3750,19 +3750,19 @@ msgstr ""
 
 #: cps/spa_strings.py:379
 msgid "in the past N days"
-msgstr ""
+msgstr "за последние N дней"
 
 #: cps/spa_strings.py:380
 msgid "not in the past N days"
-msgstr ""
+msgstr "не за последние N дней"
 
 #: cps/spa_strings.py:381
 msgid "on or after"
-msgstr ""
+msgstr "в эту дату или позже"
 
 #: cps/spa_strings.py:382
 msgid "on or before"
-msgstr ""
+msgstr "в эту дату или раньше"
 
 #: cps/spa_strings.py:383 cps/templates/detail.html:739
 #: cps/templates/detail.html:740
@@ -5453,7 +5453,7 @@ msgstr "любое правило"
 
 #: cps/spa_strings.py:780
 msgid "begins with"
-msgstr ""
+msgstr "начинается с"
 
 
 #: cps/spa_strings.py:781
@@ -5466,7 +5466,7 @@ msgstr "подходящих книг"
 
 #: cps/spa_strings.py:783
 msgid "contains"
-msgstr ""
+msgstr "содержит"
 
 #: cps/spa_strings.py:784
 msgid "copies"
@@ -5474,7 +5474,7 @@ msgstr "копии"
 
 #: cps/spa_strings.py:785
 msgid "does not contain"
-msgstr ""
+msgstr "не содержит"
 
 
 #: cps/spa_strings.py:786
@@ -5491,16 +5491,16 @@ msgstr "Тема письма для читалки"
 
 #: cps/spa_strings.py:789
 msgid "ends with"
-msgstr ""
+msgstr "заканчивается на"
 
 #: cps/spa_strings.py:790
 msgid "is"
-msgstr ""
+msgstr "равно"
 
 
 #: cps/spa_strings.py:791
 msgid "is not"
-msgstr ""
+msgstr "не равно"
 
 #: cps/spa_strings.py:792
 msgid "or continue with"
@@ -12656,3 +12656,11 @@ msgstr "Компактно"
 
 msgid "Dense"
 msgstr "Плотно"
+
+#: cps/spa_strings.py:51
+msgid "Standard (username / password)"
+msgstr "Стандартный (имя пользователя / пароль)"
+
+#: cps/spa_strings.py:56
+msgid "Simple (service account)"
+msgstr "Простая (служебная учётная запись)"

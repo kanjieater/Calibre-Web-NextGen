@@ -159,10 +159,22 @@ def test_known_residual_raw_spa_copy_does_not_return(relative_path, raw_snippet)
         "{count} results",
         "Page {number}",
         "Book {number}",
+        "Currently Reading",
+        "Standard (username / password)",
+        "Simple (service account)",
     ],
 )
 def test_dynamic_and_interpolated_residual_keys_are_anchored(msgid):
     assert msgid in extractor.parse_anchored()
+
+
+def test_magic_shelf_operator_labels_are_translated_at_render_time():
+    """The labels are anchored data, but rendering them raw still leaks English."""
+    path = os.path.join(extractor.FRONTEND_SRC, "pages", "MagicShelf.tsx")
+    with open(path, encoding="utf-8") as source_file:
+        source = source_file.read()
+    assert "{t(o.label)}" in source
+    assert "{o.label}" not in source
 
 
 def test_no_spa_anchored_msgid_is_fuzzy_in_any_locale():
@@ -199,3 +211,19 @@ def test_legacy_fuzzy_migration_clears_guess_instead_of_compiling_it(tmp_path):
     assert "#, python-brace-format" in migrated
     assert 'msgstr ""' in migrated
     assert "Semantically wrong" not in migrated
+
+
+def test_fuzzy_word_in_translator_comment_cannot_erase_reviewed_translation(tmp_path):
+    spec = importlib.util.spec_from_file_location("check_spa_fuzzy_comment", _FUZZY_SCRIPT)
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    po = tmp_path / "messages.po"
+    original = (
+        '# Translator note: reviewed, not fuzzy\n'
+        'msgid "Loading"\n'
+        'msgstr "Chargement"\n'
+    )
+    po.write_text(original, encoding="utf-8")
+    assert checker.process(po, {"Loading"}, clear=False) == []
+    assert checker.process(po, {"Loading"}, clear=True) == []
+    assert po.read_text(encoding="utf-8") == original

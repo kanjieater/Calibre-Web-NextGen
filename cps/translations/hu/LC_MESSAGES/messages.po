@@ -3864,19 +3864,19 @@ msgstr ""
 
 #: cps/spa_strings.py:379
 msgid "in the past N days"
-msgstr ""
+msgstr "az elmúlt N napban"
 
 #: cps/spa_strings.py:380
 msgid "not in the past N days"
-msgstr ""
+msgstr "nem az elmúlt N napban"
 
 #: cps/spa_strings.py:381
 msgid "on or after"
-msgstr ""
+msgstr "ekkor vagy ezután"
 
 #: cps/spa_strings.py:382
 msgid "on or before"
-msgstr ""
+msgstr "ekkor vagy ezelőtt"
 
 #: cps/spa_strings.py:383 cps/templates/detail.html:739
 #: cps/templates/detail.html:740
@@ -5714,7 +5714,7 @@ msgstr ""
 
 #: cps/spa_strings.py:780
 msgid "begins with"
-msgstr ""
+msgstr "ezzel kezdődik"
 
 
 #: cps/spa_strings.py:781
@@ -5729,7 +5729,7 @@ msgstr ""
 
 #: cps/spa_strings.py:783
 msgid "contains"
-msgstr ""
+msgstr "tartalmazza"
 
 #: cps/spa_strings.py:784
 msgid "copies"
@@ -5737,7 +5737,7 @@ msgstr ""
 
 #: cps/spa_strings.py:785
 msgid "does not contain"
-msgstr ""
+msgstr "nem tartalmazza"
 
 
 #: cps/spa_strings.py:786
@@ -5756,16 +5756,16 @@ msgstr ""
 
 #: cps/spa_strings.py:789
 msgid "ends with"
-msgstr ""
+msgstr "erre végződik"
 
 #: cps/spa_strings.py:790
 msgid "is"
-msgstr ""
+msgstr "egyenlő"
 
 
 #: cps/spa_strings.py:791
 msgid "is not"
-msgstr ""
+msgstr "nem egyenlő"
 
 #: cps/spa_strings.py:792
 msgid "or continue with"
@@ -12733,3 +12733,11 @@ msgstr "Kompakt"
 
 msgid "Dense"
 msgstr "Sűrű"
+
+#: cps/spa_strings.py:51
+msgid "Standard (username / password)"
+msgstr "Normál (felhasználónév / jelszó)"
+
+#: cps/spa_strings.py:56
+msgid "Simple (service account)"
+msgstr "Egyszerű (szolgáltatási fiók)"

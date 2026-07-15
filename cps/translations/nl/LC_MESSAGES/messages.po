@@ -1993,9 +1993,9 @@ msgid "Read Books"
 msgstr "Gelezen boeken"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "Huidige versie"
+msgstr ""
+
 
 #: cps/opds.py:201
 #, fuzzy

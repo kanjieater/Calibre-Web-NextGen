@@ -11265,3 +11265,11 @@ msgstr ""
 #: cps/templates/user_table.html:158
 msgid "Show Read/Unread Section"
 msgstr ""
+
+#: cps/spa_strings.py:51
+msgid "Standard (username / password)"
+msgstr ""
+
+#: cps/spa_strings.py:56
+msgid "Simple (service account)"
+msgstr ""

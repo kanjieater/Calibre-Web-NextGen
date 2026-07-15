@@ -36,6 +36,28 @@ _("Read now")
 _("Open details for {title}")
 _("Read {title}")
 
+# Built-in magic-shelf names are canonical English database identity but are
+# translated as request-local display text by the SPA API. They do not appear
+# as literals in .tsx, so keep them in the SPA fuzzy-quality population here.
+_("Recently Added")
+_("Highly Rated")
+_("Currently Reading")
+_("Yet to Read")
+_("Recent Publications")
+
+# The SPA admin security endpoint sends these labels as data and Admin.tsx
+# translates them at render time. Keep the complete backend-owned enums in the
+# catalog: the TSX extractor cannot discover Python registry values.
+_("Standard (username / password)")
+_("LDAP")
+_("OAuth / OpenID Connect")
+_("Anonymous")
+_("Unauthenticated")
+_("Simple (service account)")
+_("None")
+_("TLS")
+_("SSL")
+
 # #573 — the new-UI series view's series-order sort options (Catalog.tsx). Only
 # shown when viewing a single series, so the reader can order by position.
 _("Series order")
