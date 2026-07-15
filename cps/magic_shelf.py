@@ -28,6 +28,172 @@ MAGIC_SHELF_ORDER_MODES = {
 DEFAULT_MAGIC_SHELF_ORDER_MODE = 'name_asc'
 
 
+# The rule engine and both editors consume this definition.  Keep database
+# bindings private; build_rule_schema() strips them before serving JSON.
+_TEXT_OPERATORS = (
+    'equal', 'not_equal', 'contains', 'not_contains', 'begins_with',
+    'not_begins_with', 'ends_with', 'not_ends_with', 'is_empty',
+    'is_not_empty',
+)
+_NUMBER_OPERATORS = (
+    'equal', 'not_equal', 'less', 'less_or_equal', 'greater',
+    'greater_or_equal', 'between', 'not_between', 'is_empty',
+    'is_not_empty',
+)
+_DATE_OPERATORS = (
+    'in_last_days', 'not_in_last_days', 'equal', 'not_equal', 'less',
+    'less_or_equal', 'greater', 'greater_or_equal', 'between',
+    'not_between', 'is_empty', 'is_not_empty',
+)
+_ABSOLUTE_DATE_OPERATORS = _DATE_OPERATORS[2:]
+_SELECT_OPERATORS = ('equal', 'not_equal')
+
+_NATIVE_RULE_FIELDS = (
+    {'id': 'title', 'label': 'Title', 'type': 'string', 'description': 'The book title',
+     'operators': _TEXT_OPERATORS, '_binding': (db.Books, 'title')},
+    {'id': 'author', 'label': 'Author', 'type': 'string', 'description': 'Author name',
+     'operators': _TEXT_OPERATORS, '_binding': (db.Authors, 'name')},
+    {'id': 'tag', 'label': 'Tag', 'type': 'string', 'description': 'Book tags/genres',
+     'operators': _TEXT_OPERATORS, '_binding': (db.Tags, 'name')},
+    {'id': 'series', 'label': 'Series', 'type': 'string', 'description': 'Series name',
+     'operators': _TEXT_OPERATORS, '_binding': (db.Series, 'name')},
+    {'id': 'publisher', 'label': 'Publisher', 'type': 'string', 'description': 'Publisher name',
+     'operators': _TEXT_OPERATORS, '_binding': (db.Publishers, 'name')},
+    {'id': 'language', 'label': 'Language', 'type': 'string', 'input': 'select',
+     'description': 'Book language', 'operators': _SELECT_OPERATORS,
+     '_binding': (db.Languages, 'lang_code')},
+    {'id': 'rating', 'label': 'Rating', 'type': 'integer', 'input': 'select',
+     'values': {value: value for value in range(1, 11)},
+     'description': 'Book rating (1-10)', 'operators': _NUMBER_OPERATORS,
+     '_binding': (db.Ratings, 'rating')},
+    {'id': 'pubdate', 'label': 'Publication Date', 'type': 'date',
+     'validation': {'format': 'YYYY-MM-DD'}, 'description': 'Original publication date',
+     'operators': _DATE_OPERATORS, '_binding': (db.Books, 'pubdate')},
+    {'id': 'timestamp', 'label': 'Date Added', 'type': 'date',
+     'validation': {'format': 'YYYY-MM-DD'}, 'description': 'When the book was added',
+     'operators': _DATE_OPERATORS, '_binding': (db.Books, 'timestamp')},
+    {'id': 'has_cover', 'label': 'Has Cover', 'type': 'integer', 'input': 'radio',
+     'values': {1: 'Yes', 0: 'No'}, 'description': 'Whether the book has cover art',
+     'operators': _SELECT_OPERATORS, '_binding': (db.Books, 'has_cover')},
+    {'id': 'series_index', 'label': 'Series Index', 'type': 'double',
+     'description': 'Position in series', 'operators': _NUMBER_OPERATORS,
+     '_binding': (db.Books, 'series_index')},
+    {'id': 'comments', 'label': 'Description', 'type': 'string',
+     'description': 'Book description/comments', 'operators': _TEXT_OPERATORS,
+     '_binding': (db.Comments, 'text')},
+    {'id': 'read_status', 'label': 'Read Status', 'type': 'integer', 'input': 'radio',
+     'values': {0: 'Unread', 2: 'Currently Reading', 1: 'Read'},
+     'description': 'Book reading status', 'operators': _SELECT_OPERATORS,
+     '_binding': ('custom_column', 'read_status')},
+    {'id': 'hardcover_id', 'label': 'Has Hardcover ID', 'type': 'integer', 'input': 'radio',
+     'values': {1: 'Yes', 0: 'No'}, 'description': 'Whether the book has a Hardcover identifier',
+     'operators': _SELECT_OPERATORS, '_binding': ('identifier', 'hardcover-id')},
+)
+
+_RULE_OPERATORS = (
+    {'type': 'in_last_days', 'label': 'In the past N days', 'nb_inputs': 1,
+     'multiple': False, 'apply_to': ['datetime']},
+    {'type': 'not_in_last_days', 'label': 'Not in the past N days', 'nb_inputs': 1,
+     'multiple': False, 'apply_to': ['datetime']},
+    {'type': 'equal', 'label': 'is', 'nb_inputs': 1},
+    {'type': 'not_equal', 'label': 'is not', 'nb_inputs': 1},
+    {'type': 'less', 'label': 'is before / less than', 'nb_inputs': 1},
+    {'type': 'less_or_equal', 'label': 'is on or before / at most', 'nb_inputs': 1},
+    {'type': 'greater', 'label': 'is after / greater than', 'nb_inputs': 1},
+    {'type': 'greater_or_equal', 'label': 'is on or after / at least', 'nb_inputs': 1},
+    {'type': 'between', 'label': 'is between', 'nb_inputs': 2},
+    {'type': 'not_between', 'label': 'is not between', 'nb_inputs': 2},
+    {'type': 'contains', 'label': 'contains', 'nb_inputs': 1},
+    {'type': 'not_contains', 'label': 'does not contain', 'nb_inputs': 1},
+    {'type': 'begins_with', 'label': 'begins with', 'nb_inputs': 1},
+    {'type': 'not_begins_with', 'label': 'does not begin with', 'nb_inputs': 1},
+    {'type': 'ends_with', 'label': 'ends with', 'nb_inputs': 1},
+    {'type': 'not_ends_with', 'label': 'does not end with', 'nb_inputs': 1},
+    {'type': 'is_empty', 'label': 'is empty', 'nb_inputs': 0},
+    {'type': 'is_not_empty', 'label': 'is not empty', 'nb_inputs': 0},
+)
+
+
+def build_rule_schema(languages=None, custom_columns=None):
+    """Return the single rule-builder contract used by Classic and the SPA."""
+    fields = []
+    for definition in _NATIVE_RULE_FIELDS:
+        field = {key: value for key, value in definition.items() if not key.startswith('_')}
+        field['operators'] = list(field['operators'])
+        if field['id'] == 'language':
+            field['values'] = dict(languages or {})
+        fields.append(field)
+
+    for column in custom_columns or []:
+        datatype = column.get('datatype')
+        field = {
+            'id': 'custom_column_{}'.format(column['id']),
+            'label': column.get('label') or 'Custom column {}'.format(column['id']),
+            'description': 'Custom column',
+        }
+        if datatype == 'bool':
+            field.update(type='integer', input='radio', values={1: 'Yes', 0: 'No'},
+                         operators=list(_SELECT_OPERATORS))
+        elif datatype in ('int', 'rating'):
+            field.update(type='integer', operators=list(_NUMBER_OPERATORS))
+        elif datatype == 'float':
+            field.update(type='double', operators=list(_NUMBER_OPERATORS))
+        elif datatype == 'datetime':
+            field.update(type='date', validation={'format': 'YYYY-MM-DD'},
+                         operators=list(_ABSOLUTE_DATE_OPERATORS))
+        elif datatype == 'enumeration' and column.get('enum_values'):
+            values = {value: value for value in column['enum_values']}
+            field.update(type='string', input='select', values=values,
+                         operators=list(_SELECT_OPERATORS))
+        else:
+            field.update(type='string', operators=list(_TEXT_OPERATORS))
+        fields.append(field)
+
+    return {
+        'fields': fields,
+        'operators': [dict(operator) for operator in _RULE_OPERATORS],
+    }
+
+
+def get_rule_custom_columns():
+    """Load the dynamic Calibre columns available to the rule engine."""
+    from . import calibre_db
+
+    try:
+        columns = calibre_db.session.query(db.CustomColumns).filter(
+            db.CustomColumns.datatype.notin_(db.cc_exceptions),
+            db.CustomColumns.mark_for_delete == False,  # noqa: E712
+        ).order_by(db.CustomColumns.name).all()
+    except Exception:
+        log.error("Failed to query custom columns for magic shelf rule builder", exc_info=True)
+        return []
+
+    result = []
+    for column in columns:
+        entry = {'id': column.id, 'label': column.name, 'datatype': column.datatype}
+        if column.datatype == 'enumeration':
+            try:
+                entry['enum_values'] = column.get_display_dict().get('enum_values', [])
+            except Exception:
+                entry['enum_values'] = []
+        result.append(entry)
+    return result
+
+
+def build_rule_schema_for_locale(locale):
+    """Build the request-ready schema, including library-specific choices."""
+    from . import calibre_db, isoLanguages
+
+    language_map = {}
+    for language in calibre_db.session.query(db.Languages).all():
+        try:
+            language_map[language.lang_code] = isoLanguages.get_language_name(
+                locale, language.lang_code)
+        except Exception:
+            language_map[language.lang_code] = language.lang_code
+    return build_rule_schema(language_map, get_rule_custom_columns())
+
+
 def normalize_magic_shelf_order(order_list, available_ids):
     """Normalize a magic shelf order list, appending missing IDs.
 
@@ -277,23 +443,10 @@ SYSTEM_SHELF_TEMPLATES = {
 
 }
 
-# Mapping from UI field names to database models and columns
-FIELD_MAP = {
-    'title': (db.Books, 'title'),
-    'author': (db.Authors, 'name'),
-    'tag': (db.Tags, 'name'),
-    'series': (db.Series, 'name'),
-    'publisher': (db.Publishers, 'name'),
-    'rating': (db.Ratings, 'rating'),
-    'language': (db.Languages, 'lang_code'),
-    'pubdate': (db.Books, 'pubdate'),
-    'timestamp': (db.Books, 'timestamp'),
-    'has_cover': (db.Books, 'has_cover'),
-    'series_index': (db.Books, 'series_index'),
-    'comments': (db.Comments, 'text'),  # Fixed: Points to actual text column, not relationship
-    'read_status': ('custom_column', 'read_status'),  # Special handling - uses config.config_read_column
-    'hardcover_id': ('identifier', 'hardcover-id'),  # Special handling - checks Identifiers table
-}
+# Mapping from UI field names to database models and columns.  It is derived
+# from the same definitions served to both rule builders, so adding an engine
+# field cannot silently leave one UI behind.
+FIELD_MAP = {definition['id']: definition['_binding'] for definition in _NATIVE_RULE_FIELDS}
 
 # Mapping from UI operators to SQLAlchemy functions/operators
 OPERATOR_MAP = {

@@ -7,6 +7,7 @@ cps/magic_shelf.build_query_from_rules (the same rule→SQL engine the legacy vi
 uses). Create/edit/duplicate/delete reuse the existing /magicshelf routes.
 """
 from flask import jsonify, request
+from flask_babel import get_locale
 
 from . import api_v1
 from .books import _row_to_item
@@ -48,6 +49,13 @@ def list_magic_shelves():
         "is_public": bool(s.is_public), "is_owner": (s.user_id == uid),
     } for s in shelves]
     return jsonify({"items": items})
+
+
+@api_v1.route("/magicshelves/rule-schema")
+@login_required_if_no_ano
+def magic_shelf_rule_schema():
+    """The engine-owned field/operator contract consumed by both editors."""
+    return jsonify(magic_shelf.build_rule_schema_for_locale(get_locale()))
 
 
 @api_v1.route("/magicshelf/<int:shelf_id>")

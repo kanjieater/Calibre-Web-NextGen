@@ -1,51 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { Wand2, Plus, Trash2 } from 'lucide-react';
-import { useMagicShelfPreview, useCreateMagicShelf, useEditMagicShelf, useMagicShelfBooks } from '../lib/queries';
-import type { MagicRule } from '../lib/queries';
+import {
+  useMagicShelfPreview, useCreateMagicShelf, useEditMagicShelf,
+  useMagicShelfBooks, useMagicShelfRuleSchema,
+} from '../lib/queries';
+import type { MagicRule, MagicRuleField, MagicRuleOperator } from '../lib/queries';
 import { Button } from '../components/Button';
 import { useT } from '../lib/i18n';
 import { ApiError } from '../lib/api';
 import styles from './MagicShelf.module.css';
 
-const FIELDS = [
-  { id: 'title', label: 'Title' },
-  { id: 'author', label: 'Author' },
-  { id: 'series', label: 'Series' },
-  { id: 'tag', label: 'Tag' },
-  { id: 'publisher', label: 'Publisher' },
-  { id: 'language', label: 'Language' },
-  { id: 'rating', label: 'Rating' },
-  { id: 'pubdate', label: 'Publication Date' },
-  { id: 'timestamp', label: 'Date Added' },
-  { id: 'comments', label: 'Description' },
-];
-const TEXT_OPS = [
-  { id: 'contains', label: 'contains' },
-  { id: 'not_contains', label: 'does not contain' },
-  { id: 'equal', label: 'is' },
-  { id: 'not_equal', label: 'is not' },
-  { id: 'begins_with', label: 'begins with' },
-  { id: 'ends_with', label: 'ends with' },
-];
-const NUM_OPS = [
-  { id: 'equal', label: '=' },
-  { id: 'greater', label: '>' },
-  { id: 'greater_or_equal', label: '≥' },
-  { id: 'less', label: '<' },
-  { id: 'less_or_equal', label: '≤' },
-];
-const DATE_OPS = [
-  { id: 'in_last_days', label: 'in the past N days' },
-  { id: 'not_in_last_days', label: 'not in the past N days' },
-  { id: 'greater_or_equal', label: 'on or after' },
-  { id: 'less_or_equal', label: 'on or before' },
-  { id: 'equal', label: 'is' },
-  { id: 'not_equal', label: 'is not' },
-];
-
 let _rid = 0;
 const newRule = (): MagicRule & { _k: number } => ({ _k: ++_rid, id: 'title', operator: 'contains', value: '' });
+
+const hasRuleValue = (value: MagicRule['value']) =>
+  Array.isArray(value) ? value.some((item) => item.trim()) : value.trim().length > 0;
+
+const blankValueFor = (operator?: MagicRuleOperator): MagicRule['value'] =>
+  operator?.nb_inputs === 2 ? ['', ''] : '';
 
 /** Native smart-collection (magic shelf) rule builder: name + icon, AND/OR
  *  match, a list of field/operator/value rules, live preview, save. Consumes the
@@ -56,6 +29,7 @@ export function MagicShelf({ editId }: { editId?: string }) {
   const preview = useMagicShelfPreview();
   const create = useCreateMagicShelf();
   const edit = useEditMagicShelf(editId ?? '');
+  const schemaQuery = useMagicShelfRuleSchema();
   // In edit mode, load the existing shelf's name/icon/rules to seed the form.
   const existing = useMagicShelfBooks(editId ?? '', 1);
 
@@ -71,7 +45,12 @@ export function MagicShelf({ editId }: { editId?: string }) {
     setName(d.name || '');
     setIcon(d.icon || '🪄');
     setCondition(d.rules?.condition === 'OR' ? 'OR' : 'AND');
-    const loaded = (d.rules?.rules || []).map((r) => ({ _k: ++_rid, id: r.id, operator: r.operator, value: String(r.value ?? '') }));
+    const loaded = (d.rules?.rules || []).map((r) => ({
+      _k: ++_rid,
+      id: r.id,
+      operator: r.operator,
+      value: Array.isArray(r.value) ? r.value.map(String) : String(r.value ?? ''),
+    }));
     setRules(loaded.length ? loaded : [newRule()]);
     setSeeded(true);
   }, [editId, seeded, existing.data]);
@@ -83,7 +62,7 @@ export function MagicShelf({ editId }: { editId?: string }) {
 
   // Live preview (debounced) whenever the rules change and have at least one value.
   useEffect(() => {
-    const filled = rules.filter((r) => r.value.trim() || r.operator.includes('empty'));
+    const filled = rules.filter((r) => hasRuleValue(r.value) || r.operator.includes('empty'));
     if (filled.length === 0) { setPreviewData(null); return; }
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(() => {
@@ -96,15 +75,58 @@ export function MagicShelf({ editId }: { editId?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(rules), condition]);
 
-  const isNum = (id: string) => id === 'rating';
-  const isDate = (id: string) => id === 'pubdate' || id === 'timestamp';
-  const operatorsFor = (id: string) => isDate(id) ? DATE_OPS : isNum(id) ? NUM_OPS : TEXT_OPS;
-  const inputType = (rule: MagicRule) =>
-    isDate(rule.id)
-      ? (rule.operator === 'in_last_days' || rule.operator === 'not_in_last_days' ? 'number' : 'date')
-      : isNum(rule.id) ? 'number' : 'text';
+  const fields = schemaQuery.data?.fields ?? [];
+  const operatorMap = new Map((schemaQuery.data?.operators ?? []).map((operator) => [operator.type, operator]));
+  const fieldFor = (id: string) => fields.find((field) => field.id === id);
+  const operatorsFor = (id: string) => (fieldFor(id)?.operators ?? [])
+    .map((operatorId) => operatorMap.get(operatorId))
+    .filter((operator): operator is MagicRuleOperator => Boolean(operator));
+  const inputType = (field: MagicRuleField, operator: MagicRuleOperator) => {
+    if (operator.type === 'in_last_days' || operator.type === 'not_in_last_days') return 'number';
+    if (field.type === 'date') return 'date';
+    if (field.type === 'integer' || field.type === 'double') return 'number';
+    return 'text';
+  };
   const setRule = (k: number, patch: Partial<MagicRule>) =>
     setRules((rs) => rs.map((r) => (r._k === k ? { ...r, ...patch } : r)));
+
+  const renderRuleValue = (rule: MagicRule & { _k: number }, field: MagicRuleField, operator: MagicRuleOperator) => {
+    if (operator.nb_inputs === 0) return <span className={styles.noValue} aria-hidden="true" />;
+    if (field.input === 'select' || field.input === 'radio') {
+      return (
+        <select aria-label={`${t(field.label)} ${t('value')}`} value={String(rule.value ?? '')}
+          onChange={(event) => setRule(rule._k, { value: event.target.value })}>
+          {Object.entries(field.values ?? {}).map(([value, label]) => (
+            <option key={value} value={value}>{t(String(label))}</option>
+          ))}
+        </select>
+      );
+    }
+    if (operator.nb_inputs === 2) {
+      const values = Array.isArray(rule.value) ? rule.value : ['', ''];
+      return (
+        <span className={styles.rangeInputs} role="group" aria-label={`${t(field.label)} ${t(operator.label)}`}>
+          {[0, 1].map((index) => (
+            <input key={index} value={values[index] ?? ''}
+              aria-label={`${t(field.label)} ${index + 1}`}
+              onChange={(event) => {
+                const next = [...values];
+                next[index] = event.target.value;
+                setRule(rule._k, { value: next });
+              }}
+              type={inputType(field, operator)} />
+          ))}
+        </span>
+      );
+    }
+    return (
+      <input value={String(rule.value ?? '')}
+        onChange={(event) => setRule(rule._k, { value: event.target.value })}
+        aria-label={`${t(field.label)} ${t('value')}`} placeholder={t('value')}
+        type={inputType(field, operator)}
+        min={operator.type === 'in_last_days' || operator.type === 'not_in_last_days' ? 1 : undefined} />
+    );
+  };
 
   const onCancel = () => {
     // Discard edits and go back where the user came from; fall back to the shelf
@@ -131,6 +153,13 @@ export function MagicShelf({ editId }: { editId?: string }) {
   };
   const saving = create.isPending || edit.isPending;
 
+  if (schemaQuery.isLoading) {
+    return <main className={styles.container}><h1 className={styles.title}>{t('Loading…')}</h1></main>;
+  }
+  if (schemaQuery.isError || fields.length === 0) {
+    return <main className={styles.container}><p role="alert">{t('Could not load smart-shelf rules.')}</p></main>;
+  }
+
   return (
     <main className={styles.container}>
       <div className={styles.header}>
@@ -146,7 +175,8 @@ export function MagicShelf({ editId }: { editId?: string }) {
         <label className={styles.nameField}>
           <span>{t('Name')}</span>
           <input value={name} onChange={(e) => setName(e.target.value)} maxLength={100}
-            placeholder={t('e.g. Unread sci-fi')} />
+            placeholder={t('e.g. Unread sci-fi')} aria-invalid={err ? true : undefined}
+            aria-describedby={err ? 'magic-shelf-error' : undefined} />
         </label>
       </div>
 
@@ -161,19 +191,26 @@ export function MagicShelf({ editId }: { editId?: string }) {
       <div className={styles.rules}>
         {rules.map((r) => {
           const ops = operatorsFor(r.id);
+          const field = fieldFor(r.id);
+          const operator = operatorMap.get(r.operator) ?? ops[0];
+          if (!field || !operator) return null;
           return (
             <div key={r._k} className={styles.ruleRow}>
               <select aria-label={t('Rule field')} value={r.id} onChange={(e) => {
                 const id = e.target.value;
-                setRule(r._k, { id, operator: operatorsFor(id)[0].id, value: '' });
+                const nextOperator = operatorsFor(id)[0];
+                if (!nextOperator) return;
+                setRule(r._k, { id, operator: nextOperator.type, value: blankValueFor(nextOperator) });
               }}>
-                {FIELDS.map((f) => <option key={f.id} value={f.id}>{t(f.label)}</option>)}
+                {fields.map((f) => <option key={f.id} value={f.id}>{t(f.label)}</option>)}
               </select>
-              <select aria-label={t('Rule operator')} value={r.operator} onChange={(e) => setRule(r._k, { operator: e.target.value })}>
-                {ops.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+              <select aria-label={t('Rule operator')} value={operator.type} onChange={(e) => {
+                const nextOperator = operatorMap.get(e.target.value);
+                if (nextOperator) setRule(r._k, { operator: nextOperator.type, value: blankValueFor(nextOperator) });
+              }}>
+                {ops.map((o) => <option key={o.type} value={o.type}>{t(o.label)}</option>)}
               </select>
-              <input value={r.value} onChange={(e) => setRule(r._k, { value: e.target.value })}
-                placeholder={t('value')} type={inputType(r)} min={isDate(r.id) && inputType(r) === 'number' ? 1 : undefined} />
+              {renderRuleValue(r, field, operator)}
               <button className={styles.removeRule} onClick={() => setRules((rs) => rs.filter((x) => x._k !== r._k))}
                 disabled={rules.length === 1} aria-label={t('Remove rule')}>
                 <Trash2 size={15} aria-hidden="true" focusable={false} />
@@ -187,7 +224,7 @@ export function MagicShelf({ editId }: { editId?: string }) {
       </div>
 
       {previewData && (
-        <div className={styles.preview}>
+        <div className={styles.preview} role="status">
           <strong>{previewData.count}</strong> {t('books match')}
           {previewData.sample.length > 0 && (
             <span className={styles.sample}> — {previewData.sample.slice(0, 5).join(', ')}…</span>
@@ -195,7 +232,7 @@ export function MagicShelf({ editId }: { editId?: string }) {
         </div>
       )}
 
-      {err && <p className={styles.err}>{err}</p>}
+      {err && <p className={styles.err} role="alert" id="magic-shelf-error">{err}</p>}
 
       <div className={styles.actions}>
         <Button onClick={onSave} disabled={saving}>

@@ -886,8 +886,33 @@ export function useShelfMembership() {
 
 // ── Magic shelves (smart collections) ────────────────────────────────────────
 
-export interface MagicRule { id: string; operator: string; value: string }
+export interface MagicRule { id: string; operator: string; value: string | string[] }
 export interface MagicRuleSet { condition: 'AND' | 'OR'; rules: MagicRule[] }
+export interface MagicRuleField {
+  id: string;
+  label: string;
+  type: 'string' | 'integer' | 'double' | 'date';
+  input?: 'select' | 'radio';
+  values?: Record<string, string | number>;
+  operators: string[];
+}
+export interface MagicRuleOperator {
+  type: string;
+  label: string;
+  nb_inputs?: number;
+}
+export interface MagicRuleSchema {
+  fields: MagicRuleField[];
+  operators: MagicRuleOperator[];
+}
+
+export function useMagicShelfRuleSchema() {
+  return useQuery<MagicRuleSchema>({
+    queryKey: ['magicshelf-rule-schema'],
+    queryFn: () => apiGet<MagicRuleSchema>('/api/v1/magicshelves/rule-schema'),
+    staleTime: 300000,
+  });
+}
 
 export function useMagicShelfPreview() {
   return useMutation({

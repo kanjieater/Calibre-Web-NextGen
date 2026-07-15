@@ -522,13 +522,12 @@ div.help-panel > .panel-body {
 {% endblock %}
 
 {% set rules_json = shelf.rules|tojson if shelf and shelf.rules else 'null' %}
-{% set languages_json = languages|tojson if languages else '{}' %}
-{% set custom_columns_json = custom_columns|tojson if custom_columns else '[]' %}
+{% set rule_schema_json = rule_schema|tojson %}
 {% block js %}
 {{ super() }}
 <script src="{{ url_for('static', filename='js/moment.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/query-builder.standalone.min.js') }}"></script>
-<script type="application/json" id="custom-columns-data">{{ custom_columns_json|safe }}</script>
+<script type="application/json" id="magic-shelf-rule-schema">{{ rule_schema_json|safe }}</script>
 <script>
 $(function() {
     // Initialize tooltips
@@ -577,160 +576,13 @@ $(function() {
     });
     
     // Query Builder Configuration
-    var languages = {{ languages_json|safe }};
-    var fields = [
-        {
-            id: 'title', 
-            label: 'Title', 
-            type: 'string',
-            description: 'The book title'
-        },
-        {
-            id: 'author', 
-            label: 'Author', 
-            type: 'string',
-            description: 'Author name'
-        },
-        {
-            id: 'tag', 
-            label: 'Tag', 
-            type: 'string',
-            description: 'Book tags/genres'
-        },
-        {
-            id: 'series', 
-            label: 'Series', 
-            type: 'string',
-            description: 'Series name'
-        },
-        {
-            id: 'publisher', 
-            label: 'Publisher', 
-            type: 'string',
-            description: 'Publisher name'
-        },
-        {
-            id: 'language', 
-            label: 'Language', 
-            type: 'string',
-            input: 'select',
-            values: languages,
-            description: 'Book language'
-        },
-        {
-            id: 'rating', 
-            label: 'Rating', 
-            type: 'integer', 
-            input: 'select', 
-            values: {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10},
-            description: 'Book rating (1-10)'
-        },
-        {
-            id: 'pubdate', 
-            label: 'Published Date', 
-            type: 'date', 
-            validation: {format: 'YYYY-MM-DD'},
-            description: 'Original publication date'
-        },
-        {
-            id: 'timestamp', 
-            label: 'Date Added', 
-            type: 'date', 
-            validation: {format: 'YYYY-MM-DD'},
-            description: 'When book was added to library'
-        },
-        {
-            id: 'has_cover', 
-            label: 'Has Cover', 
-            type: 'integer', 
-            input: 'radio', 
-            values: {1: 'Yes', 0: 'No'},
-            description: 'Whether book has cover image'
-        },
-        {
-            id: 'read_status',
-            label: 'Read Status',
-            type: 'integer',  // Changed from 'boolean' to 'integer'
-            input: 'radio',
-            values: {0: 'Unread', 2: 'Currently Reading', 1: 'Read'},
-            description: 'Book read status'
-        },
-        {
-            id: 'series_index', 
-            label: 'Series Index', 
-            type: 'double',
-            description: 'Position in series'
-        },
-        {
-            id: 'comments', 
-            label: 'Description', 
-            type: 'string',
-            description: 'Book description/comments'
-        },
-        {
-            id: 'hardcover_id',
-            label: 'Has Hardcover ID',
-            type: 'integer',
-            input: 'radio',
-            values: {1: 'Yes', 0: 'No'},
-            description: 'Whether book has Hardcover identifier'
-        }
-    ];
-
-    // Append user-defined custom columns from Calibre
-    var customColumns = JSON.parse(document.getElementById('custom-columns-data').textContent || '[]');
-    customColumns.forEach(function(cc) {
-        var field = {
-            id: 'custom_column_' + cc.id,
-            label: cc.label,
-            description: 'Custom column'
-        };
-        if (cc.datatype === 'bool') {
-            field.type = 'integer';
-            field.input = 'radio';
-            field.values = {1: 'Yes', 0: 'No'};
-        } else if (cc.datatype === 'int' || cc.datatype === 'rating') {
-            field.type = 'integer';
-        } else if (cc.datatype === 'float') {
-            field.type = 'double';
-        } else if (cc.datatype === 'datetime') {
-            field.type = 'date';
-            field.validation = {format: 'YYYY-MM-DD'};
-        } else if (cc.datatype === 'enumeration' && cc.enum_values && cc.enum_values.length > 0) {
-            field.type = 'string';
-            field.input = 'select';
-            field.values = {};
-            cc.enum_values.forEach(function(v) { field.values[v] = v; });
-        } else {
-            field.type = 'string';
-        }
-        fields.push(field);
+    var ruleSchema = JSON.parse(document.getElementById('magic-shelf-rule-schema').textContent);
+    var fields = ruleSchema.fields;
+    var operators = ruleSchema.operators;
+    operators.forEach(function(operator) {
+        if (operator.type === 'in_last_days') operator.label = {{_('In the past N days')|tojson}};
+        if (operator.type === 'not_in_last_days') operator.label = {{_('Not in the past N days')|tojson}};
     });
-
-    var operators = [
-        {type: 'in_last_days', label: {{_('In the past N days')|tojson}}, nb_inputs: 1, multiple: false, apply_to: ['date']},
-        {type: 'not_in_last_days', label: {{_('Not in the past N days')|tojson}}, nb_inputs: 1, multiple: false, apply_to: ['date']},
-        {type: 'equal', optgroup: 'basic'},
-        {type: 'not_equal', optgroup: 'basic'},
-        {type: 'in', optgroup: 'basic'},
-        {type: 'not_in', optgroup: 'basic'},
-        {type: 'less', optgroup: 'number'},
-        {type: 'less_or_equal', optgroup: 'number'},
-        {type: 'greater', optgroup: 'number'},
-        {type: 'greater_or_equal', optgroup: 'number'},
-        {type: 'between', optgroup: 'number'},
-        {type: 'not_between', optgroup: 'number'},
-        {type: 'begins_with', optgroup: 'string'},
-        {type: 'not_begins_with', optgroup: 'string'},
-        {type: 'contains', optgroup: 'string'},
-        {type: 'not_contains', optgroup: 'string'},
-        {type: 'ends_with', optgroup: 'string'},
-        {type: 'not_ends_with', optgroup: 'string'},
-        {type: 'is_empty'},
-        {type: 'is_not_empty'},
-        {type: 'is_null'},
-        {type: 'is_not_null'}
-    ];
 
     var rules = {{ rules_json|safe }};
 
