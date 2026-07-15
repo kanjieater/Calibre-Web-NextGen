@@ -18,6 +18,11 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- **Series, tag, author, publisher, and language pages now put their real name
+  in the browser tab.** Direct links previously captured the `…` loading state
+  before the entity query finished and never refreshed it. Thanks
+  @chloeroform (#892).
+
 - **Tags can now be renamed from their New UI page.** Editors previously reached
   a read-only tag page with no rename action; the corrected name now updates the
   shared tag in the library and every linked book. Thanks @chloeroform (#914).
