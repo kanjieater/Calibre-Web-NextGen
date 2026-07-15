@@ -481,9 +481,7 @@ def create_app():
         if calibre_db.session_factory:
             calibre_db.session_factory.remove()
 
-    from .schedule import (reconcile_hardcover_configuration,
-                           register_scheduled_tasks, register_startup_tasks)
-    reconcile_hardcover_configuration()
+    from .schedule import register_scheduled_tasks, register_startup_tasks
     register_scheduled_tasks(config.schedule_reconnect)
     register_startup_tasks()
 

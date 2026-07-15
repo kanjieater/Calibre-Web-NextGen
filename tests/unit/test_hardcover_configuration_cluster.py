@@ -66,6 +66,25 @@ def test_whitespace_database_token_falls_through_to_environment(monkeypatch):
     assert cfg.hardcover_token_source() == "HARDCOVER_TOKEN"
 
 
+def test_higher_priority_token_sources_do_not_read_the_secret_file(monkeypatch):
+    from cps import config_sql
+
+    cfg = _bare_config()
+    monkeypatch.setenv("HARDCOVER_TOKEN_FILE", "/slow-or-unavailable/secret")
+    monkeypatch.setattr(
+        config_sql,
+        "_read_secret_file",
+        lambda path: pytest.fail("secret file was read despite a higher-priority token"),
+    )
+
+    cfg.config_hardcover_token = "database-value"
+    assert cfg.resolved_hardcover_token() == "database-value"
+
+    cfg.config_hardcover_token = " "
+    monkeypatch.setenv("HARDCOVER_TOKEN", "environment-value")
+    assert cfg.resolved_hardcover_token() == "environment-value"
+
+
 @pytest.mark.parametrize(
     ("raw", "expected"),
     [
@@ -263,6 +282,24 @@ def test_scheduler_skips_job_when_cwa_settings_are_unavailable(monkeypatch, capl
 
     assert jobs == []
     assert "CWA settings are unavailable" in caplog.text
+
+
+def test_startup_reconciles_once_and_passes_the_result_to_scheduling():
+    init_source = (REPO_ROOT / "cps/__init__.py").read_text(encoding="utf-8")
+    startup = init_source.split("from .schedule import", 1)[1].split(
+        "register_startup_tasks()", 1
+    )[0]
+    schedule_source = (REPO_ROOT / "cps/schedule.py").read_text(encoding="utf-8")
+    register = schedule_source.split("def register_scheduled_tasks", 1)[1].split(
+        "def register_startup_tasks", 1
+    )[0]
+
+    assert "reconcile_hardcover_configuration()" not in startup
+    assert "hardcover_configuration = reconcile_hardcover_configuration()" in register
+    assert "_schedule_hardcover_auto_fetch(" in register
+    assert "hardcover_configuration" in register.split(
+        "_schedule_hardcover_auto_fetch(", 1
+    )[1]
 
 
 def test_admin_template_has_one_sync_control_and_ungated_token_status():

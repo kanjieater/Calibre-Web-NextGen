@@ -83,6 +83,9 @@ def end_scheduled_tasks():
 
 
 def register_scheduled_tasks(reconnect=True):
+    # Reconcile even when APScheduler is unavailable, then reuse the result so
+    # normal startup performs one CWA DB read/mirror write rather than two.
+    hardcover_configuration = reconcile_hardcover_configuration()
     scheduler = BackgroundScheduler()
 
     if scheduler:
@@ -102,7 +105,9 @@ def register_scheduled_tasks(reconnect=True):
                                                                          timezone=timezone_info),
                            name="end scheduled task")
 
-        _schedule_hardcover_auto_fetch(scheduler, timezone_info)
+        _schedule_hardcover_auto_fetch(
+            scheduler, timezone_info, configuration=hardcover_configuration
+        )
         _schedule_archived_book_cleanup(scheduler, timezone_info)
 
         # Kick-off tasks, if they should currently be running
@@ -268,10 +273,14 @@ def _schedule_duplicate_scan(scheduler, timezone_info):
         pass
 
 
-def _schedule_hardcover_auto_fetch(scheduler, timezone_info):
+def _schedule_hardcover_auto_fetch(scheduler, timezone_info, configuration=None):
     """Schedule background Hardcover auto-fetch from the unified setting."""
     try:
-        enabled, cwa_settings = reconcile_hardcover_configuration()
+        enabled, cwa_settings = (
+            configuration
+            if configuration is not None
+            else reconcile_hardcover_configuration()
+        )
         token_available = bool(config.resolved_hardcover_token())
         token_source = config.hardcover_token_source()
 

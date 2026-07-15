@@ -426,15 +426,17 @@ class ConfigSQL(object):
         candidates = (
             ("database", getattr(self, "config_hardcover_token", None)),
             ("HARDCOVER_TOKEN", os.environ.get("HARDCOVER_TOKEN")),
-            (
-                "HARDCOVER_TOKEN_FILE",
-                _read_secret_file(os.environ.get("HARDCOVER_TOKEN_FILE")),
-            ),
         )
         for source, raw in candidates:
             token = self._normalize_hardcover_token(raw)
             if token:
                 return token, source
+
+        token = self._normalize_hardcover_token(
+            _read_secret_file(os.environ.get("HARDCOVER_TOKEN_FILE"))
+        )
+        if token:
+            return token, "HARDCOVER_TOKEN_FILE"
         return "", None
 
     def resolved_hardcover_token(self):
