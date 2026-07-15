@@ -1352,6 +1352,13 @@ class CalibreDB:
         allow_show_hidden=False,
         extra_filter=None,
     ):
+        hidden_book_ids = []
+        if not current_user.is_anonymous:
+            hidden_books = (ub.session.query(ub.UserHiddenBook)
+                            .filter(ub.UserHiddenBook.user_id == int(current_user.id))
+                            .all())
+            hidden_book_ids = [h.book_id for h in hidden_books]
+
         if not allow_show_archived:
             archived_books = (ub.session.query(ub.ArchivedBook)
                               .filter(ub.ArchivedBook.user_id==int(current_user.id))
@@ -1359,16 +1366,18 @@ class CalibreDB:
                               .all())
             archived_book_ids = [archived_book.book_id for archived_book in archived_books]
             archived_filter = Books.id.notin_(archived_book_ids)
+            # A book can be both hidden (personal declutter) and archived
+            # (sync-pause). The explicit hidden-books escape hatch must still
+            # reach that combination so the user can unhide it; archived-only
+            # books remain out of the normal library.
+            if allow_show_hidden and hidden_book_ids:
+                archived_filter = or_(archived_filter, Books.id.in_(hidden_book_ids))
         else:
             archived_filter = true()
 
         # Per-user hidden books — fork issue #64. allow_show_hidden=True is the
         # /hidden listing's escape hatch (so users can see + unhide).
         if not allow_show_hidden and not current_user.is_anonymous:
-            hidden_books = (ub.session.query(ub.UserHiddenBook)
-                            .filter(ub.UserHiddenBook.user_id == int(current_user.id))
-                            .all())
-            hidden_book_ids = [h.book_id for h in hidden_books]
             hidden_filter = Books.id.notin_(hidden_book_ids)
         else:
             hidden_filter = true()
@@ -1681,7 +1690,7 @@ class CalibreDB:
         return self.session.query(Books) \
             .filter(and_(Books.authors.any(and_(*q)), func.lower(Books.title).ilike("%" + title + "%"))).first()
 
-    def search_query(self, term, config, *join):
+    def search_query(self, term, config, *join, allow_show_hidden=False):
         self.ensure_session()
         strip_whitespaces(term).lower()
         q = list()
@@ -1712,7 +1721,8 @@ class CalibreDB:
                         func.lower(cc_classes[c.id].value).ilike("%" + term + "%")))
         # Eagerly load the data relationship to prevent session errors
         query = query.options(joinedload(Books.data))
-        return query.filter(self.common_filters(True)).filter(or_(*filter_expression))
+        return query.filter(self.common_filters(True, allow_show_hidden=allow_show_hidden)) \
+            .filter(or_(*filter_expression))
 
     def get_cc_columns(self, config, filter_config_custom_read=False):
         self.ensure_session()
@@ -1732,11 +1742,13 @@ class CalibreDB:
         return cc
 
     # read search results from calibre-database and return it (function is used for feed and simple search
-    def get_search_results(self, term, config, offset=None, order=None, limit=None, *join):
+    def get_search_results(self, term, config, offset=None, order=None, limit=None, *join,
+                           allow_show_hidden=False):
         self.ensure_session()
         order = order[0] if order else [Books.sort]
         pagination = None
-        result = self.search_query(term, config, *join).order_by(*order).all()
+        result = self.search_query(term, config, *join,
+                                   allow_show_hidden=allow_show_hidden).order_by(*order).all()
         result_count = len(result)
         if offset is not None and limit is not None:
             offset = int(offset)

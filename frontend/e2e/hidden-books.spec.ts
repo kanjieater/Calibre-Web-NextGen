@@ -1,0 +1,161 @@
+import { test, expect, Page } from '@playwright/test';
+import { assertNoHorizontalOverflow, collectPageErrors, assertNoPageErrors } from './utils';
+
+test.describe.configure({ mode: 'serial' });
+
+async function firstBook(page: Page): Promise<{ id: number; title: string } | null> {
+  return page.evaluate(async () => {
+    const response = await fetch('/api/v1/books?per_page=1');
+    return response.ok ? (await response.json()).items?.[0] ?? null : null;
+  });
+}
+
+async function csrfHeaders(page: Page): Promise<Record<string, string>> {
+  const response = await page.request.get('/api/v1/auth/csrf');
+  const body = await response.json() as { csrf_token: string };
+  return { 'X-CSRFToken': body.csrf_token };
+}
+
+test('Hide persists across reload; Show hidden reveals a marked book and provides Unhide', async ({ page }) => {
+  await page.goto('/app');
+  const book = await firstBook(page);
+  test.skip(!book, 'seed has no books');
+  const errors = collectPageErrors(page);
+
+  await page.goto(`/app/book/${book!.id}`);
+  const hide = page.getByRole('button', { name: 'Hide', exact: true });
+  const del = page.getByRole('button', { name: 'Delete book' });
+  await expect(hide).toBeVisible();
+  if (await del.count()) {
+    const adjacent = await hide.evaluate((node) => node.nextElementSibling?.getAttribute('aria-label'));
+    expect(adjacent).toBe('Delete book');
+  }
+
+  try {
+    await hide.click();
+    await expect(page.getByRole('button', { name: 'Unhide', exact: true })).toBeVisible();
+
+    await page.goto('/app');
+    await expect(page.getByRole('link', { name: `Open details for ${book!.title}` })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole('link', { name: `Open details for ${book!.title}` })).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'View settings' }).click();
+    const showHidden = page.getByRole('checkbox', { name: 'Show hidden books' });
+    await expect(showHidden).not.toBeChecked();
+    await showHidden.check();
+    expect(await page.evaluate(() => localStorage.getItem('cwng_show_hidden_books_v1'))).toBe('1');
+
+    const card = page.getByRole('link', { name: `Open details for ${book!.title}` });
+    await expect(card).toBeVisible();
+    await expect(card.getByRole('img', { name: 'Hidden' })).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByRole('link', { name: `Open details for ${book!.title}` })).toBeVisible();
+    await page.getByRole('link', { name: `Open details for ${book!.title}` }).click();
+    await page.getByRole('button', { name: 'Unhide', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Hide', exact: true })).toBeVisible();
+  } finally {
+    // Idempotent cleanup: only toggle when the detail payload still says hidden.
+    const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json()).catch(() => null);
+    if (detail?.hidden) {
+      await page.request.post(`/api/v1/books/${book!.id}/hidden`, { headers: await csrfHeaders(page) });
+    }
+    await page.evaluate(() => localStorage.removeItem('cwng_show_hidden_books_v1'));
+  }
+
+  assertNoPageErrors(errors);
+});
+
+test('hidden+archived remains recoverable through Show hidden, while Archived keeps hidden out', async ({ page }) => {
+  await page.goto('/app');
+  const book = await firstBook(page);
+  test.skip(!book, 'seed has no books');
+
+  await page.goto(`/app/book/${book!.id}`);
+  try {
+    await page.getByRole('button', { name: 'Archive', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Unarchive', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Hide', exact: true }).click();
+
+    await page.goto('/app/archived');
+    await expect(page.getByRole('link', { name: `Open details for ${book!.title}` })).toHaveCount(0);
+
+    await page.goto('/app');
+    await page.getByRole('button', { name: 'View settings' }).click();
+    await page.getByRole('checkbox', { name: 'Show hidden books' }).check();
+    const card = page.getByRole('link', { name: `Open details for ${book!.title}` });
+    await expect(card).toBeVisible();
+    await expect(card.getByRole('img', { name: 'Hidden' })).toBeVisible();
+  } finally {
+    const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json()).catch(() => null);
+    const headers = await csrfHeaders(page);
+    if (detail?.hidden) await page.request.post(`/api/v1/books/${book!.id}/hidden`, { headers });
+    if (detail?.archived) await page.request.post(`/api/v1/books/${book!.id}/archived`, { headers });
+    await page.evaluate(() => localStorage.removeItem('cwng_show_hidden_books_v1'));
+  }
+});
+
+test('hiding is per-user and a non-delete user still receives Hide', async ({ page, browser, baseURL }) => {
+  await page.goto('/app');
+  const book = await firstBook(page);
+  test.skip(!book, 'seed has no books');
+  const headers = await csrfHeaders(page);
+  const username = `hidden-e2e-${Date.now()}`;
+  const password = 'CWNG-hidden-E2E-42!';
+  const created = await page.request.post('/api/v1/admin/users', {
+    headers,
+    data: { name: username, password, roles: { viewer: true, download: true, delete_books: false } },
+  });
+  expect(created.ok(), await created.text()).toBeTruthy();
+  const user = await created.json() as { id: number };
+  const other = await browser.newContext({ baseURL, viewport: { width: 1280, height: 800 } });
+  const otherPage = await other.newPage();
+
+  try {
+    await page.goto(`/app/book/${book!.id}`);
+    await page.getByRole('button', { name: 'Hide', exact: true }).click();
+
+    await otherPage.goto('/app');
+    await otherPage.locator('input[autocomplete="username"]').fill(username);
+    await otherPage.locator('input[autocomplete="current-password"]').fill(password);
+    await otherPage.getByRole('button', { name: /sign in/i }).click();
+    await expect(otherPage.getByRole('link', { name: `Open details for ${book!.title}` })).toBeVisible();
+    await otherPage.getByRole('link', { name: `Open details for ${book!.title}` }).click();
+    await expect(otherPage.getByRole('button', { name: 'Delete book' })).toHaveCount(0);
+    await expect(otherPage.getByRole('button', { name: 'Hide', exact: true })).toBeVisible();
+  } finally {
+    await other.close();
+    const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json()).catch(() => null);
+    if (detail?.hidden) await page.request.post(`/api/v1/books/${book!.id}/hidden`, { headers });
+    await page.request.post(`/api/v1/admin/users/${user.id}/delete`, { headers });
+  }
+});
+
+test('Guest never receives a Hide action even when the instance feature is enabled', async ({ page }) => {
+  await page.goto('/app');
+  const book = await firstBook(page);
+  test.skip(!book, 'seed has no books');
+  await page.route('**/api/v1/auth/me', async (route) => {
+    const response = await route.fetch();
+    const me = await response.json();
+    me.role = { ...(me.role ?? {}), anonymous: true, delete_books: false };
+    me.features = { ...(me.features ?? {}), hide_books: true };
+    await route.fulfill({ response, json: me });
+  });
+  await page.goto(`/app/book/${book!.id}`);
+  await expect(page.getByRole('button', { name: 'Hide', exact: true })).toHaveCount(0);
+});
+
+test('mobile detail actions and View settings stay within 390px', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/app');
+  const book = await firstBook(page);
+  test.skip(!book, 'seed has no books');
+  await page.getByRole('button', { name: 'View settings' }).click();
+  await expect(page.getByRole('checkbox', { name: 'Show hidden books' })).toBeVisible();
+  await assertNoHorizontalOverflow(page);
+  await page.goto(`/app/book/${book!.id}`);
+  await expect(page.getByRole('button', { name: 'Hide', exact: true })).toBeVisible();
+  await assertNoHorizontalOverflow(page);
+});

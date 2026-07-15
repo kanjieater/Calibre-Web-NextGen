@@ -22,6 +22,7 @@ def test_serialize_book_list_item_full():
         "last_modified": None,
         "read": False,
         "archived": False,
+        "hidden": False,
     }
 
 
@@ -69,6 +70,14 @@ def test_serialize_book_list_item_read_archived():
     out = serialize_book_list_item(book, read=True, archived=True)
     assert out["read"] is True
     assert out["archived"] is True
+
+
+@pytest.mark.unit
+def test_serialize_book_list_item_hidden():
+    from cps.api.serializers import serialize_book_list_item
+    book = SimpleNamespace(id=6, title="Z", series_index="1.0", has_cover=0,
+                           authors=[], series=[], data=[])
+    assert serialize_book_list_item(book, hidden=True)["hidden"] is True
 
 
 @pytest.mark.unit

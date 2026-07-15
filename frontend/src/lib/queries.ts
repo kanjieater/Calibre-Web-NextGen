@@ -40,6 +40,8 @@ export interface BooksQuery {
   entityId?: string | number;
   /** Discovery view (hot/discover/rated/favorites/archived) — sent as ?filter=. */
   view?: DiscoveryView;
+  /** SPA-only escape hatch: include this user's hidden books in Your Library. */
+  showHidden?: boolean;
 }
 
 export function useMe() {
@@ -165,7 +167,10 @@ export function useLogout() {
 }
 
 export function useBooks(q: BooksQuery) {
-  const { page, perPage = 24, search = '', sort = 'new', readFilter = 'all', entityKind, entityId, view } = q;
+  const {
+    page, perPage = 24, search = '', sort = 'new', readFilter = 'all',
+    entityKind, entityId, view, showHidden = false,
+  } = q;
   const params = new URLSearchParams();
   params.set('page', String(page));
   params.set('per_page', String(perPage));
@@ -178,11 +183,13 @@ export function useBooks(q: BooksQuery) {
   // otherwise the read/unread segmented control does.
   if (view) params.set('filter', view);
   else if (readFilter !== 'all') params.set('filter', readFilter);
+  if (showHidden && !entityKind && !view) params.set('show_hidden', '1');
   if (entityKind && entityId !== undefined && entityId !== '') {
     params.set(entityKind, String(entityId));
   }
   return useQuery<BooksPage>({
-    queryKey: ['books', page, perPage, search, sort, readFilter, entityKind ?? '', entityId ?? '', view ?? ''],
+    queryKey: ['books', page, perPage, search, sort, readFilter,
+      entityKind ?? '', entityId ?? '', view ?? '', showHidden],
     queryFn: () => apiGet<BooksPage>(`/api/v1/books?${params.toString()}`),
     placeholderData: (prev) => prev,
   });

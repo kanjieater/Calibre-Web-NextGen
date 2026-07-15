@@ -218,6 +218,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
 
   // Discover section visibility (persisted; toggled by the gear menu or its ×).
   const [discoverHidden, setDiscoverHidden] = usePersistentBool('cwng_discover_hidden_v1', false);
+  const [showHidden, setShowHidden] = usePersistentBool('cwng_show_hidden_books_v1', false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [density, setDensity] = usePersistentChoice(
     'cwng:catalog-density-v1', ['comfortable', 'compact', 'dense'] as const, 'compact');
@@ -283,7 +284,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
     };
   }, [settingsOpen]);
 
-  const resetKey = [search, sort, readFilter, entityKind ?? '', entityId ?? '', view ?? '', perPage].join('|');
+  const resetKey = [search, sort, readFilter, entityKind ?? '', entityId ?? '', view ?? '', perPage, showHidden].join('|');
 
   // Any filter change resets paging to the first page — except on the first
   // restored mount, where the rehydrated page must survive (#578).
@@ -356,6 +357,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
     entityKind,
     entityId,
     view,
+    showHidden: !hideLibraryControls && showHidden,
   });
 
   // Accumulate pages; replace the accumulator whenever the filter set changes.
@@ -527,6 +529,17 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
                   />
                   <span>{t('Show Discover section')}</span>
                 </label>
+                {!me?.role?.anonymous && (
+                  <label className={styles.settingsItem}>
+                    <input
+                      type="checkbox"
+                      className={styles.settingsCheck}
+                      checked={showHidden}
+                      onChange={(e) => setShowHidden(e.target.checked)}
+                    />
+                    <span>{t('Show hidden books')}</span>
+                  </label>
+                )}
                 <fieldset className={styles.densityField}>
                   <legend>{t('Book density')}</legend>
                   {(['comfortable', 'compact', 'dense'] as const).map((choice) => (

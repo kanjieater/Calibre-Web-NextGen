@@ -16,6 +16,10 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Added
+
+- **You can now hide books from your personal library in the new interface without deleting them or affecting anyone else.** Hide/Unhide lives beside Delete on book details, and View settings can reveal clearly marked hidden books whenever you want one back.
+
 ### Fixed
 
 - **Syncing highlights from a second KOReader device no longer wipes the

@@ -61,7 +61,27 @@ SORT_MAP = {
 }
 
 
-def _row_to_item(e):
+def _real_user_id():
+    """Return a concrete user id, tolerating stripped-decorator unit contexts."""
+    try:
+        if (not current_user.is_authenticated) or current_user.is_anonymous:
+            return None
+        return int(current_user.id)
+    except (AttributeError, RuntimeError):
+        return None
+
+
+def _hidden_book_ids():
+    """Current user's hidden ids, once per list request (never for Guest)."""
+    user_id = _real_user_id()
+    if user_id is None:
+        return set()
+    rows = (ub.session.query(ub.UserHiddenBook.book_id)
+            .filter(ub.UserHiddenBook.user_id == user_id).all())
+    return {int(row[0]) for row in rows}
+
+
+def _row_to_item(e, hidden_ids=None):
     """Unwrap a SQLAlchemy Row (Books, is_archived, read_status) or plain Books object."""
     book = getattr(e, "Books", e)
     if config.config_read_column:
@@ -73,7 +93,12 @@ def _row_to_item(e):
     else:
         read = getattr(e, "read_status", None) == ub.ReadBook.STATUS_FINISHED
     archived = bool(getattr(e, "is_archived", False))
-    return serialize_book_list_item(book, read=read, archived=archived)
+    return serialize_book_list_item(
+        book,
+        read=read,
+        archived=archived,
+        hidden=book.id in (hidden_ids or set()),
+    )
 
 
 def _build_entity_filter(author, series, tag, publisher, language, rating=None, book_format=None):
@@ -149,6 +174,14 @@ def list_books():
     sort = request.args.get("sort", "new")
     order = SORT_MAP.get(sort, SORT_MAP["new"])
     search = request.args.get("search")
+    show_hidden = (request.args.get("show_hidden", "").strip().lower()
+                   in ("1", "true", "yes", "on"))
+    # Anonymous browse has no per-user hidden state. Treat a forged query as the
+    # ordinary list and keep the response/action surface coherent with the 401
+    # mutation guard.
+    show_hidden = bool(show_hidden and _real_user_id() is not None)
+    hidden_ids = _hidden_book_ids()
+    to_items = lambda entries: [_row_to_item(e, hidden_ids) for e in entries]
 
     if search:
         offset = (page - 1) * per_page
@@ -158,10 +191,11 @@ def list_books():
             db.Series,
         )
         entries, total, _pagination = calibre_db.get_search_results(
-            search, config, offset, [order], per_page, *join
+            search, config, offset, [order], per_page, *join,
+            allow_show_hidden=show_hidden,
         )
         return jsonify({
-            "items": [_row_to_item(e) for e in entries],
+            "items": to_items(entries),
             "page": page,
             "per_page": per_page,
             "total": total,
@@ -189,7 +223,7 @@ def list_books():
             True, True, config.config_read_column, *series_join,
         )
         return jsonify({
-            "items": [_row_to_item(e) for e in entries],
+            "items": to_items(entries),
             "page": pagination.page,
             "per_page": pagination.per_page,
             "total": pagination.total_count,
@@ -204,7 +238,7 @@ def list_books():
         entries, _random, pagination = calibre_db.fill_indexpage(
             page, per_page, db.Books, db.Books.id.in_(fav_ids), order,
             True, config.config_read_column, *series_join)
-        return jsonify({"items": [_row_to_item(e) for e in entries],
+        return jsonify({"items": to_items(entries),
                         "page": pagination.page, "per_page": pagination.per_page,
                         "total": pagination.total_count})
 
@@ -214,7 +248,7 @@ def list_books():
         entries, _random, pagination = calibre_db.fill_indexpage(
             page, per_page, db.Books, rated_filter, order,
             True, config.config_read_column, *series_join)
-        return jsonify({"items": [_row_to_item(e) for e in entries],
+        return jsonify({"items": to_items(entries),
                         "page": pagination.page, "per_page": pagination.per_page,
                         "total": pagination.total_count})
 
@@ -230,24 +264,33 @@ def list_books():
         entries, _random, _pg = calibre_db.fill_indexpage(
             1, per_page, db.Books, disc_filter, [func.randomblob(2)],
             True, config.config_read_column)
-        items = [_row_to_item(e) for e in entries]
+        items = to_items(entries)
         return jsonify({"items": items, "page": 1, "per_page": per_page, "total": len(items)})
 
     if filter_val == "hot":
         # Most-downloaded, paginated by the downloads table (mirrors render_hot_books).
         off = per_page * (page - 1)
-        total = ub.session.query(func.count(ub.Downloads.book_id.distinct())).scalar() or 0
-        hot_ids = [row[0] for row in (ub.session.query(ub.Downloads.book_id)
+        all_hot_ids = [row[0] for row in (ub.session.query(ub.Downloads.book_id)
                    .group_by(ub.Downloads.book_id)
-                   .order_by(func.count(ub.Downloads.book_id).desc())
-                   .offset(off).limit(per_page))]
+                   .order_by(func.count(ub.Downloads.book_id).desc()))]
+        # Filter before paginating: otherwise a hidden/restricted book leaves a
+        # short page while the header still counts it.
+        visible = set()
+        if all_hot_ids:
+            q = calibre_db.generate_linked_query(config.config_read_column, db.Books)
+            visible = {row[0] for row in q.filter(calibre_db.common_filters())
+                       .filter(db.Books.id.in_(all_hot_ids))
+                       .with_entities(db.Books.id).all()}
+        visible_hot_ids = [book_id for book_id in all_hot_ids if book_id in visible]
+        total = len(visible_hot_ids)
+        hot_ids = visible_hot_ids[off:off + per_page]
         entries = []
         if hot_ids:
             q = calibre_db.generate_linked_query(config.config_read_column, db.Books)
             rows = q.filter(calibre_db.common_filters()).filter(db.Books.id.in_(hot_ids)).all()
             book_map = {r.Books.id: r for r in rows}
             entries = [book_map[i] for i in hot_ids if i in book_map]  # preserve hotness order
-        return jsonify({"items": [_row_to_item(e) for e in entries],
+        return jsonify({"items": to_items(entries),
                         "page": page, "per_page": per_page, "total": total})
 
     # --- entity + read/unread path ---
@@ -271,9 +314,10 @@ def list_books():
     entries, _random, pagination = calibre_db.fill_indexpage(
         page, per_page, db.Books, db_filter, order,
         True, config.config_read_column, *series_join,
+        allow_show_hidden=show_hidden,
     )
     return jsonify({
-        "items": [_row_to_item(e) for e in entries],
+        "items": to_items(entries),
         "page": pagination.page,
         "per_page": pagination.per_page,
         "total": pagination.total_count,

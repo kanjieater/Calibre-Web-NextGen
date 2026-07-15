@@ -385,20 +385,6 @@ export function BookDetail() {
               {book.archived ? t('Archived') : t('Archive')}
             </button>
 
-            {/* Hide / unhide — only shown when hiding is enabled, or to unhide an
-                already-hidden book (so an admin disabling the flag can't strand it). */}
-            {(me?.features?.hide_books || book.hidden) && (
-              <button
-                className={book.hidden ? styles.readToggleActive : styles.readToggleGhost}
-                onClick={() => toggleHidden.mutate()}
-                disabled={toggleHidden.isPending}
-                aria-label={book.hidden ? t('Unhide') : t('Hide')}
-              >
-                {book.hidden ? <Eye size={14} /> : <EyeOff size={14} />}
-                {book.hidden ? t('Unhide') : t('Hide')}
-              </button>
-            )}
-
             {book.formats.map((fmt) => (
               <a
                 key={fmt.format}
@@ -457,9 +443,28 @@ export function BookDetail() {
                 server annotations page; in-reader highlight creation is the
                 flagship reader phase-2 (tracked separately). */}
             <Link href={`/book/${book.id}/annotations`} className={styles.downloadBtn}>
-              <Highlighter size={14} />
+              <Highlighter size={14} aria-hidden="true" focusable={false} />
               {t('Highlights')}
             </Link>
+
+            {/* Personal action, deliberately outside the delete-role gate. It
+                sits immediately beside Delete when Delete is available and is
+                still the final action for ordinary users. Guest sessions cannot
+                own hidden state, so never offer them a control that returns 401. */}
+            {!me?.role?.anonymous && (me?.features?.hide_books || book.hidden) && (
+              <button
+                type="button"
+                className={book.hidden ? styles.readToggleActive : styles.readToggleGhost}
+                onClick={() => toggleHidden.mutate()}
+                disabled={toggleHidden.isPending}
+                aria-label={book.hidden ? t('Unhide') : t('Hide')}
+              >
+                {book.hidden
+                  ? <Eye size={14} aria-hidden="true" focusable={false} />
+                  : <EyeOff size={14} aria-hidden="true" focusable={false} />}
+                {book.hidden ? t('Unhide') : t('Hide')}
+              </button>
+            )}
 
             {/* Delete the whole book — DB + files (fork #803). Hidden entirely for
                 users without the delete role; the server re-checks and returns 403,
@@ -483,7 +488,7 @@ export function BookDetail() {
                   });
                 }}
               >
-                <Trash2 size={14} />
+                <Trash2 size={14} aria-hidden="true" focusable={false} />
                 {deleteBook.isPending ? t('Deleting…') : t('Delete')}
               </button>
             )}

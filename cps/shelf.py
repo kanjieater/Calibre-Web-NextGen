@@ -911,9 +911,12 @@ def _shelf_book_count(shelf, user=None):
             archived_ids = (ub.session.query(ub.ArchivedBook.book_id)
                             .filter(ub.ArchivedBook.user_id == int(user.id))
                             .filter(ub.ArchivedBook.is_archived.is_(True)))
+            hidden_ids = (ub.session.query(ub.UserHiddenBook.book_id)
+                          .filter(ub.UserHiddenBook.user_id == int(user.id)))
             return int(ub.session.query(ub.BookShelf)
                        .filter(ub.BookShelf.shelf == shelf_id)
                        .filter(ub.BookShelf.book_id.notin_(archived_ids))
+                       .filter(ub.BookShelf.book_id.notin_(hidden_ids))
                        .count())
         except Exception:
             pass  # fall through to the archive-blind raw count
