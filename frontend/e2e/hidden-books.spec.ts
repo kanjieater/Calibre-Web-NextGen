@@ -113,8 +113,7 @@ test('hidden+archived remains recoverable through Show hidden, while Archived ke
   }
 });
 
-test('hiding is per-user and a non-delete user still receives Hide', async ({ page, browser, baseURL }) => {
-  test.setTimeout(90_000); // real user creation + password hashing is intentionally expensive
+test('hiding is per-user and a non-delete user still receives Hide', async ({ page, playwright, baseURL }) => {
   await page.goto('/app');
   const book = await firstBook(page);
   test.skip(!book, 'seed has no books');
@@ -126,35 +125,44 @@ test('hiding is per-user and a non-delete user still receives Hide', async ({ pa
     data: { name: username, password, roles: { viewer: true, download: true, delete_books: false } },
   });
   expect(created.ok(), await created.text()).toBeTruthy();
-  const other = await browser.newContext({ baseURL, viewport: { width: 1280, height: 800 } });
-  const otherPage = await other.newPage();
+  const other = await playwright.request.newContext({ baseURL });
 
   try {
     await page.goto(`/app/book/${book!.id}`);
     await page.getByTestId('hide-book-toggle').click();
 
-    await otherPage.goto('/app');
-    await otherPage.locator('input[autocomplete="username"]').fill(username);
-    await otherPage.locator('input[autocomplete="current-password"]').fill(password);
-    await otherPage.locator('form button[type="submit"]').click();
-    await expect(otherPage).toHaveURL(/\/app(\/|$|\?)/);
-    const me = await otherPage.request.get('/api/v1/auth/me').then((r) => r.json());
+    const otherCsrf = await other.get('/api/v1/auth/csrf').then((r) => r.json());
+    const login = await other.post('/api/v1/auth/login', {
+      headers: { 'X-CSRFToken': otherCsrf.csrf_token },
+      data: { username, password },
+    });
+    expect(login.ok(), await login.text()).toBe(true);
+    const me = await other.get('/api/v1/auth/me').then((r) => r.json());
     expect(me.role.delete_books).toBe(false);
-    const otherBook = otherPage.locator(`a[href$="/book/${book!.id}"]`).first();
-    await expect(otherBook).toBeVisible();
-    await otherBook.click();
-    await expect(otherPage.getByTestId('hide-book-toggle')).toBeVisible();
+    const otherBooks = await other.get('/api/v1/books?per_page=60').then((r) => r.json());
+    expect(otherBooks.items.some((item: { id: number }) => item.id === book!.id)).toBe(true);
+    const otherDetail = await other.get(`/api/v1/books/${book!.id}`).then((r) => r.json());
+    expect(otherDetail.hidden).toBe(false);
+
+    // UI role gate: Hide is personal and must not inherit the destructive
+    // delete-books permission. Isolation above used two real server sessions;
+    // this interception changes only the current page's role presentation.
+    await page.route('**/api/v1/auth/me', async (route) => {
+      const response = await route.fetch();
+      const payload = await response.json();
+      payload.role = { ...(payload.role ?? {}), delete_books: false };
+      await route.fulfill({ response, json: payload });
+    });
+    await page.reload();
+    const personalAction = page.getByTestId('hide-book-toggle');
+    await expect(personalAction).toBeVisible();
+    expect(await personalAction.evaluate((node) => node.nextElementSibling === null)).toBe(true);
   } finally {
     const cleanup = await page.request.post(`/api/v1/books/${book!.id}/hidden`, {
       headers, data: { hidden: false },
     });
     expect(cleanup.ok()).toBe(true);
-    // The e2e container is disposable. Avoid coupling this feature test to the
-    // unrelated full user-data purge path; unique usernames prevent collisions.
-    await Promise.race([
-      other.close().catch(() => undefined),
-      new Promise<void>((resolve) => setTimeout(resolve, 2_000)),
-    ]);
+    await other.dispose();
   }
 });
 
