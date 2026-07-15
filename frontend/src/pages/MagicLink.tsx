@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import {
   BookMarked, KeyRound, Copy, Check, RefreshCw, ArrowLeft,
   ShieldCheck, Smartphone, Clock,
@@ -9,6 +9,7 @@ import { Button } from '../components/Button';
 import { BrandName } from '../components/BrandName';
 import { useMagicLinkStart, useMagicLinkPoll, useAuthConfig } from '../lib/queries';
 import { useT } from '../lib/i18n';
+import { usePostAuthRedirect } from '../lib/authRedirect';
 import styles from './MagicLink.module.css';
 
 const POLL_MS = 3000;
@@ -24,7 +25,7 @@ function fmtCountdown(ms: number): string {
 
 export function MagicLink() {
   const t = useT();
-  const [, navigate] = useLocation();
+  const redirectAfterAuth = usePostAuthRedirect();
   const start = useMagicLinkStart();
   const poll = useMagicLinkPoll();
   const { data: cfg } = useAuthConfig();
@@ -77,7 +78,7 @@ export function MagicLink() {
   // mutation object's identity changes on every render (isPending toggling),
   // and including it would tear down + recreate this effect mid-request, whose
   // stale `cancelled` closure would then swallow the success. We capture
-  // mutateAsync/navigate from the phase-entry render (both stable enough) and
+  // mutateAsync/redirect from the phase-entry render (both stable enough) and
   // await each poll instead of relying on per-call onSuccess for control flow.
   const pollAsync = poll.mutateAsync;
   useEffect(() => {
@@ -93,7 +94,7 @@ export function MagicLink() {
           // App's me-cache is seeded by the hook; nudge to the library so the
           // authenticated tree mounts on "/".
           setPhase('success');
-          setTimeout(() => navigate('/'), 400);
+          setTimeout(redirectAfterAuth, 400);
           return;
         }
         if (r.status === 'expired' || r.status === 'not_found') {

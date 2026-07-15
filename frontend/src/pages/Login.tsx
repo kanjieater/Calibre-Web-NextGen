@@ -8,12 +8,14 @@ import { VisuallyHidden } from '../components/VisuallyHidden';
 import { useLogin, useAuthConfig, useRegister, useForgotPassword } from '../lib/queries';
 import { ApiError } from '../lib/api';
 import { useT } from '../lib/i18n';
+import { usePostAuthRedirect } from '../lib/authRedirect';
 import styles from './Login.module.css';
 
 type Mode = 'login' | 'register' | 'forgot';
 
 export function Login() {
   const t = useT();
+  const redirectAfterAuth = usePostAuthRedirect();
   const [mode, setMode] = useState<Mode>('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -39,6 +41,7 @@ export function Login() {
     e.preventDefault();
     reset();
     login.mutate({ username, password, remember }, {
+      onSuccess: redirectAfterAuth,
       onError: (err) =>
         setErrorMsg(err instanceof ApiError && err.status === 401
           ? t('Invalid username or password.') : t('Sign in failed. Please try again.')),

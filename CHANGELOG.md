@@ -18,6 +18,8 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- **Signing in through the new interface now opens the requested page instead of showing “This page doesn't exist here.”** Password and magic-link logins honor safe same-site destinations, fall back to the library when no destination was supplied, preserve reverse-proxy subpaths, and reject links that try to send the browser to another site.
+
 - KOReader progress now appears on both classic and new book pages even when
   the book already had a read/unread record before its first matched sync. The
   devices could exchange positions while the web page showed no “KOReader

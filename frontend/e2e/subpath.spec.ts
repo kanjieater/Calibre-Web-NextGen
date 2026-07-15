@@ -36,3 +36,16 @@ test('Sign out preserves the reverse-proxy sub-path', async ({ page }) => {
   await page.getByText('Sign out', { exact: true }).click();
   await expect(page).toHaveURL(/\/cwa\/logout$/);
 });
+
+test('stale prefixed login honors a prefixed next destination', async ({ page }) => {
+  await page.goto(`/app/login?next=${encodeURIComponent('/cwa/')}`);
+  await expect(page).toHaveURL(/\/cwa\/app\/?$/);
+  await expect(page.locator('a[href*="/cwa/app/book/"]').first()).toBeVisible();
+  await expect(page.getByText("This page doesn't exist here.", { exact: true })).toHaveCount(0);
+});
+
+test('prefixed login rejects a same-origin path outside its mount', async ({ page }) => {
+  await page.goto(`/app/login?next=${encodeURIComponent('/admin/config')}`);
+  await expect(page).toHaveURL(/\/cwa\/app\/?$/);
+  await expect(page.locator('a[href*="/cwa/app/book/"]').first()).toBeVisible();
+});
