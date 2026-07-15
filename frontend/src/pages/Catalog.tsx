@@ -450,7 +450,6 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
             <button
               key={rf.value}
               type="button"
-              data-testid="catalog-view-settings"
               className={readFilter === rf.value ? styles.segActive : styles.seg}
               aria-pressed={readFilter === rf.value}
               disabled={!!search && !filtered}
@@ -509,6 +508,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
           <div className={styles.settingsWrap} ref={settingsRef}>
             <button
               type="button"
+              data-testid="catalog-view-settings"
               className={settingsOpen ? styles.gearBtnActive : styles.gearBtn}
               onClick={() => setSettingsOpen((o) => !o)}
               aria-haspopup="true"
