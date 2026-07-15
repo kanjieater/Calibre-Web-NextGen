@@ -508,7 +508,7 @@ export function BookDetail() {
                   {
                     onSuccess: (r) => { setSendBanner({ ok: true, text: r.message }); },
                     onError: (err) =>
-                      setSendBanner({ ok: false, text: err instanceof ApiError ? err.message : 'Send failed.' }),
+                      setSendBanner({ ok: false, text: err instanceof ApiError ? err.message : t('Send failed.') }),
                   },
                 );
               }}

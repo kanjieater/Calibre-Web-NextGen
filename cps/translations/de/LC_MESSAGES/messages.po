@@ -2037,9 +2037,8 @@ msgid "Read Books"
 msgstr "Gelesene Bücher"
 
 #: cps/opds.py:200
-#, fuzzy
 msgid "Currently Reading"
-msgstr "Aktuelle Version"
+msgstr "Wird gerade gelesen"
 
 #: cps/opds.py:201
 #, fuzzy
@@ -2259,7 +2258,7 @@ msgstr "Zeige archivierte Bücher"
 
 #: cps/render_template.py:132 cps/spa_strings.py:487
 msgid "Favorites"
-msgstr ""
+msgstr "Favoriten"
 
 #: cps/render_template.py:134
 msgid "Show Favorites"
@@ -3670,9 +3669,8 @@ msgid ">"
 msgstr ""
 
 #: cps/spa_strings.py:336
-#, fuzzy
 msgid "A few random picks from your library"
-msgstr "Dieses Regal in der Seitenleiste ausblenden"
+msgstr "Ein paar zufällige Titel aus deiner Bibliothek"
 
 #: cps/spa_strings.py:337
 msgid ""
@@ -4515,7 +4513,7 @@ msgstr "Höhe"
 
 #: cps/spa_strings.py:517
 msgid "Hot"
-msgstr ""
+msgstr "Beliebt"
 
 #: cps/spa_strings.py:518
 msgid "Icon"
@@ -4620,7 +4618,7 @@ msgstr "Seitenleisten-Anzeigeeinstellungen"
 
 #: cps/spa_strings.py:541
 msgid "Load more"
-msgstr ""
+msgstr "Mehr laden"
 
 #: cps/spa_strings.py:542
 msgid "Loading new Discover picks."
@@ -5387,9 +5385,8 @@ msgid "Smart shelf not found."
 msgstr "Regal nicht gefunden"
 
 #: cps/spa_strings.py:709
-#, fuzzy
 msgid "Smart shelves"
-msgstr "Regale"
+msgstr "Intelligente Regale"
 
 #: cps/spa_strings.py:710
 msgid "Solid: average colour of the cover"
@@ -5441,9 +5438,8 @@ msgid "Sync only selected shelves to Kobo"
 msgstr "Nur Bücher der ausgewählten Regale mit Kobo synchronisieren"
 
 #: cps/spa_strings.py:722
-#, fuzzy
 msgid "Table view"
-msgstr "Ungültige Ansicht"
+msgstr "Tabellenansicht"
 
 #: cps/spa_strings.py:723
 #, fuzzy
@@ -5518,9 +5514,8 @@ msgid "Token URL"
 msgstr ""
 
 #: cps/spa_strings.py:739
-#, fuzzy
 msgid "Top Rated"
-msgstr "Am besten bewertete Bücher"
+msgstr "Am besten bewertet"
 
 #: cps/spa_strings.py:740
 #, fuzzy
@@ -5793,9 +5788,9 @@ msgid "you"
 msgstr ""
 
 #: cps/spa_strings.py:798
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "{count} books"
-msgstr "Buch konvertieren"
+msgstr "{count} Bücher"
 
 #: cps/spa_strings.py:799
 #, fuzzy, python-brace-format
@@ -6871,9 +6866,8 @@ msgstr "Calibre-Web wirklich neustarten?"
 #: cps/templates/admin.html:300 cps/templates/admin.html:332
 #: cps/templates/config_db.html:4 cps/templates/config_edit.html:4
 #: cps/templates/cwa_settings.html:4 cps/templates/read.html:74
-#, fuzzy
 msgid "Loading"
-msgstr "Lade..."
+msgstr "Wird geladen…"
 
 #: cps/templates/admin.html:303 cps/templates/admin.html:317
 #: cps/templates/admin.html:337 cps/templates/config_db.html:139
@@ -12527,3 +12521,105 @@ msgstr "Zeige Gelesen/Ungelesen-Abschnitt"
 
 #~ msgid "Sort descending according to series index"
 #~ msgstr "Sortiere nach Serienindex absteigend"
+
+msgid "Recently Added"
+msgstr "Kürzlich hinzugefügt"
+
+msgid "Highly Rated"
+msgstr "Hoch bewertet"
+
+msgid "Yet to Read"
+msgstr "Noch zu lesen"
+
+msgid "Recent Publications"
+msgstr "Neuere Veröffentlichungen"
+
+#, python-brace-format
+msgid "{count} book"
+msgstr "{count} Buch"
+
+#, python-brace-format
+msgid "Cancel {task}"
+msgstr "Aufgabe „{task}“ abbrechen"
+
+msgid "Could not create shelf."
+msgstr "Regal konnte nicht erstellt werden."
+
+msgid "Could not delete shelf."
+msgstr "Regal konnte nicht gelöscht werden."
+
+msgid "Could not load stats."
+msgstr "Statistiken konnten nicht geladen werden."
+
+msgid "Could not load tasks."
+msgstr "Aufgaben konnten nicht geladen werden."
+
+msgid "Could not load users."
+msgstr "Benutzer konnten nicht geladen werden."
+
+msgid "Could not rename shelf."
+msgstr "Regal konnte nicht umbenannt werden."
+
+msgid "Could not update shelf."
+msgstr "Regal konnte nicht aktualisiert werden."
+
+msgid "Create failed."
+msgstr "Erstellen fehlgeschlagen."
+
+#, python-brace-format
+msgid "Created {name}."
+msgstr "{name} wurde erstellt."
+
+msgid "Delete failed."
+msgstr "Löschen fehlgeschlagen."
+
+#, python-brace-format
+msgid "Delete {name}"
+msgstr "{name} löschen"
+
+#, python-brace-format
+msgid "Deleted {name}."
+msgstr "{name} wurde gelöscht."
+
+msgid "Failed to load shelves."
+msgstr "Regale konnten nicht geladen werden."
+
+#, python-brace-format
+msgid "Filter {items}"
+msgstr "Filtern: {items}"
+
+#, python-brace-format
+msgid "Filter {items}…"
+msgstr "Filtern: {items}…"
+
+#, python-brace-format
+msgid "No matching {items} for \"{query}\"."
+msgstr "Keine Treffer in {items} für „{query}“."
+
+#, python-brace-format
+msgid "No {items} yet."
+msgstr "Noch keine Einträge in {items}."
+
+msgid "Send failed."
+msgstr "Senden fehlgeschlagen."
+
+#, python-brace-format
+msgid "Show all {items}"
+msgstr "Alle in {items} anzeigen"
+
+msgid "Update failed."
+msgstr "Aktualisierung fehlgeschlagen."
+
+#, python-brace-format
+msgid "Delete shelf \"{name}\"? This cannot be undone."
+msgstr "Regal „{name}“ löschen? Dies kann nicht rückgängig gemacht werden."
+
+#, python-brace-format
+msgid "Delete user \"{name}\"? Their shelves and reading data are removed too."
+msgstr "Benutzer „{name}“ löschen? Seine Regale und Lesedaten werden ebenfalls entfernt."
+
+msgid "This shelf is empty. Add books from any book's page."
+msgstr "Dieses Regal ist leer. Füge Bücher über eine beliebige Buchseite hinzu."
+
+msgid "No shelves yet. Create one above to start collecting books."
+msgstr "Noch keine Regale. Erstelle oben eines, um Bücher zu sammeln."

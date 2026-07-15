@@ -2188,7 +2188,7 @@ msgstr "Livres classés par langue"
 #: cps/opds.py:242 cps/render_template.py:121 cps/spa_strings.py:625
 #: cps/web.py:2120
 msgid "Ratings"
-msgstr "Notes"
+msgstr "Évaluations"
 
 #: cps/opds.py:243
 msgid "Books ordered by Rating"
@@ -6922,7 +6922,6 @@ msgstr "Voulez-vous vraiment redémarrer Calibre-Web?"
 #: cps/templates/admin.html:300 cps/templates/admin.html:332
 #: cps/templates/config_db.html:4 cps/templates/config_edit.html:4
 #: cps/templates/cwa_settings.html:4 cps/templates/read.html:74
-#, fuzzy
 msgid "Loading"
 msgstr "Chargement…"
 
@@ -11497,7 +11496,7 @@ msgstr ""
 
 #: cps/templates/shelf_reorder.html:88
 msgid "Could not save order."
-msgstr ""
+msgstr "Impossible d’enregistrer l’ordre."
 
 #: cps/templates/stats.html:8
 msgid "Library Statistics"
@@ -12783,3 +12782,93 @@ msgstr "Afficher la section Lu / Non lu"
 #~ msgid "Click the cover to load metadata to the form"
 #~ msgstr ""
 #~ "Cliquer sur la couverture pour importer les métadonnées dans le formulaire"
+
+#, python-brace-format
+msgid "{count} book"
+msgstr "{count} livre"
+
+#, python-brace-format
+msgid "Cancel {task}"
+msgstr "Annuler {task}"
+
+msgid "Could not create shelf."
+msgstr "Impossible de créer l’étagère."
+
+msgid "Could not delete shelf."
+msgstr "Impossible de supprimer l’étagère."
+
+msgid "Could not load stats."
+msgstr "Impossible de charger les statistiques."
+
+msgid "Could not load tasks."
+msgstr "Impossible de charger les tâches."
+
+msgid "Could not load users."
+msgstr "Impossible de charger les utilisateurs."
+
+msgid "Could not rename shelf."
+msgstr "Impossible de renommer l’étagère."
+
+msgid "Could not update shelf."
+msgstr "Impossible de mettre à jour l’étagère."
+
+msgid "Create failed."
+msgstr "Échec de la création."
+
+#, python-brace-format
+msgid "Created {name}."
+msgstr "{name} a été créé."
+
+msgid "Delete failed."
+msgstr "Échec de la suppression."
+
+#, python-brace-format
+msgid "Delete {name}"
+msgstr "Supprimer {name}"
+
+#, python-brace-format
+msgid "Deleted {name}."
+msgstr "{name} a été supprimé."
+
+msgid "Failed to load shelves."
+msgstr "Impossible de charger les étagères."
+
+#, python-brace-format
+msgid "Filter {items}"
+msgstr "Filtrer : {items}"
+
+#, python-brace-format
+msgid "Filter {items}…"
+msgstr "Filtrer : {items}…"
+
+#, python-brace-format
+msgid "No matching {items} for \"{query}\"."
+msgstr "Aucun résultat dans {items} pour « {query} »."
+
+#, python-brace-format
+msgid "No {items} yet."
+msgstr "Aucun élément dans {items} pour le moment."
+
+msgid "Send failed."
+msgstr "Échec de l’envoi."
+
+#, python-brace-format
+msgid "Show all {items}"
+msgstr "Tout afficher dans {items}"
+
+msgid "Update failed."
+msgstr "Échec de la mise à jour."
+
+#, python-brace-format
+msgid "Delete shelf \"{name}\"? This cannot be undone."
+msgstr "Supprimer l’étagère « {name} » ? Cette action est irréversible."
+
+#, python-brace-format
+msgid "Delete user \"{name}\"? Their shelves and reading data are removed too."
+msgstr "Supprimer l’utilisateur « {name} » ? Ses étagères et ses données de lecture seront également supprimées."
+
+msgid "This shelf is empty. Add books from any book's page."
+msgstr "Cette étagère est vide. Ajoutez des livres depuis la page d’un livre."
+
+msgid "No shelves yet. Create one above to start collecting books."
+msgstr "Aucune étagère pour le moment. Créez-en une ci-dessus pour commencer à regrouper des livres."

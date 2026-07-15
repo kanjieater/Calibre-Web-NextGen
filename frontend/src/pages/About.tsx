@@ -13,7 +13,7 @@ export function About() {
   if (error || !data) {
     return (
       <main className={styles.container}>
-        <EmptyState message={error instanceof Error ? error.message : 'Could not load stats.'} />
+        <EmptyState message={error instanceof Error ? error.message : t('Could not load stats.')} />
       </main>
     );
   }

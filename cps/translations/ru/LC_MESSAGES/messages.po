@@ -4428,7 +4428,7 @@ msgstr "Настройки библиотеки"
 
 #: cps/spa_strings.py:541
 msgid "Load more"
-msgstr ""
+msgstr "Загрузить ещё"
 
 #: cps/spa_strings.py:542
 msgid "Loading new Discover picks."
@@ -12508,3 +12508,105 @@ msgstr "Показать раздел прочитанного/непрочит�
 
 #~ msgid "Click the cover to load metadata to the form"
 #~ msgstr "Нажмите на обложку, чтобы получить метаданные"
+
+msgid "Recently Added"
+msgstr "Недавно добавленные"
+
+msgid "Highly Rated"
+msgstr "Высоко оценённые"
+
+msgid "Yet to Read"
+msgstr "К прочтению"
+
+msgid "Recent Publications"
+msgstr "Недавние публикации"
+
+#, python-brace-format
+msgid "{count} book"
+msgstr "Книг: {count}"
+
+#, python-brace-format
+msgid "Cancel {task}"
+msgstr "Отменить задачу «{task}»"
+
+msgid "Could not create shelf."
+msgstr "Не удалось создать полку."
+
+msgid "Could not delete shelf."
+msgstr "Не удалось удалить полку."
+
+msgid "Could not load stats."
+msgstr "Не удалось загрузить статистику."
+
+msgid "Could not load tasks."
+msgstr "Не удалось загрузить задачи."
+
+msgid "Could not load users."
+msgstr "Не удалось загрузить пользователей."
+
+msgid "Could not rename shelf."
+msgstr "Не удалось переименовать полку."
+
+msgid "Could not update shelf."
+msgstr "Не удалось обновить полку."
+
+msgid "Create failed."
+msgstr "Не удалось создать."
+
+#, python-brace-format
+msgid "Created {name}."
+msgstr "Создано: {name}."
+
+msgid "Delete failed."
+msgstr "Не удалось удалить."
+
+#, python-brace-format
+msgid "Delete {name}"
+msgstr "Удалить {name}"
+
+#, python-brace-format
+msgid "Deleted {name}."
+msgstr "Удалено: {name}."
+
+msgid "Failed to load shelves."
+msgstr "Не удалось загрузить полки."
+
+#, python-brace-format
+msgid "Filter {items}"
+msgstr "Фильтр: {items}"
+
+#, python-brace-format
+msgid "Filter {items}…"
+msgstr "Фильтр: {items}…"
+
+#, python-brace-format
+msgid "No matching {items} for \"{query}\"."
+msgstr "В разделе «{items}» нет совпадений по запросу «{query}»."
+
+#, python-brace-format
+msgid "No {items} yet."
+msgstr "В разделе «{items}» пока ничего нет."
+
+msgid "Send failed."
+msgstr "Не удалось отправить."
+
+#, python-brace-format
+msgid "Show all {items}"
+msgstr "Показать все: {items}"
+
+msgid "Update failed."
+msgstr "Не удалось обновить."
+
+#, python-brace-format
+msgid "Delete shelf \"{name}\"? This cannot be undone."
+msgstr "Удалить полку «{name}»? Это действие нельзя отменить."
+
+#, python-brace-format
+msgid "Delete user \"{name}\"? Their shelves and reading data are removed too."
+msgstr "Удалить пользователя «{name}»? Его полки и данные о чтении также будут удалены."
+
+msgid "This shelf is empty. Add books from any book's page."
+msgstr "Эта полка пуста. Добавьте книги со страницы любой книги."
+
+msgid "No shelves yet. Create one above to start collecting books."
+msgstr "Полок пока нет. Создайте полку выше, чтобы начать собирать книги."

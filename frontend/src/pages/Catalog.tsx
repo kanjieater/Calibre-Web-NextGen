@@ -400,7 +400,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
       {filtered && (
         <Link href={`/${ENTITY_PLURAL[entityKind!]}`} className={styles.back}>
           <ChevronLeft size={16} />
-          All {ENTITY_PLURAL[entityKind!]}
+          {t('Show all {items}', { items: t(ENTITY_PLURAL[entityKind!]) })}
         </Link>
       )}
 

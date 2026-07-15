@@ -162,6 +162,80 @@ def test_fr_reporter_residual_spa_strings_are_served():
     assert catalog.get("Load more") == "Charger plus"
 
 
+@pytest.mark.parametrize(
+    ("locale", "expected"),
+    [
+        (
+            "fr",
+            {
+                "Currently Reading": "Lecture en cours",
+                "Ratings": "Évaluations",
+                "Loading": "Chargement…",
+                "Smart shelves": "Étagères intelligentes",
+                "Table view": "Vue en tableau",
+                "{count} books": "{count} livres",
+            },
+        ),
+        (
+            "ru",
+            {
+                "Currently Reading": "Читаю сейчас",
+                "Ratings": "Рейтинги",
+                "Loading": "Загрузка",
+                "Smart shelves": "Смарт-полки",
+                "Table view": "Табличный вид",
+                "{count} books": "Книг: {count}",
+            },
+        ),
+        (
+            "de",
+            {
+                "Currently Reading": "Wird gerade gelesen",
+                "Ratings": "Bewertungen",
+                "Loading": "Wird geladen…",
+                "Smart shelves": "Intelligente Regale",
+                "Table view": "Tabellenansicht",
+                "{count} books": "{count} Bücher",
+            },
+        ),
+        (
+            "hu",
+            {
+                "Currently Reading": "Jelenleg olvasott",
+                "Ratings": "Értékelések",
+                "Loading": "Betöltés…",
+                "Smart shelves": "Intelligens polcok",
+                "Table view": "Táblázatos nézet",
+                "{count} books": "{count} könyv",
+            },
+        ),
+    ],
+)
+def test_reviewed_new_ui_translations_survive_runtime_fuzzy_filter(locale, expected):
+    """#879/#886: reviewed reporter and household translations must be in the
+    exact catalog consumed by the SPA, rather than merely present as fuzzy PO
+    guesses that the safe runtime policy intentionally drops.
+    """
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    assert {msgid: catalog.get(msgid) for msgid in expected} == expected
+
+
+@pytest.mark.parametrize("locale", ["fr", "ru", "de", "hu"])
+def test_newly_wrapped_shelf_states_are_translated(locale):
+    """A representative newly wrapped state and error remain non-English in
+    every reporter/household locale after extraction and catalog filtering.
+    """
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    for msgid in (
+        "No shelves yet. Create one above to start collecting books.",
+        "Could not save order.",
+    ):
+        assert catalog.get(msgid)
+        assert catalog[msgid] != msgid
+
+
 @pytest.mark.unit
 def test_i18n_endpoint_is_public():
     """The auth gate must let the catalog through (login screen needs strings)."""

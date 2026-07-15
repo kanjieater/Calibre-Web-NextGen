@@ -16,6 +16,7 @@ generator can never disagree.
 """
 import importlib.util
 import os
+import re
 
 import pytest
 
@@ -96,3 +97,26 @@ def test_extractor_finds_data_driven_labels(msgid):
     """Variable-rendered labels must not escape extraction again (#719/#615)."""
     keys = extractor.extract_frontend_keys()
     assert msgid in keys
+
+
+def test_accessible_names_and_empty_states_are_not_raw_english_literals():
+    """Derive this gate from every TSX file instead of pinning today's file
+    list: visible empty states and accessible names are user-facing SPA copy
+    and must go through ``t()`` just like ordinary JSX text (#886).
+    """
+    offenders = []
+    for root, _, files in os.walk(extractor.FRONTEND_SRC):
+        for filename in files:
+            if not filename.endswith(".tsx"):
+                continue
+            path = os.path.join(root, filename)
+            with open(path, encoding="utf-8") as source_file:
+                source = source_file.read()
+            for pattern in (
+                r'aria-label="[A-Za-z][^"]*"',
+                r'<EmptyState\b[^>]*\bmessage="[A-Za-z][^"]*"',
+            ):
+                for match in re.finditer(pattern, source):
+                    line = source.count("\n", 0, match.start()) + 1
+                    offenders.append(f"{os.path.relpath(path, extractor._REPO)}:{line}: {match.group(0)}")
+    assert offenders == []

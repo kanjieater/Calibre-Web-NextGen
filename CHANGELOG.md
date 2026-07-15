@@ -18,6 +18,13 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- New UI labels no longer fall back to English when translation tooling marks
+  an unreviewed guess as fuzzy. Residual navigation, shelf, status, error, and
+  accessibility text is now translatable, built-in smart-shelf names follow
+  the signed-in user's language without renaming the shelf, and the affected
+  French, Russian, German, and Hungarian strings have been reviewed (#879,
+  #886).
+
 - **Syncing highlights from a second KOReader device no longer wipes the
   highlights from your first one.** Opening a book on another device could
   silently delete every highlight the other device had made, permanently and
@@ -33,7 +40,6 @@ is for things you can see or feel when running the app.
   and the deleted highlight stayed in your library. Update the plugin to
   4.1.14 (Highlight sync → the plugin ships with this release) for device
   deletions to sync (#905, #906).
-
 - Admin → Theme no longer says "Settings saved." and then changes nothing. The
   picker stored its choice in an old numbering the theme system stopped reading,
   so "Light" always came back dark. It is now the default theme for **new

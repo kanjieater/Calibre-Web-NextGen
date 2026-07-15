@@ -79,4 +79,5 @@ def test_translation_update_disables_msgmerge_fuzzy_guessing():
     but disappear from the compiled/runtime catalog (#879).
     """
     script = (ROOT / "scripts" / "update_translations.sh").read_text(encoding="utf-8")
-    assert "msgmerge --no-fuzzy-matching --update" in script
+    assert script.count("msgmerge --no-fuzzy-matching --update") == 3
+    assert "msgmerge --update" not in script

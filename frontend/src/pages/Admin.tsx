@@ -72,7 +72,7 @@ export function Admin() {
   if (error || !data) {
     return (
       <main className={styles.container}>
-        <EmptyState message={error instanceof Error ? error.message : 'Could not load users.'} />
+        <EmptyState message={error instanceof Error ? error.message : t('Could not load users.')} />
       </main>
     );
   }
@@ -83,7 +83,7 @@ export function Admin() {
       { id: user.id, roles: { [key]: value } },
       {
         onError: (err) =>
-          setBanner({ ok: false, text: err instanceof ApiError ? err.message : 'Update failed.' }),
+          setBanner({ ok: false, text: err instanceof ApiError ? err.message : t('Update failed.') }),
       },
     );
   };
@@ -100,23 +100,26 @@ export function Admin() {
       },
       {
         onSuccess: (u) => {
-          setBanner({ ok: true, text: `Created ${u.name}.` });
+          setBanner({ ok: true, text: t('Created {name}.', { name: u.name }) });
           setForm({ name: '', password: '', email: '', upload: false });
           setShowNew(false);
         },
         onError: (err) =>
-          setBanner({ ok: false, text: err instanceof ApiError ? err.message : 'Create failed.' }),
+          setBanner({ ok: false, text: err instanceof ApiError ? err.message : t('Create failed.') }),
       },
     );
   };
 
   const onDelete = (user: AdminUser) => {
-    if (!window.confirm(`Delete user "${user.name}"? Their shelves and reading data are removed too.`)) return;
+    if (!window.confirm(t(
+      'Delete user "{name}"? Their shelves and reading data are removed too.',
+      { name: user.name },
+    ))) return;
     setBanner(null);
     deleteUser.mutate(user.id, {
-      onSuccess: () => setBanner({ ok: true, text: `Deleted ${user.name}.` }),
+      onSuccess: () => setBanner({ ok: true, text: t('Deleted {name}.', { name: user.name }) }),
       onError: (err) =>
-        setBanner({ ok: false, text: err instanceof ApiError ? err.message : 'Delete failed.' }),
+        setBanner({ ok: false, text: err instanceof ApiError ? err.message : t('Delete failed.') }),
     });
   };
 
@@ -209,7 +212,7 @@ export function Admin() {
                       </button>
                     )}
                     <button className={styles.deleteBtn} onClick={() => onDelete(user)}
-                      disabled={deleteUser.isPending} aria-label={`Delete ${user.name}`}>
+                      disabled={deleteUser.isPending} aria-label={t('Delete {name}', { name: user.name })}>
                       <Trash2 size={15} aria-hidden="true" focusable={false} />
                     </button>
                   </div>
