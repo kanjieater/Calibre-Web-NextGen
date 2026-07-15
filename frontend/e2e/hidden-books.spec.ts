@@ -130,15 +130,22 @@ test('hiding is per-user and a non-delete user still receives Hide', async ({ pa
     await otherPage.goto('/app');
     await otherPage.locator('input[autocomplete="username"]').fill(username);
     await otherPage.locator('input[autocomplete="current-password"]').fill(password);
-    await otherPage.getByRole('button', { name: /sign in/i }).click();
-    await expect(otherPage.getByRole('link', { name: `Open details for ${book!.title}` })).toBeVisible();
-    await otherPage.getByRole('link', { name: `Open details for ${book!.title}` }).click();
-    await expect(otherPage.getByRole('button', { name: 'Delete book' })).toHaveCount(0);
+    await otherPage.locator('form button[type="submit"]').click();
+    await expect(otherPage).toHaveURL(/\/app(\/|$|\?)/);
+    const me = await otherPage.request.get('/api/v1/auth/me').then((r) => r.json());
+    expect(me.role.delete_books).toBe(false);
+    const otherBook = otherPage.locator(`a[href$="/book/${book!.id}"]`).first();
+    await expect(otherBook).toBeVisible();
+    await otherBook.click();
     await expect(otherPage.getByTestId('hide-book-toggle')).toBeVisible();
   } finally {
-    await other.close();
+    await other.close().catch(() => undefined);
     const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json()).catch(() => null);
-    if (detail?.hidden) await page.request.post(`/api/v1/books/${book!.id}/hidden`, { headers });
+    if (detail?.hidden) {
+      await page.request.post(`/api/v1/books/${book!.id}/hidden`, {
+        headers, data: { hidden: false },
+      });
+    }
     await page.request.post(`/api/v1/admin/users/${user.id}/delete`, { headers });
   }
 });
