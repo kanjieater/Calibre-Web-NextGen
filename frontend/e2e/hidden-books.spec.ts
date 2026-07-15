@@ -68,7 +68,9 @@ test('Hide persists across reload; Show hidden reveals a marked book and provide
     // Idempotent cleanup: only toggle when the detail payload still says hidden.
     const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json()).catch(() => null);
     if (detail?.hidden) {
-      await page.request.post(`/api/v1/books/${book!.id}/hidden`, { headers: await csrfHeaders(page) });
+      await page.request.post(`/api/v1/books/${book!.id}/hidden`, {
+        headers: await csrfHeaders(page), data: { hidden: false },
+      });
     }
     await page.evaluate(() => localStorage.removeItem('cwng_show_hidden_books_v1'));
   }
@@ -101,7 +103,11 @@ test('hidden+archived remains recoverable through Show hidden, while Archived ke
   } finally {
     const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json()).catch(() => null);
     const headers = await csrfHeaders(page);
-    if (detail?.hidden) await page.request.post(`/api/v1/books/${book!.id}/hidden`, { headers });
+    if (detail?.hidden) {
+      await page.request.post(`/api/v1/books/${book!.id}/hidden`, {
+        headers, data: { hidden: false },
+      });
+    }
     if (detail?.archived) await page.request.post(`/api/v1/books/${book!.id}/archived`, { headers });
     await page.evaluate(() => localStorage.removeItem('cwng_show_hidden_books_v1'));
   }
@@ -119,7 +125,6 @@ test('hiding is per-user and a non-delete user still receives Hide', async ({ pa
     data: { name: username, password, roles: { viewer: true, download: true, delete_books: false } },
   });
   expect(created.ok(), await created.text()).toBeTruthy();
-  const user = await created.json() as { id: number };
   const other = await browser.newContext({ baseURL, viewport: { width: 1280, height: 800 } });
   const otherPage = await other.newPage();
 
@@ -140,13 +145,12 @@ test('hiding is per-user and a non-delete user still receives Hide', async ({ pa
     await expect(otherPage.getByTestId('hide-book-toggle')).toBeVisible();
   } finally {
     await other.close().catch(() => undefined);
-    const detail = await page.request.get(`/api/v1/books/${book!.id}`).then((r) => r.json()).catch(() => null);
-    if (detail?.hidden) {
-      await page.request.post(`/api/v1/books/${book!.id}/hidden`, {
-        headers, data: { hidden: false },
-      });
-    }
-    await page.request.post(`/api/v1/admin/users/${user.id}/delete`, { headers });
+    const cleanup = await page.request.post(`/api/v1/books/${book!.id}/hidden`, {
+      headers, data: { hidden: false },
+    });
+    expect(cleanup.ok()).toBe(true);
+    // The e2e container is disposable. Avoid coupling this feature test to the
+    // unrelated full user-data purge path; unique usernames prevent collisions.
   }
 });
 
