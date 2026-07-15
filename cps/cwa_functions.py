@@ -1092,7 +1092,7 @@ def set_cwa_settings():
         # values so changes take effect without a container restart.
         try:
             from . import schedule
-            schedule.register_scheduled_tasks(config.schedule_reconnect)
+            schedule.refresh_hardcover_auto_fetch()
         except Exception:
             log.exception("Unable to refresh scheduled tasks after CWA settings update")
 

@@ -352,6 +352,20 @@ def _schedule_hardcover_auto_fetch(scheduler, timezone_info):
         log.exception("Unable to schedule Hardcover auto-fetch")
 
 
+def refresh_hardcover_auto_fetch():
+    """Replace only Hardcover's recurring job, preserving one-shot jobs."""
+    scheduler = BackgroundScheduler()
+    if not scheduler:
+        return
+
+    for job in scheduler.get_jobs():
+        if getattr(job, "name", None) == "hardcover auto-fetch":
+            scheduler.remove_job(job.id)
+
+    timezone_info = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+    _schedule_hardcover_auto_fetch(scheduler, timezone_info)
+
+
 def _schedule_archived_book_cleanup(scheduler, timezone_info):
     """Schedule cleanup for stale archived_book entries (default 03:00 local)."""
     try:

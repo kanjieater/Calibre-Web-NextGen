@@ -2743,8 +2743,7 @@ def _configuration_update_helper():
     # rollback. Runtime consumers use ConfigSQL.hardcover_sync_enabled().
     effective_hardcover_sync, _ = schedule.reconcile_hardcover_configuration()
     if effective_hardcover_sync != prev_hardcover_sync:
-        schedule.end_scheduled_tasks()
-        schedule.register_scheduled_tasks(config.schedule_reconnect)
+        schedule.refresh_hardcover_auto_fetch()
     apply_https_runtime_config()
     if reboot_required:
         web_server.stop(True)

@@ -290,8 +290,8 @@ def test_admin_save_has_one_hardcover_sync_coercion_path():
         "def _configuration_result", 1
     )[0]
     assert "prev_hardcover_sync = config.hardcover_sync_enabled()" in helper
-    assert "schedule.end_scheduled_tasks()" in helper
-    assert "schedule.register_scheduled_tasks(config.schedule_reconnect)" in helper
+    assert "schedule.refresh_hardcover_auto_fetch()" in helper
+    assert "schedule.register_scheduled_tasks" not in helper
 
 
 def test_auto_fetch_task_rechecks_effective_enable_before_database_or_network(monkeypatch, caplog):
@@ -367,7 +367,39 @@ def test_cwa_schedule_changes_refresh_jobs_without_restart():
     endpoint = source.split("def set_cwa_settings():", 1)[1].split(
         "def get_next_duplicate_scan_run", 1
     )[0]
-    assert "schedule.register_scheduled_tasks(config.schedule_reconnect)" in endpoint
+    assert "schedule.refresh_hardcover_auto_fetch()" in endpoint
+    assert "schedule.register_scheduled_tasks" not in endpoint
+
+
+def test_hardcover_refresh_preserves_unrelated_pending_jobs(monkeypatch):
+    from types import SimpleNamespace
+
+    import cps.schedule as schedule
+
+    unrelated = SimpleNamespace(id="auto-send-17", name="rehydrated auto-send 17")
+    hardcover = SimpleNamespace(id="hardcover-old", name="hardcover auto-fetch")
+    jobs = [unrelated, hardcover]
+    removed = []
+
+    class FakeScheduler:
+        def get_jobs(self):
+            return list(jobs)
+
+        def remove_job(self, job_id):
+            removed.append(job_id)
+
+    monkeypatch.setattr(schedule, "BackgroundScheduler", lambda: FakeScheduler())
+    scheduled = []
+    monkeypatch.setattr(
+        schedule,
+        "_schedule_hardcover_auto_fetch",
+        lambda scheduler, timezone_info: scheduled.append((scheduler, timezone_info)),
+    )
+
+    schedule.refresh_hardcover_auto_fetch()
+
+    assert removed == ["hardcover-old"]
+    assert len(scheduled) == 1
 
 
 def test_applying_cwa_defaults_restores_the_rollback_mirror():
