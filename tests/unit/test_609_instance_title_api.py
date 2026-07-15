@@ -137,6 +137,13 @@ def test_route_title_waits_for_translated_catalog():
     assert "if (!ready) return" in route_a11y
     assert "locale, ready" in route_a11y
 
+    i18n = (FRONTEND / "lib" / "i18n.tsx").read_text()
+    assert "isFetched" in i18n, (
+        "a failed locale request must settle to English fallback so the title "
+        "does not remain stuck on the previous route"
+    )
+    assert "!enabled || isSuccess" not in i18n
+
 
 @pytest.mark.unit
 def test_api_types_declare_instance_name():
