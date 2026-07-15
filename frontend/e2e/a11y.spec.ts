@@ -167,7 +167,7 @@ test('mobile: closed drawer is inert; open traps focus and Escape closes', async
   await expect(nav).toHaveAttribute('inert', '');
 
   // Open it via the hamburger.
-  await page.getByRole('button', { name: /navigation|menu/i }).first().click();
+  await page.getByRole('banner').getByRole('button').first().click();
   await expect(nav).not.toHaveAttribute('inert', '');
   // Focus should have moved into the drawer.
   const focusInDrawer = await page.evaluate(() =>
