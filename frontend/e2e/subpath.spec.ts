@@ -14,7 +14,9 @@ test('SPA boots and serves assets under a reverse-proxy sub-path', async ({ page
     if (r.status() === 404 && /\.(js|css|png|svg|woff2?)(\?|$)/.test(r.url())) bad404s.push(r.url());
   });
 
-  await page.goto('/app');
+  // Relative navigation preserves the baseURL's /cwa/ mount prefix. A leading
+  // slash would silently test the domain root instead of the sub-path rig.
+  await page.goto('./app');
   await expect(page.locator('a[href*="/book/"]').first()).toBeVisible();
 
   // Nav links must carry the base prefix, not resolve to bare root.
@@ -31,8 +33,20 @@ test('Sign out preserves the reverse-proxy sub-path', async ({ page }) => {
     contentType: 'text/html',
     body: '<title>Logout captured</title>',
   }));
-  await page.goto('/app');
+  await page.goto('./app');
   await page.getByRole('button', { name: /account:/i }).click();
   await page.getByText('Sign out', { exact: true }).click();
   await expect(page).toHaveURL(/\/cwa\/logout$/);
+});
+
+test('admin hybrid links keep their intended UI and reverse-proxy prefix (#909)', async ({ page }) => {
+  await page.goto('./app/admin');
+
+  const duplicates = page.getByRole('link', { name: 'Duplicate books' });
+  await expect(duplicates).toHaveAttribute('href', /\/cwa\/app\/duplicates$/);
+  await expect(duplicates).not.toContainText('Opens in classic view');
+
+  const classic = page.getByRole('link', { name: /Basic configuration/ });
+  await expect(classic).toHaveAttribute('href', '/cwa/admin/config');
+  await expect(classic).toContainText('Opens in classic view');
 });

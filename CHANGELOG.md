@@ -18,6 +18,11 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- **Advanced server settings now say before you click that they open in the
+  classic view.** Those deep configuration pages intentionally remain in the
+  proven server-rendered interface during the hybrid cutover; the New UI no
+  longer makes that transition look accidental. Thanks @HLRobius (#909).
+
 - **Series, tag, author, publisher, and language pages now put their real name
   in the browser tab.** Direct links previously captured the `…` loading state
   before the entity query finished and never refreshed it. Thanks

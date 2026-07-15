@@ -46,9 +46,15 @@ def test_server_config_links_go_through_resource_url():
     src = _admin_src()
     assert "href={resourceUrl(href)}" in src, \
         "server-config card anchor must use href={resourceUrl(href)}"
-    # The raw, un-prefixed form must be gone — this is the exact #603 bug.
-    assert "href={href}" not in src, \
-        "raw href={href} on the settings card leaks the reverse-proxy prefix (#603)"
+    # A raw legacy <a href={href}> must stay gone — this is the exact #603 bug.
+    # Native SPA cards legitimately use Wouter <Link href={href}>; its Router
+    # base adds /app and the reverse-proxy prefix (#909).
+    assert not re.search(r"<a\b[^>]*href=\{href\}", src, re.S), \
+        "raw legacy <a href={href}> leaks the reverse-proxy prefix (#603)"
+    assert "<Link key={href} href={href}" in src, \
+        "native settings destinations must stay inside the SPA router"
+    assert "href: '/duplicates', label: 'Duplicate books', icon: Files, spa: true" in src, \
+        "Duplicate books already has a native SPA route and must not fall through to Classic (#909)"
 
 
 @pytest.mark.unit
