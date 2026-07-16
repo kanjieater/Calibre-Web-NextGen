@@ -198,6 +198,19 @@ export function useEntityList(plural: string) {
   });
 }
 
+export function useRenameTag(id: string | number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => apiPost<{ id: number; name: string }>(`/api/v1/tags/${id}`, { name }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['entities', 'tags'] });
+      void qc.invalidateQueries({ queryKey: ['books'] });
+      void qc.invalidateQueries({ queryKey: ['book'] });
+      void qc.invalidateQueries({ queryKey: ['metadata'] });
+    },
+  });
+}
+
 export function useBook(id: string | number) {
   return useQuery<BookDetail>({
     queryKey: ['book', String(id)],

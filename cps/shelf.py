@@ -33,7 +33,7 @@ def queue_hardcover_sync(shelf_obj, book_ids):
     button used no longer changes whether Hardcover hears about the book.
     The token is captured here because the worker thread has no request
     context."""
-    if not (shelf_obj.kobo_sync and config.config_hardcover_sync and bool(hardcover)):
+    if not (shelf_obj.kobo_sync and config.hardcover_sync_enabled() and bool(hardcover)):
         return
     if not book_ids:
         return

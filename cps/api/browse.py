@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Entity-list browse endpoints for /api/v1."""
+from flask import jsonify, request
+from flask_babel import gettext as _
 from sqlalchemy import func, text
+from sqlalchemy.exc import IntegrityError
 
 from . import api_v1
-from .. import calibre_db, db
+from .. import calibre_db, db, helper
+from ..cw_login import current_user
+from ..services.calibre_db_lock import metadata_db_write_lock
 from ..usermanagement import login_required_if_no_ano
 
 
@@ -48,6 +53,61 @@ def list_tags():
             .all())
     items = [{"id": t.id, "name": t.name, "count": cnt} for t, cnt in rows]
     return {"items": items}
+
+
+@api_v1.route("/tags/<int:tag_id>", methods=["POST"])
+@login_required_if_no_ano
+def rename_tag(tag_id):
+    """Rename one existing Calibre tag for every linked book."""
+    if not current_user.is_authenticated or current_user.is_anonymous:
+        return jsonify({"error": {"code": "unauthorized", "message": _("You must be signed in")}}), 401
+    if not current_user.role_edit():
+        return jsonify({"error": {"code": "forbidden", "message": _("You are not allowed to edit metadata")}}), 403
+
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict) or not isinstance(payload.get("name"), str):
+        return jsonify({"error": {"code": "invalid_request", "message": _("Tag name must be text")}}), 400
+    name = payload["name"].strip()
+    if not name:
+        return jsonify({"error": {"code": "invalid_request", "message": _("Tag name cannot be empty")}}), 400
+    if "," in name:
+        return jsonify({"error": {"code": "invalid_request", "message": _("Tag name cannot contain commas")}}), 400
+
+    with metadata_db_write_lock():
+        tag = calibre_db.session.get(db.Tags, tag_id)
+        if tag is None:
+            return jsonify({"error": {"code": "not_found", "message": _("Tag not found")}}), 404
+        if tag.name == name:
+            return jsonify({"id": tag.id, "name": tag.name})
+
+        # Recheck under the process-shared writer lock so two Flask workers
+        # cannot both pass the uniqueness check before either commits.
+        duplicate = (calibre_db.session.query(db.Tags)
+                     .filter(func.lower(db.Tags.name) == name.lower(), db.Tags.id != tag_id)
+                     .first())
+        if duplicate is not None:
+            return jsonify({"error": {"code": "conflict", "message": _("A tag with that name already exists")}}), 409
+
+        # Materialize the exact linked-book set while association writers are
+        # excluded, then mutate and dirty that same set in one transaction.
+        affected_books = list(tag.books)
+        try:
+            tag.name = name
+            for book in affected_books:
+                helper.mark_book_modified(book, set_dirty=True)
+            calibre_db.session.commit()
+        except IntegrityError:
+            calibre_db.session.rollback()
+            return jsonify({"error": {"code": "conflict", "message": _("A tag with that name already exists")}}), 409
+        except Exception:
+            calibre_db.session.rollback()
+            raise
+
+    # File-level enforcement is best-effort and must only be queued after the
+    # database transaction succeeds. Every linked book now contains this tag.
+    for book in affected_books:
+        helper.log_metadata_change(book, {"tags": ", ".join(item.name for item in book.tags)})
+    return jsonify({"id": tag.id, "name": tag.name})
 
 
 @api_v1.route("/publishers")

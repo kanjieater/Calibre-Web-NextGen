@@ -331,7 +331,7 @@ class TestShelfCallSitePins:
         m = re.search(r"def queue_hardcover_sync\(shelf_obj, book_ids\):(.*?)\n@shelf", SHELF_SRC, re.S)
         assert m, "queue_hardcover_sync helper not found in cps/shelf.py"
         body = m.group(1)
-        for fragment in ("kobo_sync", "config.config_hardcover_sync",
+        for fragment in ("kobo_sync", "config.hardcover_sync_enabled()",
                          "hardcover_token", "WorkerThread.add",
                          "TaskHardcoverBulkSync"):
             assert fragment in body, f"gate helper must contain {fragment}"

@@ -52,6 +52,11 @@ class BackgroundScheduler:
                 # Ignore if job not found
                 return None
 
+    def get_jobs(self):
+        if use_APScheduler:
+            return self.scheduler.get_jobs()
+        return []
+
     # Expects a lambda expression for the task
     def schedule_task(self, task, user=None, name=None, hidden=False, trigger=None):
         if use_APScheduler:

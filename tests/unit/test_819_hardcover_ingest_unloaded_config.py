@@ -88,20 +88,25 @@ def test_token_from_env_no_crash_on_unloaded_config(monkeypatch):
 
 
 def test_resolvers_use_getattr_not_raw_attr():
-    """Source-pin: both resolvers must access the column defensively so a
+    """Source-pin: value/source resolvers access the column defensively so a
     future edit can't reintroduce the unguarded ``self.config_hardcover_token``
     that broke ingest. Pins the fix, not trivia."""
     import inspect
 
     from cps.config_sql import ConfigSQL
 
-    for name in ("resolved_hardcover_token", "hardcover_token_from_env"):
+    resolver_src = inspect.getsource(ConfigSQL._resolved_hardcover_token_and_source)
+    assert "self.config_hardcover_token" not in resolver_src
+    assert 'getattr(self, "config_hardcover_token"' in resolver_src.replace("'", '"')
+
+    for name in ("resolved_hardcover_token", "hardcover_token_source"):
         src = inspect.getsource(getattr(ConfigSQL, name))
-        assert "self.config_hardcover_token" not in src, (
-            f"{name} reads self.config_hardcover_token directly; use "
-            f'getattr(self, "config_hardcover_token", None) so an unloaded '
-            f"config (ingest subprocess) does not raise — fork #819"
+        assert "_resolved_hardcover_token_and_source()" in src, (
+            f"{name} must delegate to the shared defensive value/source resolver"
         )
-        assert 'getattr(self, "config_hardcover_token"' in src.replace("'", '"'), (
-            f"{name} must resolve the token via getattr with a default"
-        )
+
+    hint_src = inspect.getsource(ConfigSQL.hardcover_token_from_env)
+    assert "hardcover_token_source()" in hint_src, (
+        "the compatibility boolean must delegate to the defensive source "
+        "resolver rather than re-reading the column"
+    )

@@ -102,8 +102,12 @@ class _Settings(_Base):
     config_kobo_sync = Column(Boolean, default=False)
     config_kobo_sync_magic_shelves = Column(Boolean, default=False)
 
-    # Sync read progress to Hardcover - should this be renamed?
-    config_hardcover_sync = Column(Boolean, default=False) 
+    # Canonical server-wide Hardcover enable flag. Before fork #900,
+    # auto-fetch had a second flag in cwa.db; the migration marker makes the
+    # one-time OR reconciliation idempotent while the legacy column remains a
+    # write-only rollback mirror.
+    config_hardcover_sync = Column(Boolean, default=False)
+    config_hardcover_sync_migrated = Column(Boolean, default=False)
     # Sync annotations to Hardcover
     config_hardcover_annotations_sync = Column(Boolean, default=False)
 
@@ -411,6 +415,30 @@ class ConfigSQL(object):
                 storage[k] = v
         return storage
 
+    @staticmethod
+    def _normalize_hardcover_token(raw):
+        if not isinstance(raw, str):
+            return ""
+        return raw.replace("Bearer ", "", 1).strip()
+
+    def _resolved_hardcover_token_and_source(self):
+        """Resolve value and diagnostic source through one precedence path."""
+        candidates = (
+            ("database", getattr(self, "config_hardcover_token", None)),
+            ("HARDCOVER_TOKEN", os.environ.get("HARDCOVER_TOKEN")),
+        )
+        for source, raw in candidates:
+            token = self._normalize_hardcover_token(raw)
+            if token:
+                return token, source
+
+        token = self._normalize_hardcover_token(
+            _read_secret_file(os.environ.get("HARDCOVER_TOKEN_FILE"))
+        )
+        if token:
+            return token, "HARDCOVER_TOKEN_FILE"
+        return "", None
+
     def resolved_hardcover_token(self):
         """Global Hardcover token: the admin-configured value, else the
         HARDCOVER_TOKEN environment variable, else the file named by
@@ -430,13 +458,11 @@ class ConfigSQL(object):
         # (and other unloaded/CLI contexts) the wrapper is not loaded, so a
         # raw column access raises AttributeError and aborts the whole fetch —
         # fork #819. The env/file fallbacks must still resolve.
-        raw = (
-            getattr(self, "config_hardcover_token", None)
-            or os.environ.get("HARDCOVER_TOKEN")
-            or _read_secret_file(os.environ.get("HARDCOVER_TOKEN_FILE"))
-            or ""
-        )
-        return raw.replace("Bearer ", "").strip()
+        return self._resolved_hardcover_token_and_source()[0]
+
+    def hardcover_token_source(self):
+        """Return the active global token source without exposing its value."""
+        return self._resolved_hardcover_token_and_source()[1]
 
     def hardcover_token_from_env(self):
         """True when the active global token comes from the environment —
@@ -444,12 +470,59 @@ class ConfigSQL(object):
         works (fork #743)."""
         # getattr default so an unloaded wrapper (ingest subprocess) cannot
         # raise here either — fork #819.
-        if (getattr(self, "config_hardcover_token", None) or "").strip():
+        return self.hardcover_token_source() in {
+            "HARDCOVER_TOKEN", "HARDCOVER_TOKEN_FILE"
+        }
+
+    def _hardcover_sync_env_override(self):
+        raw = os.environ.get("HARDCOVER_SYNC_ENABLED")
+        if raw is None or not raw.strip():
+            return None
+        normalized = raw.strip().lower()
+        if normalized in {"1", "true", "yes", "on"}:
+            return True
+        if normalized in {"0", "false", "no", "off"}:
             return False
-        return bool(
-            (os.environ.get("HARDCOVER_TOKEN") or "").strip()
-            or _read_secret_file(os.environ.get("HARDCOVER_TOKEN_FILE"))
-        )
+        if not self.__dict__.get("_hardcover_sync_env_warning_logged", False):
+            log.warning(
+                "Ignoring invalid HARDCOVER_SYNC_ENABLED value; expected "
+                "true/false, 1/0, yes/no, or on/off"
+            )
+            self.__dict__["_hardcover_sync_env_warning_logged"] = True
+        return None
+
+    def hardcover_sync_enabled(self):
+        """Resolve the single server-wide Hardcover enable switch.
+
+        HARDCOVER_SYNC_ENABLED is a runtime override and is deliberately not
+        persisted. The app.db value remains the canonical stored setting.
+        """
+        override = self._hardcover_sync_env_override()
+        if override is not None:
+            return override
+        return bool(getattr(self, "config_hardcover_sync", False))
+
+    def hardcover_sync_source(self):
+        """Return the effective enable source without returning any secret."""
+        if self._hardcover_sync_env_override() is not None:
+            return "HARDCOVER_SYNC_ENABLED"
+        return "database"
+
+    def reconcile_hardcover_sync(self, legacy_auto_fetch_enabled=False):
+        """One-time, preservation-first merge of the former two flags.
+
+        Either old flag being true keeps Hardcover enabled. Once the marker
+        is saved, the legacy CWA value is never imported again; callers may
+        mirror the returned effective value back to cwa.db for rollback.
+        """
+        if not bool(getattr(self, "config_hardcover_sync_migrated", False)):
+            self.config_hardcover_sync = bool(
+                getattr(self, "config_hardcover_sync", False)
+                or legacy_auto_fetch_enabled
+            )
+            self.config_hardcover_sync_migrated = True
+            self.save()
+        return self.hardcover_sync_enabled()
 
     def load(self):
         """Load all configuration values from the underlying storage."""
