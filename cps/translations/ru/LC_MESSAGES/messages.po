@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-15 22:30-0400\n"
+"POT-Creation-Date: 2026-07-16 11:31-0400\n"
 "PO-Revision-Date: 2026-07-14 09:12+0300\n"
 "Last-Translator: ZIZA\n"
 "Language-Team: \n"
@@ -4862,12 +4862,12 @@ msgid "Need to report an issue? Try the new"
 msgstr "Нужно сообщить о проблеме? Попробуйте новый"
 
 #: cps/spa_strings.py:662
-msgid "Less than Netflix to keep us afloat"
-msgstr "Меньше, чем Netflix, чтобы помочь нам оставаться на плаву"
+msgid "Support us on Ko-fi!"
+msgstr "Поддержите нас на Ko-fi!"
 
 #: cps/spa_strings.py:663
-msgid "Join on Ko-fi →"
-msgstr "Присоединиться на Ko-fi →"
+msgid "Open Ko-fi →"
+msgstr "Открыть Ko-fi →"
 
 #: cps/spa_strings.py:664
 msgid "Dismiss help announcement"
@@ -12223,6 +12223,12 @@ msgstr "Показывать выбранные полки в OPDS"
 #: cps/templates/user_table.html:158
 msgid "Show Read/Unread Section"
 msgstr "Показать раздел прочитанного/непрочитанного"
+
+#~ msgid "Less than Netflix to keep us afloat"
+#~ msgstr "Меньше, чем Netflix, чтобы помочь нам оставаться на плаву"
+
+#~ msgid "Join on Ko-fi →"
+#~ msgstr "Присоединиться на Ko-fi →"
 
 #~ msgid ""
 #~ "Off by default. When enabled, each user gets a hide button on the book "

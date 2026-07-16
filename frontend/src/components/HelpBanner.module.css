@@ -33,10 +33,11 @@
 }
 
 .supportBanner {
-  --hb-edge: #a85763;
-  --hb-icon: #ffffff;
-  background: linear-gradient(90deg, #263944 0%, #2b3e45 58%, #3a3a42 100%);
-  box-shadow: inset 3px 0 0 #ff5e6c;
+  --hb-text: #e9f9ff;
+  --hb-icon: #13c3ff;
+  background: linear-gradient(90deg, #07384d 0%, #08465e 58%, #06445e 100%);
+  border-bottom: none;
+  box-shadow: none;
 }
 
 .supportIconWrap {
@@ -52,18 +53,18 @@
 }
 
 .kofiCup {
-  fill: #ffffff;
+  fill: var(--hb-icon);
 }
 
 .kofiHandle {
   fill: none;
-  stroke: #ffffff;
+  stroke: var(--hb-icon);
   stroke-width: 2;
   stroke-linecap: round;
 }
 
 .kofiHeart {
-  fill: #ff5e6c;
+  fill: var(--hb-icon);
 }
 
 .text {
@@ -99,22 +100,22 @@
   align-items: center;
   flex: none;
   min-height: 24px;
-  color: #ffffff;
+  color: var(--hb-icon);
   font-weight: var(--fw-semi);
   text-decoration: underline;
-  text-decoration-color: rgba(255, 94, 108, 0.75);
+  text-decoration-color: currentColor;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   transition: color var(--dur-fast) var(--ease), text-decoration-color var(--dur-fast) var(--ease);
 }
 
 .supportLink:hover {
-  color: #ffd7db;
-  text-decoration-color: #ff5e6c;
+  color: #a5ecff;
+  text-decoration-color: currentColor;
 }
 
 .supportLink:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid #dff7ff;
   outline-offset: 3px;
   border-radius: 2px;
 }

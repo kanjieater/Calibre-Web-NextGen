@@ -12,15 +12,15 @@ test('help dismissal reveals a durable, independently dismissible Ko-fi banner',
   await page.reload();
 
   const banner = page.getByRole('status').filter({
-    hasText: /Need to report an issue\? Try the new|Less than Netflix to keep us afloat/,
+    hasText: /Need to report an issue\? Try the new|Support us on Ko-fi!/,
   });
-  const supportLink = page.getByRole('link', { name: 'Join on Ko-fi →' });
+  const supportLink = page.getByRole('link', { name: 'Open Ko-fi →' });
 
   await expect(banner).toContainText('Need to report an issue? Try the new');
   await expect(supportLink).toHaveCount(0);
 
   await banner.getByRole('button', { name: /Dismiss(?: help announcement)?/ }).click();
-  await expect(banner).toContainText('Less than Netflix to keep us afloat');
+  await expect(banner).toContainText('Support us on Ko-fi!');
   await expect(supportLink).toHaveAttribute('href', 'https://ko-fi.com/calibrewebnextgen');
   await expect(supportLink).toHaveAttribute('target', '_blank');
   await expect(supportLink).toHaveAttribute('rel', 'noopener noreferrer');

@@ -5,8 +5,8 @@ import styles from './HelpBanner.module.css';
 
 const HELP_DISMISS_KEY = 'cwng_help_banner_dismissed_v1';
 const KOFI_DISMISS_KEY = 'cwng_kofi_banner_dismissed_v1';
-const SUPPORT_PITCH = 'Less than Netflix to keep us afloat';
-const SUPPORT_LINK_LABEL = 'Join on Ko-fi →';
+const SUPPORT_PITCH = 'Support us on Ko-fi!';
+const SUPPORT_LINK_LABEL = 'Open Ko-fi →';
 const SUPPORT_URL = 'https://ko-fi.com/calibrewebnextgen';
 
 function wasDismissed(key: string) {

@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-15 22:30-0400\n"
+"POT-Creation-Date: 2026-07-16 11:31-0400\n"
 "PO-Revision-Date: 2023-07-25 11:30+0100\n"
 "Last-Translator: horus68 <https://github.com/horus68>\n"
 "Language-Team: pt-PT <>\n"
@@ -4803,12 +4803,12 @@ msgid "Need to report an issue? Try the new"
 msgstr ""
 
 #: cps/spa_strings.py:662
-msgid "Less than Netflix to keep us afloat"
-msgstr "Por menos do que a Netflix, ajude-nos a continuar"
+msgid "Support us on Ko-fi!"
+msgstr "Apoie-nos no Ko-fi!"
 
 #: cps/spa_strings.py:663
-msgid "Join on Ko-fi →"
-msgstr "Aderir no Ko-fi →"
+msgid "Open Ko-fi →"
+msgstr "Abrir o Ko-fi →"
 
 #: cps/spa_strings.py:664
 msgid "Dismiss help announcement"
@@ -11906,6 +11906,12 @@ msgstr "Sincronizar com Kobo as estantes selecionadas"
 #, fuzzy
 msgid "Show Read/Unread Section"
 msgstr "Mostrar secção de lidos/não lidos"
+
+#~ msgid "Less than Netflix to keep us afloat"
+#~ msgstr "Por menos do que a Netflix, ajude-nos a continuar"
+
+#~ msgid "Join on Ko-fi →"
+#~ msgstr "Aderir no Ko-fi →"
 
 #, fuzzy
 #~ msgid "Enable Hardcover Auto-Fetch"

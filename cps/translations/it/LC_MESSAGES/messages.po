@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-15 22:30-0400\n"
+"POT-Creation-Date: 2026-07-16 11:31-0400\n"
 "PO-Revision-Date: 2025-11-24 17:12+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian\n"
@@ -4780,12 +4780,12 @@ msgid "Need to report an issue? Try the new"
 msgstr ""
 
 #: cps/spa_strings.py:662
-msgid "Less than Netflix to keep us afloat"
-msgstr "Meno di Netflix per aiutarci ad andare avanti"
+msgid "Support us on Ko-fi!"
+msgstr "Sostienici su Ko-fi!"
 
 #: cps/spa_strings.py:663
-msgid "Join on Ko-fi →"
-msgstr "Unisciti su Ko-fi →"
+msgid "Open Ko-fi →"
+msgstr "Apri Ko-fi →"
 
 #: cps/spa_strings.py:664
 msgid "Dismiss help announcement"
@@ -11864,6 +11864,12 @@ msgstr "Sincronizza gli scaffali selezionati con Kobo"
 #: cps/templates/user_table.html:158
 msgid "Show Read/Unread Section"
 msgstr "Mostra sezione Libri letti e Libri da leggere"
+
+#~ msgid "Less than Netflix to keep us afloat"
+#~ msgstr "Meno di Netflix per aiutarci ad andare avanti"
+
+#~ msgid "Join on Ko-fi →"
+#~ msgstr "Unisciti su Ko-fi →"
 
 #~ msgid "Sync Kobo read progress to Hardcover (Requires API key per user)"
 #~ msgstr ""

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-15 22:30-0400\n"
+"POT-Creation-Date: 2026-07-16 11:31-0400\n"
 "PO-Revision-Date: 2018-02-07 02:20-0500\n"
 "Last-Translator: subdiox <subdiox@gmail.com>\n"
 "Language-Team: ja <LL@li.org>\n"
@@ -4788,12 +4788,12 @@ msgid "Need to report an issue? Try the new"
 msgstr ""
 
 #: cps/spa_strings.py:662
-msgid "Less than Netflix to keep us afloat"
-msgstr "Netflixより少ない金額で、運営を支えてください"
+msgid "Support us on Ko-fi!"
+msgstr "Ko-fiで私たちを応援してください！"
 
 #: cps/spa_strings.py:663
-msgid "Join on Ko-fi →"
-msgstr "Ko-fiでメンバーになる →"
+msgid "Open Ko-fi →"
+msgstr "Ko-fiを開く →"
 
 #: cps/spa_strings.py:664
 msgid "Dismiss help announcement"
@@ -11988,6 +11988,12 @@ msgstr "選択した本棚をKoboと同期"
 #: cps/templates/user_table.html:158
 msgid "Show Read/Unread Section"
 msgstr "既読/未読セクションを表示"
+
+#~ msgid "Less than Netflix to keep us afloat"
+#~ msgstr "Netflixより少ない金額で、運営を支えてください"
+
+#~ msgid "Join on Ko-fi →"
+#~ msgstr "Ko-fiでメンバーになる →"
 
 #~ msgid "Sync Kobo read progress to Hardcover (Requires API key per user)"
 #~ msgstr "Koboの読書進捗をHardcoverに同期（ユーザーごとにAPIキーが必要）"
