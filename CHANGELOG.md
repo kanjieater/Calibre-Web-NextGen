@@ -18,7 +18,7 @@ is for things you can see or feel when running the app.
 
 ### Added
 
-- **You can now support CWNG development from the app** — a one-line Ko-fi link appears in the top banner after the help announcement is dismissed; dismissible, remembered.
+- **You can now support CWNG development from the app** — announcements queue in the top banner, and clicking anywhere on the Ko-fi message opens Ko-fi and dismisses it; dismissals are remembered.
 
 ### Fixed
 
