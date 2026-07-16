@@ -22,6 +22,11 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- Russian users now see the newly added New UI controls, smart-shelf date
+  filters, theme choices, upload flow, and accessibility announcements in
+  Russian instead of English fallback text. Translation update by
+  @standhaftsohnsergius (#895), with terminology corrections during adoption.
+
 - New UI translation updates no longer manufacture fuzzy guesses that look
   complete but disappear at runtime. Legacy SPA guesses are now an explicit
   untranslated review queue, an all-locale gate prevents fuzzy entries from
