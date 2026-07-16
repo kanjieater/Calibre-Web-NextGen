@@ -91,10 +91,11 @@ export function MagicLink() {
         const r = await pollAsync(token);
         if (cancelled) return;
         if (r.status === 'success') {
-          // App's me-cache is seeded by the hook; nudge to the library so the
-          // authenticated tree mounts on "/".
+          // Redirect while the auth URL still contains `next`. Delaying this
+          // used to let the authenticated landing replace the URL first, then
+          // a stale timer sent deep-link logins back to the library.
           setPhase('success');
-          setTimeout(redirectAfterAuth, 400);
+          redirectAfterAuth();
           return;
         }
         if (r.status === 'expired' || r.status === 'not_found') {

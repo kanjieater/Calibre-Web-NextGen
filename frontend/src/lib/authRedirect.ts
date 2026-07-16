@@ -9,7 +9,6 @@ type PostAuthDestination =
   | { kind: 'classic'; path: string };
 
 const LIBRARY: PostAuthDestination = { kind: 'spa', path: '/' };
-const SCHEME_RE = /[A-Za-z][A-Za-z0-9+.-]*:/;
 
 function isSpaRoute(pathname: string, parser: Parser): boolean {
   return SPA_ROUTE_PATTERNS.some((pattern) => matchRoute(parser, pattern, pathname)[0]);
@@ -28,7 +27,7 @@ export function resolvePostAuthDestination(currentHref: string, parser: Parser):
   // Require one leading slash. Backslashes are rejected before URL parsing
   // because browsers normalize them as path separators in special URLs.
   if (!next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')
-      || next.includes('\\') || SCHEME_RE.test(next)) {
+      || next.includes('\\')) {
     return LIBRARY;
   }
 

@@ -62,23 +62,29 @@ test.describe('SPA post-auth destination', () => {
     });
   }
 
-  test('magic-link login honors next and never strands the authenticated tree on /magic-link', async ({ page, browser, baseURL }, testInfo) => {
+  test('magic-link login preserves a deep next destination after the success delay', async ({ page, browser, baseURL }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'one real magic-link flow is sufficient for this redirect contract');
+    const verifierContext = await browser.newContext({ baseURL, storageState: STORAGE });
+    const verifierPage = await verifierContext.newPage();
+    await verifierPage.goto('/app');
+    const bookHref = await verifierPage.locator('a[href*="/app/book/"]').first().getAttribute('href');
+    expect(bookHref).toBeTruthy();
+
     await page.context().clearCookies();
     const startResponse = page.waitForResponse('**/api/v1/auth/magic-link/start');
 
-    await page.goto('/app/magic-link?next=%2F');
+    await page.goto(`/app/magic-link?next=${encodeURIComponent(bookHref!)}`);
     const started = await startResponse;
     expect(started.ok()).toBeTruthy();
     const { verify_url: verifyUrl } = await started.json() as { verify_url: string };
     expect(verifyUrl).toBeTruthy();
 
-    const verifierContext = await browser.newContext({ baseURL, storageState: STORAGE });
-    const verifierPage = await verifierContext.newPage();
     await verifierPage.goto(verifyUrl);
 
-    await expect(page).toHaveURL(/\/app\/?$/, { timeout: 20_000 });
-    await expectLibrary(page);
+    await expect(page).toHaveURL(new RegExp(`${bookHref!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/?$`), { timeout: 20_000 });
+    await page.waitForTimeout(700);
+    await expect(page).toHaveURL(new RegExp(`${bookHref!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/?$`));
+    await expect(page.locator('main h1')).toBeVisible();
     await verifierContext.close();
   });
 });
