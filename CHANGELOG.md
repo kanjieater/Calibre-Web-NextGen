@@ -16,7 +16,39 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Added
+
 - **You can now support CWNG development from the app** — a one-line Ko-fi link appears in the top banner after the help announcement is dismissed; dismissible, remembered.
+
+### Fixed
+
+- **Setting a default library view turned your library into the search page.** After saving
+  a default view, the library home showed the "Advanced search" form pinned above the books,
+  the page was retitled "Advanced search", and the library heading, its actions and the
+  Discover strip disappeared. Your library now stays your library — it simply shows the
+  books your default view selects, with a note saying so and a "Show all books" link to see
+  everything again. Reported by @chloeroform.
+
+- **Automatic duplicate resolution never ran if you set a cooldown.** Turning on the
+  cooldown ("wait N minutes between automatic resolutions") stopped automatic duplicate
+  resolution from running at all, and the log reported a wait of about four hours
+  counting up rather than down. Two separate causes: the cooldown you typed was thrown
+  away and replaced with one minute, and the clock comparison mixed your local time with
+  UTC, so the wait never elapsed. If your server runs east of UTC the opposite happened —
+  the cooldown was ignored and resolution ran on every scan. Both are fixed and your
+  existing resolution history stays intact. Thanks to @jdbway, who diagnosed both causes
+  and pinpointed the exact lines in #944.
+
+- **Startup no longer sets permissions on your Calibre library twice.** Every container
+  start walked the whole library once from a hardcoded list and again from `dirs.json`,
+  and re-walked a folder inside `/config` that had already been covered. Each folder is
+  now visited once, which shortens startup on large libraries. Thanks to @chloeroform for
+  spotting it in the startup log and measuring it.
+
+- **Russian screen readers announced the reader's progress as "Прочитано: 45% r"** — a
+  stray letter left over from the English "read". It only ever reached people using a
+  screen reader, since the text is spoken rather than drawn on screen. Brazilian
+  Portuguese was already correct and is unchanged.
 
 ## [v4.1.14] - 2026-07-16
 
