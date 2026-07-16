@@ -50,3 +50,16 @@ test('admin hybrid links keep their intended UI and reverse-proxy prefix (#909)'
   await expect(classic).toHaveAttribute('href', '/cwa/admin/config');
   await expect(classic).toContainText('Opens in classic view');
 });
+
+test('stale prefixed login honors a prefixed next destination', async ({ page }) => {
+  await page.goto(`./app/login?next=${encodeURIComponent('/cwa/')}`);
+  await expect(page).toHaveURL(/\/cwa\/app\/?$/);
+  await expect(page.locator('a[href*="/cwa/app/book/"]').first()).toBeVisible();
+  await expect(page.getByText("This page doesn't exist here.", { exact: true })).toHaveCount(0);
+});
+
+test('prefixed login rejects a same-origin path outside its mount', async ({ page }) => {
+  await page.goto(`./app/login?next=${encodeURIComponent('/admin/config')}`);
+  await expect(page).toHaveURL(/\/cwa\/app\/?$/);
+  await expect(page.locator('a[href*="/cwa/app/book/"]').first()).toBeVisible();
+});
