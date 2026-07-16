@@ -177,6 +177,29 @@ def test_magic_shelf_operator_labels_are_translated_at_render_time():
     assert "{o.label}" not in source
 
 
+def test_catalog_back_link_translates_labels_not_route_segments():
+    """Route identifiers (`authors`) are not gettext msgids; the visible back
+    link must use static plural labels (`Authors`) that the extractor can see.
+    """
+    path = os.path.join(extractor.FRONTEND_SRC, "pages", "Catalog.tsx")
+    with open(path, encoding="utf-8") as source_file:
+        source = source_file.read()
+    assert "items: t(ENTITY_PLURAL[entityKind!])" not in source
+    assert "items: t(KIND_PLURAL_OPTIONS[entityKind!].label)" in source
+    keys = extractor.extract_frontend_keys()
+    for label in ("Authors", "Series", "Tags", "Publishers", "Languages", "Ratings", "Formats"):
+        assert label in keys
+
+
+def test_browse_list_lowercases_with_the_app_locale():
+    path = os.path.join(extractor.FRONTEND_SRC, "pages", "BrowseList.tsx")
+    with open(path, encoding="utf-8") as source_file:
+        source = source_file.read()
+    assert "const { t, locale } = useI18n()" in source
+    assert "toLocaleLowerCase((locale || 'en').replace('_', '-'))" in source
+    assert "t(title).toLocaleLowerCase()" not in source
+
+
 def test_locale_change_invalidates_translated_magic_shelf_names():
     queries = os.path.join(extractor.FRONTEND_SRC, "lib", "queries.ts")
     with open(queries, encoding="utf-8") as source_file:

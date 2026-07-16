@@ -63,6 +63,18 @@ const KIND_OPTIONS: Record<EntityKind, { label: string }> = {
   format: { label: 'Format' },
 };
 
+// Human-facing plural labels are deliberately separate from ENTITY_PLURAL:
+// route segments such as "authors" are identifiers, not gettext msgids.
+const KIND_PLURAL_OPTIONS: Record<EntityKind, { label: string }> = {
+  author: { label: 'Authors' },
+  series: { label: 'Series' },
+  tag: { label: 'Tags' },
+  publisher: { label: 'Publishers' },
+  language: { label: 'Languages' },
+  rating: { label: 'Ratings' },
+  format: { label: 'Formats' },
+};
+
 const DENSITY_OPTIONS = [
   { value: 'comfortable', label: 'Comfortable' },
   { value: 'compact', label: 'Compact' },
@@ -460,7 +472,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
       {filtered && (
         <Link href={`/${ENTITY_PLURAL[entityKind!]}`} className={styles.back}>
           <ChevronLeft size={16} />
-          {t('Show all {items}', { items: t(ENTITY_PLURAL[entityKind!]) })}
+          {t('Show all {items}', { items: t(KIND_PLURAL_OPTIONS[entityKind!].label) })}
         </Link>
       )}
 

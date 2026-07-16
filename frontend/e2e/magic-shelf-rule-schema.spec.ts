@@ -9,8 +9,8 @@ type RuleSchema = {
 
 const DATE_FIELDS = ['pubdate', 'timestamp'];
 
-async function selectOptions(page: import('@playwright/test').Page, label: string) {
-  return page.getByLabel(label).locator('option').evaluateAll((options) =>
+async function selectOptions(select: import('@playwright/test').Locator) {
+  return select.locator('option').evaluateAll((options) =>
     options.map((option) => ({ value: (option as HTMLOptionElement).value, text: option.textContent?.trim() || '' })),
   );
 }
@@ -20,7 +20,7 @@ test('Classic and New UI consume the canonical rule schema and date rules previe
   const schemaResponse = await request.get('/api/v1/magicshelves/rule-schema');
   expect(schemaResponse.status()).toBe(200);
   const schema = await schemaResponse.json() as RuleSchema;
-  const expectedFields = schema.fields.map(({ id, label }) => ({ value: id, text: label }));
+  const expectedFieldIds = schema.fields.map(({ id }) => id);
 
   for (const fieldId of DATE_FIELDS) {
     const field = schema.fields.find((item) => item.id === fieldId);
@@ -33,13 +33,15 @@ test('Classic and New UI consume the canonical rule schema and date rules previe
   const classicFields = (await classicFilter.locator('option').evaluateAll((options) =>
     options.map((option) => ({ value: (option as HTMLOptionElement).value, text: option.textContent?.trim() || '' })),
   )).filter((option) => option.value !== '-1');
-  expect(classicFields).toEqual(expectedFields);
+  expect(classicFields.map(({ value }) => value)).toEqual(expectedFieldIds);
+  expect(classicFields.every(({ text }) => text.length > 0)).toBe(true);
 
   for (const fieldId of DATE_FIELDS) {
     await classicFilter.selectOption(fieldId);
     const classicOperator = page.locator('#builder .rule-operator-container select').first();
-    await expect(classicOperator).toContainText('In the past N days');
-    await expect(classicOperator).toContainText('Not in the past N days');
+    const classicOperatorValues = (await selectOptions(classicOperator)).map(({ value }) => value);
+    expect(classicOperatorValues).toContain('in_last_days');
+    expect(classicOperatorValues).toContain('not_in_last_days');
     await classicOperator.selectOption('in_last_days');
     await page.locator('#builder .rule-value-container input').first().fill('30');
     const previewResponse = page.waitForResponse((response) =>
@@ -54,16 +56,20 @@ test('Classic and New UI consume the canonical rule schema and date rules previe
   }
 
   await page.goto('/app/magic');
-  await expect(page.getByRole('heading', { name: 'New smart shelf' })).toBeVisible();
-  expect(await selectOptions(page, 'Rule field')).toEqual(expectedFields);
+  await expect(page.locator('main#main h1')).toBeVisible();
+  const spaField = page.locator('main#main select:has(option[value="pubdate"])').first();
+  const spaOperator = page.locator('main#main select:has(option[value="in_last_days"])').first();
+  const spaFields = await selectOptions(spaField);
+  expect(spaFields.map(({ value }) => value)).toEqual(expectedFieldIds);
+  expect(spaFields.every(({ text }) => text.length > 0)).toBe(true);
 
   for (const fieldId of DATE_FIELDS) {
-    await page.getByLabel('Rule field').selectOption(fieldId);
-    await page.getByLabel('Rule operator').selectOption('in_last_days');
+    await spaField.selectOption(fieldId);
+    await spaOperator.selectOption('in_last_days');
     const previewResponse = page.waitForResponse((response) =>
       response.url().includes('/magicshelf/preview') && response.request().method() === 'POST',
     );
-    await page.getByPlaceholder('value').fill('30');
+    await page.locator('main#main input[type="number"]').first().fill('30');
     const response = await previewResponse;
     expect(response.status()).toBe(200);
     const payload = await response.json() as { success: boolean; count: number };

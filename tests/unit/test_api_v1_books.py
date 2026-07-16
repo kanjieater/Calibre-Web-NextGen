@@ -354,3 +354,25 @@ def test_list_books_handles_discovery_filters():
     src = _inspect.getsource(books_mod.list_books)
     for value in ('favorites', 'rated', 'discover', 'hot'):
         assert 'filter_val == "%s"' % value in src, "discovery filter %r missing" % value
+
+
+@pytest.mark.unit
+def test_hot_visibility_filter_chunks_large_libraries_without_losing_order(monkeypatch):
+    """The app and calibre catalogs use separate SQLite sessions, so hot-book
+    ids must cross the boundary in bounded batches rather than one huge IN().
+    """
+    from cps.api import books as books_mod
+
+    ids = list(range(2005))
+    chunks = []
+
+    def visible_even_ids(chunk):
+        chunks.append(list(chunk))
+        return {book_id for book_id in chunk if book_id % 2 == 0}
+
+    monkeypatch.setattr(books_mod, "_visible_ids_for_chunk", visible_even_ids)
+    result = books_mod._visible_hot_book_ids(ids)
+
+    assert [len(chunk) for chunk in chunks] == [900, 900, 205]
+    assert all(len(chunk) <= books_mod._SQLITE_IN_CHUNK for chunk in chunks)
+    assert result == [book_id for book_id in ids if book_id % 2 == 0]

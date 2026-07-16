@@ -4,7 +4,7 @@ import { LayoutGrid, List, Search } from 'lucide-react';
 import { useEntityList } from '../lib/queries';
 import { SpinnerCentered } from '../components/Spinner';
 import { EmptyState } from '../components/EmptyState';
-import { useT } from '../lib/i18n';
+import { useI18n } from '../lib/i18n';
 import { usePersistentBool } from '../lib/usePersistentBool';
 import styles from './BrowseList.module.css';
 
@@ -16,10 +16,18 @@ interface BrowseListProps {
 }
 
 export function BrowseList({ plural, title }: BrowseListProps) {
-  const t = useT();
+  const { t, locale } = useI18n();
   const { data, isLoading, error } = useEntityList(plural);
   const [q, setQ] = useState('');
   const [compact, setCompact] = usePersistentBool('cwng:browse-list-compact', false);
+  const translatedItems = useMemo(() => {
+    const translated = t(title);
+    try {
+      return translated.toLocaleLowerCase((locale || 'en').replace('_', '-'));
+    } catch {
+      return translated.toLocaleLowerCase();
+    }
+  }, [locale, t, title]);
 
   const items = useMemo(() => {
     const all = data?.items ?? [];
@@ -51,10 +59,10 @@ export function BrowseList({ plural, title }: BrowseListProps) {
           <input
             type="search"
             className={styles.searchInput}
-            placeholder={t('Filter {items}…', { items: t(title).toLocaleLowerCase() })}
+            placeholder={t('Filter {items}…', { items: translatedItems })}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            aria-label={t('Filter {items}', { items: t(title).toLocaleLowerCase() })}
+            aria-label={t('Filter {items}', { items: translatedItems })}
           />
         </div>
       )}
@@ -65,8 +73,8 @@ export function BrowseList({ plural, title }: BrowseListProps) {
         <EmptyState message={error instanceof Error ? error.message : t('Failed to load.')} />
       ) : items.length === 0 ? (
         <EmptyState message={q
-          ? t('No matching {items} for "{query}".', { items: t(title).toLocaleLowerCase(), query: q })
-          : t('No {items} yet.', { items: t(title).toLocaleLowerCase() })} />
+          ? t('No matching {items} for "{query}".', { items: translatedItems, query: q })
+          : t('No {items} yet.', { items: translatedItems })} />
       ) : (
         <ul className={compact ? styles.list : styles.grid} role="list">
           {items.map((e) => (

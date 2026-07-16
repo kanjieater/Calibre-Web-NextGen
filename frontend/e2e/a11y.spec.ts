@@ -81,7 +81,11 @@ test('edit book: no critical/serious a11y violations', async ({ page }) => {
 
 test('smart shelf builder: no critical/serious a11y violations', async ({ page }) => {
   await page.goto('/app/magic');
-  await expect(page.getByRole('heading', { name: 'New smart shelf' })).toBeVisible();
+  // The signed-in test user may use any supported locale. Identify the route by
+  // structure rather than an English accessible name, and pin its one-landmark
+  // invariant so a nested page-level <main> cannot return.
+  await expect(page.locator('main#main h1')).toBeVisible();
+  await expect(page.locator('main')).toHaveCount(1);
   await axeScan(page, 'smart-shelf-builder');
 });
 

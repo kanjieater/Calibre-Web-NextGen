@@ -200,7 +200,7 @@
     <div class="form-group">
       <input type="checkbox" id="config_user_hide_enabled" name="config_user_hide_enabled" {% if config.config_user_hide_enabled %}checked{% endif %}>
       <label for="config_user_hide_enabled">{{_('Allow users to hide books from their personal library')}}</label>
-      <p class="help-block">{{_('Off by default. When enabled, each user gets a hide button on the book detail page that drops the book out of their own index/search/OPDS without affecting other users. Recovery is via the profile page (Hidden Books link).')}}</p>
+      <p class="help-block">{{_('On by default for new installations; an existing saved choice is preserved during upgrades. When enabled, each user gets a hide button on the book detail page that drops the book out of their own index/search/OPDS without affecting other users. Recovery is via the profile page (Hidden Books link).')}}</p>
     </div>
     {% if feature_support['kobo'] %}
     <div class="form-group">

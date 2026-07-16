@@ -17,6 +17,26 @@ from ..usermanagement import login_required_if_no_ano
 
 log = logger.create()
 
+# SQLite builds vary in their host-parameter ceiling. Stay below even the
+# conservative historical limit when filtering app.db-derived download ids
+# against the separate calibre metadata database.
+_SQLITE_IN_CHUNK = 900
+
+
+def _visible_ids_for_chunk(book_ids):
+    query = calibre_db.generate_linked_query(config.config_read_column, db.Books)
+    return {row[0] for row in query.filter(calibre_db.common_filters())
+            .filter(db.Books.id.in_(book_ids))
+            .with_entities(db.Books.id).all()}
+
+
+def _visible_hot_book_ids(book_ids):
+    """Return visible ids in hotness order without an unbounded SQL ``IN``."""
+    visible = set()
+    for start in range(0, len(book_ids), _SQLITE_IN_CHUNK):
+        visible.update(_visible_ids_for_chunk(book_ids[start:start + _SQLITE_IN_CHUNK]))
+    return [book_id for book_id in book_ids if book_id in visible]
+
 
 def _detail_custom_columns():
     """Classic-parity display definitions, degrading safely if DB metadata is unavailable."""
@@ -286,13 +306,7 @@ def list_books():
                    .order_by(func.count(ub.Downloads.book_id).desc()))]
         # Filter before paginating: otherwise a hidden/restricted book leaves a
         # short page while the header still counts it.
-        visible = set()
-        if all_hot_ids:
-            q = calibre_db.generate_linked_query(config.config_read_column, db.Books)
-            visible = {row[0] for row in q.filter(calibre_db.common_filters())
-                       .filter(db.Books.id.in_(all_hot_ids))
-                       .with_entities(db.Books.id).all()}
-        visible_hot_ids = [book_id for book_id in all_hot_ids if book_id in visible]
+        visible_hot_ids = _visible_hot_book_ids(all_hot_ids)
         total = len(visible_hot_ids)
         hot_ids = visible_hot_ids[off:off + per_page]
         entries = []

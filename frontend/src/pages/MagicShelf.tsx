@@ -156,14 +156,14 @@ export function MagicShelf({ editId }: { editId?: string }) {
   const saving = create.isPending || edit.isPending;
 
   if (schemaQuery.isLoading) {
-    return <main className={styles.container}><h1 className={styles.title}>{t('Loading…')}</h1></main>;
+    return <div className={styles.container}><h1 className={styles.title}>{t('Loading…')}</h1></div>;
   }
   if (schemaQuery.isError || fields.length === 0) {
-    return <main className={styles.container}><p role="alert">{t('Could not load smart-shelf rules.')}</p></main>;
+    return <div className={styles.container}><p role="alert">{t('Could not load smart-shelf rules.')}</p></div>;
   }
 
   return (
-    <main className={styles.container}>
+    <div className={styles.container}>
       <div className={styles.header}>
         <Wand2 size={22} className={styles.headerIcon} aria-hidden="true" focusable={false} />
         <h1 className={styles.title}>{editId ? t('Edit smart shelf') : t('New smart shelf')}</h1>
@@ -244,6 +244,6 @@ export function MagicShelf({ editId }: { editId?: string }) {
         </Button>
         <Button variant="ghost" onClick={onCancel} disabled={saving}>{t('Cancel')}</Button>
       </div>
-    </main>
+    </div>
   );
 }

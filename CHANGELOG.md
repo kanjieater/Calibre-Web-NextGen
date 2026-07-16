@@ -18,9 +18,15 @@ is for things you can see or feel when running the app.
 
 ### Added
 
-- **You can now hide books from your personal library in the new interface without deleting them or affecting anyone else.** Hide/Unhide lives beside Delete on book details, and View settings can reveal clearly marked hidden books whenever you want one back.
+- **You can now hide books from your personal library in the new interface without deleting them or affecting anyone else.** Hide/Unhide lives beside Delete on book details, and View settings can reveal clearly marked hidden books whenever you want one back. The feature is on by default for new installations; upgrades preserve the admin's existing **Allow users to hide books** switch, which is the kill switch to check if Hide is absent.
 
 ### Fixed
+
+- Translated entity pages now say “Show all authors/tags/…” in the signed-in
+  user's language instead of leaking the English route segment, and locale-
+  sensitive search labels now lowercase using the app language rather than the
+  browser's language. Most-downloaded lists also remain usable for libraries
+  large enough to exceed SQLite's single-query parameter limit.
 
 - Brazilian Portuguese users now see more of the New UI in Portuguese,
   including book actions, upload feedback, favorites, and hide/archive status;
