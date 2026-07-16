@@ -55,6 +55,7 @@ test('book-card actions keep a shared baseline for touch, mouse, and keyboard', 
       await expect(quickEdit, `${theme}: the adjacent quick-edit action is touch-reachable`).toBeVisible();
     } else {
       await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+      await page.mouse.move(0, 0);
       await expect(firstRead, `${theme}: desktop starts with the clean hover treatment`).toBeHidden();
       await firstCard.hover();
       await expect(firstRead, `${theme}: mouse hover reveals Read now`).toBeVisible();
