@@ -1,6 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 
 const isTouchProject = () => ['mobile', 'ipad-touch'].includes(test.info().project.name);
+
+async function expectRevealed(locator: Locator, revealed: boolean, message: string) {
+  await expect.poll(
+    () => locator.evaluate((node) => getComputedStyle(node).opacity),
+    { message },
+  ).toBe(revealed ? '1' : '0');
+}
 
 test('book-card actions keep a shared baseline for touch, mouse, and keyboard', async ({ page }) => {
   await page.goto('/app');
@@ -50,18 +57,19 @@ test('book-card actions keep a shared baseline for touch, mouse, and keyboard', 
     ).toBeLessThanOrEqual(1);
 
     if (isTouchProject()) {
-      await expect(firstRead, `${theme}: Read now stays visible without hover`).toBeVisible();
-      const quickEdit = firstCard.locator('a[aria-label^="Edit "]');
-      await expect(quickEdit, `${theme}: the adjacent quick-edit action is touch-reachable`).toBeVisible();
+      await expectRevealed(firstRead, true, `${theme}: Read now stays visible without hover`);
+      const quickEdit = page.locator('a[aria-label^="Edit "]').first();
+      await expect(quickEdit).toHaveCount(1);
+      await expectRevealed(quickEdit, true, `${theme}: the adjacent quick-edit action is touch-reachable`);
     } else {
       await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
       await page.mouse.move(0, 0);
-      await expect(firstRead, `${theme}: desktop starts with the clean hover treatment`).toBeHidden();
+      await expectRevealed(firstRead, false, `${theme}: desktop starts with the clean hover treatment`);
       await firstCard.hover();
-      await expect(firstRead, `${theme}: mouse hover reveals Read now`).toBeVisible();
+      await expectRevealed(firstRead, true, `${theme}: mouse hover reveals Read now`);
       await page.mouse.move(0, 0);
       await firstRead.focus();
-      await expect(firstRead, `${theme}: keyboard focus reveals Read now`).toBeVisible();
+      await expectRevealed(firstRead, true, `${theme}: keyboard focus reveals Read now`);
     }
   }
 });
