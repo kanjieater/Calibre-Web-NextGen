@@ -319,6 +319,7 @@ _("Under the hood")
 # "Try it" deep-link button labels (data-authored, but stable enough to anchor
 # so a reader's locale can translate the call-to-action).
 _("Open your library")
+_("Browse tags")
 _("Open the table view")
 _("Review duplicates")
 _("Open your shelves")

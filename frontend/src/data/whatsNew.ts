@@ -56,6 +56,73 @@ export interface WhatsNewRelease {
 /** Newest release first. The `whats-new-populate` skill prepends here. */
 export const WHATS_NEW: WhatsNewRelease[] = [
   {
+    version: 'v4.1.14',
+    date: '2026-07-16',
+    items: [
+      {
+        title: 'Hide a book without hiding it from everyone',
+        body: 'You can now hide a book from your own new-interface library without deleting it or changing what anyone else sees. Use Hide beside Delete on a book, then turn on Show hidden books in View settings whenever you want it back; admins can disable the feature with Allow users to hide books.',
+        category: 'Library',
+        link: { to: '/', label: 'Open your library' },
+      },
+      {
+        title: 'Signing in takes you where you meant to go',
+        body: 'A sign-in from the new interface now returns to the page you requested instead of ending at a “page doesn’t exist” screen. With no destination, password and magic-link sign-ins open the library, while unsafe links to another site are rejected.',
+        category: 'Account',
+      },
+      {
+        title: 'KOReader highlights stay safe across devices',
+        body: 'A second KOReader device no longer erases highlights made on the first, and a highlight you deliberately delete now disappears from Calibre-Web NextGen too. The book page also shows KOReader progress when the book already had a read/unread record; update the bundled Progress Sync plugin for device-side highlight deletion.',
+        category: 'Sync',
+      },
+      {
+        title: 'One clear switch for Hardcover sync',
+        body: 'Hardcover setup now has one server-wide switch for reading progress and scheduled ID fetching, with correct environment-variable and secret-file guidance. Existing enabled setups stay enabled, and startup logs explain the configuration sources without exposing the token.',
+        category: 'Admin',
+        link: { to: '/admin', label: 'Open Admin' },
+      },
+      {
+        title: 'Choose the theme new accounts start with',
+        body: 'The Admin theme picker now really sets the default for new accounts and offers System, Light, Dark, Sepia, High contrast, and Midnight. Your own theme remains a personal choice under Account → Theme.',
+        category: 'Admin',
+        link: { to: '/admin', label: 'Open Admin' },
+      },
+      {
+        title: 'Moving-date smart shelves work in both interfaces',
+        body: 'The classic smart-shelf editor now offers working “in the past N days” rules for Publication Date and Date Added. Both editors share the same field and operator definitions, so their choices can no longer drift apart.',
+        category: 'Library',
+        link: { to: '/magic', label: 'Smart shelves' },
+      },
+      {
+        title: 'Rename tags where you browse them',
+        body: 'Editors can now rename a tag from its new-interface page, and the corrected name updates every linked book. Author, series, tag, publisher, and language pages also put the real entity name in the browser tab instead of leaving a loading placeholder there.',
+        category: 'Library',
+        link: { to: '/tags', label: 'Browse tags' },
+      },
+      {
+        title: 'The classic and new interfaces agree more often',
+        body: 'Classic catalog read checkboxes now match book details, dismissing the “Try the new UI” banner stays dismissed after updates, and advanced settings say up front when they open in the classic view. These small handoffs should now feel intentional instead of surprising.',
+        category: 'Account',
+      },
+      {
+        title: 'Signing out respects your interface choice',
+        body: 'A browser that prefers the new interface now returns to its new-interface login page after sign-out instead of unexpectedly switching to the classic login. New browsers, disabled-SPA servers, non-browser clients, and reverse-proxy subpaths keep their existing behavior.',
+        category: 'Account',
+      },
+      {
+        title: 'More of the interface speaks Russian and Brazilian Portuguese',
+        body: 'New book actions, upload feedback, hide/archive states, smart-shelf dates, themes, and accessibility announcements now have broader Russian and Brazilian Portuguese coverage. The translation pipeline also stops unreviewed fuzzy guesses from appearing complete and then falling back to English at runtime.',
+        category: 'Under the hood',
+        link: { to: '/account', label: 'Open account settings' },
+      },
+      {
+        title: 'Translated catalogs stay useful in very large libraries',
+        body: 'Entity-page prompts and search labels now follow the signed-in language consistently, rather than leaking route names or the browser’s locale. Most-downloaded lists also keep loading when a library is large enough to exceed SQLite’s single-query parameter limit.',
+        category: 'Under the hood',
+      },
+    ],
+  },
+  {
     version: 'v4.1.13',
     date: '2026-07-14',
     items: [
