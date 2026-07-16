@@ -25,7 +25,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-15 18:50+0000\n"
+"POT-Creation-Date: 2026-07-15 21:01-0400\n"
 "PO-Revision-Date: 2025-11-17 21:51+0100\n"
 "Last-Translator: Tex <tex@grosist.fr>\n"
 "Language-Team: \n"
@@ -37,7 +37,7 @@ msgstr ""
 "Generated-By: Babel 2.13.1\n"
 "X-Generator: Poedit 3.8\n"
 
-#: cps/about.py:65 cps/spa_strings.py:718
+#: cps/about.py:65 cps/spa_strings.py:800
 msgid "Statistics"
 msgstr "Statistiques"
 
@@ -70,7 +70,13 @@ msgstr ""
 "Bravo ! Livres placés en file d'attente pour une sauvegarde des métadonnées, "
 "veuillez vérifier les Tâches pour voir le résultat"
 
-#: cps/admin.py:248
+#: cps/admin.py:246
+msgid ""
+"Error: Hardcover sync is disabled. Enable it in Basic Configuration or with "
+"HARDCOVER_SYNC_ENABLED."
+msgstr ""
+
+#: cps/admin.py:254
 msgid ""
 "Error: No Hardcover token available. Set HARDCOVER_TOKEN environment "
 "variable or configure in Basic Configuration."
@@ -79,49 +85,49 @@ msgstr ""
 "d'environnement HARDCOVER_TOKEN ou configurez-la dans la configuration de "
 "base."
 
-#: cps/admin.py:276
+#: cps/admin.py:282
 msgid ""
 "Success! Hardcover auto-fetch task started. Check Tasks panel for progress."
 msgstr ""
 "Réussi ! La tâche de récupération automatique Hardcover a démarré. Vérifiez "
 "la progression dans le panneau Tâches."
 
-#: cps/admin.py:281
+#: cps/admin.py:287
 #, python-format
 msgid "Error starting Hardcover auto-fetch task: %(error)s"
 msgstr ""
 "Erreur lors du démarrage de la tâche de récupération automatique Hardcover : "
 "%(error)s"
 
-#: cps/admin.py:320 cps/templates/admin.html:224
+#: cps/admin.py:326 cps/templates/admin.html:224
 msgid "Review Hardcover Matches"
 msgstr "Vérifier les correspondances Hardcover"
 
-#: cps/admin.py:327
+#: cps/admin.py:333
 #, python-format
 msgid "Error loading review queue: %(error)s"
 msgstr ""
 "Erreur lors du chargement de la file d'attente des vérifications : %(error)s"
 
-#: cps/admin.py:408
+#: cps/admin.py:414
 msgid "Hardcover ID applied successfully"
 msgstr "Identifiant de couverture rigide appliqué avec succès"
 
-#: cps/admin.py:425
+#: cps/admin.py:431
 #, python-format
 msgid "Match %(action)s"
 msgstr "Correspond à %(action)s"
 
-#: cps/admin.py:463
+#: cps/admin.py:469
 msgid "No pending matches to reject"
 msgstr "Aucune correspondance en attente à rejeter"
 
-#: cps/admin.py:469
+#: cps/admin.py:475
 #, python-format
 msgid "Rejected %(count)s match(es)"
 msgstr "%(count)s correspondance(s) rejetée(s)"
 
-#: cps/admin.py:506
+#: cps/admin.py:512
 #, python-brace-format
 msgid ""
 "Thumbnail cache refresh started for {} book(s). This may take a few minutes."
@@ -129,32 +135,32 @@ msgstr ""
 "Actualisation du cache des vignettes lancée pour {} livre(s). Cela peut "
 "prendre quelques minutes."
 
-#: cps/admin.py:508
+#: cps/admin.py:514
 msgid "No books with covers found to process."
 msgstr "Aucun livre avec couverture trouvé à traiter."
 
-#: cps/admin.py:520
+#: cps/admin.py:526
 #, python-brace-format
 msgid "Failed to start thumbnail refresh: {}"
 msgstr "Échec du démarrage de l'actualisation des miniatures : {}"
 
-#: cps/admin.py:590
+#: cps/admin.py:596
 msgid "Admin page"
 msgstr "Page admin"
 
-#: cps/admin.py:610
+#: cps/admin.py:616
 msgid "Hardcover token expires"
 msgstr "Le jeton Hardcover expire"
 
-#: cps/admin.py:618
+#: cps/admin.py:624
 msgid "Basic Configuration"
 msgstr "Configuration principale"
 
-#: cps/admin.py:656
+#: cps/admin.py:662
 msgid "UI Configuration"
 msgstr "Configuration de l’interface utilisateur"
 
-#: cps/admin.py:680 cps/admin.py:1427 cps/db.py:1408 cps/search.py:153
+#: cps/admin.py:686 cps/admin.py:1433 cps/db.py:1408 cps/search.py:153
 #: cps/web.py:673 cps/web.py:1003
 #, python-format
 msgid "Custom Column No.%(column)d does not exist in calibre database"
@@ -162,135 +168,135 @@ msgstr ""
 "La colonne personnalisée No.%(column)d n'existe pas dans la base de données "
 "calibre"
 
-#: cps/admin.py:698 cps/templates/admin.html:55
+#: cps/admin.py:704 cps/templates/admin.html:55
 msgid "Edit Users"
 msgstr "Éditer les utilisateurs"
 
-#: cps/admin.py:742 cps/opds.py:1311 cps/spa_strings.py:346
+#: cps/admin.py:748 cps/opds.py:1311 cps/spa_strings.py:383
 #: cps/templates/grid.html:14 cps/templates/list.html:19
 msgid "All"
 msgstr "Tout"
 
-#: cps/admin.py:769 cps/admin.py:2149
+#: cps/admin.py:775 cps/admin.py:2155
 msgid "User not found"
 msgstr "L'utilisateur n'a pas été trouvé"
 
-#: cps/admin.py:783
+#: cps/admin.py:789
 #, python-brace-format
 msgid "{} users deleted successfully"
 msgstr "{} utilisateurs supprimés avec succès"
 
-#: cps/admin.py:806 cps/api/account.py:67
+#: cps/admin.py:812 cps/api/account.py:67
 #: cps/templates/config_view_edit.html:186 cps/templates/user_edit.html:270
 #: cps/templates/user_edit.html:292 cps/templates/user_table.html:81
 msgid "Show All"
 msgstr "Montrer tout"
 
-#: cps/admin.py:827 cps/admin.py:833
+#: cps/admin.py:833 cps/admin.py:839
 msgid "Malformed request"
 msgstr "Demande malformée"
 
-#: cps/admin.py:845 cps/admin.py:3067
+#: cps/admin.py:851 cps/admin.py:3084
 msgid "Guest Name can't be changed"
 msgstr "Le nom de l’invité ne peut pas être modifié"
 
-#: cps/admin.py:861
+#: cps/admin.py:867
 msgid "Guest can't have this role"
 msgstr "L’invité ne peut pas avoir ce rôle"
 
-#: cps/admin.py:873 cps/admin.py:2891
+#: cps/admin.py:879 cps/admin.py:2908
 msgid "No admin user remaining, can't remove admin role"
 msgstr "Aucun utilisateur admin restant, impossible de supprimer le rôle admin"
 
-#: cps/admin.py:877 cps/admin.py:891
+#: cps/admin.py:883 cps/admin.py:897
 msgid "Value has to be true or false"
 msgstr "La valeur doit être vraie ou fausse"
 
-#: cps/admin.py:879
+#: cps/admin.py:885
 msgid "Invalid role"
 msgstr "Rôle invalide"
 
-#: cps/admin.py:883
+#: cps/admin.py:889
 msgid "Guest can't have this view"
 msgstr "L’invité ne peut pas avoir cette vue"
 
-#: cps/admin.py:893
+#: cps/admin.py:899
 msgid "Invalid view"
 msgstr "Vue invalide"
 
-#: cps/admin.py:896
+#: cps/admin.py:902
 msgid "Guest's Locale is determined automatically and can't be set"
 msgstr ""
 "Les paramètres régionaux de l’invité sont déterminés automatiquement et ne "
 "peuvent pas être définis"
 
-#: cps/admin.py:900
+#: cps/admin.py:906
 msgid "No Valid Locale Given"
 msgstr "Aucun paramètre régional valide n’est donné"
 
-#: cps/admin.py:911
+#: cps/admin.py:917
 msgid "No Valid Book Language Given"
 msgstr "Aucune langue de livre valide donnée"
 
-#: cps/admin.py:913 cps/editbooks.py:677
+#: cps/admin.py:919 cps/editbooks.py:682
 msgid "Parameter not found"
 msgstr "Paramètre non trouvé"
 
-#: cps/admin.py:961
+#: cps/admin.py:967
 msgid ""
 "The title-sort rule was saved, but reordering the existing library failed — "
 "books may keep their previous order until you retry or edit them."
 msgstr ""
 
-#: cps/admin.py:966
+#: cps/admin.py:972
 msgid "Invalid Read Column"
 msgstr "Colonne de lecture non valide"
 
-#: cps/admin.py:972
+#: cps/admin.py:978
 msgid "Invalid Restricted Column"
 msgstr "Colonne restreinte non valide"
 
-#: cps/admin.py:1001 cps/admin.py:2747
+#: cps/admin.py:1007 cps/admin.py:2764
 msgid "Calibre-Web NextGen configuration updated"
 msgstr ""
 
-#: cps/admin.py:1013
+#: cps/admin.py:1019
 msgid "Do you really want to delete the Kobo Token?"
 msgstr "Voulez-vous vraiment supprimer le jeton Kobo ?"
 
-#: cps/admin.py:1015
+#: cps/admin.py:1021
 msgid "Do you really want to delete this domain?"
 msgstr "Voulez-vous vraiment supprimer ce domaine ?"
 
-#: cps/admin.py:1017
+#: cps/admin.py:1023
 msgid "Do you really want to delete this user?"
 msgstr "Voulez-vous vraiment supprimer cet utilisateur ?"
 
-#: cps/admin.py:1019
+#: cps/admin.py:1025
 msgid "Are you sure you want to delete this shelf?"
 msgstr "Voulez-vous vraiment supprimer l’étagère ?"
 
-#: cps/admin.py:1021
+#: cps/admin.py:1027
 msgid "Are you sure you want to change locales of selected user(s)?"
 msgstr ""
 "Voulez vous vraiment changer la langue pour le ou les utilisateurs "
 "sélectionnés ?"
 
-#: cps/admin.py:1023
+#: cps/admin.py:1029
 msgid ""
 "Are you sure you want to change visible book languages for selected user(s)?"
 msgstr ""
 "Voulez-vous vraiment modifier les langues de livre visibles pour le ou les "
 "utilisateurs sélectionnés ?"
 
-#: cps/admin.py:1025
+#: cps/admin.py:1031
 msgid ""
 "Are you sure you want to change the selected role for the selected user(s)?"
 msgstr ""
 "Voulez-vous vraiment modifier le rôle sélectionné pour le ou les "
 "utilisateurs sélectionnés ?"
 
-#: cps/admin.py:1027
+#: cps/admin.py:1033
 msgid ""
 "Are you sure you want to change the selected restrictions for the selected "
 "user(s)?"
@@ -298,7 +304,7 @@ msgstr ""
 "Voulez-vous vraiment modifier les restrictions sélectionnées pour le ou les "
 "utilisateurs sélectionnés ?"
 
-#: cps/admin.py:1029
+#: cps/admin.py:1035
 msgid ""
 "Are you sure you want to change the selected visibility restrictions for the "
 "selected user(s)?"
@@ -306,14 +312,14 @@ msgstr ""
 "Voulez-vous vraiment modifier les restrictions de visibilité sélectionnées "
 "pour le ou les utilisateurs sélectionnés ?"
 
-#: cps/admin.py:1032
+#: cps/admin.py:1038
 msgid ""
 "Are you sure you want to change shelf sync behavior for the selected user(s)?"
 msgstr ""
 "Voulez-vous vraiment changer le comportement de synchronisation pour le ou "
 "les utilisateurs sélectionnés ?"
 
-#: cps/admin.py:1034
+#: cps/admin.py:1040
 #, fuzzy
 msgid ""
 "Are you sure you want to change OPDS shelf exposure for the selected user(s)?"
@@ -321,130 +327,130 @@ msgstr ""
 "Voulez-vous vraiment changer le comportement de synchronisation pour le ou "
 "les utilisateurs sélectionnés ?"
 
-#: cps/admin.py:1036
+#: cps/admin.py:1042
 msgid "Are you sure you want to change Calibre library location?"
 msgstr ""
 "Voulez-vous vraiment changer l’emplacement de la bibliothèque de Calibre ?"
 
-#: cps/admin.py:1038
+#: cps/admin.py:1044
 msgid ""
 "Calibre-Web NextGen will search for updated Covers and update Cover "
 "Thumbnails, this may take a while?"
 msgstr ""
 
-#: cps/admin.py:1041
+#: cps/admin.py:1047
 msgid ""
 "Are you sure you want delete Calibre-Web NextGen's sync database to force a "
 "full sync with your Kobo Reader?"
 msgstr ""
 
-#: cps/admin.py:1280 cps/admin.py:1286 cps/admin.py:1296 cps/admin.py:1306
+#: cps/admin.py:1286 cps/admin.py:1292 cps/admin.py:1302 cps/admin.py:1312
 #: cps/templates/modal_dialogs.html:29 cps/templates/user_table.html:41
 #: cps/templates/user_table.html:58
 msgid "Deny"
 msgstr "Refuser"
 
-#: cps/admin.py:1282 cps/admin.py:1288 cps/admin.py:1298 cps/admin.py:1308
+#: cps/admin.py:1288 cps/admin.py:1294 cps/admin.py:1304 cps/admin.py:1314
 #: cps/templates/modal_dialogs.html:28 cps/templates/user_table.html:44
 #: cps/templates/user_table.html:61
 msgid "Allow"
 msgstr "Autoriser"
 
-#: cps/admin.py:1341
+#: cps/admin.py:1347
 #, python-brace-format
 msgid "{} sync entries deleted"
 msgstr "{} entrées de synchronisation supprimées"
 
-#: cps/admin.py:1361
+#: cps/admin.py:1367
 #, fuzzy, python-brace-format
 msgid "Book {} not found"
 msgstr "Livre introuvable."
 
-#: cps/admin.py:1371
+#: cps/admin.py:1377
 #, python-brace-format
 msgid ""
 "Cleared sync state for book {0} (user {1}); the device will re-receive the "
 "book on next sync"
 msgstr ""
 
-#: cps/admin.py:1374
+#: cps/admin.py:1380
 #, python-brace-format
 msgid ""
 "Book {0} was not in the sync record for user {1}; last_modified bumped so "
 "the device will receive on next sync"
 msgstr ""
 
-#: cps/admin.py:1418
+#: cps/admin.py:1424 cps/api/browse.py:79 cps/spa_strings.py:83
 msgid "Tag not found"
 msgstr "Étiquette introuvable"
 
-#: cps/admin.py:1436
+#: cps/admin.py:1442
 msgid "Invalid Action"
 msgstr "Action invalide"
 
-#: cps/admin.py:1563
+#: cps/admin.py:1569
 msgid "client_secrets.json Is Not Configured For Web Application"
 msgstr "client_secrets.json n'est pas configuré pour l'application Web"
 
-#: cps/admin.py:1720
+#: cps/admin.py:1726
 msgid "Logfile Location is not Valid, Please Enter Correct Path"
 msgstr ""
 "L'emplacement du fichier logfile est incorrect, veuillez saisir un chemin "
 "valide"
 
-#: cps/admin.py:1726
+#: cps/admin.py:1732
 msgid "Access Logfile Location is not Valid, Please Enter Correct Path"
 msgstr ""
 "L'emplacement du fichier Access Logfile est incorrect, veuillez saisir un "
 "chemin valide"
 
-#: cps/admin.py:1761
+#: cps/admin.py:1767
 msgid "Please Enter a LDAP Provider, Port, DN and User Object Identifier"
 msgstr ""
 "Veuillez saisir un fournisseur LDAP, Port, DN et l'identifiant objet de "
 "l'utilisateur"
 
-#: cps/admin.py:1767
+#: cps/admin.py:1773
 msgid "Please Enter a LDAP Service Account and Password"
 msgstr "Veuillez saisir un identifiant et mot de passe de service LDAP"
 
-#: cps/admin.py:1770
+#: cps/admin.py:1776
 msgid "Please Enter a LDAP Service Account"
 msgstr "Veuillez entrer un compte de service LDAP"
 
-#: cps/admin.py:1775
+#: cps/admin.py:1781
 #, python-format
 msgid "LDAP Group Object Filter Needs to Have One \"%s\" Format Identifier"
 msgstr ""
 "Le filtre objet du groupe LDAP a besoin d'un identifiant de format \"%s\""
 
-#: cps/admin.py:1777
+#: cps/admin.py:1783
 msgid "LDAP Group Object Filter Has Unmatched Parenthesis"
 msgstr "Le filtre objet du groupe LDAP a une parenthèse non gérée"
 
-#: cps/admin.py:1781
+#: cps/admin.py:1787
 #, python-format
 msgid "LDAP User Object Filter needs to Have One \"%s\" Format Identifier"
 msgstr ""
 "Le filtre objet de l'utilisateur LDAP a besoin d'un identifiant de format "
 "\"%s\""
 
-#: cps/admin.py:1783
+#: cps/admin.py:1789
 msgid "LDAP User Object Filter Has Unmatched Parenthesis"
 msgstr "Le filtre objet de l'utilisateur LDAP a une parenthèse non gérée"
 
-#: cps/admin.py:1790
+#: cps/admin.py:1796
 #, python-format
 msgid "LDAP Member User Filter needs to Have One \"%s\" Format Identifier"
 msgstr ""
 "Le filtre utilisateur des membres LDAP doit avoir un identificateur de "
 "format \"%s\\ »"
 
-#: cps/admin.py:1792
+#: cps/admin.py:1798
 msgid "LDAP Member User Filter Has Unmatched Parenthesis"
 msgstr "Le filtre utilisateur de membre LDAP a des parenthèses non appariées"
 
-#: cps/admin.py:1799
+#: cps/admin.py:1805
 msgid ""
 "LDAP CACertificate, Certificate or Key Location is not Valid, Please Enter "
 "Correct Path"
@@ -452,29 +458,29 @@ msgstr ""
 "LDAP CACertificat, certificat ou emplacement de clé non valide, veuillez "
 "entrer le chemin correct"
 
-#: cps/admin.py:1832 cps/templates/admin.html:57
+#: cps/admin.py:1838 cps/templates/admin.html:57
 msgid "Add New User"
 msgstr "Ajouter un nouvel utilisateur"
 
-#: cps/admin.py:1847 cps/templates/admin.html:105
+#: cps/admin.py:1853 cps/templates/admin.html:105
 #: cps/templates/broadcast_email.html:9
 msgid "Edit Email Server Settings"
 msgstr "Modifier les paramètres du serveur de courriels"
 
-#: cps/admin.py:1866
+#: cps/admin.py:1872
 msgid "Success! Gmail Account Verified."
 msgstr "Bravo ! Compte Gmail vérifié."
 
-#: cps/admin.py:1890 cps/admin.py:1893 cps/admin.py:2498 cps/admin.py:2730
-#: cps/admin.py:2848 cps/admin.py:3110 cps/editbooks.py:1152
-#: cps/editbooks.py:2054 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
+#: cps/admin.py:1896 cps/admin.py:1899 cps/admin.py:2504 cps/admin.py:2740
+#: cps/admin.py:2865 cps/admin.py:3127 cps/editbooks.py:1157
+#: cps/editbooks.py:2059 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
 #: cps/shelf.py:332 cps/shelf.py:389 cps/shelf.py:464 cps/shelf.py:547
-#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3135
+#: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3140
 #, python-format
 msgid "Oops! Database Error: %(error)s."
 msgstr "Erreur de la base de données : %(error)s."
 
-#: cps/admin.py:1900
+#: cps/admin.py:1906
 #, python-format
 msgid ""
 "Test e-mail queued for sending to %(email)s, please check Tasks for result"
@@ -482,53 +488,53 @@ msgstr ""
 "Le courriel de test a été mis en file d'attente pour être envoyé à "
 "%(email)s, veuillez vérifier les Tâches pour voir le résultat"
 
-#: cps/admin.py:1903
+#: cps/admin.py:1909
 #, python-format
 msgid "There was an error sending the Test e-mail: %(res)s"
 msgstr "Il y a eu une erreur pendant l’envoi du courriel de test : %(res)s"
 
-#: cps/admin.py:1905
+#: cps/admin.py:1911
 msgid "Please configure your e-mail address first..."
 msgstr "Veuillez d'abord configurer votre adresse de courriel…"
 
-#: cps/admin.py:1907
+#: cps/admin.py:1913
 msgid "Email Server Settings updated"
 msgstr "Les paramètres du serveur de courriels ont été mis à jour"
 
-#: cps/admin.py:1947 cps/templates/admin.html:106
+#: cps/admin.py:1953 cps/templates/admin.html:106
 #, fuzzy
 msgid "Email Your Users"
 msgstr "Éditer les utilisateurs"
 
-#: cps/admin.py:1973
+#: cps/admin.py:1979
 #, fuzzy
 msgid ""
 "Please configure the email server under Edit Email Server Settings first."
 msgstr "Veuillez configurer les paramètres SMTP au préalable…"
 
-#: cps/admin.py:1978
+#: cps/admin.py:1984
 msgid "Please enter a subject for the announcement email."
 msgstr ""
 
-#: cps/admin.py:1981
+#: cps/admin.py:1987
 msgid "Please enter a message body for the announcement email."
 msgstr ""
 
-#: cps/admin.py:1987
+#: cps/admin.py:1993
 #, fuzzy
 msgid "Please set an email address on your own account first..."
 msgstr "Veuillez d'abord configurer votre adresse de courriel…"
 
-#: cps/admin.py:2000
+#: cps/admin.py:2006
 #, fuzzy
 msgid "Please select at least one recipient."
 msgstr "Le nouveau mot de passe a été envoyé vers votre adresse de courriel"
 
-#: cps/admin.py:2006
+#: cps/admin.py:2012
 msgid "No valid recipients — nothing was sent."
 msgstr ""
 
-#: cps/admin.py:2010
+#: cps/admin.py:2016
 #, fuzzy, python-format
 msgid ""
 "Test announcement email queued to %(email)s — check Tasks for the result."
@@ -536,7 +542,7 @@ msgstr ""
 "Le courriel de test a été mis en file d'attente pour être envoyé à "
 "%(email)s, veuillez vérifier les Tâches pour voir le résultat"
 
-#: cps/admin.py:2014
+#: cps/admin.py:2020
 #, fuzzy, python-format
 msgid ""
 "Announcement email queued for %(num)s recipient(s) — check Tasks for "
@@ -545,173 +551,173 @@ msgstr ""
 "Le courriel de test a été mis en file d'attente pour être envoyé à "
 "%(email)s, veuillez vérifier les Tâches pour voir le résultat"
 
-#: cps/admin.py:2016
+#: cps/admin.py:2022
 #, python-format
 msgid "%(num)s address(es) were skipped as invalid or duplicate."
 msgstr ""
 
-#: cps/admin.py:2039 cps/templates/admin.html:202
+#: cps/admin.py:2045 cps/templates/admin.html:202
 msgid "Edit Scheduled Tasks Settings"
 msgstr "Modifier les paramètres des tâches planifiées"
 
-#: cps/admin.py:2051
+#: cps/admin.py:2057
 msgid "Invalid start time for task specified"
 msgstr "Heure de début non valide pour la tâche spécifiée"
 
-#: cps/admin.py:2056
+#: cps/admin.py:2062
 msgid "Invalid duration for task specified"
 msgstr "Durée non valide pour la tâche spécifiée"
 
-#: cps/admin.py:2066
+#: cps/admin.py:2072
 msgid "Scheduled tasks settings updated"
 msgstr "Paramètres des tâches planifiées mis à jour"
 
-#: cps/admin.py:2076 cps/admin.py:2220 cps/admin.py:3106 cps/web.py:2565
+#: cps/admin.py:2082 cps/admin.py:2226 cps/admin.py:3123 cps/web.py:2570
 msgid "Oops! An unknown error occurred. Please try again later."
 msgstr "Une erreur inconnue est survenue. Veuillez réessayer plus tard."
 
-#: cps/admin.py:2080
+#: cps/admin.py:2086
 msgid "Settings DB is not Writeable"
 msgstr "La base de données des paramètres n'est pas accessible en écriture"
 
-#: cps/admin.py:2099 cps/opds.py:316 cps/opds.py:354 cps/opds.py:357
-#: cps/web.py:3051 cps/web.py:3186
+#: cps/admin.py:2105 cps/opds.py:316 cps/opds.py:354 cps/opds.py:357
+#: cps/web.py:3056 cps/web.py:3191
 msgid "title"
 msgstr "Titre"
 
-#: cps/admin.py:2205 cps/admin.py:3098
+#: cps/admin.py:2211 cps/admin.py:3115
 #, python-format
 msgid "Edit User %(nick)s"
 msgstr "Éditer l'utilisateur %(nick)s"
 
-#: cps/admin.py:2217
+#: cps/admin.py:2223
 #, python-format
 msgid "Success! Password for user %(user)s reset"
 msgstr ""
 "Le mot de passe de l’utilisateur %(user)s a été réinitialisé avec succès"
 
-#: cps/admin.py:2223
+#: cps/admin.py:2229
 msgid "Oops! Please configure the SMTP mail settings."
 msgstr "Oups ! Veuillez configurer les paramètres de messagerie SMTP."
 
-#: cps/admin.py:2234
+#: cps/admin.py:2240
 msgid "Logfile viewer"
 msgstr "Visualiseur de fichier journal"
 
-#: cps/admin.py:2310
+#: cps/admin.py:2316
 msgid "Requesting update package"
 msgstr "Demande de mise à jour"
 
-#: cps/admin.py:2311
+#: cps/admin.py:2317
 msgid "Downloading update package"
 msgstr "Téléchargement de la mise à jour"
 
-#: cps/admin.py:2312
+#: cps/admin.py:2318
 msgid "Unzipping update package"
 msgstr "Décompression de la mise à jour"
 
-#: cps/admin.py:2313
+#: cps/admin.py:2319
 msgid "Replacing files"
 msgstr "Remplacement des fichiers"
 
-#: cps/admin.py:2314
+#: cps/admin.py:2320
 msgid "Database connections are closed"
 msgstr "Les connexions à la base de données ont été fermées"
 
-#: cps/admin.py:2315
+#: cps/admin.py:2321
 msgid "Stopping server"
 msgstr "Arrêt du serveur"
 
-#: cps/admin.py:2316
+#: cps/admin.py:2322
 msgid "Update finished, please press okay and reload page"
 msgstr ""
 "Mise à jour terminée, merci d’appuyer sur okay et de rafraîchir la page"
 
-#: cps/admin.py:2317 cps/admin.py:2318 cps/admin.py:2319 cps/admin.py:2320
-#: cps/admin.py:2321 cps/admin.py:2322
+#: cps/admin.py:2323 cps/admin.py:2324 cps/admin.py:2325 cps/admin.py:2326
+#: cps/admin.py:2327 cps/admin.py:2328
 msgid "Update failed:"
 msgstr "La mise à jour a échoué :"
 
-#: cps/admin.py:2317 cps/updater.py:446 cps/updater.py:685 cps/updater.py:687
+#: cps/admin.py:2323 cps/updater.py:446 cps/updater.py:685 cps/updater.py:687
 msgid "HTTP Error"
 msgstr "Erreur HTTP"
 
-#: cps/admin.py:2318 cps/updater.py:448 cps/updater.py:689
+#: cps/admin.py:2324 cps/updater.py:448 cps/updater.py:689
 msgid "Connection error"
 msgstr "Erreur de connexion"
 
-#: cps/admin.py:2319 cps/updater.py:450 cps/updater.py:691
+#: cps/admin.py:2325 cps/updater.py:450 cps/updater.py:691
 msgid "Timeout while establishing connection"
 msgstr "Délai d'attente dépassé lors de l'établissement de connexion"
 
-#: cps/admin.py:2320 cps/updater.py:452 cps/updater.py:693
+#: cps/admin.py:2326 cps/updater.py:452 cps/updater.py:693
 msgid "General error"
 msgstr "Erreur générale"
 
-#: cps/admin.py:2321
+#: cps/admin.py:2327
 msgid "Update file could not be saved in temp dir"
 msgstr ""
 "Le fichier de mise à jour n'a pas pu être sauvegardé dans le répertoire "
 "temporaire"
 
-#: cps/admin.py:2322
+#: cps/admin.py:2328
 msgid "Files could not be replaced during update"
 msgstr "Les fichiers n’ont pas pu être remplacés pendant la mise à jour"
 
-#: cps/admin.py:2346
+#: cps/admin.py:2352
 msgid "Failed to extract at least One LDAP User"
 msgstr "Impossible d'extraire au moins un utilisateur LDAP"
 
-#: cps/admin.py:2391
+#: cps/admin.py:2397
 msgid "Failed to Create at Least One LDAP User"
 msgstr "Impossible de créer au moins un utilisateur LDAP"
 
-#: cps/admin.py:2404
+#: cps/admin.py:2410
 #, python-format
 msgid "Error: %(ldaperror)s"
 msgstr "Erreur : %(ldaperror)s"
 
-#: cps/admin.py:2408
+#: cps/admin.py:2414
 msgid "Error: No user returned in response of LDAP server"
 msgstr "Erreur : Aucun utilisateur renvoyé dans la réponse LDAP du serveur"
 
-#: cps/admin.py:2444
+#: cps/admin.py:2450
 msgid "At Least One LDAP User Not Found in Database"
 msgstr ""
 "Au moins un utilisateur LDAP n'a pas été trouvé dans la base de données"
 
-#: cps/admin.py:2446
+#: cps/admin.py:2452
 #, python-brace-format
 msgid "{} User Successfully Imported"
 msgstr "{} utilisateur importé avec succès"
 
-#: cps/admin.py:2510
+#: cps/admin.py:2516
 msgid "Books path not valid"
 msgstr "Chemin d'accès aux livres non valide"
 
-#: cps/admin.py:2517
+#: cps/admin.py:2523
 msgid "DB Location is not Valid, Please Enter Correct Path"
 msgstr ""
 "L'emplacement de la base de données est incorrect, veuillez saisir un chemin "
 "valide"
 
-#: cps/admin.py:2542
+#: cps/admin.py:2548
 msgid "DB is not Writeable"
 msgstr "La base de données n'est pas accessible en écriture"
 
-#: cps/admin.py:2555
+#: cps/admin.py:2563
 msgid "Keyfile Location is not Valid, Please Enter Correct Path"
 msgstr ""
 "L'emplacement du fichier Keyfile est incorrect, veuillez saisir un chemin "
 "valide"
 
-#: cps/admin.py:2559
+#: cps/admin.py:2567
 msgid "Certfile Location is not Valid, Please Enter Correct Path"
 msgstr ""
 "L'emplacement du fichier Certfile est incorrect, veuillez saisir un chemin "
 "valide"
 
-#: cps/admin.py:2651
+#: cps/admin.py:2661
 msgid ""
 "Auto-create users cannot be enabled without enabling reverse proxy "
 "authentication"
@@ -719,13 +725,13 @@ msgstr ""
 "La création automatique d'utilisateurs ne peut pas être activée sans activer "
 "l'authentification par reverse proxy"
 
-#: cps/admin.py:2654
+#: cps/admin.py:2664
 msgid "Auto-create users requires a valid reverse proxy header name"
 msgstr ""
 "La création automatique d'utilisateurs nécessite un nom d'en-tête de reverse "
 "proxy valide"
 
-#: cps/admin.py:2673 cps/admin.py:2680
+#: cps/admin.py:2683 cps/admin.py:2690
 msgid ""
 "Invalid OAuth Redirect Host format. Please include the full URL with "
 "protocol (e.g., https://your-domain.com)"
@@ -733,7 +739,7 @@ msgstr ""
 "Format d'hôte de redirection OAuth non valide. Veuillez inclure l'URL "
 "complète avec le protocole (par exemple, https://your-domain.com)."
 
-#: cps/admin.py:2677
+#: cps/admin.py:2687
 msgid ""
 "OAuth Redirect Host should not include a path. Use only the base URL (e.g., "
 "https://your-domain.com)"
@@ -741,63 +747,63 @@ msgstr ""
 "L'hôte de redirection OAuth ne doit pas inclure de chemin d'accès. Utilisez "
 "uniquement l'URL de base (par exemple, https://your-domain.com)."
 
-#: cps/admin.py:2713
+#: cps/admin.py:2723
 msgid "Password length has to be between 1 and 40"
 msgstr ""
 "La longueur du mot de passe doit être comprise entre 1 et 40 caractères"
 
-#: cps/admin.py:2774
+#: cps/admin.py:2791
 msgid "Database Settings updated"
 msgstr "La configuration de la base de données a été mise à jour"
 
-#: cps/admin.py:2782
+#: cps/admin.py:2799
 msgid "Database Configuration"
 msgstr "Configuration de la base de données"
 
-#: cps/admin.py:2803 cps/web.py:2530
+#: cps/admin.py:2820 cps/web.py:2535
 msgid "Oops! Please complete all fields."
 msgstr "Veuillez compléter tous les champs."
 
-#: cps/admin.py:2812
+#: cps/admin.py:2829
 msgid "E-mail is not from valid domain"
 msgstr "Cette adresse de courriel n’appartient pas à un domaine valide"
 
-#: cps/admin.py:2820
+#: cps/admin.py:2837
 msgid "Add new user"
 msgstr "Ajouter un nouvel utilisateur"
 
-#: cps/admin.py:2838
+#: cps/admin.py:2855
 #, python-format
 msgid "User '%(user)s' created"
 msgstr "Utilisateur '%(user)s' créé"
 
-#: cps/admin.py:2844
+#: cps/admin.py:2861
 msgid "Oops! An account already exists for this Email. or name."
 msgstr "Oups ! Un compte existe déjà pour cette adresse e-mail ou ce nom."
 
-#: cps/admin.py:2870
+#: cps/admin.py:2887
 #, python-format
 msgid "User '%(nick)s' deleted"
 msgstr "Utilisateur '%(nick)s' supprimé"
 
-#: cps/admin.py:2873
+#: cps/admin.py:2890
 msgid "Can't delete Guest User"
 msgstr "Impossible de supprimer l’utilisateur Invité"
 
-#: cps/admin.py:2876
+#: cps/admin.py:2893
 msgid "No admin user remaining, can't delete user"
 msgstr "Aucun utilisateur admin restant, impossible de supprimer l’utilisateur"
 
-#: cps/admin.py:3061 cps/web.py:2866
+#: cps/admin.py:3078 cps/web.py:2871
 msgid "Email can't be empty and has to be a valid Email"
 msgstr "L'adresse e-mail ne peut pas être vide et doit être valide"
 
-#: cps/admin.py:3102
+#: cps/admin.py:3119
 #, python-format
 msgid "User '%(nick)s' updated"
 msgstr "Utilisateur '%(nick)s' mis à jour"
 
-#: cps/admin.py:3167
+#: cps/admin.py:3184
 #, python-format
 msgid ""
 "Connection successful! OIDC discovery endpoint is accessible.%(endpoints)s"
@@ -805,7 +811,7 @@ msgstr ""
 "Connexion réussie ! Le point de terminaison de découverte OIDC est "
 "accessible.%(endpoints)s"
 
-#: cps/admin.py:3172
+#: cps/admin.py:3189
 msgid ""
 "Connection failed: OIDC discovery endpoint not found (404). Check if the "
 "base URL is correct."
@@ -813,13 +819,13 @@ msgstr ""
 "Échec de la connexion : point de terminaison OIDC introuvable (404). "
 "Vérifiez que l'URL de base est correcte."
 
-#: cps/admin.py:3174 cps/admin.py:3231
+#: cps/admin.py:3191 cps/admin.py:3248
 #, python-format
 msgid "Connection failed: Server returned status code %(code)s"
 msgstr ""
 "Échec de la connexion : Le serveur a retourné le code de statut %(code)s"
 
-#: cps/admin.py:3176
+#: cps/admin.py:3193
 msgid ""
 "Connection failed: Could not connect to server. Check the URL and network "
 "connectivity."
@@ -827,14 +833,14 @@ msgstr ""
 "Échec de la connexion : impossible de se connecter au serveur. Vérifiez "
 "l'URL et la connexion réseau."
 
-#: cps/admin.py:3178
+#: cps/admin.py:3195
 msgid ""
 "Connection failed: Request timed out. The server may be slow or unreachable."
 msgstr ""
 "Échec de la connexion : délai d'attente expiré. Le serveur est peut-être "
 "lent ou inaccessible."
 
-#: cps/admin.py:3180
+#: cps/admin.py:3197
 msgid ""
 "Connection failed: Server returned invalid JSON. This may not be an OIDC "
 "endpoint."
@@ -842,12 +848,12 @@ msgstr ""
 "Échec de la connexion : le serveur a renvoyé un JSON non valide. Il ne "
 "s'agit peut-être pas d'un point de terminaison OIDC."
 
-#: cps/admin.py:3183
+#: cps/admin.py:3200
 #, python-format
 msgid "Connection failed: %(error)s"
 msgstr "Échec de la connexion : %(error)s"
 
-#: cps/admin.py:3209
+#: cps/admin.py:3226
 #, python-format
 msgid ""
 "Metadata is missing required OIDC fields: %(fields)s. This may not be a "
@@ -857,31 +863,31 @@ msgstr ""
 "se peut que ce ne soit pas un point de terminaison de métadonnées OIDC "
 "valide."
 
-#: cps/admin.py:3220
+#: cps/admin.py:3237
 #, python-format
 msgid "Metadata URL is valid! Found %(count)s OAuth endpoints."
 msgstr ""
 "L'URL des métadonnées est valide ! %(count)s points de terminaison OAuth "
 "trouvés."
 
-#: cps/admin.py:3222
+#: cps/admin.py:3239
 msgid " User info endpoint is available."
 msgstr " Le point de terminaison des informations utilisateur est disponible."
 
-#: cps/admin.py:3224
+#: cps/admin.py:3241
 msgid ""
 " Note: User info endpoint not found - this may cause authentication issues."
 msgstr ""
 " Remarque : point de terminaison des informations utilisateur introuvable - "
 "cela peut entraîner des problèmes d'authentification."
 
-#: cps/admin.py:3229
+#: cps/admin.py:3246
 msgid "Metadata URL not found (404). Please check the URL is correct."
 msgstr ""
 "URL des métadonnées introuvable (404). Veuillez vérifier que l'URL est "
 "correcte."
 
-#: cps/admin.py:3233
+#: cps/admin.py:3250
 msgid ""
 "Connection failed: Could not connect to metadata URL. Check the URL and "
 "network connectivity."
@@ -889,49 +895,49 @@ msgstr ""
 "Échec de la connexion : impossible de se connecter à l'URL des métadonnées. "
 "Vérifiez l'URL et la connectivité réseau."
 
-#: cps/admin.py:3235
+#: cps/admin.py:3252
 msgid "Connection failed: Request timed out."
 msgstr "Échec de la connexion : Délai d'attente dépassé."
 
-#: cps/admin.py:3237
+#: cps/admin.py:3254
 msgid "Connection failed: Invalid JSON in response."
 msgstr "Échec de la connexion : Réponse JSON invalide."
 
-#: cps/admin.py:3240
+#: cps/admin.py:3257
 msgid "An unknown error occurred."
 msgstr "Une erreur inconnue est survenue."
 
-#: cps/admin.py:3252
+#: cps/admin.py:3269
 msgid "Restore already in progress."
 msgstr "Restauration déjà en cours."
 
-#: cps/admin.py:3256
+#: cps/admin.py:3273
 msgid "Restore failed: Calibre library path is not configured."
 msgstr ""
 "Restauration échouée : chemin de la bibliothèque Calibre non configuré."
 
-#: cps/admin.py:3261
+#: cps/admin.py:3278
 #, python-format
 msgid "Restore failed: metadata.db not found at %(path)s"
 msgstr "Restauration échouée : metadata.db introuvable à %(path)s"
 
-#: cps/admin.py:3266
+#: cps/admin.py:3283
 #, python-format
 msgid "Restore failed: app.db not found at %(path)s"
 msgstr "Restauration échouée : app.db introuvable à %(path)s"
 
-#: cps/admin.py:3338 cps/admin.py:3381
+#: cps/admin.py:3355 cps/admin.py:3398
 #, python-format
 msgid "Restore failed: %(err)s"
 msgstr "Échec de la restauration : %(err)s"
 
-#: cps/admin.py:3358
+#: cps/admin.py:3375
 msgid "Restore completed but app.db cleanup failed. See logs for details."
 msgstr ""
 "La restauration est terminée mais le nettoyage de app.db a échoué. Voir les "
 "journaux pour plus de détails."
 
-#: cps/admin.py:3377
+#: cps/admin.py:3394
 #, python-format
 msgid ""
 "Restore complete. Backups and restore log saved to %(dir)s. All book-linked "
@@ -1079,12 +1085,11 @@ msgstr "non installé"
 msgid "Execution permissions missing"
 msgstr "Les permissions d'exécutions manquantes"
 
-#: cps/cover_picker.py:121 cps/spa_strings.py:370
-#, fuzzy
+#: cps/cover_picker.py:121 cps/spa_strings.py:407
 msgid "Back to edit metadata"
-msgstr "modifier les métadonnées"
+msgstr ""
 
-#: cps/cover_picker.py:124 cps/spa_strings.py:109
+#: cps/cover_picker.py:124 cps/spa_strings.py:146
 #: cps/templates/book_edit.html:39
 msgid "Back to book"
 msgstr ""
@@ -1128,16 +1133,16 @@ msgstr "Impossible de trouver le répertoire spécifié"
 msgid "Could not load a source image to preview."
 msgstr ""
 
-#: cps/cover_picker.py:573 cps/cover_picker.py:587 cps/spa_strings.py:433
+#: cps/cover_picker.py:573 cps/cover_picker.py:587 cps/spa_strings.py:477
 msgid "Cover save failed."
 msgstr ""
 
-#: cps/cwa_functions.py:170
+#: cps/cwa_functions.py:178
 msgid "Theme switching is temporarily disabled until v5.0.0"
 msgstr ""
 "Le changement de thème est temporairement désactivé jusqu'à la version 5.0.0"
 
-#: cps/cwa_functions.py:285
+#: cps/cwa_functions.py:293
 msgid ""
 "Library Refresh 🔄 Checking for any books that may have been missed, please "
 "wait..."
@@ -1145,223 +1150,223 @@ msgstr ""
 "Actualisation de la bibliothèque 🔄 Recherche des livres qui auraient pu "
 "être oubliés, veuillez patienter..."
 
-#: cps/cwa_functions.py:978
+#: cps/cwa_functions.py:993
 msgid "Invalid cron expression for duplicate scans. Changes were not saved."
 msgstr ""
 "Expression cron non valide pour les analyses en double. Les modifications "
 "n'ont pas été enregistrées."
 
-#: cps/cwa_functions.py:1070
+#: cps/cwa_functions.py:1105
 msgid "Calibre-Web NextGen User Settings"
 msgstr ""
 
-#: cps/cwa_functions.py:1116 cps/cwa_functions.py:1118
-#: cps/cwa_functions.py:1122 cps/cwa_functions.py:1124
-#: cps/cwa_functions.py:1127 cps/cwa_functions.py:1129
+#: cps/cwa_functions.py:1151 cps/cwa_functions.py:1153
+#: cps/cwa_functions.py:1157 cps/cwa_functions.py:1159
+#: cps/cwa_functions.py:1162 cps/cwa_functions.py:1164
 msgid "Timestamp"
 msgstr "Horodatage"
 
-#: cps/cwa_functions.py:1116 cps/cwa_functions.py:1118
+#: cps/cwa_functions.py:1151 cps/cwa_functions.py:1153
 #: cps/templates/tasks.html:43 cps/templates/user_edit.html:342
 msgid "Book ID"
 msgstr "Identifiant du livre"
 
-#: cps/cwa_functions.py:1116 cps/templates/book_edit.html:125
+#: cps/cwa_functions.py:1151 cps/templates/book_edit.html:125
 #: cps/templates/search_form.html:8
 msgid "Book Title"
 msgstr "Titre du livre"
 
-#: cps/cwa_functions.py:1116
+#: cps/cwa_functions.py:1151
 msgid "Book Author"
 msgstr "Auteur du livre"
 
-#: cps/cwa_functions.py:1116
+#: cps/cwa_functions.py:1151
 msgid "Trigger Type"
 msgstr "Type de déclencheur"
 
-#: cps/cwa_functions.py:1118 cps/cwa_functions.py:1124
+#: cps/cwa_functions.py:1153 cps/cwa_functions.py:1159
 msgid "Filepath"
 msgstr "Chemin du fichier"
 
-#: cps/cwa_functions.py:1122 cps/cwa_functions.py:1124
-#: cps/cwa_functions.py:1127 cps/cwa_functions.py:1129
+#: cps/cwa_functions.py:1157 cps/cwa_functions.py:1159
+#: cps/cwa_functions.py:1162 cps/cwa_functions.py:1164
 msgid "Filename"
 msgstr "Nom du fichier"
 
-#: cps/cwa_functions.py:1122
+#: cps/cwa_functions.py:1157
 msgid "Manual?"
 msgstr "Manuel ?"
 
-#: cps/cwa_functions.py:1122
+#: cps/cwa_functions.py:1157
 msgid "No. Fixes"
 msgstr "Nb Corrections"
 
-#: cps/cwa_functions.py:1122 cps/cwa_functions.py:1127
-#: cps/cwa_functions.py:1129
+#: cps/cwa_functions.py:1157 cps/cwa_functions.py:1162
+#: cps/cwa_functions.py:1164
 msgid "Original Backed Up?"
 msgstr "Original sauvegardé ?"
 
-#: cps/cwa_functions.py:1124
+#: cps/cwa_functions.py:1159
 msgid "Fixes Applied"
 msgstr "Corrections appliquées"
 
-#: cps/cwa_functions.py:1129
+#: cps/cwa_functions.py:1164
 msgid "Original Format"
 msgstr "Format original"
 
-#: cps/cwa_functions.py:1129
+#: cps/cwa_functions.py:1164
 msgid "End Format"
 msgstr "Format de fin"
 
-#: cps/cwa_functions.py:1205 cps/cwa_functions.py:1234
+#: cps/cwa_functions.py:1240 cps/cwa_functions.py:1269
 msgid "Unknown User"
 msgstr "Utilisateur inconnu"
 
-#: cps/cwa_functions.py:1342
+#: cps/cwa_functions.py:1377
 msgid "Calibre-Web NextGen Stats & Activity"
 msgstr ""
 
-#: cps/cwa_functions.py:1726
+#: cps/cwa_functions.py:1761
 msgid "Calibre-Web NextGen - Full Enforcement History"
 msgstr ""
 
-#: cps/cwa_functions.py:1735
+#: cps/cwa_functions.py:1770
 msgid "Calibre-Web NextGen - Full Enforcement History (w/ Paths)"
 msgstr ""
 
-#: cps/cwa_functions.py:1744
+#: cps/cwa_functions.py:1779
 msgid "Calibre-Web NextGen - Full Import History"
 msgstr ""
 
-#: cps/cwa_functions.py:1753
+#: cps/cwa_functions.py:1788
 msgid "Calibre-Web NextGen - Full Conversion History"
 msgstr ""
 
-#: cps/cwa_functions.py:1762
+#: cps/cwa_functions.py:1797
 msgid "Calibre-Web NextGen - Full EPUB Fixer History (w/out Paths & Fixes)"
 msgstr ""
 
-#: cps/cwa_functions.py:1771
+#: cps/cwa_functions.py:1806
 msgid "Calibre-Web NextGen - Full EPUB Fixer History (w/ Paths & Fixes)"
 msgstr ""
 
-#: cps/cwa_functions.py:1789
+#: cps/cwa_functions.py:1824
 msgid "✅ All Monitoring Services are running as intended! 👍"
 msgstr "✅ Tous les services de surveillance fonctionnent comme prévu ! 👍"
 
-#: cps/cwa_functions.py:1791
+#: cps/cwa_functions.py:1826
 msgid ""
 "🔴 The Ingest Service is running but the Metadata Change Detector is not"
 msgstr ""
 "🔴 Le service d’ingestion est en cours d’exécution, mais le détecteur de "
 "modification des métadonnées ne l’est pas"
 
-#: cps/cwa_functions.py:1793
+#: cps/cwa_functions.py:1828
 msgid ""
 "🔴 The Metadata Change Detector is running but the Ingest Service is not"
 msgstr ""
 "🔴 Le détecteur de modification des métadonnées est en cours d’exécution, "
 "mais le service d’ingestion ne l’est pas"
 
-#: cps/cwa_functions.py:1795
+#: cps/cwa_functions.py:1830
 msgid ""
 "⛔ Neither the Ingest Service or the Metadata Change Detector are running"
 msgstr ""
 "⛔ Ni le service d'ingestion, ni le détecteur de changement de métadonnées "
 "ne sont en cours d'exécution"
 
-#: cps/cwa_functions.py:1797
+#: cps/cwa_functions.py:1832
 msgid "An Error has occurred"
 msgstr "Une erreur s'est produite"
 
-#: cps/cwa_functions.py:1974 cps/cwa_functions.py:2002
+#: cps/cwa_functions.py:2009 cps/cwa_functions.py:2037
 msgid "Calibre-Web NextGen - Convert Library"
 msgstr ""
 
-#: cps/cwa_functions.py:2128 cps/cwa_functions.py:2154
+#: cps/cwa_functions.py:2163 cps/cwa_functions.py:2189
 msgid "Calibre-Web NextGen - EPUB Fixer Service"
 msgstr ""
 
-#: cps/cwa_functions.py:2212
+#: cps/cwa_functions.py:2247
 msgid "Single-book EPUB Fixer is not supported with Google Drive libraries."
 msgstr ""
 "Le correcteur EPUB pour un seul livre n'est pas pris en charge avec les "
 "bibliothèques Google Drive."
 
-#: cps/cwa_functions.py:2219
+#: cps/cwa_functions.py:2254
 msgid "Invalid book selection."
 msgstr "Sélection de livre invalide."
 
-#: cps/cwa_functions.py:2225 cps/spa_strings.py:386
+#: cps/cwa_functions.py:2260 cps/spa_strings.py:414
 msgid "Book not found."
 msgstr "Livre introuvable."
 
-#: cps/cwa_functions.py:2231
+#: cps/cwa_functions.py:2266
 msgid "Selected book has no EPUB format."
 msgstr "Le livre sélectionné n'a pas de format EPUB."
 
-#: cps/cwa_functions.py:2235
+#: cps/cwa_functions.py:2270
 msgid "EPUB file not found on disk."
 msgstr "Fichier EPUB introuvable sur le disque."
 
-#: cps/cwa_functions.py:2250
+#: cps/cwa_functions.py:2285
 msgid "EPUB Fixer started for selected book."
 msgstr "Correction EPUB démarrée pour le livre sélectionné."
 
-#: cps/cwa_functions.py:2253
+#: cps/cwa_functions.py:2288
 msgid "Failed to start EPUB Fixer for selected book."
 msgstr "Échec du démarrage de la correction EPUB pour le livre sélectionné."
 
-#: cps/cwa_functions.py:2304
+#: cps/cwa_functions.py:2339
 msgid "You must be an admin to access this page."
 msgstr "Vous devez être un administrateur pour accéder à cette page."
 
-#: cps/cwa_functions.py:2319
+#: cps/cwa_functions.py:2354
 msgid "Both username and image data are required."
 msgstr "Le nom d’utilisateur et les données d’images sont requis."
 
-#: cps/cwa_functions.py:2327
+#: cps/cwa_functions.py:2362
 msgid "Invalid image data format. Must be a valid image."
 msgstr "Format de données d'image non valide. Doit être une image valide."
 
-#: cps/cwa_functions.py:2335
+#: cps/cwa_functions.py:2370
 msgid "Unsupported image type. Only PNG and JPEG are allowed."
 msgstr ""
 "Type d'image non pris en charge. Seuls les formats PNG et JPEG sont "
 "autorisés."
 
-#: cps/cwa_functions.py:2347
+#: cps/cwa_functions.py:2382
 msgid "Image is too large. Please use an image smaller than 500KB."
 msgstr ""
 "L'image est trop volumineuse. Veuillez utiliser une image inférieure à 500 "
 "Ko."
 
-#: cps/cwa_functions.py:2351
+#: cps/cwa_functions.py:2386
 msgid "Invalid Base64 image data."
 msgstr "Données d'image Base64 non valides."
 
-#: cps/cwa_functions.py:2355
+#: cps/cwa_functions.py:2390
 msgid "Invalid image data format."
 msgstr "Format de données d'image non valide."
 
-#: cps/cwa_functions.py:2360
+#: cps/cwa_functions.py:2395
 msgid "Error validating image data."
 msgstr "Erreur lors de la validation des données d'image."
 
-#: cps/cwa_functions.py:2378
+#: cps/cwa_functions.py:2413
 msgid "Profile picture updated successfully."
 msgstr "Image de profil mise à jour."
 
-#: cps/cwa_functions.py:2391
+#: cps/cwa_functions.py:2426
 msgid "Calibre-Web NextGen Profile Picture Management (WIP)"
 msgstr ""
 
-#: cps/db.py:1776 cps/spa_strings.py:596 cps/templates/config_edit.html:359
-#: cps/templates/config_view_edit.html:79
+#: cps/db.py:1783 cps/spa_strings.py:57 cps/spa_strings.py:668
+#: cps/templates/config_edit.html:359 cps/templates/config_view_edit.html:79
 #: cps/templates/config_view_edit.html:90 cps/templates/email_edit.html:41
 #: cps/web.py:816 cps/web.py:850 cps/web.py:895 cps/web.py:935 cps/web.py:964
-#: cps/web.py:2025 cps/web.py:2062 cps/web.py:2113 cps/web.py:2145
-#: cps/web.py:2184
+#: cps/web.py:2030 cps/web.py:2067 cps/web.py:2118 cps/web.py:2150
+#: cps/web.py:2189
 msgid "None"
 msgstr "Aucun"
 
@@ -1442,63 +1447,63 @@ msgstr ""
 msgid "There was an error converting this book: %(res)s"
 msgstr "Une erreur est survenue au cours de la conversion du livre : %(res)s"
 
-#: cps/editbooks.py:377 cps/editbooks.py:1403 cps/editbooks.py:2001
+#: cps/editbooks.py:377 cps/editbooks.py:1408 cps/editbooks.py:2006
 msgid "File type isn't allowed to be uploaded to this server"
 msgstr "Ce type de fichier n’est pas autorisé à être déposé sur ce serveur"
 
-#: cps/editbooks.py:382 cps/editbooks.py:1409 cps/editbooks.py:2012
+#: cps/editbooks.py:382 cps/editbooks.py:1414 cps/editbooks.py:2017
 #, python-format
 msgid "File extension '%(ext)s' is not allowed to be uploaded to this server"
 msgstr ""
 "L’extension de fichier '%(ext)s' n’est pas autorisée pour être déposée sur "
 "ce serveur"
 
-#: cps/editbooks.py:386 cps/editbooks.py:1413 cps/editbooks.py:2017
+#: cps/editbooks.py:386 cps/editbooks.py:1418 cps/editbooks.py:2022
 msgid "File to be uploaded must have an extension"
 msgstr "Pour être déposé le fichier doit avoir une extension"
 
-#: cps/editbooks.py:935 cps/editbooks.py:1674 cps/web.py:783 cps/web.py:3316
-#: cps/web.py:3498 cps/web.py:3648
+#: cps/editbooks.py:940 cps/editbooks.py:1679 cps/web.py:783 cps/web.py:3321
+#: cps/web.py:3503 cps/web.py:3653
 msgid ""
 "Oops! Selected book is unavailable. File does not exist or is not accessible"
 msgstr ""
 "Erreur d'ouverture du livre numérique. Le fichier n'existe pas ou n'est pas "
 "accessible"
 
-#: cps/editbooks.py:975 cps/editbooks.py:2084
+#: cps/editbooks.py:980 cps/editbooks.py:2089
 msgid "User has no rights to upload cover"
 msgstr "L’utilisateur n’a pas les droits pour envoyer une couverture de livre"
 
-#: cps/editbooks.py:983
+#: cps/editbooks.py:988
 msgid "Cover is locked. Unlock it on the cover-picker page first."
 msgstr ""
 
-#: cps/editbooks.py:1006 cps/editbooks.py:1391
+#: cps/editbooks.py:1011 cps/editbooks.py:1396
 msgid "Identifiers are not Case Sensitive, Overwriting Old Identifier"
 msgstr ""
 "Les identificateurs ne sont pas sensibles à la casse, écrasant l’ancien "
 "identificateur"
 
-#: cps/editbooks.py:1018 cps/editbooks.py:1365 cps/editbooks.py:1812
+#: cps/editbooks.py:1023 cps/editbooks.py:1370 cps/editbooks.py:1817
 #, python-format
 msgid "'%(langname)s' is not a valid language"
 msgstr "%(langname)s n'est pas une langue valide"
 
-#: cps/editbooks.py:1137
+#: cps/editbooks.py:1142
 msgid "Metadata successfully updated"
 msgstr "Les métadonnées ont bien été mises à jour"
 
-#: cps/editbooks.py:1157
+#: cps/editbooks.py:1162
 #, python-brace-format
 msgid "Error editing book: {}"
 msgstr "Erreur d'édition du livre : {}"
 
-#: cps/editbooks.py:1250 cps/editbooks.py:1300 cps/editbooks.py:2102
+#: cps/editbooks.py:1255 cps/editbooks.py:1305 cps/editbooks.py:2107
 #: cps/updater.py:674 cps/uploader.py:142 cps/uploader.py:151
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: cps/editbooks.py:1304
+#: cps/editbooks.py:1309
 msgid ""
 "Uploaded book probably exists in the library, consider to change before "
 "upload new: "
@@ -1506,96 +1511,96 @@ msgstr ""
 "Le fichier téléchargé existe probablement dans la bibliothèque, veuillez le "
 "modifier avant de le télécharger de nouveau : "
 
-#: cps/editbooks.py:1421
+#: cps/editbooks.py:1426
 #, python-format
 msgid "File %(filename)s could not saved to temp dir"
 msgstr ""
 "Le fichier %(filename)s ne peut pas être sauvegardé dans le répertoire "
 "temporaire"
 
-#: cps/editbooks.py:1441
+#: cps/editbooks.py:1446
 #, python-format
 msgid "Failed to Move Cover File %(file)s: %(error)s"
 msgstr "Impossible de déplacer le fichier de couverture %(file)s : %(error)s"
 
-#: cps/editbooks.py:1529 cps/editbooks.py:1531
+#: cps/editbooks.py:1534 cps/editbooks.py:1536
 msgid "Book Format Successfully Deleted"
 msgstr "Le format du livre a été supprimé avec succès"
 
-#: cps/editbooks.py:1538 cps/editbooks.py:1540
+#: cps/editbooks.py:1543 cps/editbooks.py:1545
 msgid "Book Successfully Deleted"
 msgstr "Le livre a été supprimé avec succès"
 
-#: cps/editbooks.py:1655
+#: cps/editbooks.py:1660
 msgid "You are missing permissions to delete books"
 msgstr "Vous n’avez par les permissions pour supprimer les livres"
 
-#: cps/editbooks.py:1717
+#: cps/editbooks.py:1722
 msgid "edit metadata"
 msgstr "modifier les métadonnées"
 
-#: cps/editbooks.py:1771
+#: cps/editbooks.py:1776
 #, python-format
 msgid "Seriesindex: %(seriesindex)s is not a valid number, skipping"
 msgstr "Index de série : %(seriesindex)s n'est pas un nombre valide, ignoré"
 
-#: cps/editbooks.py:2006
+#: cps/editbooks.py:2011
 msgid "User has no rights to upload additional file formats"
 msgstr ""
 "L’utilisateur n’a pas le droit de télécharger des formats de fichiers "
 "supplémentaires"
 
-#: cps/editbooks.py:2030
+#: cps/editbooks.py:2035
 #, python-format
 msgid "Failed to create path %(path)s (Permission denied)."
 msgstr "Impossible de créer le chemin %(path)s (Permission refusée)."
 
-#: cps/editbooks.py:2037
+#: cps/editbooks.py:2042
 #, python-format
 msgid "Failed to store file %(file)s."
 msgstr "Échec de la sauvegarde du fichier %(file)s."
 
-#: cps/editbooks.py:2061
+#: cps/editbooks.py:2066
 #, python-format
 msgid "File format %(ext)s added to %(book)s"
 msgstr "Le format de fichier %(ext)s a été ajouté à %(book)s"
 
-#: cps/editbooks.py:2363
+#: cps/editbooks.py:2368
 #, fuzzy
 msgid "Book not found"
 msgstr "Livre introuvable."
 
-#: cps/editbooks.py:2367
+#: cps/editbooks.py:2372
 msgid "Book has no file formats on disk to reload from"
 msgstr ""
 
-#: cps/editbooks.py:2388
+#: cps/editbooks.py:2393
 #, fuzzy, python-format
 msgid "Book file not found on disk: %(path)s"
 msgstr "Fichier EPUB introuvable sur le disque."
 
-#: cps/editbooks.py:2408
+#: cps/editbooks.py:2413
 #, python-format
 msgid "Could not parse metadata from %(format)s file: %(err)s"
 msgstr ""
 
-#: cps/editbooks.py:2529
+#: cps/editbooks.py:2534
 #, python-format
 msgid ""
 "Could not rename the book folder to match the reloaded metadata: %(err)s"
 msgstr ""
 
-#: cps/editbooks.py:2551
+#: cps/editbooks.py:2556
 #, python-format
 msgid "Could not save reloaded metadata: %(err)s"
 msgstr ""
 
-#: cps/editbooks.py:2557
+#: cps/editbooks.py:2562
 #, python-format
 msgid "Reloaded %(n)d field(s) from on-disk %(fmt)s"
 msgstr ""
 
-#: cps/editbooks.py:2560
+#: cps/editbooks.py:2565
 msgid "On-disk metadata matches current — no fields updated"
 msgstr ""
 
@@ -1616,7 +1621,7 @@ msgstr ""
 "suivre les étapes nécessaires pour vérifier le domaine dans la console de "
 "développement de Google"
 
-#: cps/helper.py:191 cps/spa_strings.py:63 cps/templates/email_edit.html:61
+#: cps/helper.py:191 cps/spa_strings.py:100 cps/templates/email_edit.html:61
 msgid "This Email has been sent via Calibre-Web NextGen."
 msgstr ""
 
@@ -1813,7 +1818,7 @@ msgstr "Contenu du fichier de couverture invalide"
 msgid "Only jpg/jpeg files are supported as coverfile"
 msgstr "Seuls les fichiers jpg/jpeg sont supportés comme fichier de couverture"
 
-#: cps/helper.py:1887 cps/helper.py:2139 cps/spa_strings.py:128
+#: cps/helper.py:1887 cps/helper.py:2139 cps/spa_strings.py:165
 msgid "Cover"
 msgstr "Couverture"
 
@@ -1872,6 +1877,26 @@ msgstr ""
 #: cps/kobo_auth.py:107
 msgid "Kobo Setup"
 msgstr "Configuration Kobo"
+
+#: cps/magic_shelf.py:161 cps/spa_strings.py:42
+msgid "Recently Added"
+msgstr "Ajoutés récemment"
+
+#: cps/magic_shelf.py:180 cps/spa_strings.py:43
+msgid "Highly Rated"
+msgstr "Les mieux notés"
+
+#: cps/magic_shelf.py:217 cps/opds.py:200 cps/spa_strings.py:44
+msgid "Currently Reading"
+msgstr "Lecture en cours"
+
+#: cps/magic_shelf.py:234 cps/spa_strings.py:45
+msgid "Yet to Read"
+msgstr "À lire"
+
+#: cps/magic_shelf.py:251 cps/spa_strings.py:46
+msgid "Recent Publications"
+msgstr "Publications récentes"
 
 #: cps/oauth_bb.py:287
 #, python-format
@@ -2104,11 +2129,6 @@ msgstr "Montrer des livres au hasard"
 msgid "Read Books"
 msgstr "Livres lus"
 
-#: cps/opds.py:200
-#, fuzzy
-msgid "Currently Reading"
-msgstr "Version actuelle"
-
 #: cps/opds.py:201
 #, fuzzy
 msgid "Books currently being read"
@@ -2118,7 +2138,7 @@ msgstr "Version actuelle"
 msgid "Unread Books"
 msgstr "Livres non-lus"
 
-#: cps/opds.py:212 cps/render_template.py:110 cps/spa_strings.py:367
+#: cps/opds.py:212 cps/render_template.py:110 cps/spa_strings.py:404
 #: cps/templates/book_table.html:109 cps/templates/cwa_settings.html:334
 #: cps/templates/cwa_settings.html:336
 #: cps/templates/hardcover_review_matches.html:134
@@ -2129,8 +2149,8 @@ msgstr "Auteurs"
 msgid "Books ordered by Author"
 msgstr "Livres classés par auteur"
 
-#: cps/opds.py:218 cps/render_template.py:114 cps/spa_strings.py:621
-#: cps/templates/book_table.html:115 cps/web.py:2036
+#: cps/opds.py:218 cps/render_template.py:114 cps/spa_strings.py:697
+#: cps/templates/book_table.html:115 cps/web.py:2041
 msgid "Publishers"
 msgstr "Éditeurs"
 
@@ -2138,8 +2158,8 @@ msgstr "Éditeurs"
 msgid "Books ordered by publisher"
 msgstr "Livres classés par éditeur"
 
-#: cps/opds.py:224 cps/render_template.py:104 cps/spa_strings.py:399
-#: cps/templates/book_table.html:110 cps/web.py:2188
+#: cps/opds.py:224 cps/render_template.py:104 cps/spa_strings.py:428
+#: cps/templates/book_table.html:110 cps/web.py:2193
 msgid "Categories"
 msgstr "Catégories"
 
@@ -2147,12 +2167,12 @@ msgstr "Catégories"
 msgid "Books ordered by category"
 msgstr "Livres classés par catégorie"
 
-#: cps/opds.py:230 cps/render_template.py:107 cps/spa_strings.py:218
+#: cps/opds.py:230 cps/render_template.py:107 cps/spa_strings.py:255
 #: cps/templates/book_edit.html:143 cps/templates/book_table.html:111
 #: cps/templates/cwa_settings.html:362 cps/templates/cwa_settings.html:364
 #: cps/templates/cwa_settings.html:1133
 #: cps/templates/hardcover_review_matches.html:140
-#: cps/templates/search_form.html:70 cps/web.py:2068 cps/web.py:2080
+#: cps/templates/search_form.html:70 cps/web.py:2073 cps/web.py:2085
 msgid "Series"
 msgstr "Séries"
 
@@ -2160,9 +2180,9 @@ msgstr "Séries"
 msgid "Books ordered by series"
 msgstr "Livres classés par série"
 
-#: cps/opds.py:236 cps/render_template.py:117 cps/spa_strings.py:535
+#: cps/opds.py:236 cps/render_template.py:117 cps/spa_strings.py:600
 #: cps/templates/book_table.html:113 cps/templates/detail.html:930
-#: cps/templates/search_form.html:108 cps/web.py:2160
+#: cps/templates/search_form.html:108 cps/web.py:2165
 msgid "Languages"
 msgstr "Langues"
 
@@ -2170,10 +2190,10 @@ msgstr "Langues"
 msgid "Books ordered by Languages"
 msgstr "Livres classés par langue"
 
-#: cps/opds.py:242 cps/render_template.py:121 cps/spa_strings.py:625
-#: cps/web.py:2120
+#: cps/opds.py:242 cps/render_template.py:121 cps/spa_strings.py:701
+#: cps/web.py:2125
 msgid "Ratings"
-msgstr "Notes"
+msgstr "Évaluations"
 
 #: cps/opds.py:243
 msgid "Books ordered by Rating"
@@ -2187,7 +2207,7 @@ msgstr "Formats de fichier"
 msgid "Books ordered by file formats"
 msgstr "Livres classés par formats de fichiers"
 
-#: cps/opds.py:254 cps/spa_strings.py:685 cps/templates/layout.html:629
+#: cps/opds.py:254 cps/spa_strings.py:767 cps/templates/layout.html:639
 #: cps/templates/search_form.html:88
 msgid "Shelves"
 msgstr "Etagères"
@@ -2215,7 +2235,7 @@ msgstr "Description"
 msgid "{} Stars"
 msgstr "{} Étoiles"
 
-#: cps/opds.py:1169 cps/search.py:53 cps/search.py:454 cps/spa_strings.py:203
+#: cps/opds.py:1169 cps/search.py:53 cps/search.py:454 cps/spa_strings.py:240
 #: cps/templates/book_edit.html:338 cps/templates/cwa_epub_fixer.html:25
 #: cps/templates/feed.xml:43 cps/templates/index.xml:12
 #: cps/templates/layout.html:313 cps/templates/layout.html:316
@@ -2223,9 +2243,9 @@ msgstr "{} Étoiles"
 msgid "Search"
 msgstr "Chercher"
 
-#: cps/remotelogin.py:76 cps/spa_strings.py:545 cps/templates/layout.html:344
+#: cps/remotelogin.py:76 cps/spa_strings.py:611 cps/templates/layout.html:344
 #: cps/templates/layout.html:385 cps/templates/login.html:11
-#: cps/templates/login.html:39 cps/web.py:2638
+#: cps/templates/login.html:39 cps/web.py:2643
 msgid "Login"
 msgstr "Connexion"
 
@@ -2247,7 +2267,7 @@ msgid ""
 "can run after imports and metadata changes. "
 msgstr ""
 
-#: cps/render_template.py:74 cps/spa_strings.py:388
+#: cps/render_template.py:74 cps/spa_strings.py:416
 msgid "Books"
 msgstr "Livres"
 
@@ -2280,7 +2300,7 @@ msgstr "Montrer lus et non-lus"
 msgid "Show unread"
 msgstr "Afficher non-lus"
 
-#: cps/render_template.py:101 cps/spa_strings.py:456
+#: cps/render_template.py:101 cps/spa_strings.py:512
 msgid "Discover"
 msgstr "Découvrir"
 
@@ -2320,15 +2340,15 @@ msgstr "Livres archivés"
 msgid "Show Archived Books"
 msgstr "Afficher les livres archivés"
 
-#: cps/render_template.py:132 cps/spa_strings.py:487
+#: cps/render_template.py:132 cps/spa_strings.py:546
 msgid "Favorites"
-msgstr ""
+msgstr "Favoris"
 
 #: cps/render_template.py:134
 msgid "Show Favorites"
 msgstr ""
 
-#: cps/render_template.py:137 cps/web.py:1842
+#: cps/render_template.py:137 cps/web.py:1847
 msgid "Books List"
 msgstr "Liste des livres"
 
@@ -2336,7 +2356,7 @@ msgstr "Liste des livres"
 msgid "Show Books List"
 msgstr "Montrer la liste des livres"
 
-#: cps/render_template.py:142 cps/spa_strings.py:466
+#: cps/render_template.py:142 cps/spa_strings.py:523
 msgid "Duplicates"
 msgstr "Doubles"
 
@@ -2526,63 +2546,63 @@ msgstr ""
 "Erreur à l’ouverture de l’étagère. Elle n’existe plus ou n’est plus "
 "accessible"
 
-#: cps/shelf.py:1013
+#: cps/shelf.py:1016
 #, python-format
 msgid "Invalid order mode: %(mode)s"
 msgstr ""
 
-#: cps/shelf.py:1017
+#: cps/shelf.py:1020
 msgid "Invalid payload: 'order' must be a list"
 msgstr ""
 
-#: cps/shelf.py:1041
+#: cps/shelf.py:1044
 msgid "Could not save order"
 msgstr ""
 
-#: cps/shelf.py:1049 cps/templates/layout.html:638
+#: cps/shelf.py:1052 cps/templates/layout.html:648
 #, fuzzy
 msgid "Reorder Shelves"
 msgstr "Etagères exclues"
 
-#: cps/shelf.py:1054
+#: cps/shelf.py:1057
 #, fuzzy
 msgid "Name (A → Z)"
 msgstr "Nom (A-Z)"
 
-#: cps/shelf.py:1055
+#: cps/shelf.py:1058
 #, fuzzy
 msgid "Name (Z → A)"
 msgstr "Nom (Z-A)"
 
-#: cps/shelf.py:1056
+#: cps/shelf.py:1059
 #, fuzzy
 msgid "Book count (most → fewest)"
 msgstr "Nombre de livres (décroissant)"
 
-#: cps/shelf.py:1057
+#: cps/shelf.py:1060
 #, fuzzy
 msgid "Book count (fewest → most)"
 msgstr "Nombre de livres (décroissant)"
 
-#: cps/shelf.py:1058
+#: cps/shelf.py:1061
 #, fuzzy
 msgid "Created (newest → oldest)"
 msgstr "Création (plus récent en premier)"
 
-#: cps/shelf.py:1059
+#: cps/shelf.py:1062
 #, fuzzy
 msgid "Created (oldest → newest)"
 msgstr "Création (plus ancien en premier)"
 
-#: cps/shelf.py:1060
+#: cps/shelf.py:1063
 msgid "Modified (recent → oldest)"
 msgstr ""
 
-#: cps/shelf.py:1061
+#: cps/shelf.py:1064
 msgid "Modified (oldest → recent)"
 msgstr ""
 
-#: cps/shelf.py:1062
+#: cps/shelf.py:1065
 #, fuzzy
 msgid "Manual (drag below)"
 msgstr "Manuel (glisser pour réorganiser)"
@@ -2594,329 +2614,387 @@ msgstr "Lire"
 #: cps/spa_strings.py:36
 #, python-brace-format
 msgid "Open details for {title}"
-msgstr ""
+msgstr "Ouvrir les détails de {title}"
 
 #: cps/spa_strings.py:37
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Read {title}"
-msgstr "Insérer le titre"
+msgstr "Lire {title}"
 
-#: cps/spa_strings.py:41
-#, fuzzy
+#: cps/spa_strings.py:51
+msgid "Standard (username / password)"
+msgstr "Standard (nom d’utilisateur / mot de passe)"
+
+#: cps/spa_strings.py:52 cps/spa_strings.py:598
+msgid "LDAP"
+msgstr ""
+
+#: cps/spa_strings.py:53 cps/spa_strings.py:670
+msgid "OAuth / OpenID Connect"
+msgstr ""
+
+#: cps/spa_strings.py:54 cps/templates/config_edit.html:390
+msgid "Anonymous"
+msgstr "Anonyme"
+
+#: cps/spa_strings.py:55 cps/templates/config_edit.html:391
+msgid "Unauthenticated"
+msgstr "Non authentifié"
+
+#: cps/spa_strings.py:56
+msgid "Simple (service account)"
+msgstr "Simple (compte de service)"
+
+#: cps/spa_strings.py:58 cps/templates/config_edit.html:360
+msgid "TLS"
+msgstr "TLS"
+
+#: cps/spa_strings.py:59 cps/templates/config_edit.html:361
+msgid "SSL"
+msgstr "SSL"
+
+#: cps/spa_strings.py:63
 msgid "Series order"
-msgstr "Index des séries"
+msgstr "Ordre de série"
 
-#: cps/spa_strings.py:42
-#, fuzzy
+#: cps/spa_strings.py:64
 msgid "Series order (reverse)"
-msgstr "Séries : %(serie)s"
+msgstr "Ordre de série (inverse)"
 
-#: cps/spa_strings.py:46 cps/templates/detail.html:965
+#: cps/spa_strings.py:68 cps/templates/detail.html:965
 #: cps/templates/detail.html:966 cps/templates/detail.html:1537
 msgid "Add tag"
 msgstr "Ajouter un tag"
 
-#: cps/spa_strings.py:47
+#: cps/spa_strings.py:69
 msgid "New tag"
 msgstr ""
 
-#: cps/spa_strings.py:48 cps/templates/detail.html:957
+#: cps/spa_strings.py:70 cps/templates/detail.html:957
 msgid "Remove tag"
 msgstr "Supprimer le tag"
 
-#: cps/spa_strings.py:52
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:74
+#, python-brace-format
 msgid "Remove tag {name}"
-msgstr "Supprimer le tag"
+msgstr ""
 
-#: cps/spa_strings.py:58
-#, fuzzy
+#: cps/spa_strings.py:75
+#, python-brace-format
+msgid "Rename tag {name}"
+msgstr ""
+
+#: cps/spa_strings.py:76
+msgid "Tag name"
+msgstr ""
+
+#: cps/api/browse.py:72 cps/spa_strings.py:77
+msgid "Tag name cannot be empty"
+msgstr ""
+
+#: cps/spa_strings.py:78
+msgid "Save tag name"
+msgstr ""
+
+#: cps/spa_strings.py:79
+msgid "Could not rename tag"
+msgstr ""
+
+#: cps/spa_strings.py:80
+#, python-brace-format
+msgid "Tag renamed to {name}"
+msgstr ""
+
+#: cps/api/browse.py:63 cps/spa_strings.py:81
+msgid "You must be signed in"
+msgstr ""
+
+#: cps/api/browse.py:65 cps/spa_strings.py:82
+msgid "You are not allowed to edit metadata"
+msgstr ""
+
+#: cps/api/browse.py:89 cps/api/browse.py:101 cps/spa_strings.py:84
+msgid "A tag with that name already exists"
+msgstr ""
+
+#: cps/api/browse.py:69 cps/spa_strings.py:85
+msgid "Tag name must be text"
+msgstr ""
+
+#: cps/api/browse.py:74 cps/spa_strings.py:86
+msgid "Tag name cannot contain commas"
+msgstr ""
+
+#: cps/spa_strings.py:87
+msgid "Enter a valid tag name"
+msgstr ""
+
+#: cps/spa_strings.py:88
+msgid "Could not load this page"
+msgstr ""
+
+#: cps/spa_strings.py:89
+msgid "Page not found"
+msgstr ""
+
+#: cps/spa_strings.py:95
 msgid "Clear rating"
-msgstr "Supprimer la sélection"
+msgstr ""
 
-#: cps/spa_strings.py:59
-#, fuzzy
+#: cps/spa_strings.py:96
 msgid "Not rated"
-msgstr "Créer/visualiser"
+msgstr ""
 
-#: cps/spa_strings.py:60 cps/templates/book_edit.html:220
+#: cps/spa_strings.py:97 cps/templates/book_edit.html:220
 #: cps/templates/search_form.html:46 cps/templates/search_form.html:167
 msgid "Yes"
 msgstr "Oui"
 
-#: cps/spa_strings.py:61 cps/templates/book_edit.html:221
+#: cps/spa_strings.py:98 cps/templates/book_edit.html:221
 #: cps/templates/search_form.html:47 cps/templates/search_form.html:168
 msgid "No"
 msgstr "Non"
 
-#: cps/spa_strings.py:62 cps/templates/email_edit.html:60
+#: cps/spa_strings.py:99 cps/templates/email_edit.html:60
 msgid "Email Message Body"
 msgstr ""
 
-#: cps/spa_strings.py:64
+#: cps/spa_strings.py:101
 #, python-brace-format
 msgid "Rated {rating} out of 5"
 msgstr ""
 
-#: cps/spa_strings.py:65
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:102
+#, python-brace-format
 msgid "More by {name}"
-msgstr "Supprimer le tag"
+msgstr ""
 
-#: cps/spa_strings.py:70
+#: cps/spa_strings.py:107
 #, python-brace-format
 msgid ""
 "Merge {n} books into the first selected? The others are removed after their "
 "formats are copied over."
 msgstr ""
 
-#: cps/spa_strings.py:71
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:108
+#, python-brace-format
 msgid "Apply to {n} books"
-msgstr "Supprimer le livre"
-
-#: cps/spa_strings.py:75
-#, fuzzy
-msgid "Match condition"
-msgstr "Correspond à %(action)s"
-
-#: cps/spa_strings.py:76
-#, fuzzy
-msgid "Rule field"
-msgstr "Masquer l'étagère"
-
-#: cps/spa_strings.py:77
-msgid "Rule operator"
 msgstr ""
 
-#: cps/spa_strings.py:80
+#: cps/spa_strings.py:112
+msgid "Match condition"
+msgstr "Condition de correspondance"
+
+#: cps/spa_strings.py:113
+msgid "Rule field"
+msgstr "Champ de la règle"
+
+#: cps/spa_strings.py:114
+msgid "Rule operator"
+msgstr "Opérateur de la règle"
+
+#: cps/spa_strings.py:117
 msgid "Appearance"
 msgstr ""
 
-#: cps/spa_strings.py:81 cps/templates/read.html:106
+#: cps/spa_strings.py:118 cps/templates/read.html:106
 #: cps/templates/readcbr.html:102 cps/templates/user_edit.html:279
 msgid "Theme"
 msgstr "Thème"
 
-#: cps/spa_strings.py:82
+#: cps/spa_strings.py:119
 msgid "System"
 msgstr ""
 
-#: cps/spa_strings.py:83 cps/spa_strings.py:168 cps/templates/read.html:108
+#: cps/spa_strings.py:120 cps/spa_strings.py:205 cps/templates/read.html:108
 #: cps/templates/readcbr.html:105
 msgid "Light"
 msgstr "Clair"
 
-#: cps/spa_strings.py:84 cps/spa_strings.py:134 cps/templates/read.html:109
+#: cps/spa_strings.py:121 cps/spa_strings.py:171 cps/templates/read.html:109
 #: cps/templates/readcbr.html:106
 msgid "Dark"
 msgstr "Sombre"
 
-#: cps/spa_strings.py:85 cps/spa_strings.py:216 cps/templates/read.html:110
+#: cps/spa_strings.py:122 cps/spa_strings.py:253 cps/templates/read.html:110
 msgid "Sepia"
 msgstr "Sépia"
 
-#: cps/spa_strings.py:86
+#: cps/spa_strings.py:123
 msgid "High contrast"
 msgstr ""
 
-#: cps/spa_strings.py:87
+#: cps/spa_strings.py:124
 msgid "Midnight (AMOLED)"
 msgstr ""
 
-#: cps/spa_strings.py:88
+#: cps/spa_strings.py:125
 msgid "Match your device’s light or dark setting"
 msgstr ""
 
-#: cps/spa_strings.py:89
-#, fuzzy
+#: cps/spa_strings.py:126
 msgid "Theme saved."
-msgstr "Le fichier %(file)s a été téléchargé"
+msgstr ""
 
-#: cps/spa_strings.py:90
-#, fuzzy
+#: cps/spa_strings.py:127
 msgid "Could not save theme."
-msgstr "Impossible de se connecter : %(message)s"
+msgstr ""
 
-#: cps/spa_strings.py:91
-#, fuzzy
+#: cps/spa_strings.py:128
 msgid "Default theme for new accounts"
-msgstr "Réglages par défaut pour les nouveaux utilisateurs"
+msgstr ""
 
-#: cps/spa_strings.py:92
+#: cps/spa_strings.py:129
 msgid ""
 "Applies to accounts created from now on. Everyone picks their own under "
 "Account → Theme."
 msgstr ""
 
-#: cps/spa_strings.py:101
-#, fuzzy
+#: cps/spa_strings.py:138
 msgid "Add a format"
-msgstr "Ajouter comme archive"
+msgstr ""
 
-#: cps/spa_strings.py:102
-#, fuzzy
+#: cps/spa_strings.py:139
 msgid "Add rule"
-msgstr "Ajouter un nouvel utilisateur"
+msgstr "Ajouter une règle"
 
-#: cps/spa_strings.py:103 cps/templates/detail.html:786
+#: cps/spa_strings.py:140 cps/templates/detail.html:786
 #: cps/templates/detail.html:997 cps/templates/detail.html:998
 #: cps/templates/detail.html:1659 cps/templates/listenmp3.html:190
 #: cps/templates/search.html:17
 msgid "Add to shelf"
 msgstr "Ajouter à l'étagère"
 
-#: cps/spa_strings.py:104
+#: cps/spa_strings.py:141
 msgid "Add your own"
 msgstr ""
 
-#: cps/spa_strings.py:105
-#, fuzzy
+#: cps/spa_strings.py:142
 msgid "App password label"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:106
-#, fuzzy
+#: cps/spa_strings.py:143
 msgid "App passwords"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:107 cps/templates/book_edit.html:135
+#: cps/spa_strings.py:144 cps/templates/book_edit.html:135
 #: cps/templates/book_edit.html:459 cps/templates/cwa_settings.html:1121
 #: cps/templates/search_form.html:12
 msgid "Author"
 msgstr "Auteur"
 
-#: cps/spa_strings.py:108
+#: cps/spa_strings.py:145
 msgid "Authors (separate with &)"
 msgstr ""
 
-#: cps/spa_strings.py:110
-#, fuzzy
+#: cps/spa_strings.py:147
 msgid "Back to sign in"
-msgstr "Retour au panneau d'administration"
+msgstr ""
 
-#: cps/spa_strings.py:111 cps/templates/read.html:197
+#: cps/spa_strings.py:148 cps/templates/read.html:197
 msgid "Blue"
 msgstr ""
 
-#: cps/spa_strings.py:112
-#, fuzzy
+#: cps/spa_strings.py:149
 msgid "Book content"
-msgstr "Titre du livre"
+msgstr ""
 
-#: cps/spa_strings.py:113 cps/templates/layout.html:612
+#: cps/spa_strings.py:150 cps/templates/layout.html:622
 msgid "Browse"
 msgstr "Explorer"
 
-#: cps/spa_strings.py:114
-#, fuzzy
+#: cps/spa_strings.py:151
 msgid "Change password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:115 cps/templates/book_edit.html:94
+#: cps/spa_strings.py:152 cps/templates/book_edit.html:94
 #: cps/templates/book_edit.html:378 cps/templates/book_table.html:346
 #: cps/templates/cwng_feedback_popup.html:63
 #: cps/templates/cwng_feedback_popup.html:72 cps/templates/duplicates.html:766
-#: cps/templates/layout.html:360 cps/templates/layout.html:722
-#: cps/templates/layout.html:865 cps/templates/modal_dialogs.html:34
+#: cps/templates/layout.html:360 cps/templates/layout.html:732
+#: cps/templates/layout.html:875 cps/templates/modal_dialogs.html:34
 #: cps/templates/shelf.html:110 cps/templates/update_now_modal.html:69
 #: cps/templates/user_edit.html:673
 msgid "Close"
 msgstr "Fermer"
 
-#: cps/spa_strings.py:116
-#, fuzzy
+#: cps/spa_strings.py:153
 msgid "Close menu"
-msgstr "Fermer"
+msgstr "Fermer le menu"
 
-#: cps/spa_strings.py:117
-#, fuzzy
+#: cps/spa_strings.py:154
 msgid "Contents"
-msgstr "Commentaires"
+msgstr ""
 
-#: cps/spa_strings.py:118
-#, fuzzy
+#: cps/spa_strings.py:155
 msgid "Convert failed."
-msgstr "La mise à jour a échoué :"
+msgstr ""
 
-#: cps/spa_strings.py:119
-#, fuzzy
+#: cps/spa_strings.py:156
 msgid "Convert to format"
-msgstr "Convertir le format du livre :"
+msgstr ""
 
-#: cps/spa_strings.py:120 cps/templates/cwa_settings.html:770
+#: cps/spa_strings.py:157 cps/templates/cwa_settings.html:770
 #: cps/templates/update_now_modal.html:36
 #: cps/templates/update_now_modal.html:45
 #: cps/templates/update_now_modal.html:63 cps/templates/user_edit.html:618
-#, fuzzy
 msgid "Copy"
-msgstr "Copier l'UUID"
+msgstr ""
 
-#: cps/spa_strings.py:121
-#, fuzzy
+#: cps/spa_strings.py:158
 msgid "Could not change password."
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:122
-#, fuzzy
+#: cps/spa_strings.py:159
 msgid "Could not create."
-msgstr "modifier les métadonnées"
+msgstr ""
 
-#: cps/spa_strings.py:123
-#, fuzzy
+#: cps/spa_strings.py:160
 msgid "Could not fetch cover."
-msgstr "Impossible d'extraire les informations de mise à jour"
+msgstr ""
 
-#: cps/spa_strings.py:124
-#, fuzzy
+#: cps/spa_strings.py:161
 msgid "Could not load metadata."
-msgstr "modifier les métadonnées"
+msgstr ""
 
-#: cps/spa_strings.py:125
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:162
+#, python-brace-format
 msgid "Could not load the book file ({status})"
-msgstr "Échec de la connexion au compte OAuth. Veuillez réessayer."
+msgstr ""
 
-#: cps/spa_strings.py:126
-#, fuzzy
+#: cps/spa_strings.py:163
 msgid "Could not load your account."
-msgstr "modifier les métadonnées"
+msgstr ""
 
-#: cps/spa_strings.py:127
-#, fuzzy
+#: cps/spa_strings.py:164
 msgid "Could not save."
-msgstr "Impossible de se connecter : %(message)s"
+msgstr ""
 
-#: cps/spa_strings.py:129
-#, fuzzy
+#: cps/spa_strings.py:166
 msgid "Cover image URL"
-msgstr "Image de couverture"
+msgstr ""
 
-#: cps/spa_strings.py:130
-#, fuzzy
+#: cps/spa_strings.py:167
 msgid "Cover update failed."
-msgstr "Image de couverture"
+msgstr ""
 
-#: cps/spa_strings.py:131 cps/templates/cover_picker.html:225
-#, fuzzy
+#: cps/spa_strings.py:168 cps/templates/cover_picker.html:225
 msgid "Cover updated."
-msgstr "Image de couverture"
+msgstr ""
 
-#: cps/spa_strings.py:132
-#, fuzzy
+#: cps/spa_strings.py:169
 msgid "Create smart shelf"
-msgstr "Créer une étagère"
+msgstr "Créer l’étagère intelligente"
 
-#: cps/spa_strings.py:133
+#: cps/spa_strings.py:170
 msgid "Create your account"
 msgstr ""
 
-#: cps/spa_strings.py:135
-#, fuzzy
+#: cps/spa_strings.py:172
 msgid "Dark theme"
-msgstr "Thème par défaut"
+msgstr ""
 
-#: cps/spa_strings.py:136 cps/templates/_book_organizer.html:155
+#: cps/spa_strings.py:173 cps/templates/_book_organizer.html:155
 #: cps/templates/admin.html:27 cps/templates/book_edit.html:59
 #: cps/templates/book_table.html:66 cps/templates/book_table.html:145
 #: cps/templates/book_table.html:194 cps/templates/duplicates.html:718
@@ -2926,235 +3004,208 @@ msgstr "Thème par défaut"
 msgid "Delete"
 msgstr "Supprimer"
 
-#: cps/spa_strings.py:138
-#, fuzzy
+#: cps/spa_strings.py:175
 msgid "Delete book"
-msgstr "Supprimer le livre"
+msgstr ""
 
-#: cps/spa_strings.py:139
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:176
+#, python-brace-format
 msgid ""
 "Delete \"{title}\"? This permanently removes the book and all its files from "
 "your library. This cannot be undone."
 msgstr ""
-"Cela supprimera définitivement les livres. Les fichiers originaux seront "
-"sauvegardés sur"
 
-#: cps/spa_strings.py:140
-#, fuzzy
+#: cps/spa_strings.py:177
 msgid "Deleting…"
-msgstr "Chercher"
+msgstr ""
 
-#: cps/spa_strings.py:141
-#, fuzzy
+#: cps/spa_strings.py:178
 msgid "Could not delete this book."
-msgstr "modifier les métadonnées"
+msgstr ""
 
-#: cps/spa_strings.py:142
+#: cps/spa_strings.py:179
 #, python-brace-format
 msgid "Delete the {fmt} file? The book stays; only this format is removed."
 msgstr ""
 
-#: cps/spa_strings.py:143
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:180
+#, python-brace-format
 msgid "Delete {fmt}"
-msgstr "Supprimer les formats :"
+msgstr ""
 
-#: cps/spa_strings.py:144
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:181
+#, python-brace-format
 msgid "Delete {n} book(s)? This cannot be undone."
-msgstr "Êtes-vous sûr(e) ? Cette action ne peut pas être annulée."
+msgstr ""
 
-#: cps/spa_strings.py:145
+#: cps/spa_strings.py:182
 msgid "Description contains"
 msgstr "La description contient"
 
-#: cps/spa_strings.py:146
+#: cps/spa_strings.py:183
 #, python-brace-format
 msgid "Deselect {title}"
 msgstr ""
 
-#: cps/spa_strings.py:147
-#, fuzzy
+#: cps/spa_strings.py:184
 msgid "Edit metadata"
-msgstr "modifier les métadonnées"
-
-#: cps/spa_strings.py:148
-#, fuzzy, python-brace-format
-msgid "Edit {title}"
-msgstr "Insérer le titre"
-
-#: cps/spa_strings.py:149
-#, fuzzy
-msgid "Failed to load books."
-msgstr "Échec de la connexion avec Google."
-
-#: cps/spa_strings.py:150
-#, fuzzy
-msgid "Failed to open the book."
-msgstr "Échec de la connexion avec Google."
-
-#: cps/spa_strings.py:151
-#, fuzzy
-msgid "Generate"
-msgstr "Erreur générale"
-
-#: cps/spa_strings.py:152 cps/templates/read.html:196
-#, fuzzy
-msgid "Green"
-msgstr "Grec"
-
-#: cps/spa_strings.py:153
-msgid "Help"
 msgstr ""
 
-#: cps/spa_strings.py:154
+#: cps/spa_strings.py:185
+#, python-brace-format
+msgid "Edit {title}"
+msgstr "Modifier {title}"
+
+#: cps/spa_strings.py:186
+msgid "Failed to load books."
+msgstr "Impossible de charger les livres."
+
+#: cps/spa_strings.py:187
+msgid "Failed to open the book."
+msgstr ""
+
+#: cps/spa_strings.py:188
+msgid "Generate"
+msgstr ""
+
+#: cps/spa_strings.py:189 cps/templates/read.html:196
+msgid "Green"
+msgstr ""
+
+#: cps/spa_strings.py:190
+msgid "Help"
+msgstr "Aide"
+
+#: cps/spa_strings.py:191
 msgid "Highlight color"
 msgstr ""
 
-#: cps/spa_strings.py:155 cps/templates/annotations_view.html:46
+#: cps/spa_strings.py:192 cps/templates/annotations_view.html:46
 msgid "Import from Kobo"
 msgstr ""
 
-#: cps/spa_strings.py:156
-#, fuzzy
+#: cps/spa_strings.py:193
 msgid "Interface language"
-msgstr "Langue de l'interface"
+msgstr ""
 
-#: cps/spa_strings.py:157
-#, fuzzy
+#: cps/spa_strings.py:194
 msgid "Invalid username or password."
 msgstr ""
-"Veuillez entrer un nom d'utilisateur valide pour réinitialiser le mot de "
-"passe"
 
-#: cps/spa_strings.py:159
+#: cps/spa_strings.py:196
 msgid "UI body font"
 msgstr ""
 
-#: cps/spa_strings.py:160
+#: cps/spa_strings.py:197
 msgid "UI display font"
 msgstr ""
 
-#: cps/spa_strings.py:161
+#: cps/spa_strings.py:198
 msgid "Default (Optima / Sans-Serif)"
 msgstr ""
 
-#: cps/spa_strings.py:162
+#: cps/spa_strings.py:199
 msgid "Default (Bookish Serif)"
 msgstr ""
 
-#: cps/spa_strings.py:163
-#, fuzzy
+#: cps/spa_strings.py:200
 msgid "System Sans-Serif"
-msgstr "Statistiques système"
+msgstr ""
 
-#: cps/spa_strings.py:164
-#, fuzzy
+#: cps/spa_strings.py:201
 msgid "Bookish Serif"
-msgstr "Liste des livres"
+msgstr ""
 
-#: cps/spa_strings.py:165
+#: cps/spa_strings.py:202
 msgid "Monospace"
 msgstr ""
 
-#: cps/spa_strings.py:166
+#: cps/spa_strings.py:203
 msgid "Label (e.g. KOReader on phone)"
 msgstr ""
 
-#: cps/spa_strings.py:167
-#, fuzzy
+#: cps/spa_strings.py:204
 msgid "Languages (comma separated)"
-msgstr "Hôtes de confiance (séparés par des virgules)"
+msgstr ""
 
-#: cps/spa_strings.py:169
-#, fuzzy
+#: cps/spa_strings.py:206
 msgid "Light theme"
-msgstr "Clair"
+msgstr ""
 
-#: cps/spa_strings.py:170
-#, fuzzy
+#: cps/spa_strings.py:207
 msgid "Login failed."
-msgstr "La mise à jour a échoué :"
+msgstr ""
 
-#: cps/spa_strings.py:171
-#, fuzzy
+#: cps/spa_strings.py:208
 msgid "Mark read"
-msgstr "Marquer comme lu"
+msgstr ""
 
-#: cps/spa_strings.py:172
-#, fuzzy
+#: cps/spa_strings.py:209
 msgid "Mark unread"
-msgstr "Marquer comme non lu"
+msgstr ""
 
-#: cps/spa_strings.py:173 cps/templates/book_table.html:48
+#: cps/spa_strings.py:210 cps/templates/book_table.html:48
 #: cps/templates/book_table.html:175 cps/templates/duplicates.html:745
 msgid "Merge"
 msgstr "Fusionner"
 
-#: cps/spa_strings.py:174
+#: cps/spa_strings.py:211
 #, python-brace-format
 msgid "Metadata applied to {n} book(s)."
 msgstr ""
 
-#: cps/spa_strings.py:175
+#: cps/spa_strings.py:212
 #, python-brace-format
 msgid "New password for “{label}” — copy it now, it won’t be shown again:"
 msgstr ""
 
-#: cps/spa_strings.py:176
+#: cps/spa_strings.py:213
 msgid "New passwords do not match."
 msgstr ""
 
-#: cps/spa_strings.py:177
+#: cps/spa_strings.py:214
 msgid "No books here."
 msgstr "Aucun livre ici."
 
-#: cps/spa_strings.py:178
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:215
+#, python-brace-format
 msgid "No results for \"{q}\"."
-msgstr "Résultats pour :"
+msgstr "Aucun résultat pour « {q} »."
 
-#: cps/spa_strings.py:179
+#: cps/spa_strings.py:216
 msgid "No suggestions"
 msgstr ""
 
-#: cps/spa_strings.py:180
+#: cps/spa_strings.py:217
 #, python-brace-format
 msgid "No {filter} books here."
+msgstr "Aucun livre {filter} ici."
+
+#: cps/spa_strings.py:218
+msgid "Password changed."
 msgstr ""
 
-#: cps/spa_strings.py:181
-#, fuzzy
-msgid "Password changed."
-msgstr "Mot de passe"
-
-#: cps/spa_strings.py:182
-#, fuzzy
+#: cps/spa_strings.py:219
 msgid "Paste URL"
-msgstr "URL de base OAuth"
+msgstr ""
 
-#: cps/spa_strings.py:183
-#, fuzzy
+#: cps/spa_strings.py:220
 msgid "Private shelf"
-msgstr "Créer une étagère"
+msgstr ""
 
-#: cps/spa_strings.py:184
-#, fuzzy
+#: cps/spa_strings.py:221
 msgid "Profile"
-msgstr "Votre profil"
+msgstr ""
 
-#: cps/spa_strings.py:185
-#, fuzzy
+#: cps/spa_strings.py:222
 msgid "Profile saved."
-msgstr "Le fichier %(file)s a été téléchargé"
+msgstr ""
 
-#: cps/spa_strings.py:186
-#, fuzzy
+#: cps/spa_strings.py:223
 msgid "Public shelf"
-msgstr "Étagère publique"
+msgstr ""
 
-#: cps/spa_strings.py:187 cps/templates/book_edit.html:159
+#: cps/spa_strings.py:224 cps/templates/book_edit.html:159
 #: cps/templates/book_edit.html:460 cps/templates/cwa_settings.html:348
 #: cps/templates/cwa_settings.html:350 cps/templates/cwa_settings.html:1139
 #: cps/templates/detail.html:1005
@@ -3163,178 +3214,153 @@ msgstr "Étagère publique"
 msgid "Publisher"
 msgstr "Éditeur"
 
-#: cps/spa_strings.py:188
-#, fuzzy
+#: cps/spa_strings.py:225
 msgid "Publishers (comma separated)"
-msgstr "Hôtes de confiance (séparés par des virgules)"
+msgstr ""
 
-#: cps/spa_strings.py:189 cps/templates/image.html:26
+#: cps/spa_strings.py:226 cps/templates/image.html:26
 #: cps/templates/listenmp3.html:159
 msgid "Read"
 msgstr "Lu"
 
-#: cps/spa_strings.py:190
-#, fuzzy
+#: cps/spa_strings.py:227
 msgid "Reading progress"
-msgstr "Avancement KOReader"
+msgstr ""
 
-#: cps/spa_strings.py:191 cps/templates/read.html:195
-#, fuzzy
+#: cps/spa_strings.py:228 cps/templates/read.html:195
 msgid "Red"
-msgstr "Lu"
+msgstr ""
 
-#: cps/spa_strings.py:192
-#, fuzzy
+#: cps/spa_strings.py:229
 msgid "Registration failed."
-msgstr "Inscription publique"
+msgstr ""
 
-#: cps/spa_strings.py:193
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:230
+#, python-brace-format
 msgid "Remove {name}"
-msgstr "Supprimer le tag"
+msgstr ""
 
-#: cps/spa_strings.py:194
-#, fuzzy
+#: cps/spa_strings.py:231
 msgid "Request failed."
-msgstr "Échec de la restauration : %(err)s"
+msgstr ""
 
-#: cps/spa_strings.py:195
+#: cps/spa_strings.py:232
 msgid "Reset"
 msgstr "Réinitialiser"
 
-#: cps/spa_strings.py:196
-#, fuzzy
+#: cps/spa_strings.py:233
 msgid "Reset your password"
-msgstr "Réinitialiser le mot de passe de l’utilisateur"
+msgstr ""
 
-#: cps/spa_strings.py:197
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:234
+#, python-brace-format
 msgid "Revoke {label}"
-msgstr "Révoquer"
+msgstr ""
 
-#: cps/spa_strings.py:198
-#, fuzzy
+#: cps/spa_strings.py:235
 msgid "Save changes"
-msgstr "Voir le Changelog"
+msgstr "Enregistrer les modifications"
 
-#: cps/spa_strings.py:199
-#, fuzzy
+#: cps/spa_strings.py:236
 msgid "Save failed."
-msgstr "La mise à jour a échoué :"
+msgstr ""
 
-#: cps/spa_strings.py:200
-#, fuzzy
+#: cps/spa_strings.py:237
 msgid "Save profile"
-msgstr "Profil de %(name)s"
+msgstr ""
 
-#: cps/spa_strings.py:201
-#, fuzzy
+#: cps/spa_strings.py:238
 msgid "Saved."
-msgstr "Sauvegarder"
+msgstr ""
 
-#: cps/spa_strings.py:202 cps/templates/shelf_order.html:33
-#, fuzzy
+#: cps/spa_strings.py:239 cps/templates/shelf_order.html:33
 msgid "Saving…"
-msgstr "Chercher"
+msgstr "Enregistrement…"
 
-#: cps/spa_strings.py:204
-#, fuzzy
+#: cps/spa_strings.py:241
 msgid "Search failed."
-msgstr "La mise à jour a échoué :"
+msgstr ""
 
-#: cps/spa_strings.py:205
-#, fuzzy
+#: cps/spa_strings.py:242
 msgid "Search for metadata"
-msgstr "Obtenir les métadonnées"
+msgstr ""
 
-#: cps/spa_strings.py:206
-#, fuzzy
+#: cps/spa_strings.py:243
 msgid "Metadata providers"
-msgstr "Fournisseurs de métadonnées activés"
+msgstr ""
 
-#: cps/spa_strings.py:207
-#, fuzzy
+#: cps/spa_strings.py:244
 msgid "Loading providers…"
-msgstr "Chargement…"
+msgstr ""
 
-#: cps/spa_strings.py:208
-#, fuzzy
+#: cps/spa_strings.py:245
 msgid "Could not load providers."
-msgstr "modifier les métadonnées"
+msgstr ""
 
-#: cps/spa_strings.py:209
-#, fuzzy
+#: cps/spa_strings.py:246
 msgid "Could not update provider."
-msgstr "Impossible d'extraire les informations de mise à jour"
+msgstr ""
 
-#: cps/spa_strings.py:210
+#: cps/spa_strings.py:247
 #, python-brace-format
 msgid "{provider}: {state}"
 msgstr ""
 
-#: cps/spa_strings.py:211
+#: cps/spa_strings.py:248
 msgid "On"
 msgstr ""
 
-#: cps/spa_strings.py:212
+#: cps/spa_strings.py:249
 msgid "Off"
 msgstr ""
 
-#: cps/spa_strings.py:213 cps/templates/shelf.html:119
-#, fuzzy
+#: cps/spa_strings.py:250 cps/templates/shelf.html:119
 msgid "Search results"
-msgstr "Requête de recherche"
+msgstr ""
 
-#: cps/spa_strings.py:214
+#: cps/spa_strings.py:251
 msgid "Search the library"
 msgstr "Chercher dans la bibliothèque"
 
-#: cps/spa_strings.py:215
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:252
+#, python-brace-format
 msgid "Select {title}"
-msgstr "Sélectionner tout"
+msgstr ""
 
-#: cps/spa_strings.py:217
-#, fuzzy
+#: cps/spa_strings.py:254
 msgid "Sepia theme"
-msgstr "Sépia"
+msgstr ""
 
-#: cps/spa_strings.py:219
+#: cps/spa_strings.py:256
 #, python-brace-format
 msgid "Series position {n}"
 msgstr ""
 
-#: cps/spa_strings.py:220
+#: cps/spa_strings.py:257
 msgid "Sign in"
 msgstr ""
 
-#: cps/spa_strings.py:221
-#, fuzzy
+#: cps/spa_strings.py:258
 msgid "Sign in failed. Please try again."
-msgstr "Échec de la connexion au compte OAuth. Veuillez réessayer."
-
-#: cps/spa_strings.py:222
-msgid "Skip to content"
 msgstr ""
 
-#: cps/spa_strings.py:223
-#, fuzzy
+#: cps/spa_strings.py:259
+msgid "Skip to content"
+msgstr "Aller au contenu"
+
+#: cps/spa_strings.py:260
 msgid "Some fields could not be saved."
 msgstr ""
-"Le fichier de mise à jour n'a pas pu être sauvegardé dans le répertoire "
-"temporaire"
 
-#: cps/spa_strings.py:224
-#, fuzzy
+#: cps/spa_strings.py:261
 msgid "Table of contents"
-msgstr "Contenu du fichier de couverture invalide"
+msgstr ""
 
-#: cps/spa_strings.py:225
-#, fuzzy
+#: cps/spa_strings.py:262
 msgid "Tags (comma separated)"
-msgstr "Hôtes de confiance (séparés par des virgules)"
+msgstr ""
 
-#: cps/spa_strings.py:226 cps/templates/book_table.html:106
+#: cps/spa_strings.py:263 cps/templates/book_table.html:106
 #: cps/templates/config_view_edit.html:39 cps/templates/cwa_settings.html:327
 #: cps/templates/cwa_settings.html:329 cps/templates/cwa_settings.html:1115
 #: cps/templates/shelf_edit.html:8 cps/templates/tasks.html:41
@@ -3342,655 +3368,559 @@ msgstr "Hôtes de confiance (séparés par des virgules)"
 msgid "Title"
 msgstr "Titre"
 
-#: cps/spa_strings.py:227
+#: cps/spa_strings.py:264
 msgid "Unread"
 msgstr "Non lu"
 
-#: cps/spa_strings.py:228
-#, fuzzy
+#: cps/spa_strings.py:265
 msgid "Update password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:229 cps/tasks/upload.py:28 cps/templates/admin.html:22
+#: cps/spa_strings.py:266 cps/tasks/upload.py:28 cps/templates/admin.html:22
 #: cps/templates/layout.html:363 cps/templates/user_table.html:146
 msgid "Upload"
 msgstr "Téléverser"
 
-#: cps/spa_strings.py:230
-#, fuzzy
+#: cps/spa_strings.py:267
 msgid "Choose books to upload"
-msgstr "Choisissez un format cible :"
+msgstr ""
 
-#: cps/spa_strings.py:231
-#, fuzzy
+#: cps/spa_strings.py:268
 msgid "Upload failed."
-msgstr "Téléverser"
+msgstr "Échec du téléversement."
 
-#: cps/spa_strings.py:232
-#, fuzzy
+#: cps/spa_strings.py:269
 msgid "Upload image"
-msgstr "Format du fichier téléversé"
+msgstr ""
 
-#: cps/spa_strings.py:233
-#, fuzzy
+#: cps/spa_strings.py:270
 msgid "Uploading…"
-msgstr "Chargement…"
+msgstr ""
 
-#: cps/spa_strings.py:234 cps/templates/read.html:194
-#, fuzzy
+#: cps/spa_strings.py:271 cps/templates/read.html:194
 msgid "Yellow"
-msgstr "Autoriser"
+msgstr ""
 
-#: cps/spa_strings.py:235
+#: cps/spa_strings.py:272
 msgid "e.g. MOBI"
 msgstr ""
 
-#: cps/spa_strings.py:236
+#: cps/spa_strings.py:273
 #, python-brace-format
 msgid "{format} reader"
 msgstr ""
 
-#: cps/spa_strings.py:237
+#: cps/spa_strings.py:274
 #, python-brace-format
 msgid "{name} API key"
 msgstr ""
 
-#: cps/spa_strings.py:238
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:275
+#, python-brace-format
 msgid "{n} book(s) added to the shelf."
-msgstr "Ajouter à l'étagère"
+msgstr ""
 
-#: cps/spa_strings.py:239
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:276
+#, python-brace-format
 msgid "{n} book(s) deleted."
-msgstr "Exécuter sur le livre sélectionné"
+msgstr ""
 
-#: cps/spa_strings.py:240
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:277
+#, python-brace-format
 msgid "{n} marked as read."
-msgstr "Marqué comme lu"
+msgstr ""
 
-#: cps/spa_strings.py:241
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:278
+#, python-brace-format
 msgid "{n} marked as unread."
-msgstr "Marqué comme non lu"
+msgstr ""
 
-#: cps/spa_strings.py:242 cps/templates/_book_organizer.html:162
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:279 cps/templates/_book_organizer.html:162
+#, python-brace-format
 msgid "{n} selected"
-msgstr "Exécuter sur le livre sélectionné"
+msgstr ""
 
-#: cps/spa_strings.py:243
+#: cps/spa_strings.py:280
 #, python-format, python-brace-format
 msgid "{pct}% read"
 msgstr ""
 
-#: cps/spa_strings.py:249
+#: cps/spa_strings.py:286
 msgid "What's new"
+msgstr "Quoi de neuf"
+
+#: cps/spa_strings.py:287
+msgid "Help — new updates available"
+msgstr "Aide — nouvelles mises à jour disponibles"
+
+#: cps/spa_strings.py:288
+msgid "The latest features and fixes in Calibre-Web NextGen — newest first."
 msgstr ""
 
-#: cps/spa_strings.py:250
-#, fuzzy
-msgid "Help — new updates available"
-msgstr "La mise à jour a échoué :"
-
-#: cps/spa_strings.py:251
-#, fuzzy
-msgid "The latest features and fixes in Calibre-Web NextGen — newest first."
-msgstr "Catalogue de livres électroniques Calibre-Web Automated"
-
-#: cps/spa_strings.py:252
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:289
+#, python-brace-format
 msgid "{n} update"
-msgstr "Évaluation mise à jour"
+msgstr ""
 
-#: cps/spa_strings.py:253
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:290
+#, python-brace-format
 msgid "{n} updates"
-msgstr "Évaluation mise à jour"
+msgstr ""
 
-#: cps/spa_strings.py:254
+#: cps/spa_strings.py:291
 msgid "No release notes yet — check back after the next update."
 msgstr ""
 
-#: cps/spa_strings.py:255
+#: cps/spa_strings.py:292
 msgid ""
 "The interface is translated into your language; these update notes are "
 "written in English."
 msgstr ""
 
-#: cps/spa_strings.py:257 cps/templates/image.html:27
-#, fuzzy
+#: cps/spa_strings.py:294 cps/templates/image.html:27
 msgid "Reading"
-msgstr "Lu"
+msgstr ""
 
-#: cps/spa_strings.py:258
-#, fuzzy
+#: cps/spa_strings.py:295
 msgid "Grid view"
-msgstr "Vue invalide"
+msgstr "Vue en grille"
 
-#: cps/spa_strings.py:259
+#: cps/spa_strings.py:296
 msgid "Library"
 msgstr "Bibliothèque"
 
-#: cps/spa_strings.py:260
-#, fuzzy
+#: cps/spa_strings.py:297
 msgid "List view"
-msgstr "Liste"
+msgstr "Vue en liste"
 
-#: cps/spa_strings.py:261
+#: cps/spa_strings.py:298
 msgid "Sync"
 msgstr ""
 
-#: cps/spa_strings.py:262 cps/templates/layout.html:342
+#: cps/spa_strings.py:299 cps/templates/layout.html:342
 #: cps/templates/layout.html:378 cps/templates/user_edit.html:312
 #: cps/templates/user_edit.html:314
 msgid "Account"
 msgstr "Compte"
 
-#: cps/spa_strings.py:263 cps/templates/admin.html:19
+#: cps/spa_strings.py:300 cps/templates/admin.html:19
 #: cps/templates/layout.html:374 cps/templates/user_table.html:144
 msgid "Admin"
 msgstr "Administration"
 
-#: cps/spa_strings.py:264
+#: cps/spa_strings.py:301
 msgid "Under the hood"
 msgstr ""
 
-#: cps/spa_strings.py:267
-#, fuzzy
+#: cps/spa_strings.py:304
 msgid "Open your library"
-msgstr "Chercher dans librairie"
+msgstr ""
 
-#: cps/spa_strings.py:268
-#, fuzzy
+#: cps/spa_strings.py:305
 msgid "Open the table view"
-msgstr "Vue invalide"
+msgstr ""
 
-#: cps/spa_strings.py:269
-#, fuzzy
+#: cps/spa_strings.py:306
 msgid "Review duplicates"
-msgstr "Sélectionner les doublons"
+msgstr ""
 
-#: cps/spa_strings.py:270
-#, fuzzy
+#: cps/spa_strings.py:307
 msgid "Open your shelves"
-msgstr "Etagères exclues"
+msgstr ""
 
-#: cps/spa_strings.py:271
-#, fuzzy
+#: cps/spa_strings.py:308
 msgid "Manage sync & app passwords"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:272
-#, fuzzy
+#: cps/spa_strings.py:309
 msgid "Check your e-reader address"
-msgstr "Envoyer à l'adresse e-mail de l'eReader"
+msgstr ""
 
-#: cps/spa_strings.py:273
-#, fuzzy
+#: cps/spa_strings.py:310
 msgid "Create an app password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:274
-#, fuzzy
+#: cps/spa_strings.py:311
 msgid "Browse series"
-msgstr "Explorer"
+msgstr ""
 
-#: cps/spa_strings.py:275
-#, fuzzy
+#: cps/spa_strings.py:312
 msgid "Browse authors"
-msgstr "Explorer"
+msgstr ""
 
-#: cps/spa_strings.py:276
+#: cps/spa_strings.py:313
 msgid "Open Table view"
 msgstr ""
 
-#: cps/spa_strings.py:277
-#, fuzzy
+#: cps/spa_strings.py:314
 msgid "Open Admin"
-msgstr "Administration"
+msgstr ""
 
-#: cps/spa_strings.py:278
-#, fuzzy
+#: cps/spa_strings.py:315
 msgid "Open account settings"
-msgstr "Ouvrir les paramètres CWA"
+msgstr ""
 
-#: cps/spa_strings.py:279
-#, fuzzy
+#: cps/spa_strings.py:316
 msgid "Browse Discover"
-msgstr "Découvrir"
+msgstr ""
 
-#: cps/spa_strings.py:280
-#, fuzzy
+#: cps/spa_strings.py:317
 msgid "Explore your library"
-msgstr "Chercher dans librairie"
+msgstr ""
 
-#: cps/spa_strings.py:281
-#, fuzzy
+#: cps/spa_strings.py:318
 msgid "Go to Upload"
-msgstr "Téléverser"
+msgstr ""
 
-#: cps/spa_strings.py:282
-#, fuzzy
+#: cps/spa_strings.py:319
 msgid "Open search"
-msgstr "Lecteur ePub"
+msgstr ""
 
-#: cps/spa_strings.py:284
-#, fuzzy
+#: cps/spa_strings.py:321
 msgid "Editions"
-msgstr "Actions"
+msgstr ""
 
-#: cps/spa_strings.py:285 cps/templates/layout.html:335
-#, fuzzy
+#: cps/spa_strings.py:322 cps/templates/layout.html:335
 msgid "Back to New UI"
-msgstr "Retour au panneau d'administration"
+msgstr ""
 
-#: cps/spa_strings.py:286
-#, fuzzy
+#: cps/spa_strings.py:323
 msgid "Back to results"
-msgstr "Requête de recherche"
+msgstr ""
 
-#: cps/spa_strings.py:287
+#: cps/spa_strings.py:324
 msgid "No editions found for this book."
 msgstr ""
 
-#: cps/spa_strings.py:289
-#, fuzzy
+#: cps/spa_strings.py:326
 msgid "View all details"
-msgstr "Voir les détails du livre"
+msgstr ""
 
-#: cps/spa_strings.py:290
+#: cps/spa_strings.py:327
 msgid "Result details"
 msgstr ""
 
-#: cps/spa_strings.py:291 cps/templates/detail.html:1011
+#: cps/spa_strings.py:328 cps/templates/detail.html:1011
 #: cps/templates/listenmp3.html:111
 msgid "Published"
 msgstr "Publié"
 
-#: cps/spa_strings.py:292 cps/templates/cwa_settings.html:1145
+#: cps/spa_strings.py:329 cps/templates/cwa_settings.html:1145
 msgid "Format"
 msgstr "Format"
 
-#: cps/spa_strings.py:293 cps/templates/book_edit.html:462
+#: cps/spa_strings.py:330 cps/templates/book_edit.html:462
 msgid "Source"
 msgstr "Source"
 
-#: cps/spa_strings.py:296
-#, fuzzy
+#: cps/spa_strings.py:333
 msgid "Customize"
-msgstr "Filtre personnalisé"
-
-#: cps/spa_strings.py:297
-#, fuzzy
-msgid "Customize sidebar"
-msgstr "Filtre personnalisé"
-
-#: cps/spa_strings.py:298
-#, fuzzy
-msgid "Customize navigation"
-msgstr "Basculer la navigation"
-
-#: cps/spa_strings.py:299 cps/templates/_book_organizer.html:164
-msgid "Done"
 msgstr ""
 
-#: cps/spa_strings.py:300
-#, fuzzy
-msgid "Reset to default"
-msgstr "Revenir en haut"
+#: cps/spa_strings.py:334
+msgid "Customize sidebar"
+msgstr ""
 
-#: cps/spa_strings.py:301
+#: cps/spa_strings.py:335
+msgid "Customize navigation"
+msgstr "Personnaliser la navigation"
+
+#: cps/spa_strings.py:336 cps/templates/_book_organizer.html:164
+msgid "Done"
+msgstr "Terminé"
+
+#: cps/spa_strings.py:337
+msgid "Reset to default"
+msgstr "Rétablir les valeurs par défaut"
+
+#: cps/spa_strings.py:338
 msgid "Always shown"
 msgstr ""
 
-#: cps/spa_strings.py:302
+#: cps/spa_strings.py:339
 msgid "Editing sidebar. Reorder or hide sections, then tap Done."
 msgstr ""
+"Modification de la barre latérale. Réorganisez ou masquez des sections, puis "
+"appuyez sur Terminé."
 
-#: cps/spa_strings.py:303
+#: cps/spa_strings.py:340
 msgid "Editing cancelled."
-msgstr ""
+msgstr "Modification annulée."
 
-#: cps/spa_strings.py:304
+#: cps/spa_strings.py:341
 msgid ""
 "Drag to reorder. Tap ✕ to hide a section. Arrow keys move the focused handle."
 msgstr ""
+"Faites glisser pour réorganiser. Appuyez sur ✕ pour masquer une section. Les "
+"touches fléchées déplacent la poignée active."
 
-#: cps/spa_strings.py:305
-#, fuzzy
+#: cps/spa_strings.py:342
 msgid "Sidebar saved."
-msgstr "Mode de tri"
+msgstr "Barre latérale enregistrée."
 
-#: cps/spa_strings.py:306
+#: cps/spa_strings.py:343
 msgid "Sidebar reset to default."
-msgstr ""
+msgstr "Barre latérale réinitialisée."
 
-#: cps/spa_strings.py:307
+#: cps/spa_strings.py:344
 #, python-brace-format
 msgid "{label} moved to position {pos} of {total}"
 msgstr ""
 
-#: cps/spa_strings.py:308
+#: cps/spa_strings.py:345
 #, python-brace-format
 msgid "Reorder {label} (position {pos} of {total}). Use arrow keys to move."
 msgstr ""
 
-#: cps/spa_strings.py:309
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:346
+#, python-brace-format
 msgid "Delete {label}"
-msgstr "Révoquer"
+msgstr ""
 
-#: cps/spa_strings.py:310
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:347
+#, python-brace-format
 msgid "Restore {label}"
-msgstr "Révoquer"
+msgstr ""
 
-#: cps/spa_strings.py:311
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:348
+#, python-brace-format
 msgid "{label} hidden"
-msgstr "Révoquer"
+msgstr ""
 
-#: cps/spa_strings.py:312
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:349
+#, python-brace-format
 msgid "{label} restored"
-msgstr "Groupe dupliqué restauré"
+msgstr ""
 
-#: cps/spa_strings.py:313
-#, fuzzy
+#: cps/spa_strings.py:350
 msgid "Could not save sidebar. Please try again."
-msgstr "Échec de la connexion au compte OAuth. Veuillez réessayer."
+msgstr "Impossible d’enregistrer la barre latérale. Veuillez réessayer."
 
-#: cps/spa_strings.py:320
+#: cps/spa_strings.py:357
 msgid "Refresh library"
 msgstr "Actualiser la bibliothèque"
 
-#: cps/spa_strings.py:330
-#, fuzzy
+#: cps/spa_strings.py:367
 msgid "(replace cover)"
-msgstr "Format du fichier téléversé"
+msgstr ""
 
-#: cps/spa_strings.py:331
+#: cps/spa_strings.py:368
 msgid "2:3 (publisher cover — no padding for typical covers)"
 msgstr ""
 
-#: cps/spa_strings.py:332 cps/templates/config_edit.html:239
+#: cps/spa_strings.py:369 cps/templates/config_edit.html:235
 #: cps/templates/cover_picker.html:108
 msgid "3:4 (generic)"
 msgstr ""
 
-#: cps/spa_strings.py:333
+#: cps/spa_strings.py:370
 msgid "<"
 msgstr ""
 
-#: cps/spa_strings.py:334
+#: cps/spa_strings.py:371
 msgid "="
 msgstr ""
 
-#: cps/spa_strings.py:335
+#: cps/spa_strings.py:372
 msgid ">"
 msgstr ""
 
-#: cps/spa_strings.py:336
-#, fuzzy
+#: cps/spa_strings.py:373
 msgid "A few random picks from your library"
-msgstr "Masquer cette étagère dans votre barre latérale"
+msgstr "Une sélection aléatoire de votre bibliothèque"
 
-#: cps/spa_strings.py:337
+#: cps/spa_strings.py:374
 msgid ""
 "A one-time full duplicate scan is needed. Run it from CWA settings, then "
 "return here."
 msgstr ""
 
-#: cps/spa_strings.py:338 cps/templates/cover_picker.html:81
+#: cps/spa_strings.py:375 cps/templates/cover_picker.html:81
 msgid "API keys"
 msgstr ""
 
-#: cps/spa_strings.py:339 cps/templates/layout.html:652
+#: cps/spa_strings.py:376 cps/templates/layout.html:662
 #: cps/templates/stats.html:3
 msgid "About"
 msgstr "À propos"
 
-#: cps/spa_strings.py:340
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:377
+#, python-brace-format
 msgid "Account: {name}"
-msgstr "Compte"
+msgstr "Compte : {name}"
 
-#: cps/spa_strings.py:341
-#, fuzzy
+#: cps/spa_strings.py:378
 msgid "Add identifier"
-msgstr "Ajouter un identifiant"
+msgstr ""
 
-#: cps/spa_strings.py:342 cps/templates/detail.html:700
+#: cps/spa_strings.py:379 cps/templates/detail.html:700
 #: cps/templates/detail.html:701 cps/templates/detail.html:703
-#, fuzzy
 msgid "Add to favorites"
-msgstr "Ajouter comme archive"
+msgstr ""
 
-#: cps/spa_strings.py:343
-#, fuzzy
+#: cps/spa_strings.py:380
 msgid "Admin group"
-msgstr "Page admin"
+msgstr ""
 
-#: cps/spa_strings.py:344
+#: cps/spa_strings.py:381
 msgid "Advanced"
 msgstr "Avancé"
 
-#: cps/spa_strings.py:345
+#: cps/spa_strings.py:382
 msgid "Advanced search"
 msgstr "Recherche avancée"
 
-#: cps/spa_strings.py:347
-#, fuzzy
+#: cps/spa_strings.py:384
 msgid "All shelves"
-msgstr "Etagères"
+msgstr ""
 
-#: cps/spa_strings.py:348
+#: cps/spa_strings.py:385
 msgid "Allow remote (magic-link) login"
 msgstr ""
 
-#: cps/spa_strings.py:349
-#, fuzzy
+#: cps/spa_strings.py:386
 msgid "Allowed groups (comma-separated)"
-msgstr "Hôtes de confiance (séparés par des virgules)"
+msgstr ""
 
-#: cps/spa_strings.py:350 cps/templates/search_form.html:44
+#: cps/spa_strings.py:387 cps/templates/search_form.html:44
 #: cps/templates/search_form.html:165
 msgid "Any"
 msgstr "Tous"
 
-#: cps/spa_strings.py:351
+#: cps/spa_strings.py:388
 msgid "Any format"
 msgstr "Tous les formats"
 
-#: cps/spa_strings.py:352
+#: cps/spa_strings.py:389
 msgid "Any language"
 msgstr "Toutes les langues"
 
-#: cps/spa_strings.py:353
+#: cps/spa_strings.py:390
 msgid "Any series"
 msgstr "Toutes les séries"
 
-#: cps/spa_strings.py:354
+#: cps/spa_strings.py:391
 msgid "Any tags"
 msgstr "Toutes les étiquettes"
 
-#: cps/spa_strings.py:355
-#, fuzzy
+#: cps/spa_strings.py:392
 msgid "Apply selected"
-msgstr "Exécuter sur le livre sélectionné"
+msgstr ""
 
-#: cps/spa_strings.py:356
+#: cps/spa_strings.py:393
 msgid ""
 "Apply to all selected (only filled fields change; replaces existing values):"
 msgstr ""
 
-#: cps/spa_strings.py:357 cps/templates/cover_picker.html:224
+#: cps/spa_strings.py:394 cps/templates/cover_picker.html:224
 msgid "Applying…"
 msgstr ""
 
-#: cps/spa_strings.py:358 cps/templates/book_table.html:54
+#: cps/spa_strings.py:395 cps/templates/book_table.html:54
 #: cps/templates/book_table.html:214 cps/templates/duplicates.html:660
 msgid "Archive"
 msgstr "Archiver"
 
-#: cps/spa_strings.py:359 cps/templates/detail.html:712
+#: cps/spa_strings.py:396 cps/templates/detail.html:712
 #: cps/templates/listenmp3.html:167
 msgid "Archived"
 msgstr "Archivé"
 
-#: cps/spa_strings.py:360
+#: cps/spa_strings.py:397
 msgid "Ask in Discord"
+msgstr "Poser une question sur Discord"
+
+#: cps/spa_strings.py:398
+msgid "Authentication"
 msgstr ""
 
-#: cps/spa_strings.py:361
-#, fuzzy
-msgid "Authentication"
-msgstr "Authentification LDAP"
-
-#: cps/spa_strings.py:362
-#, fuzzy
+#: cps/spa_strings.py:399
 msgid "Authentication & security"
-msgstr "Authentification LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:363
+#: cps/spa_strings.py:400
 msgid "Author A–Z"
 msgstr "Auteur A–Z"
 
-#: cps/spa_strings.py:364
+#: cps/spa_strings.py:401
 msgid "Author Z–A"
 msgstr "Auteur Z–A"
 
-#: cps/spa_strings.py:365
+#: cps/spa_strings.py:402
 msgid "Authorised — signing you in…"
 msgstr ""
 
-#: cps/spa_strings.py:366
-#, fuzzy
+#: cps/spa_strings.py:403
 msgid "Authorize URL"
-msgstr "URL de base OAuth"
+msgstr ""
 
-#: cps/spa_strings.py:368
-#, fuzzy
+#: cps/spa_strings.py:405
 msgid "Auto-create users"
-msgstr "Création automatique d'utilisateurs à partir de LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:369
-#, fuzzy
+#: cps/spa_strings.py:406
 msgid "Auto-create users on first login"
-msgstr "Création automatique d'utilisateurs à partir de LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:371
-#, fuzzy
+#: cps/spa_strings.py:408
 msgid "Back to library"
-msgstr "Chercher dans librairie"
+msgstr ""
 
-#: cps/spa_strings.py:372
-#, fuzzy
+#: cps/spa_strings.py:409
 msgid "Back to the classic view"
-msgstr "Retour au panneau d'administration"
+msgstr "Revenir à l’affichage classique"
 
-#: cps/spa_strings.py:373
+#: cps/spa_strings.py:410
 msgid "Base DN"
 msgstr ""
 
-#: cps/spa_strings.py:374
-#, fuzzy
+#: cps/spa_strings.py:411
 msgid "Basic configuration"
-msgstr "Configuration principale"
+msgstr ""
 
-#: cps/spa_strings.py:375
-#, fuzzy
+#: cps/spa_strings.py:412
+msgid "Book default"
+msgstr ""
+
+#: cps/spa_strings.py:413
 msgid "Book density"
-msgstr "Titre du livre"
+msgstr "Densité des livres"
 
-#: cps/spa_strings.py:376
-#, fuzzy
-msgid "Rows per load"
-msgstr "Permettre le téléversement de fichiers"
-
-#: cps/spa_strings.py:377 cps/templates/cwa_settings.html:376
-#: cps/templates/cwa_settings.html:378
-msgid "Publication Date"
-msgstr "Date de publication"
-
-#: cps/spa_strings.py:378
-#, fuzzy
-msgid "Date Added"
-msgstr "Date d'ajout"
-
-#: cps/spa_strings.py:379
-#, fuzzy
-msgid "in the past N days"
-msgstr "Au cours des N derniers jours"
-
-#: cps/spa_strings.py:380
-#, fuzzy
-msgid "not in the past N days"
-msgstr "Pas au cours des N derniers jours"
-
-#: cps/spa_strings.py:381
-msgid "on or after"
-msgstr ""
-
-#: cps/spa_strings.py:382
-msgid "on or before"
-msgstr ""
-
-#: cps/spa_strings.py:383 cps/templates/detail.html:739
-#: cps/templates/detail.html:740
-msgid "Reload metadata from disk"
-msgstr ""
-
-#: cps/spa_strings.py:384
-#, fuzzy
-msgid "Reloading…"
-msgstr "Chargement…"
-
-#: cps/spa_strings.py:385 cps/templates/detail.html:738
-#, fuzzy
-msgid "Could not reload metadata"
-msgstr "modifier les métadonnées"
-
-#: cps/spa_strings.py:387
+#: cps/spa_strings.py:415
 #, python-brace-format
 msgid "Book {number}"
+msgstr "Livre {number}"
+
+#: cps/spa_strings.py:417
+msgid "Books per page"
 msgstr ""
 
-#: cps/spa_strings.py:389
-#, fuzzy
-msgid "Books per page"
-msgstr "Livres par page"
-
-#: cps/spa_strings.py:390 cps/templates/config_edit.html:244
+#: cps/spa_strings.py:418 cps/templates/config_edit.html:240
 #: cps/templates/cover_picker.html:114
 msgid "Border fill style"
 msgstr ""
 
-#: cps/spa_strings.py:391
+#: cps/spa_strings.py:419
 msgid "Built-in providers (leave blank to disable):"
 msgstr ""
 
-#: cps/spa_strings.py:392
-#, fuzzy
+#: cps/spa_strings.py:420
 msgid "Bulk actions"
-msgstr "Actions"
+msgstr ""
 
-#: cps/spa_strings.py:393
+#: cps/spa_strings.py:421
 msgid "CA certificate path"
 msgstr ""
 
-#: cps/spa_strings.py:394
+#: cps/spa_strings.py:422
 msgid "CWA settings (ingest/convert)"
 msgstr ""
 
-#: cps/spa_strings.py:395
-#, fuzzy
+#: cps/spa_strings.py:423
 msgid "Can upload books"
-msgstr "Échec de la connexion avec Google."
+msgstr ""
 
-#: cps/spa_strings.py:396 cps/templates/admin.html:304
+#: cps/spa_strings.py:424 cps/templates/admin.html:304
 #: cps/templates/admin.html:318 cps/templates/book_edit.html:312
 #: cps/templates/book_table.html:176 cps/templates/book_table.html:195
 #: cps/templates/book_table.html:215 cps/templates/book_table.html:235
@@ -4001,8 +3931,8 @@ msgstr "Échec de la connexion avec Google."
 #: cps/templates/cwa_convert_library.html:23
 #: cps/templates/cwa_epub_fixer.html:40 cps/templates/detail.html:1192
 #: cps/templates/duplicates.html:696 cps/templates/duplicates.html:719
-#: cps/templates/duplicates.html:746 cps/templates/layout.html:828
-#: cps/templates/layout.html:983 cps/templates/modal_dialogs.html:64
+#: cps/templates/duplicates.html:746 cps/templates/layout.html:838
+#: cps/templates/layout.html:993 cps/templates/modal_dialogs.html:64
 #: cps/templates/modal_dialogs.html:99 cps/templates/modal_dialogs.html:117
 #: cps/templates/modal_dialogs.html:135 cps/templates/read.html:187
 #: cps/templates/schedule_edit.html:46 cps/templates/shelf.html:125
@@ -4012,1156 +3942,1257 @@ msgstr "Échec de la connexion avec Google."
 msgid "Cancel"
 msgstr "Annuler"
 
-#: cps/spa_strings.py:397
-#, fuzzy
-msgid "Cancel title edit"
-msgstr "Annulée"
-
-#: cps/spa_strings.py:398
-#, fuzzy
+#: cps/spa_strings.py:425
 msgid "Cancel rename"
-msgstr "Annuler l'analyse"
+msgstr ""
 
-#: cps/spa_strings.py:400
+#: cps/spa_strings.py:426
+msgid "Cancel title edit"
+msgstr ""
+
+#: cps/spa_strings.py:427
+#, python-brace-format
+msgid "Cancel {task}"
+msgstr "Annuler {task}"
+
+#: cps/spa_strings.py:429
 msgid "Certificate file path"
 msgstr ""
 
-#: cps/spa_strings.py:401
+#: cps/spa_strings.py:430
 msgid "Certificate path"
 msgstr ""
 
-#: cps/spa_strings.py:402 cps/templates/book_edit.html:192
+#: cps/spa_strings.py:431 cps/templates/book_edit.html:192
 #: cps/templates/cover_picker.html:12 cps/templates/detail.html:619
 #: cps/templates/detail.html:622 cps/templates/detail.html:744
-#, fuzzy
 msgid "Change cover"
-msgstr "Changer le mot de passe"
-
-#: cps/spa_strings.py:403
-#, fuzzy
-msgid "Checking…"
-msgstr "Chercher"
-
-#: cps/spa_strings.py:404
-#, fuzzy
-msgid "Choose a cover"
-msgstr "Choisissez un nom d'utilisateur"
-
-#: cps/spa_strings.py:405
-#, fuzzy
-msgid "Choose a cover image to upload"
-msgstr "Choisissez un format cible :"
-
-#: cps/spa_strings.py:406
-#, fuzzy
-msgid "Choose an image…"
-msgstr "Choisissez un nom d'utilisateur"
-
-#: cps/spa_strings.py:407
-#, fuzzy
-msgid "Choose fields"
-msgstr "Choisissez les adresses e-mail :"
-
-#: cps/spa_strings.py:408
-#, fuzzy
-msgid "Choose your theme"
-msgstr "Choisissez un nom d'utilisateur"
-
-#: cps/spa_strings.py:409
-#, fuzzy
-msgid "Clear selection"
-msgstr "Supprimer la sélection"
-
-#: cps/spa_strings.py:410
-#, fuzzy
-msgid "Client ID"
-msgstr "Client Id OAuth"
-
-#: cps/spa_strings.py:411
-#, fuzzy
-msgid "Client secret"
-msgstr "Client secret OAuth"
-
-#: cps/spa_strings.py:412
-msgid "Client secret (leave blank to keep)"
 msgstr ""
-
-#: cps/spa_strings.py:413
-#, fuzzy
-msgid "Close reader"
-msgstr "Lecteur de bandes dessinées"
-
-#: cps/spa_strings.py:414
-#, fuzzy
-msgid "Columns"
-msgstr "Deux colonnes"
-
-#: cps/spa_strings.py:415
-#, fuzzy
-msgid "Configured"
-msgstr "Configuration"
-
-#: cps/spa_strings.py:416
-#, fuzzy
-msgid "Confirm new password"
-msgstr "Changer le mot de passe"
-
-#: cps/spa_strings.py:417 cps/tasks/convert.py:358
-msgid "Convert"
-msgstr "Convertir"
-
-#: cps/spa_strings.py:418
-msgid "Convert before sending"
-msgstr ""
-
-#: cps/spa_strings.py:419
-#, fuzzy
-msgid "Convert from"
-msgstr "Convertir depuis :"
-
-#: cps/spa_strings.py:420
-#, fuzzy
-msgid "Copied to clipboard"
-msgstr "UUID copié dans le presse-papiers"
-
-#: cps/spa_strings.py:421
-#, fuzzy
-msgid "Copy link"
-msgstr "Copier l'UUID"
-
-#: cps/spa_strings.py:422
-#, fuzzy
-msgid "Could not create the shelf."
-msgstr "modifier les métadonnées"
-
-#: cps/spa_strings.py:423
-#, fuzzy
-msgid "Could not load candidates."
-msgstr "modifier les métadonnées"
-
-#: cps/spa_strings.py:424
-#, fuzzy
-msgid "Could not load duplicates."
-msgstr "modifier les métadonnées"
-
-#: cps/spa_strings.py:425
-#, fuzzy
-msgid "Could not load highlights."
-msgstr "modifier les métadonnées"
-
-#: cps/spa_strings.py:426
-#, fuzzy
-msgid "Could not load this text file."
-msgstr "Échec de la connexion au compte OAuth. Veuillez réessayer."
-
-#: cps/spa_strings.py:427
-#, fuzzy
-msgid "Could not read this comic archive."
-msgstr "Impossible d'extraire les informations de mise à jour"
-
-#: cps/spa_strings.py:428
-#, fuzzy
-msgid "Could not reset password."
-msgstr "Changer le mot de passe"
-
-#: cps/spa_strings.py:429
-#, fuzzy
-msgid "Could not save the shelf."
-msgstr "Impossible de se connecter : %(message)s"
-
-#: cps/spa_strings.py:430
-#, fuzzy
-msgid "Couldn’t start a magic link. Please try again."
-msgstr "Échec de la connexion au compte OAuth. Veuillez réessayer."
-
-#: cps/spa_strings.py:431
-#, fuzzy
-msgid "Cover locked"
-msgstr "Image de couverture"
 
 #: cps/spa_strings.py:432
-#, fuzzy
-msgid "Cover not reachable"
-msgstr "modifier les métadonnées"
+msgid "Checking…"
+msgstr ""
+
+#: cps/spa_strings.py:433
+msgid "Choose a cover"
+msgstr ""
 
 #: cps/spa_strings.py:434
-#, fuzzy
-msgid "Cover updated from the selected result."
-msgstr "Image de couverture"
+msgid "Choose a cover image to upload"
+msgstr ""
 
 #: cps/spa_strings.py:435
-#, fuzzy
-msgid "Create"
-msgstr "Créer/visualiser"
+msgid "Choose an image…"
+msgstr ""
 
 #: cps/spa_strings.py:436
-#, fuzzy
-msgid "Create account"
-msgstr "Signaler un problème"
+msgid "Choose fields"
+msgstr ""
 
 #: cps/spa_strings.py:437
-#, fuzzy
-msgid "Create an account"
-msgstr "Changer le mot de passe"
+msgid "Choose your theme"
+msgstr ""
 
-#: cps/spa_strings.py:438
-msgid "Create shelf and add book"
+#: cps/spa_strings.py:438 cps/spa_strings.py:770
+msgid "Clear default"
 msgstr ""
 
 #: cps/spa_strings.py:439
-#, fuzzy
-msgid "Create user"
-msgstr "Signaler un problème"
+msgid "Clear selection"
+msgstr ""
 
 #: cps/spa_strings.py:440
-#, fuzzy
-msgid "Creating…"
-msgstr "Chercher"
+msgid "Client ID"
+msgstr ""
 
-#: cps/spa_strings.py:441 cps/templates/cover_picker.html:178
-#, fuzzy
-msgid "Current"
-msgstr "Version actuelle"
+#: cps/spa_strings.py:441
+msgid "Client secret"
+msgstr ""
 
-#: cps/spa_strings.py:442 cps/templates/cover_picker.html:23
-#, fuzzy
-msgid "Current cover"
-msgstr "Version actuelle"
+#: cps/spa_strings.py:442
+msgid "Client secret (leave blank to keep)"
+msgstr ""
 
 #: cps/spa_strings.py:443
-#, fuzzy
-msgid "Current password"
-msgstr "Changer le mot de passe"
+msgid "Close reader"
+msgstr ""
 
-#: cps/spa_strings.py:444 cps/templates/detail.html:849
-#: cps/templates/image.html:27 cps/templates/index.html:45
-#, fuzzy
-msgid "Currently reading"
-msgstr "Version actuelle"
+#: cps/spa_strings.py:444
+msgid "Columns"
+msgstr ""
 
 #: cps/spa_strings.py:445
-msgid "Custom border colour"
-msgstr ""
+msgid "Comfortable"
+msgstr "Confortable"
 
 #: cps/spa_strings.py:446
-msgid "Database & library path"
-msgstr ""
+msgid "Compact"
+msgstr "Compact"
 
 #: cps/spa_strings.py:447
-#, fuzzy
-msgid "Default (System Sans-Serif)"
-msgstr "Statistiques système"
+msgid "Configured"
+msgstr ""
 
 #: cps/spa_strings.py:448
-#, fuzzy
-msgid "Default book language"
-msgstr "Langue par défaut"
+msgid "Confirm new password"
+msgstr ""
 
-#: cps/spa_strings.py:449
-#, fuzzy
-msgid "Default interface language"
-msgstr "Langue par défaut de l'interface pour les nouveaux utilisateurs."
+#: cps/spa_strings.py:449 cps/tasks/convert.py:358
+msgid "Convert"
+msgstr "Convertir"
 
 #: cps/spa_strings.py:450
-#, fuzzy
-msgid "Default roles for new OAuth users:"
-msgstr "Réglages par défaut pour les nouveaux utilisateurs"
+msgid "Convert before sending"
+msgstr ""
 
 #: cps/spa_strings.py:451
-msgid "Defaults live in Admin → Configuration → Kobo sync."
+msgid "Convert from"
 msgstr ""
 
 #: cps/spa_strings.py:452
-#, fuzzy
-msgid "Delete books"
-msgstr "Supprimer le livre"
+msgid "Copied to clipboard"
+msgstr ""
 
 #: cps/spa_strings.py:453
+msgid "Copy link"
+msgstr ""
+
+#: cps/spa_strings.py:454
+msgid "Could not create shelf."
+msgstr "Impossible de créer l’étagère."
+
+#: cps/spa_strings.py:455
+msgid "Could not create the shelf."
+msgstr "Impossible de créer l’étagère."
+
+#: cps/spa_strings.py:456
+msgid "Could not delete shelf."
+msgstr "Impossible de supprimer l’étagère."
+
+#: cps/spa_strings.py:457
+msgid "Could not load candidates."
+msgstr ""
+
+#: cps/spa_strings.py:458
+msgid "Could not load duplicates."
+msgstr ""
+
+#: cps/spa_strings.py:459
+msgid "Could not load highlights."
+msgstr ""
+
+#: cps/spa_strings.py:460
+msgid "Could not load stats."
+msgstr "Impossible de charger les statistiques."
+
+#: cps/spa_strings.py:461
+msgid "Could not load tasks."
+msgstr "Impossible de charger les tâches."
+
+#: cps/spa_strings.py:462
+msgid "Could not load this text file."
+msgstr ""
+
+#: cps/spa_strings.py:463
+msgid "Could not load users."
+msgstr "Impossible de charger les utilisateurs."
+
+#: cps/spa_strings.py:464
+msgid "Could not read this comic archive."
+msgstr ""
+
+#: cps/spa_strings.py:465 cps/templates/detail.html:738
+msgid "Could not reload metadata"
+msgstr ""
+
+#: cps/spa_strings.py:466
+msgid "Could not rename shelf."
+msgstr "Impossible de renommer l’étagère."
+
+#: cps/spa_strings.py:467
+msgid "Could not reset password."
+msgstr ""
+
+#: cps/spa_strings.py:468 cps/templates/shelf_reorder.html:88
+msgid "Could not save order."
+msgstr "Impossible d’enregistrer l’ordre."
+
+#: cps/spa_strings.py:469
+msgid "Could not save reader settings."
+msgstr ""
+
+#: cps/spa_strings.py:470 cps/spa_strings.py:771
+msgid "Could not save the default library filter."
+msgstr ""
+
+#: cps/spa_strings.py:471
+msgid "Could not save the shelf."
+msgstr "Impossible d’enregistrer l’étagère."
+
+#: cps/spa_strings.py:472 cps/spa_strings.py:772
+msgid "Could not save title."
+msgstr ""
+
+#: cps/spa_strings.py:473
+msgid "Could not update shelf."
+msgstr "Impossible de mettre à jour l’étagère."
+
+#: cps/spa_strings.py:474
+msgid "Couldn’t start a magic link. Please try again."
+msgstr ""
+
+#: cps/spa_strings.py:475
+msgid "Cover locked"
+msgstr ""
+
+#: cps/spa_strings.py:476
+msgid "Cover not reachable"
+msgstr ""
+
+#: cps/spa_strings.py:478
+msgid "Cover updated from the selected result."
+msgstr ""
+
+#: cps/spa_strings.py:479
+msgid "Create"
+msgstr "Créer"
+
+#: cps/spa_strings.py:480
+msgid "Create account"
+msgstr ""
+
+#: cps/spa_strings.py:481
+msgid "Create an account"
+msgstr ""
+
+#: cps/spa_strings.py:482
+msgid "Create failed."
+msgstr "Échec de la création."
+
+#: cps/spa_strings.py:483
+msgid "Create shelf and add book"
+msgstr ""
+
+#: cps/spa_strings.py:484
+msgid "Create user"
+msgstr ""
+
+#: cps/spa_strings.py:485
+#, python-brace-format
+msgid "Created {name}."
+msgstr "{name} a été créé."
+
+#: cps/spa_strings.py:486
+msgid "Creating…"
+msgstr ""
+
+#: cps/spa_strings.py:487 cps/templates/cover_picker.html:178
+msgid "Current"
+msgstr ""
+
+#: cps/spa_strings.py:488 cps/templates/cover_picker.html:23
+msgid "Current cover"
+msgstr ""
+
+#: cps/spa_strings.py:489
+msgid "Current password"
+msgstr ""
+
+#: cps/spa_strings.py:490 cps/templates/detail.html:849
+#: cps/templates/image.html:27 cps/templates/index.html:45
+msgid "Currently reading"
+msgstr ""
+
+#: cps/spa_strings.py:491
+msgid "Custom border colour"
+msgstr ""
+
+#: cps/spa_strings.py:492
+msgid "Database & library path"
+msgstr ""
+
+#: cps/spa_strings.py:493
+msgid "Date Added"
+msgstr "Date d’ajout"
+
+#: cps/spa_strings.py:494 cps/spa_strings.py:776 cps/templates/detail.html:904
+msgid "Date added"
+msgstr "Date d'ajout"
+
+#: cps/spa_strings.py:495
+msgid "Default (System Sans-Serif)"
+msgstr ""
+
+#: cps/spa_strings.py:496
+msgid "Default book language"
+msgstr ""
+
+#: cps/spa_strings.py:497
+msgid "Default interface language"
+msgstr ""
+
+#: cps/spa_strings.py:498 cps/spa_strings.py:774
+msgid "Default library filter cleared."
+msgstr ""
+
+#: cps/spa_strings.py:499 cps/spa_strings.py:775
+msgid "Default library filter saved."
+msgstr ""
+
+#: cps/spa_strings.py:500
+msgid "Default roles for new OAuth users:"
+msgstr ""
+
+#: cps/spa_strings.py:501
+msgid "Defaults live in Admin → Configuration → Kobo sync."
+msgstr ""
+
+#: cps/spa_strings.py:502
+msgid "Delete books"
+msgstr ""
+
+#: cps/spa_strings.py:503
+msgid "Delete failed."
+msgstr "Échec de la suppression."
+
+#: cps/spa_strings.py:504
+#, python-brace-format
+msgid "Delete shelf \"{name}\"? This cannot be undone."
+msgstr "Supprimer l’étagère « {name} » ? Cette action est irréversible."
+
+#: cps/spa_strings.py:505
 msgid "Delete this smart shelf? Your books are not affected."
 msgstr ""
 
-#: cps/spa_strings.py:454 cps/templates/book_edit.html:171
+#: cps/spa_strings.py:506
+#, python-brace-format
+msgid "Delete user \"{name}\"? Their shelves and reading data are removed too."
+msgstr ""
+"Supprimer l’utilisateur « {name} » ? Ses étagères et ses données de lecture "
+"seront également supprimées."
+
+#: cps/spa_strings.py:507
+#, python-brace-format
+msgid "Delete {name}"
+msgstr "Supprimer {name}"
+
+#: cps/spa_strings.py:508
+#, python-brace-format
+msgid "Deleted {name}."
+msgstr "{name} a été supprimé."
+
+#: cps/spa_strings.py:509
+msgid "Dense"
+msgstr "Dense"
+
+#: cps/spa_strings.py:510 cps/templates/book_edit.html:171
 #: cps/templates/book_edit.html:461 cps/templates/cwa_settings.html:341
 #: cps/templates/cwa_settings.html:343 cps/templates/search_form.html:154
 msgid "Description"
 msgstr "Description"
 
-#: cps/spa_strings.py:455
-#, fuzzy
+#: cps/spa_strings.py:511
 msgid "Disable standard password login"
-msgstr "Désactiver la connexion standard (nom d'utilisateur/mot de passe)"
+msgstr ""
 
-#: cps/spa_strings.py:457
-#, fuzzy
+#: cps/spa_strings.py:513
 msgid "Discover picks updated."
-msgstr "Image de couverture"
+msgstr ""
 
-#: cps/spa_strings.py:458 cps/templates/cwng_feedback_popup.html:24
-#: cps/templates/duplicates.html:618 cps/templates/layout.html:406
-#: cps/templates/layout.html:576
+#: cps/spa_strings.py:514
+msgid "Discover — Random Picks"
+msgstr "Découvrir — Sélection aléatoire"
+
+#: cps/spa_strings.py:515 cps/templates/cwng_feedback_popup.html:24
+#: cps/templates/duplicates.html:618 cps/templates/layout.html:404
+#: cps/templates/layout.html:586
 msgid "Dismiss"
 msgstr "Rejeter"
 
-#: cps/spa_strings.py:459
-#, fuzzy
+#: cps/spa_strings.py:516
 msgid "Dismiss this group"
-msgstr "Supprimer ce groupe en double"
+msgstr ""
 
-#: cps/spa_strings.py:460
-#, fuzzy
+#: cps/spa_strings.py:517
 msgid "Documentation"
-msgstr "Authentification LDAP"
+msgstr "Documentation"
 
-#: cps/spa_strings.py:461
+#: cps/spa_strings.py:518
 msgid "Done reordering"
 msgstr ""
 
-#: cps/spa_strings.py:462 cps/templates/admin.html:24
+#: cps/spa_strings.py:519 cps/templates/admin.html:24
 #: cps/templates/detail.html:647 cps/templates/shelf.html:9
 #: cps/templates/user_table.html:147
 msgid "Download"
 msgstr "Télécharger"
 
-#: cps/spa_strings.py:463
+#: cps/spa_strings.py:520
 msgid "Drop files here, or click to choose"
 msgstr ""
 
-#: cps/spa_strings.py:464
-#, fuzzy
+#: cps/spa_strings.py:521
 msgid "Duplicate"
-msgstr "Doubles"
+msgstr ""
 
-#: cps/spa_strings.py:465
-#, fuzzy
+#: cps/spa_strings.py:522
 msgid "Duplicate books"
-msgstr "Livres en double"
+msgstr ""
 
-#: cps/spa_strings.py:467 cps/templates/cover_picker.html:94
+#: cps/spa_strings.py:524 cps/templates/cover_picker.html:94
 msgid "E-reader preview"
 msgstr ""
 
-#: cps/spa_strings.py:468
+#: cps/spa_strings.py:525
 msgid "Each type (isbn, amazon, google, doi…) may appear once."
 msgstr ""
 
-#: cps/spa_strings.py:469 cps/templates/config_edit.html:247
+#: cps/spa_strings.py:526 cps/templates/config_edit.html:243
 #: cps/templates/cover_picker.html:117
 msgid "Edge blur — soft bokeh border"
 msgstr ""
 
-#: cps/spa_strings.py:470 cps/templates/config_edit.html:246
+#: cps/spa_strings.py:527 cps/templates/config_edit.html:242
 #: cps/templates/cover_picker.html:116
 msgid "Edge mirror — extend the artwork (recommended)"
 msgstr ""
 
-#: cps/spa_strings.py:471 cps/templates/admin.html:26
+#: cps/spa_strings.py:528 cps/templates/admin.html:26
 #: cps/templates/book_table.html:51 cps/templates/book_table.html:332
 #: cps/templates/duplicates.html:657 cps/templates/index.html:131
 #: cps/templates/user_table.html:131 cps/templates/user_table.html:149
 msgid "Edit"
 msgstr "Éditer"
 
-#: cps/spa_strings.py:472
-#, fuzzy
+#: cps/spa_strings.py:529
 msgid "Edit public shelves"
-msgstr "Modifier les étagères publiques"
+msgstr ""
 
-#: cps/spa_strings.py:473
-#, fuzzy
+#: cps/spa_strings.py:530
 msgid "Edit smart shelf"
-msgstr "Modifier une étagère"
+msgstr "Modifier l’étagère intelligente"
 
-#: cps/spa_strings.py:474 cps/templates/admin.html:15
+#: cps/spa_strings.py:531 cps/spa_strings.py:773
+#, python-brace-format
+msgid "Edit title for {title}"
+msgstr ""
+
+#: cps/spa_strings.py:532 cps/templates/admin.html:15
 #: cps/templates/register.html:14 cps/templates/user_edit.html:200
 #: cps/templates/user_table.html:135
 msgid "Email"
 msgstr "Adresse mail"
 
-#: cps/spa_strings.py:475
-#, fuzzy
+#: cps/spa_strings.py:533
 msgid "Email (SMTP) server"
-msgstr "Service de messagerie"
+msgstr ""
 
-#: cps/spa_strings.py:476
+#: cps/spa_strings.py:534
 msgid "Email (optional)"
 msgstr ""
 
-#: cps/spa_strings.py:477
-#, fuzzy
+#: cps/spa_strings.py:535
 msgid "Email claim"
-msgstr "Champs courriel"
+msgstr ""
 
-#: cps/spa_strings.py:478
-#, fuzzy
+#: cps/spa_strings.py:536
 msgid "Email me a reset"
-msgstr "Service de messagerie"
+msgstr ""
 
-#: cps/spa_strings.py:479
-#, fuzzy
+#: cps/spa_strings.py:537
 msgid "Email settings saved."
-msgstr "Les paramètres du serveur de courriels ont été mis à jour"
+msgstr ""
 
-#: cps/spa_strings.py:480 cps/templates/config_edit.html:208
+#: cps/spa_strings.py:538 cps/templates/config_edit.html:208
 msgid "Enable Kobo sync"
 msgstr "Activer la synchronisation Kobo"
 
-#: cps/spa_strings.py:481 cps/templates/admin.html:80
+#: cps/spa_strings.py:539 cps/templates/admin.html:80
 #: cps/templates/email_edit.html:39
 msgid "Encryption"
 msgstr "Chiffrement"
 
-#: cps/spa_strings.py:482
+#: cps/spa_strings.py:540
 msgid "Expires in"
 msgstr ""
 
-#: cps/spa_strings.py:483
-#, fuzzy
+#: cps/spa_strings.py:541
 msgid "Expose only selected shelves over OPDS"
 msgstr ""
-"Synchroniser uniquement les livres dans les étagères sélectionnées avec Kobo"
 
-#: cps/spa_strings.py:484
-#, fuzzy
+#: cps/spa_strings.py:542
+msgid "Failed to load shelves."
+msgstr "Impossible de charger les étagères."
+
+#: cps/spa_strings.py:543
 msgid "Failed to load."
-msgstr "Échec de la connexion avec Google."
+msgstr ""
 
-#: cps/spa_strings.py:485 cps/templates/image.html:25
+#: cps/spa_strings.py:544 cps/templates/image.html:25
 msgid "Favorite"
 msgstr ""
 
-#: cps/spa_strings.py:486
-#, fuzzy
+#: cps/spa_strings.py:545
 msgid "Favorited"
-msgstr "Livres populaires"
+msgstr ""
 
-#: cps/spa_strings.py:488
+#: cps/spa_strings.py:547
 msgid "Fetch"
 msgstr ""
 
-#: cps/spa_strings.py:489
-#, fuzzy
+#: cps/spa_strings.py:548
 msgid "Fetch metadata from web"
-msgstr "Obtenir les métadonnées"
+msgstr ""
 
-#: cps/spa_strings.py:490
-#, fuzzy
+#: cps/spa_strings.py:549
 msgid "Files"
-msgstr "Tailles de fichiers"
+msgstr ""
 
-#: cps/spa_strings.py:491
+#: cps/spa_strings.py:550
 msgid ""
 "Files are queued for the library's ingest process and appear once imported."
 msgstr ""
 
-#: cps/spa_strings.py:492
-#, fuzzy
-msgid "Forgot password?"
-msgstr "Mot de passe oublié ?"
+#: cps/spa_strings.py:551
+#, python-brace-format
+msgid "Filter {items}"
+msgstr "Filtrer : {items}"
 
-#: cps/spa_strings.py:493
+#: cps/spa_strings.py:552
+#, python-brace-format
+msgid "Filter {items}…"
+msgstr "Filtrer : {items}…"
+
+#: cps/spa_strings.py:553
+msgid "Font family"
+msgstr ""
+
+#: cps/spa_strings.py:554
+msgid "Font size"
+msgstr ""
+
+#: cps/spa_strings.py:555
+msgid "Forgot password?"
+msgstr ""
+
+#: cps/spa_strings.py:556
 msgid "Format queued — it will appear once processed."
 msgstr ""
 
-#: cps/spa_strings.py:494
-#, fuzzy
+#: cps/spa_strings.py:557
 msgid "Formats"
-msgstr "Format"
+msgstr ""
 
-#: cps/spa_strings.py:495
+#: cps/spa_strings.py:558
 msgid "Formats — exclude"
 msgstr "Formats — exclure"
 
-#: cps/spa_strings.py:496
+#: cps/spa_strings.py:559
 msgid "Formats — include"
 msgstr "Formats — inclure"
 
-#: cps/spa_strings.py:497
-#, fuzzy
+#: cps/spa_strings.py:560
 msgid "From address"
-msgstr "Avancement"
+msgstr ""
 
-#: cps/spa_strings.py:498
+#: cps/spa_strings.py:561
 msgid "Full user table & restrictions"
 msgstr ""
 
-#: cps/spa_strings.py:499
+#: cps/spa_strings.py:562
 msgid "Generate a new link"
 msgstr ""
 
-#: cps/spa_strings.py:500
+#: cps/spa_strings.py:563
 msgid "Give your smart shelf a name."
+msgstr "Donnez un nom à votre étagère intelligente."
+
+#: cps/spa_strings.py:564
+msgid "Go to your library"
 msgstr ""
 
-#: cps/spa_strings.py:501
-#, fuzzy
-msgid "Go to your library"
-msgstr "Masquer cette étagère dans votre barre latérale"
-
-#: cps/spa_strings.py:502 cps/templates/config_edit.html:248
+#: cps/spa_strings.py:565 cps/templates/config_edit.html:244
 #: cps/templates/cover_picker.html:118
 msgid "Gradient — palette-matched top/bottom blend"
 msgstr ""
 
-#: cps/spa_strings.py:503
-#, fuzzy
+#: cps/spa_strings.py:566
 msgid "Group claim"
-msgstr "Groupe OAuth pour les administrateurs"
+msgstr ""
 
-#: cps/spa_strings.py:504
-#, fuzzy
+#: cps/spa_strings.py:567
 msgid "Group members field"
-msgstr "Champ des membres de groupe LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:505
-#, fuzzy
+#: cps/spa_strings.py:568
 msgid "Group name"
-msgstr "Nom de groupe LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:506
-#, fuzzy
+#: cps/spa_strings.py:569
 msgid "Group object filter"
-msgstr "Filtre objet de groupe LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:507
+#: cps/spa_strings.py:570
 msgid "HTML is allowed and sanitized on display."
 msgstr ""
 
-#: cps/spa_strings.py:508
-#, fuzzy
+#: cps/spa_strings.py:571
 msgid "Header name"
-msgstr "Nom d'utilisateur"
-
-#: cps/spa_strings.py:509
-msgid "Help & support"
 msgstr ""
 
-#: cps/spa_strings.py:510
-#, fuzzy
-msgid "Help menu"
-msgstr "Fermer"
+#: cps/spa_strings.py:572
+msgid "Help & support"
+msgstr "Aide et assistance"
 
-#: cps/spa_strings.py:511 cps/templates/readcbr.html:173
+#: cps/spa_strings.py:573
+msgid "Help menu"
+msgstr "menu Aide"
+
+#: cps/spa_strings.py:574 cps/templates/readcbr.html:173
 msgid "Hide"
 msgstr "Cacher"
 
-#: cps/spa_strings.py:512
-#, fuzzy
+#: cps/spa_strings.py:575 cps/templates/detail.html:770
+msgid "Hidden"
+msgstr ""
+
+
+#: cps/spa_strings.py:576
 msgid "Hide Discover section"
-msgstr "Direction"
+msgstr "Masquer la section Découvrir"
 
-#: cps/spa_strings.py:513
-#, fuzzy
+#: cps/spa_strings.py:577
 msgid "Hide fields"
-msgstr "Masquer l'étagère"
+msgstr ""
 
-#: cps/spa_strings.py:514
-#, fuzzy
+#: cps/spa_strings.py:578
 msgid "Hide password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:515
-#, fuzzy
+#: cps/spa_strings.py:579
 msgid "Highlight"
-msgstr "Hauteur"
+msgstr ""
 
-#: cps/spa_strings.py:516
-#, fuzzy
+#: cps/spa_strings.py:580
 msgid "Highlights"
-msgstr "Hauteur"
+msgstr ""
 
-#: cps/spa_strings.py:517
+#: cps/spa_strings.py:581
 msgid "Hot"
-msgstr ""
+msgstr "Populaires"
 
-#: cps/spa_strings.py:518
+#: cps/spa_strings.py:582
+msgid "Hot — Most Downloaded"
+msgstr "Populaires — Les plus téléchargés"
+
+#: cps/spa_strings.py:583
 msgid "Icon"
+msgstr "Icône"
+
+#: cps/spa_strings.py:584
+msgid "Identifier type"
 msgstr ""
 
-#: cps/spa_strings.py:519
-#, fuzzy
-msgid "Identifier type"
-msgstr "Type d'identifiant"
-
-#: cps/spa_strings.py:520
-#, fuzzy
+#: cps/spa_strings.py:585
 msgid "Identifier value"
-msgstr "Valeur d'identifiant"
+msgstr ""
 
-#: cps/spa_strings.py:521 cps/templates/book_edit.html:175
+#: cps/spa_strings.py:586 cps/templates/book_edit.html:175
 msgid "Identifiers"
 msgstr "Identifiants"
 
-#: cps/spa_strings.py:522 cps/templates/book_edit.html:128
+#: cps/spa_strings.py:587 cps/templates/book_edit.html:128
 #: cps/templates/detail.html:899
-#, fuzzy
 msgid "Imported as"
-msgstr "Important :"
+msgstr ""
 
-#: cps/spa_strings.py:523
+#: cps/spa_strings.py:588
 msgid "In your book"
 msgstr ""
 
-#: cps/spa_strings.py:524
+#: cps/spa_strings.py:589
 msgid ""
 "In-browser reading currently supports EPUB. Use download or the classic "
 "reader for other formats."
 msgstr ""
 
-#: cps/spa_strings.py:525
+#: cps/spa_strings.py:590
 msgid "Issuer / base URL"
 msgstr ""
 
-#: cps/spa_strings.py:526
+#: cps/spa_strings.py:591
 msgid "It may have moved, or it might still live in the classic interface."
 msgstr ""
 
-#: cps/spa_strings.py:527 cps/templates/detail.html:1017
+#: cps/spa_strings.py:592 cps/templates/detail.html:1017
 msgid "KOReader Progress"
 msgstr "Avancement KOReader"
 
-#: cps/spa_strings.py:528
-#, fuzzy
+#: cps/spa_strings.py:593
 msgid "Key file path"
-msgstr "Chemin du fichier"
+msgstr ""
 
-#: cps/spa_strings.py:529
-#, fuzzy
+#: cps/spa_strings.py:594
 msgid "Key path"
-msgstr "Chemin du fichier"
+msgstr ""
 
-#: cps/spa_strings.py:530
+#: cps/spa_strings.py:595
 msgid "Kobo Clara HD / 2E / BW / Colour (1072×1448)"
 msgstr ""
 
-#: cps/spa_strings.py:531
+#: cps/spa_strings.py:596
 msgid "Kobo Libra Color / Libra 2 (1264×1680)"
 msgstr ""
 
-#: cps/spa_strings.py:532
-#, fuzzy
+#: cps/spa_strings.py:597
 msgid "Kobo sync on"
-msgstr "Jeton de synchronisation Kobo"
-
-#: cps/spa_strings.py:533
-msgid "LDAP"
 msgstr ""
 
-#: cps/spa_strings.py:534 cps/templates/book_edit.html:163
+#: cps/spa_strings.py:599 cps/templates/book_edit.html:163
 #: cps/templates/cwa_settings.html:1127 cps/templates/listenmp3.html:69
 msgid "Language"
 msgstr "Langue"
 
-#: cps/spa_strings.py:536
+#: cps/spa_strings.py:601
 msgid "Languages — include"
 msgstr "Langues — inclure"
 
-#: cps/spa_strings.py:537
-msgid "Larger"
-msgstr ""
-
-#: cps/spa_strings.py:538
-msgid "Larger text"
-msgstr ""
-
-#: cps/spa_strings.py:539 cps/templates/detail.html:1029
-#, fuzzy
-msgid "Last synced"
+#: cps/spa_strings.py:602 cps/templates/detail.html:908
+msgid "Last modified"
 msgstr "Dernière modification"
 
-#: cps/spa_strings.py:540
-#, fuzzy
-msgid "Library settings"
-msgstr "Paramètres d'affichage de la barre latérale"
-
-#: cps/spa_strings.py:541
-msgid "Load more"
+#: cps/spa_strings.py:603 cps/templates/detail.html:1029
+msgid "Last synced"
 msgstr ""
 
-#: cps/spa_strings.py:542
+#: cps/spa_strings.py:604
+msgid "Library settings"
+msgstr ""
+
+#: cps/spa_strings.py:605 cps/templates/read.html:132
+msgid "Line height"
+msgstr ""
+
+#: cps/spa_strings.py:606
+msgid "Load more"
+msgstr "Charger plus"
+
+#: cps/spa_strings.py:607 cps/templates/admin.html:300
+#: cps/templates/admin.html:332 cps/templates/config_db.html:4
+#: cps/templates/config_edit.html:4 cps/templates/cwa_settings.html:4
+#: cps/templates/read.html:74
+msgid "Loading"
+msgstr "Chargement…"
+
+#: cps/spa_strings.py:608
 msgid "Loading new Discover picks."
 msgstr ""
 
-#: cps/spa_strings.py:543 cps/templates/cover_picker.html:87
-#, fuzzy
+#: cps/spa_strings.py:609 cps/templates/cover_picker.html:87
 msgid "Loading…"
 msgstr "Chargement…"
 
-#: cps/spa_strings.py:544 cps/templates/cover_picker.html:37
+#: cps/spa_strings.py:610 cps/templates/cover_picker.html:37
 msgid "Lock cover"
 msgstr ""
 
-#: cps/spa_strings.py:546
-#, fuzzy
+#: cps/spa_strings.py:612
 msgid "Login button text"
-msgstr "Texte du bouton d'authentification"
+msgstr ""
 
-#: cps/spa_strings.py:547
-#, fuzzy
+#: cps/spa_strings.py:613
 msgid "Login method"
-msgstr "La mise à jour a échoué :"
+msgstr ""
 
-#: cps/spa_strings.py:548
-#, fuzzy
-msgid "Logs"
-msgstr "Afficher les fichiers journaux"
-
-#: cps/spa_strings.py:549
-#, fuzzy
+#: cps/spa_strings.py:614
 msgid "Login with"
-msgstr "Se connecter avec SSO"
+msgstr ""
 
-#: cps/spa_strings.py:550
+#: cps/spa_strings.py:615
+msgid "Logs"
+msgstr ""
+
+#: cps/spa_strings.py:616
 msgid "Looks good"
 msgstr ""
 
-#: cps/spa_strings.py:551
+#: cps/spa_strings.py:617
 msgid "Low-res"
 msgstr ""
 
-#: cps/spa_strings.py:552
-#, fuzzy
+#: cps/spa_strings.py:618
 msgid "Magic link"
-msgstr "Connexion à distance Magic Link"
+msgstr ""
 
-#: cps/spa_strings.py:553
-#, fuzzy
+#: cps/spa_strings.py:619
 msgid "Magic link QR code"
-msgstr "Connexion à distance Magic Link"
+msgstr ""
 
-#: cps/spa_strings.py:554
+#: cps/spa_strings.py:620
 msgid "Make private"
 msgstr ""
 
-#: cps/spa_strings.py:555
+#: cps/spa_strings.py:621
 msgid "Make public"
 msgstr ""
 
-#: cps/spa_strings.py:556
+#: cps/spa_strings.py:622 cps/spa_strings.py:777
+msgid "Make this my default library view"
+msgstr ""
+
+#: cps/spa_strings.py:623
 msgid "Manage admin role from OAuth group"
 msgstr ""
 
-#: cps/spa_strings.py:557
-#, fuzzy
+#: cps/spa_strings.py:624
 msgid "Manage shelves"
-msgstr "Étagères magiques ✨"
+msgstr ""
 
-#: cps/spa_strings.py:558 cps/templates/_book_organizer.html:139
+#: cps/spa_strings.py:625 cps/templates/_book_organizer.html:139
 #: cps/templates/book_table.html:60 cps/templates/book_table.html:254
 msgid "Mark as read"
 msgstr "Marquer comme lu"
 
-#: cps/spa_strings.py:559 cps/templates/_book_organizer.html:145
+#: cps/spa_strings.py:626 cps/templates/_book_organizer.html:145
 #: cps/templates/book_table.html:63 cps/templates/book_table.html:274
 msgid "Mark as unread"
 msgstr "Marquer comme non lu"
 
-#: cps/spa_strings.py:560
+#: cps/spa_strings.py:627
 msgid "Match"
-msgstr ""
+msgstr "Correspondance"
 
-#: cps/spa_strings.py:561
+#: cps/spa_strings.py:628
 msgid "Max"
 msgstr "Max."
 
-#: cps/spa_strings.py:562
+#: cps/spa_strings.py:629
 msgid "Max authors shown"
 msgstr ""
 
-#: cps/spa_strings.py:563
+#: cps/spa_strings.py:630
 msgid "Maximum rating"
 msgstr "Note maximale"
 
-#: cps/spa_strings.py:564
-#, fuzzy
+#: cps/spa_strings.py:631
 msgid "Member user filter"
-msgstr "Filtre utilisateur des membres LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:565
-#, fuzzy
+#: cps/spa_strings.py:632
 msgid "Metadata URL (OIDC auto-discovery)"
-msgstr "URL de métadonnées OAuth (pour auto-découverte)"
+msgstr ""
 
-#: cps/spa_strings.py:566
+#: cps/spa_strings.py:633
 msgid "Min"
 msgstr "Min."
 
-#: cps/spa_strings.py:567
+#: cps/spa_strings.py:634
 msgid "Minimum rating"
 msgstr "Note minimale"
 
-#: cps/spa_strings.py:568
+#: cps/spa_strings.py:635
 msgid "More cover options (search providers, e-reader preview)"
 msgstr ""
 
-#: cps/spa_strings.py:569
-#, fuzzy
+#: cps/spa_strings.py:636
 msgid "More server configuration"
-msgstr "Configuration du serveur"
+msgstr ""
 
-#: cps/spa_strings.py:570
+#: cps/spa_strings.py:637
+msgid ""
+"Pages marked below open in the classic view. Changes there apply to the "
+"whole server."
+msgstr ""
+
+#: cps/spa_strings.py:638
+msgid "Opens in classic view"
+msgstr ""
+
+#: cps/spa_strings.py:639
 msgid "Move down"
 msgstr ""
 
-#: cps/spa_strings.py:571
-#, fuzzy
+#: cps/spa_strings.py:640
 msgid "Move up"
-msgstr "Révoquer"
+msgstr ""
 
-#: cps/spa_strings.py:572
-#, fuzzy
+#: cps/spa_strings.py:641
 msgid "My account"
-msgstr "Compte"
+msgstr "Mon compte"
 
-#: cps/spa_strings.py:573
+#: cps/spa_strings.py:642
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
-#: cps/spa_strings.py:574
+#: cps/spa_strings.py:643
 msgid "Need to report an issue? Try the new"
-msgstr ""
+msgstr "Besoin de signaler un problème ? Essayez le nouveau"
 
-#: cps/spa_strings.py:575 cps/templates/cover_picker.html:182
+#: cps/spa_strings.py:644 cps/templates/cover_picker.html:182
 msgid "New"
 msgstr ""
 
-#: cps/spa_strings.py:576
-#, fuzzy
+#: cps/spa_strings.py:645
 msgid "New password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:577
+#: cps/spa_strings.py:646
 msgid "New shelf name"
-msgstr ""
+msgstr "Nom de la nouvelle étagère"
 
-#: cps/spa_strings.py:578
+#: cps/spa_strings.py:647
 msgid "New shelf name…"
-msgstr ""
+msgstr "Nom de la nouvelle étagère…"
 
-#: cps/spa_strings.py:579
+#: cps/spa_strings.py:648
 msgid "New shelf…"
 msgstr ""
 
-#: cps/spa_strings.py:580
-#, fuzzy
+#: cps/spa_strings.py:649
 msgid "New smart shelf"
-msgstr "Créer une étagère"
+msgstr "Nouvelle étagère intelligente"
 
-#: cps/spa_strings.py:581
-#, fuzzy
+#: cps/spa_strings.py:650
 msgid "New user"
-msgstr "Ajouter un nouvel utilisateur"
+msgstr ""
 
-#: cps/spa_strings.py:582
+#: cps/spa_strings.py:651
 msgid "Newest"
 msgstr "Plus récent"
 
-#: cps/spa_strings.py:583
+#: cps/spa_strings.py:652
 msgid "Newest published"
 msgstr "Date de publication (décroissant)"
 
-#: cps/spa_strings.py:584
-#, fuzzy
+#: cps/spa_strings.py:653
 msgid "Next page"
-msgstr "Page suivante"
+msgstr ""
 
-#: cps/spa_strings.py:585
+#: cps/spa_strings.py:654
 msgid "No books match this smart shelf right now."
 msgstr ""
 
-#: cps/spa_strings.py:586
-#, fuzzy
+#: cps/spa_strings.py:655
 msgid "No books match those criteria."
-msgstr "Livre introuvable."
+msgstr ""
 
-#: cps/spa_strings.py:587 cps/templates/cover_picker.html:223
+#: cps/spa_strings.py:656 cps/templates/cover_picker.html:223
 msgid "No candidates found yet. Try a different search or refresh."
 msgstr ""
 
-#: cps/spa_strings.py:588
-#, fuzzy
+#: cps/spa_strings.py:657
 msgid "No contents found."
-msgstr "Livre introuvable."
+msgstr ""
 
-#: cps/spa_strings.py:589
-#, fuzzy
+#: cps/spa_strings.py:658
 msgid "No duplicate groups found."
-msgstr "Groupes en double trouvés"
+msgstr ""
 
-#: cps/spa_strings.py:590
+#: cps/spa_strings.py:659
 msgid "No excluded tags"
 msgstr "Aucune étiquette exclue"
 
-#: cps/spa_strings.py:591
+#: cps/spa_strings.py:660
 msgid ""
 "No highlights yet. Highlight while reading, or import from a Kobo device."
 msgstr ""
 
-#: cps/spa_strings.py:592
+#: cps/spa_strings.py:661
+#, python-brace-format
+msgid "No matching {items} for \"{query}\"."
+msgstr "Aucun résultat dans {items} pour « {query} »."
+
+#: cps/spa_strings.py:662
 msgid "No pages found in this comic."
 msgstr ""
 
-#: cps/spa_strings.py:593
+#: cps/spa_strings.py:663
 msgid "No shelves yet — create one below."
 msgstr ""
 
-#: cps/spa_strings.py:594
+#: cps/spa_strings.py:664
+msgid "No shelves yet. Create one above to start collecting books."
+msgstr ""
+"Aucune étagère pour le moment. Créez-en une ci-dessus pour commencer à "
+"regrouper des livres."
+
+#: cps/spa_strings.py:665
 msgid "No sources need a key."
 msgstr ""
 
-#: cps/spa_strings.py:595
+#: cps/spa_strings.py:666
 msgid "No tasks running."
 msgstr ""
 
-#: cps/spa_strings.py:597
+#: cps/spa_strings.py:667
+#, python-brace-format
+msgid "No {items} yet."
+msgstr "Aucun élément dans {items} pour le moment."
+
+#: cps/spa_strings.py:669
 msgid "Not configured"
 msgstr ""
 
-#: cps/spa_strings.py:598
-msgid "OAuth / OpenID Connect"
-msgstr ""
-
-#: cps/spa_strings.py:599
+#: cps/spa_strings.py:671
 msgid "Oldest"
 msgstr "Plus ancien"
 
-#: cps/spa_strings.py:600
+#: cps/spa_strings.py:672
 msgid "Oldest published"
 msgstr "Date de publication (croissant)"
 
-#: cps/spa_strings.py:601
+#: cps/spa_strings.py:673
 msgid ""
 "On another device where you’re already signed in, scan this code or open the "
 "link below to authorise this device."
 msgstr ""
 
-#: cps/spa_strings.py:602
-#, fuzzy
+#: cps/spa_strings.py:674
 msgid "Open Account"
-msgstr "Compte"
+msgstr ""
 
-#: cps/spa_strings.py:603
+#: cps/spa_strings.py:675
 msgid "Open classic reader"
 msgstr ""
 
-#: cps/spa_strings.py:604
-#, fuzzy
+#: cps/spa_strings.py:676
 msgid "Open navigation"
-msgstr "Basculer la navigation"
+msgstr "Ouvrir la navigation"
 
-#: cps/spa_strings.py:605
-#, fuzzy
+#: cps/spa_strings.py:677
 msgid "Open reader"
-msgstr "Lecteur ePub"
+msgstr ""
 
-#: cps/spa_strings.py:606
+#: cps/spa_strings.py:678
 msgid "Open the classic interface"
 msgstr ""
 
-#: cps/spa_strings.py:607
+#: cps/spa_strings.py:679
 msgid "Open the link below on your signed-in device."
 msgstr ""
 
-#: cps/spa_strings.py:608
-#, fuzzy
+#: cps/spa_strings.py:680
 msgid "OpenLDAP server"
-msgstr "Port du serveur LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:609
-#, fuzzy
+#: cps/spa_strings.py:681
 msgid "PDF reader"
-msgstr "Lecteur PDF"
+msgstr ""
 
-#: cps/spa_strings.py:610 cps/templates/admin.html:20
+#: cps/spa_strings.py:682
+msgid "Page margins"
+msgstr ""
+
+#: cps/spa_strings.py:683
+msgid "Page theme"
+msgstr ""
+
+#: cps/spa_strings.py:684
+#, python-brace-format
+msgid "Page {number}"
+msgstr "Page {number}"
+
+#: cps/spa_strings.py:685 cps/templates/admin.html:20
 #: cps/templates/login.html:22 cps/templates/login.html:23
 #: cps/templates/user_edit.html:211
 msgid "Password"
 msgstr "Mot de passe"
 
-#: cps/spa_strings.py:611
+#: cps/spa_strings.py:686
 msgid "Password (leave blank to keep)"
 msgstr ""
 
-#: cps/spa_strings.py:612 cps/templates/cover_picker.html:14
+#: cps/spa_strings.py:687 cps/templates/cover_picker.html:14
 msgid ""
 "Pick a cover from any source we support, paste a URL, upload a file, or use "
 "the cover embedded in the book itself."
 msgstr ""
 
-#: cps/spa_strings.py:613
+#: cps/spa_strings.py:688
 #, python-brace-format
 msgid "Picked up {label}. Drag to reorder, release to drop."
 msgstr ""
 
-#: cps/spa_strings.py:614 cps/templates/admin.html:123
+#: cps/spa_strings.py:689 cps/templates/admin.html:123
 msgid "Port"
 msgstr "Port"
 
-#: cps/spa_strings.py:615
+#: cps/spa_strings.py:690
 msgid "Preparing your magic link…"
 msgstr ""
 
-#: cps/spa_strings.py:616
-#, fuzzy
+#: cps/spa_strings.py:691
 msgid "Previous page"
-msgstr "Page précédente"
+msgstr ""
 
-#: cps/spa_strings.py:617 cps/templates/duplicates.html:545
+#: cps/spa_strings.py:692 cps/templates/duplicates.html:545
 #: cps/templates/tasks.html:17
 msgid "Progress"
 msgstr "Avancement"
 
-#: cps/spa_strings.py:618
-#, fuzzy
+#: cps/spa_strings.py:693
 msgid "Public"
-msgstr "(Public)"
+msgstr "Publique"
 
-#: cps/spa_strings.py:619
+#: cps/spa_strings.py:694 cps/templates/cwa_settings.html:376
+#: cps/templates/cwa_settings.html:378
+msgid "Publication Date"
+msgstr "Date de publication"
+
+#: cps/spa_strings.py:695
 msgid "Published after"
 msgstr "Publié après le"
 
-#: cps/spa_strings.py:620
+#: cps/spa_strings.py:696
 msgid "Published before"
 msgstr "Publié avant le"
 
-#: cps/spa_strings.py:622
-#, fuzzy
+#: cps/spa_strings.py:698
 msgid "Random books shown"
-msgstr "Livres au hasard"
+msgstr ""
 
-#: cps/spa_strings.py:623 cps/templates/book_edit.html:167
+#: cps/spa_strings.py:699 cps/templates/book_edit.html:167
 #: cps/templates/cwa_settings.html:369 cps/templates/cwa_settings.html:371
 msgid "Rating"
 msgstr "Évaluation"
 
-#: cps/spa_strings.py:624
+#: cps/spa_strings.py:700
 msgid "Rating (stars)"
 msgstr "Note (étoiles)"
 
-#: cps/spa_strings.py:626
+#: cps/spa_strings.py:702
 msgid "Read status"
 msgstr "Statut de lecture"
 
-#: cps/spa_strings.py:627
-#, fuzzy
+#: cps/spa_strings.py:703
 msgid "Read status filter"
-msgstr "Status de lecture"
+msgstr "Filtre de statut de lecture"
 
-#: cps/spa_strings.py:628
+#: cps/spa_strings.py:704
+msgid "Reader settings saved."
+msgstr ""
+
+#: cps/spa_strings.py:705
+msgid "Reading appearance"
+msgstr ""
+
+#: cps/spa_strings.py:706
 msgid "Recipient(s)"
 msgstr ""
 
-#: cps/spa_strings.py:629
+#: cps/spa_strings.py:707
 msgid "Redirect host (full URL)"
 msgstr ""
 
-#: cps/spa_strings.py:630 cps/templates/cover_picker.html:152
+#: cps/spa_strings.py:708 cps/templates/cover_picker.html:152
 #: cps/templates/index.html:120
 msgid "Refresh"
 msgstr "Actualiser"
 
-#: cps/spa_strings.py:631
-#, fuzzy
+#: cps/spa_strings.py:709
 msgid "Registering…"
-msgstr "Créer un compte"
+msgstr ""
 
-#: cps/spa_strings.py:632
-#, fuzzy
+#: cps/spa_strings.py:710 cps/templates/detail.html:739
+#: cps/templates/detail.html:740
+msgid "Reload metadata from disk"
+msgstr ""
+
+#: cps/spa_strings.py:711
+msgid "Reloading…"
+msgstr ""
+
+#: cps/spa_strings.py:712
 msgid "Remember me"
-msgstr "Se rappeler de moi"
+msgstr ""
 
-#: cps/spa_strings.py:633 cps/templates/detail.html:700
+#: cps/spa_strings.py:713 cps/templates/detail.html:700
 #: cps/templates/detail.html:701 cps/templates/detail.html:702
-#, fuzzy
 msgid "Remove from favorites"
-msgstr "Retirer de l'étagère"
+msgstr ""
 
-#: cps/spa_strings.py:634 cps/templates/detail.html:809
+#: cps/spa_strings.py:714 cps/templates/detail.html:809
 #: cps/templates/detail.html:991
 msgid "Remove from shelf"
 msgstr "Retirer de l'étagère"
 
-#: cps/spa_strings.py:635
-#, fuzzy
+#: cps/spa_strings.py:715
 msgid "Remove highlight"
-msgstr "Hauteur"
+msgstr ""
 
-#: cps/spa_strings.py:636
-#, fuzzy
+#: cps/spa_strings.py:716
 msgid "Remove identifier"
-msgstr "Ajouter un identifiant"
+msgstr ""
 
-#: cps/spa_strings.py:637
-#, fuzzy
+#: cps/spa_strings.py:717
 msgid "Remove rule"
-msgstr "Supprimer"
+msgstr "Supprimer la règle"
 
-#: cps/spa_strings.py:638
-#, fuzzy
+#: cps/spa_strings.py:718
 msgid "Rename"
-msgstr "nom"
+msgstr ""
 
-#: cps/spa_strings.py:639
-#, fuzzy
+#: cps/spa_strings.py:719
 msgid "Reorder"
-msgstr "Étagère introuvable"
+msgstr ""
 
-#: cps/spa_strings.py:640
+#: cps/spa_strings.py:720
 msgid "Replace cover with this one?"
 msgstr ""
 
-#: cps/spa_strings.py:641
-#, fuzzy
+#: cps/spa_strings.py:721
 msgid "Replace cover?"
-msgstr "Format du fichier téléversé"
+msgstr ""
 
-#: cps/spa_strings.py:642
+#: cps/spa_strings.py:722
 msgid "Report Issue on Discord"
-msgstr ""
+msgstr "Signaler un problème sur Discord"
 
-#: cps/spa_strings.py:643
+#: cps/spa_strings.py:723
 msgid "Report Issue on GitHub"
-msgstr ""
+msgstr "Signaler un problème sur GitHub"
 
-#: cps/spa_strings.py:644
+#: cps/spa_strings.py:724
 msgid "Require group membership"
 msgstr ""
 
-#: cps/spa_strings.py:645
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:725
+#, python-brace-format
 msgid "Reset password for {name}"
-msgstr "Réinitialiser le mot de passe de l’utilisateur"
+msgstr ""
 
-#: cps/spa_strings.py:646
+#: cps/spa_strings.py:726
 #, python-brace-format
 msgid ""
 "Reset password for {name}? Their current password will stop working and a "
 "replacement will be emailed."
 msgstr ""
 
-#: cps/spa_strings.py:647
-#, fuzzy
+#: cps/spa_strings.py:727
 msgid "Reverse-proxy header login"
-msgstr "Compte du Reverse Proxy"
+msgstr ""
 
-#: cps/spa_strings.py:648
-#, fuzzy
+#: cps/spa_strings.py:728
+msgid "Rows per load"
+msgstr "Lignes par chargement"
+
+#: cps/spa_strings.py:729
 msgid "Run time"
-msgstr "Durée"
+msgstr ""
 
-#: cps/spa_strings.py:649
-#, fuzzy
+#: cps/spa_strings.py:730
 msgid "SMTP server"
-msgstr "Arrêt du serveur"
+msgstr ""
 
-#: cps/spa_strings.py:650 cps/templates/email_edit.html:43
+#: cps/spa_strings.py:731 cps/templates/email_edit.html:43
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
-#: cps/spa_strings.py:651 cps/templates/email_edit.html:42
+#: cps/spa_strings.py:732 cps/templates/email_edit.html:42
 msgid "STARTTLS"
 msgstr "STARTTLS"
 
-#: cps/spa_strings.py:652 cps/templates/book_edit.html:313
+#: cps/spa_strings.py:733 cps/templates/book_edit.html:313
 #: cps/templates/config_db.html:111 cps/templates/config_edit.html:734
 #: cps/templates/config_view_edit.html:237 cps/templates/email_edit.html:71
 #: cps/templates/read.html:186 cps/templates/schedule_edit.html:47
@@ -5170,706 +5201,623 @@ msgstr "STARTTLS"
 msgid "Save"
 msgstr "Sauvegarder"
 
-#: cps/spa_strings.py:653
-#, fuzzy
+#: cps/spa_strings.py:734
 msgid "Save email settings"
-msgstr "Paramètres d'affichage de la barre latérale"
+msgstr ""
 
-#: cps/spa_strings.py:654
-#, fuzzy
+#: cps/spa_strings.py:735
 msgid "Save name"
-msgstr "Voir le Changelog"
+msgstr ""
 
-#: cps/spa_strings.py:655
-#, fuzzy
+#: cps/spa_strings.py:736
 msgid "Save security settings"
-msgstr "Réglages de sécurité"
+msgstr ""
 
-#: cps/spa_strings.py:656
-#, fuzzy
+#: cps/spa_strings.py:737
 msgid "Save settings"
-msgstr "Paramètres"
+msgstr ""
 
-#: cps/spa_strings.py:657
+#: cps/spa_strings.py:738
 msgid "Saved. Restart the server for the login changes to take effect."
 msgstr ""
 
-#: cps/spa_strings.py:658
-#, fuzzy
+#: cps/spa_strings.py:739
 msgid "Scheduled tasks"
-msgstr "Calendrier 5m"
+msgstr ""
 
-#: cps/spa_strings.py:659
-#, fuzzy
+#: cps/spa_strings.py:740
 msgid "Scopes"
-msgstr "Portées OAuth"
+msgstr ""
 
-#: cps/spa_strings.py:660
+#: cps/spa_strings.py:741
 msgid "Search title, author…"
 msgstr "Chercher un titre, un auteur…"
 
-#: cps/spa_strings.py:661
-#, fuzzy
+#: cps/spa_strings.py:742
 msgid "Searching every source…"
-msgstr "Chercher"
+msgstr ""
 
-#: cps/spa_strings.py:662 cps/templates/cover_picker.html:147
+#: cps/spa_strings.py:743 cps/templates/cover_picker.html:147
 #: cps/templates/cover_picker.html:222
-#, fuzzy
 msgid "Searching…"
-msgstr "Chercher"
+msgstr ""
 
-#: cps/spa_strings.py:663
-#, fuzzy
+#: cps/spa_strings.py:744
 msgid "Security settings saved."
-msgstr "Réglages de sécurité"
+msgstr ""
 
-#: cps/spa_strings.py:664
+#: cps/spa_strings.py:745
 msgid "See how each cover looks padded for your device"
 msgstr ""
 
-#: cps/spa_strings.py:665 cps/templates/modal_dialogs.html:98
+#: cps/spa_strings.py:746 cps/templates/modal_dialogs.html:98
 msgid "Select"
 msgstr "Sélectionner"
 
-#: cps/spa_strings.py:666
-#, fuzzy
+#: cps/spa_strings.py:747
 msgid "Select multiple"
-msgstr "Sélectionner d'abord un livre"
+msgstr "Sélection multiple"
 
-#: cps/spa_strings.py:667 cps/templates/detail.html:1191
+#: cps/spa_strings.py:748 cps/templates/detail.html:1191
 msgid "Send"
 msgstr "Envoyer"
 
-#: cps/spa_strings.py:668
-#, fuzzy
+#: cps/spa_strings.py:749
+msgid "Send failed."
+msgstr "Échec de l’envoi."
+
+#: cps/spa_strings.py:750
 msgid "Send to e-reader"
-msgstr "Envoyer à l'eReader"
+msgstr ""
 
-#: cps/spa_strings.py:669
-#, fuzzy
+#: cps/spa_strings.py:751
 msgid "Send-to-eReader email"
-msgstr "Envoyer à l'eReader E-mail"
+msgstr ""
 
-#: cps/spa_strings.py:670
-#, fuzzy
+#: cps/spa_strings.py:752
 msgid "Sending…"
-msgstr "Chercher"
+msgstr ""
 
-#: cps/spa_strings.py:671
-#, fuzzy
+#: cps/spa_strings.py:753
 msgid "Series index"
-msgstr "Index des séries"
+msgstr ""
 
-#: cps/spa_strings.py:672
-#, fuzzy
+#: cps/spa_strings.py:754
 msgid "Series view"
-msgstr "Index des séries"
+msgstr "Vue par séries"
 
-#: cps/spa_strings.py:673
+#: cps/spa_strings.py:755
 msgid "Series — include"
 msgstr "Séries — inclure"
 
-#: cps/spa_strings.py:674
-#, fuzzy
+#: cps/spa_strings.py:756
 msgid "Serve over HTTPS"
-msgstr "Utilisation via HTTPS"
+msgstr ""
 
-#: cps/spa_strings.py:675
+#: cps/spa_strings.py:757
 msgid "Server SSL / HTTPS"
 msgstr ""
 
-#: cps/spa_strings.py:676
+#: cps/spa_strings.py:758
 msgid "Server announcement (shown to all users)"
 msgstr ""
 
-#: cps/spa_strings.py:677
-#, fuzzy
+#: cps/spa_strings.py:759
 msgid "Server host"
-msgstr "Numéro de port du serveur"
+msgstr ""
 
-#: cps/spa_strings.py:678
+#: cps/spa_strings.py:760
 msgid "Service account (DN)"
 msgstr ""
 
-#: cps/spa_strings.py:679
-#, fuzzy
+#: cps/spa_strings.py:761
 msgid "Service password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:680
+#: cps/spa_strings.py:762
 msgid "Service password (leave blank to keep)"
 msgstr ""
 
-#: cps/spa_strings.py:681
+#: cps/spa_strings.py:763
 msgid ""
 "Set a metadata URL to auto-fill the endpoints below, or enter them manually."
 msgstr ""
 
-#: cps/spa_strings.py:682
-#, fuzzy
+#: cps/spa_strings.py:764
 msgid "Settings saved."
-msgstr "Paramètres"
+msgstr ""
 
-#: cps/spa_strings.py:683
-#, fuzzy
+#: cps/spa_strings.py:765
 msgid "Shelf name"
-msgstr "Étagère : '%(name)s'"
+msgstr ""
 
-#: cps/spa_strings.py:684
-#, fuzzy
+#: cps/spa_strings.py:766
 msgid "Shelf not found."
-msgstr "Étagère introuvable"
+msgstr ""
 
-#: cps/spa_strings.py:686
-#, fuzzy
+#: cps/spa_strings.py:768
 msgid "Show Discover section"
-msgstr "Montrer la section Éditeurs"
+msgstr "Afficher la section Découvrir"
 
-#: cps/spa_strings.py:687
-#, fuzzy
-msgid "Clear default"
-msgstr "Nettoyer tout"
-
-#: cps/spa_strings.py:688
-#, fuzzy
-msgid "Could not save the default library filter."
-msgstr "Impossible de se connecter : %(message)s"
-
-#: cps/spa_strings.py:689
-#, fuzzy
-msgid "Could not save title."
-msgstr "Impossible de se connecter : %(message)s"
-
-#: cps/spa_strings.py:690
-#, fuzzy, python-brace-format
-msgid "Edit title for {title}"
-msgstr "Insérer le titre"
-
-#: cps/spa_strings.py:691
-msgid "Default library filter cleared."
+#: cps/spa_strings.py:769
+msgid "Show hidden books"
 msgstr ""
 
-#: cps/spa_strings.py:692
-msgid "Default library filter saved."
-msgstr ""
-
-#: cps/spa_strings.py:693 cps/templates/detail.html:904
-msgid "Date added"
-msgstr "Date d'ajout"
-
-#: cps/spa_strings.py:694
-msgid "Make this my default library view"
-msgstr ""
-
-#: cps/spa_strings.py:695
-#, fuzzy
+#: cps/spa_strings.py:778
 msgid "Show Table view"
-msgstr "Vue invalide"
+msgstr "Afficher la vue en tableau"
 
-#: cps/spa_strings.py:696
+#: cps/spa_strings.py:779
 #, python-brace-format
 msgid "Show all {count} tags"
 msgstr ""
 
-#: cps/spa_strings.py:697
+#: cps/spa_strings.py:780
+#, python-brace-format
+msgid "Show all {items}"
+msgstr "Tout afficher dans {items}"
+
+#: cps/spa_strings.py:781
 msgid "Show books in language"
 msgstr ""
 
-#: cps/spa_strings.py:698
+#: cps/spa_strings.py:782
 msgid "Show e-reader previews on each candidate"
 msgstr ""
 
-#: cps/spa_strings.py:699
-#, fuzzy
+#: cps/spa_strings.py:783
 msgid "Show fewer tags"
-msgstr "Montrer les statistique de CWA"
+msgstr ""
 
-#: cps/spa_strings.py:700
-#, fuzzy
+#: cps/spa_strings.py:784
 msgid "Show password"
-msgstr "Afficher le mot de passe"
+msgstr ""
 
-#: cps/spa_strings.py:701
+#: cps/spa_strings.py:785
 msgid "Shuffle picks"
-msgstr ""
+msgstr "Mélanger la sélection"
 
-#: cps/spa_strings.py:702
-#, fuzzy
+#: cps/spa_strings.py:786
 msgid "Sign in with a magic link"
-msgstr "Connectez-vous avec Magic Link"
-
-#: cps/spa_strings.py:703
-msgid "Sign out"
 msgstr ""
 
-#: cps/spa_strings.py:704
+#: cps/spa_strings.py:787
+msgid "Sign out"
+msgstr "Se déconnecter"
+
+#: cps/spa_strings.py:788
 msgid "Signing in…"
 msgstr ""
 
-#: cps/spa_strings.py:705
-#, fuzzy
+#: cps/spa_strings.py:789
 msgid "Site title"
-msgstr "Insérer le titre"
-
-#: cps/spa_strings.py:706
-msgid "Smaller"
 msgstr ""
 
-#: cps/spa_strings.py:707
-msgid "Smaller text"
-msgstr ""
-
-#: cps/spa_strings.py:708
-#, fuzzy
+#: cps/spa_strings.py:790
 msgid "Smart shelf not found."
-msgstr "Étagère introuvable"
+msgstr ""
 
-#: cps/spa_strings.py:709
-#, fuzzy
+#: cps/spa_strings.py:791
 msgid "Smart shelves"
-msgstr "Etagères"
+msgstr "Étagères intelligentes"
 
-#: cps/spa_strings.py:710
+#: cps/spa_strings.py:792
 msgid "Solid: average colour of the cover"
 msgstr ""
 
-#: cps/spa_strings.py:711
+#: cps/spa_strings.py:793
 msgid "Solid: custom colour"
 msgstr ""
 
-#: cps/spa_strings.py:712
+#: cps/spa_strings.py:794
 msgid "Solid: most-common colour in the cover"
 msgstr ""
 
-#: cps/spa_strings.py:713
+#: cps/spa_strings.py:795
 msgid "Some sources need a key for better covers"
 msgstr ""
 
-#: cps/spa_strings.py:714 cps/templates/cover_picker.html:226
+#: cps/spa_strings.py:796 cps/templates/cover_picker.html:226
 msgid "Something went wrong. Try again."
 msgstr ""
 
-#: cps/spa_strings.py:715
-#, fuzzy
+#: cps/spa_strings.py:797
 msgid "Sort order"
-msgstr "Index des séries"
+msgstr "Ordre de tri"
 
-#: cps/spa_strings.py:716
-#, fuzzy
+#: cps/spa_strings.py:798
 msgid "Source details"
-msgstr "Détails du livre"
+msgstr ""
 
-#: cps/spa_strings.py:717 cps/templates/detail.html:1023
-#, fuzzy
+#: cps/spa_strings.py:799 cps/templates/detail.html:1023
 msgid "Started reading"
-msgstr "Débuté"
+msgstr ""
 
-#: cps/spa_strings.py:719
-#, fuzzy
+#: cps/spa_strings.py:801
 msgid "Statistics dashboard"
-msgstr "Statistiques"
+msgstr ""
 
-#: cps/spa_strings.py:720 cps/templates/tasks.html:16
+#: cps/spa_strings.py:802 cps/templates/tasks.html:16
 msgid "Status"
 msgstr "Statut"
 
-#: cps/spa_strings.py:721
-#, fuzzy
+#: cps/spa_strings.py:803
 msgid "Sync only selected shelves to Kobo"
 msgstr ""
-"Synchroniser uniquement les livres dans les étagères sélectionnées avec Kobo"
 
-#: cps/spa_strings.py:722
-#, fuzzy
+#: cps/spa_strings.py:804
 msgid "Table view"
-msgstr "Vue invalide"
+msgstr "Vue en tableau"
 
-#: cps/spa_strings.py:723
-#, fuzzy
+#: cps/spa_strings.py:805
 msgid "Tag"
-msgstr "Étiquettes"
+msgstr "Étiquette"
 
-#: cps/spa_strings.py:724 cps/templates/book_edit.html:139
+#: cps/spa_strings.py:806 cps/templates/book_edit.html:139
 #: cps/templates/search_form.html:52
 msgid "Tags"
 msgstr "Étiquettes"
 
-#: cps/spa_strings.py:725
+#: cps/spa_strings.py:807
 msgid "Tags — exclude"
 msgstr "Étiquettes — exclure"
 
-#: cps/spa_strings.py:726
+#: cps/spa_strings.py:808
 msgid "Tags — include"
 msgstr "Étiquettes — inclure"
 
-#: cps/spa_strings.py:727 cps/templates/config_edit.html:235
+#: cps/spa_strings.py:809 cps/templates/config_edit.html:231
 #: cps/templates/cover_picker.html:104
 msgid "Target aspect ratio"
 msgstr ""
 
-#: cps/spa_strings.py:728 cps/templates/tasks.html:15
+#: cps/spa_strings.py:810 cps/templates/tasks.html:15
 msgid "Task"
 msgstr "Tâche"
 
-#: cps/spa_strings.py:729 cps/tasks_status.py:37 cps/templates/layout.html:371
+#: cps/spa_strings.py:811 cps/tasks_status.py:37 cps/templates/layout.html:371
 #: cps/templates/tasks.html:7
 msgid "Tasks"
 msgstr "Tâches"
 
-#: cps/spa_strings.py:730
+#: cps/spa_strings.py:812
 msgid "That URL is not a usable image."
 msgstr ""
 
-#: cps/spa_strings.py:731
+#: cps/spa_strings.py:813
 msgid ""
 "These open the full configuration pages. Changes there apply to the whole "
 "server."
 msgstr ""
 
-#: cps/spa_strings.py:732
+#: cps/spa_strings.py:814
 msgid "This format opens in the full-screen reader."
 msgstr ""
 
-#: cps/spa_strings.py:733
+#: cps/spa_strings.py:815
 msgid "This magic link expired. Generate a new one to try again."
 msgstr ""
 
-#: cps/spa_strings.py:734
+#: cps/spa_strings.py:816
 msgid "This page doesn't exist here."
 msgstr ""
 
-#: cps/spa_strings.py:735
+#: cps/spa_strings.py:817
+msgid "This shelf is empty. Add books from any book's page."
+msgstr "Cette étagère est vide. Ajoutez des livres depuis la page d’un livre."
+
+#: cps/spa_strings.py:818
 msgid "Title A–Z"
 msgstr "Titre A–Z"
 
-#: cps/spa_strings.py:736
+#: cps/spa_strings.py:819
 msgid "Title Z–A"
 msgstr "Titre Z–A"
 
-#: cps/spa_strings.py:737
+#: cps/spa_strings.py:820
 msgid "Title, author, or ISBN"
 msgstr ""
 
-#: cps/spa_strings.py:738
+#: cps/spa_strings.py:821
 msgid "Token URL"
 msgstr ""
 
-#: cps/spa_strings.py:739
-#, fuzzy
+#: cps/spa_strings.py:822
 msgid "Top Rated"
-msgstr "Livres les mieux notés"
+msgstr "Les mieux notés"
 
-#: cps/spa_strings.py:740
-#, fuzzy
+#: cps/spa_strings.py:823
 msgid "Trust authentication header"
-msgstr "Non authentifié"
+msgstr ""
 
-#: cps/spa_strings.py:741
-#, fuzzy
+#: cps/spa_strings.py:824
 msgid "UI / display configuration"
-msgstr "Configuration de l’interface utilisateur"
+msgstr ""
 
-#: cps/spa_strings.py:742 cps/templates/book_table.html:57
+#: cps/spa_strings.py:825 cps/templates/book_table.html:57
 #: cps/templates/book_table.html:234
 msgid "Unarchive"
 msgstr "Désarchiver"
 
-#: cps/spa_strings.py:743
+#: cps/spa_strings.py:826
 msgid "Unhide"
 msgstr ""
 
-#: cps/spa_strings.py:744
+#: cps/spa_strings.py:827
 msgid "Unlock the cover above to apply a new one."
 msgstr ""
 
-#: cps/spa_strings.py:745
+#: cps/spa_strings.py:828
 msgid "Unlock the cover to change it"
 msgstr ""
 
-#: cps/spa_strings.py:746
-#, fuzzy
+#: cps/spa_strings.py:829
 msgid "Untitled"
-msgstr "Titre"
+msgstr ""
 
-#: cps/spa_strings.py:747 cps/templates/cover_picker.html:74
-#, fuzzy
+#: cps/spa_strings.py:830
+msgid "Update failed."
+msgstr "Échec de la mise à jour."
+
+#: cps/spa_strings.py:831 cps/templates/cover_picker.html:74
 msgid "Upload as cover"
-msgstr "Format du fichier téléversé"
+msgstr ""
 
-#: cps/spa_strings.py:748
+#: cps/spa_strings.py:832
 msgid "Upload books"
 msgstr "Téléverser des livres"
 
-#: cps/spa_strings.py:749
+#: cps/spa_strings.py:833
 msgid ""
 "Use these to connect OPDS readers or KOReader sync without your main "
 "password."
 msgstr ""
 
-#: cps/spa_strings.py:750 cps/templates/cover_picker.html:62
+#: cps/spa_strings.py:834 cps/templates/cover_picker.html:62
 #: cps/templates/cover_picker.html:191
-#, fuzzy
 msgid "Use this cover"
-msgstr "Découvrir"
+msgstr ""
 
-#: cps/spa_strings.py:751 cps/templates/tasks.html:13
+#: cps/spa_strings.py:835 cps/templates/tasks.html:13
 #: cps/templates/tasks.html:42 cps/templates/tasks.html:65
 msgid "User"
 msgstr "Utilisateur"
 
-#: cps/spa_strings.py:752
-#, fuzzy
+#: cps/spa_strings.py:836
 msgid "User administration"
-msgstr "Autorisations de l'utilisateur"
+msgstr ""
 
-#: cps/spa_strings.py:753
-#, fuzzy
+#: cps/spa_strings.py:837
 msgid "User object filter"
-msgstr "Filtre objet de l'utilisateur LDAP"
+msgstr ""
 
-#: cps/spa_strings.py:754
+#: cps/spa_strings.py:838
 msgid "Userinfo URL"
 msgstr ""
 
-#: cps/spa_strings.py:755 cps/templates/admin.html:14
+#: cps/spa_strings.py:839 cps/templates/admin.html:14
 #: cps/templates/login.html:17 cps/templates/login.html:19
 #: cps/templates/register.html:9 cps/templates/user_edit.html:192
 #: cps/templates/user_table.html:134
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
-#: cps/spa_strings.py:756
-#, fuzzy
+#: cps/spa_strings.py:840
 msgid "Username claim"
-msgstr "Nom d'utilisateur"
+msgstr ""
 
-#: cps/spa_strings.py:757
-#, fuzzy
+#: cps/spa_strings.py:841
 msgid "Versions"
-msgstr "Version"
+msgstr ""
 
-#: cps/spa_strings.py:758 cps/templates/user_table.html:148
+#: cps/spa_strings.py:842 cps/templates/user_table.html:148
 msgid "View"
 msgstr "Vue"
 
-#: cps/spa_strings.py:759
+#: cps/spa_strings.py:843
 msgid "View settings"
 msgstr "Paramètres d’affichage"
 
-#: cps/spa_strings.py:760
-#, fuzzy
+#: cps/spa_strings.py:844
 msgid "Viewer"
-msgstr "Vue"
+msgstr ""
 
-#: cps/spa_strings.py:761
+#: cps/spa_strings.py:845
 msgid "Waiting for you to authorise…"
 msgstr ""
 
-#: cps/spa_strings.py:762 cps/templates/cover_picker.html:40
+#: cps/spa_strings.py:846 cps/templates/cover_picker.html:40
 msgid "When locked, fetching metadata will not overwrite this cover."
 msgstr ""
 
-#: cps/spa_strings.py:763 cps/templates/detail.html:1023
+#: cps/spa_strings.py:847 cps/templates/detail.html:1023
 msgid "When reading progress was first synced"
 msgstr ""
 
-#: cps/spa_strings.py:764
+#: cps/spa_strings.py:848
 msgid "Your Library"
 msgstr "Votre bibliothèque"
 
-#: cps/spa_strings.py:765
+#: cps/spa_strings.py:849
 msgid "Your browser cannot play this audio format."
 msgstr ""
 
-#: cps/spa_strings.py:766
+#: cps/spa_strings.py:850
 msgid "Your personal digital library"
 msgstr ""
 
-#: cps/spa_strings.py:767
+#: cps/spa_strings.py:851
 msgid "Your saved e-reader address is shown — change it for this send only."
 msgstr ""
 
-#: cps/spa_strings.py:768
-#, fuzzy
-msgid "Book default"
-msgstr "Titre du livre"
-
-#: cps/spa_strings.py:769
-#, fuzzy
-msgid "Could not save reader settings."
-msgstr "Impossible de se connecter : %(message)s"
-
-#: cps/spa_strings.py:770
-#, fuzzy
-msgid "Font family"
-msgstr "La mise à jour a échoué :"
-
-#: cps/spa_strings.py:771
-#, fuzzy
-msgid "Font size"
-msgstr "Taille de police"
-
-#: cps/spa_strings.py:772 cps/templates/read.html:132
-#, fuzzy
-msgid "Line height"
-msgstr "Clair"
-
-#: cps/spa_strings.py:773 cps/templates/detail.html:908
-msgid "Last modified"
-msgstr "Dernière modification"
-
-#: cps/spa_strings.py:774
-#, fuzzy
-msgid "Page margins"
-msgstr "Page suivante"
-
-#: cps/spa_strings.py:775
-#, fuzzy
-msgid "Page theme"
-msgstr "Thème par défaut"
-
-#: cps/spa_strings.py:776
-#, fuzzy
-msgid "Reader settings saved."
-msgstr "Les paramètres du serveur de courriels ont été mis à jour"
-
-#: cps/spa_strings.py:777
-#, fuzzy
-msgid "Reading appearance"
-msgstr "Avancement KOReader"
-
-#: cps/spa_strings.py:778
+#: cps/spa_strings.py:852
 msgid "all rules"
-msgstr ""
+msgstr "toutes les règles"
 
-#: cps/spa_strings.py:779
-#, fuzzy
+#: cps/spa_strings.py:853
 msgid "any rule"
-msgstr "Ajouter un nouvel utilisateur"
+msgstr "au moins une règle"
 
-#: cps/spa_strings.py:780
-#, fuzzy
+#: cps/spa_strings.py:854
 msgid "begins with"
-msgstr "Se connecter avec SSO"
+msgstr "commence par"
 
-#: cps/spa_strings.py:781
+#: cps/spa_strings.py:855
 msgid "books"
 msgstr "livres"
 
-#: cps/spa_strings.py:782
-#, fuzzy
+#: cps/spa_strings.py:856
 msgid "books match"
-msgstr "Ajouter à l'étagère"
+msgstr "livres correspondent"
 
-#: cps/spa_strings.py:783
+#: cps/spa_strings.py:857
 msgid "contains"
-msgstr ""
+msgstr "contient"
 
-#: cps/spa_strings.py:784
+#: cps/spa_strings.py:858
 msgid "copies"
 msgstr ""
 
-#: cps/spa_strings.py:785
-#, fuzzy
+#: cps/spa_strings.py:859
 msgid "does not contain"
-msgstr "Description"
+msgstr "ne contient pas"
 
-#: cps/spa_strings.py:786
-#, fuzzy
+#: cps/spa_strings.py:860
 msgid "e-reader"
-msgstr "Lecteur ePub"
+msgstr ""
 
-#: cps/spa_strings.py:787
+#: cps/spa_strings.py:861
 msgid "e.g. Unread sci-fi"
-msgstr ""
+msgstr "ex. Science-fiction non lue"
 
-#: cps/spa_strings.py:788
-#, fuzzy
+#: cps/spa_strings.py:862
 msgid "eReader email subject"
-msgstr "Objet de l'e-mail eReader"
+msgstr ""
 
-#: cps/spa_strings.py:789
+#: cps/spa_strings.py:863
 msgid "ends with"
-msgstr ""
+msgstr "se termine par"
 
-#: cps/spa_strings.py:790
-#, fuzzy
+#: cps/spa_strings.py:864
+msgid "in the past N days"
+msgstr "au cours des N derniers jours"
+
+#: cps/spa_strings.py:865
 msgid "is"
-msgstr "Liste"
+msgstr "est"
 
-#: cps/spa_strings.py:791
+#: cps/spa_strings.py:866
 msgid "is not"
-msgstr ""
+msgstr "n’est pas"
 
-#: cps/spa_strings.py:792
-msgid "or continue with"
-msgstr ""
+#: cps/spa_strings.py:867
+msgid "not in the past N days"
+msgstr "pas au cours des N derniers jours"
 
-#: cps/spa_strings.py:793
+#: cps/spa_strings.py:868
+msgid "on or after"
+msgstr "le ou après le"
+
+#: cps/spa_strings.py:869
+msgid "on or before"
+msgstr "le ou avant le"
+
+#: cps/spa_strings.py:870
 msgid "shared"
 msgstr ""
 
-#: cps/spa_strings.py:794
+#: cps/spa_strings.py:871
 msgid "to"
 msgstr ""
 
-#: cps/spa_strings.py:795
+#: cps/spa_strings.py:872
 msgid "type (isbn, amazon, doi…)"
 msgstr ""
 
-#: cps/spa_strings.py:796
+#: cps/spa_strings.py:873
 msgid "value"
-msgstr ""
+msgstr "valeur"
 
-#: cps/spa_strings.py:797
+#: cps/spa_strings.py:874
 msgid "you"
 msgstr ""
 
-#: cps/spa_strings.py:798
+#: cps/spa_strings.py:875
+#, python-brace-format
+msgid "{count} book"
+msgstr "{count} livre"
+
+#: cps/spa_strings.py:876
 #, python-brace-format
 msgid "{count} books"
 msgstr "{count} livres"
 
-#: cps/spa_strings.py:799
+#: cps/spa_strings.py:877
+#, python-brace-format
+msgid "{count} file queued for import"
+msgstr "{count} fichier mis en file d’attente pour l’importation"
+
+#: cps/spa_strings.py:878
+#, python-brace-format
+msgid "{count} file rejected"
+msgstr "{count} fichier rejeté"
+
+#: cps/spa_strings.py:879
+#, python-brace-format
+msgid "{count} files queued for import"
+msgstr "{count} fichiers mis en file d’attente pour l’importation"
+
+#: cps/spa_strings.py:880
+#, python-brace-format
+msgid "{count} files rejected"
+msgstr "{count} fichiers rejetés"
+
+#: cps/spa_strings.py:881
+#, python-brace-format
+msgid "{count} result"
+msgstr "{count} résultat"
+
+#: cps/spa_strings.py:882
+#, python-brace-format
+msgid "{count} results"
+msgstr "{count} résultats"
+
+#: cps/spa_strings.py:883
 #, python-brace-format
 msgid "{count} results for \"{query}\""
 msgstr "{count} résultats pour « {query} »"
 
-#: cps/spa_strings.py:800
-#, fuzzy, python-brace-format
+#: cps/spa_strings.py:884
+#, python-brace-format
 msgid "{n} found"
-msgstr "Étiquette introuvable"
+msgstr ""
 
-#: cps/spa_strings.py:801
+#: cps/spa_strings.py:885
 #, python-brace-format
 msgid "{ok} of {total} sources answered"
 msgstr ""
 
-#: cps/spa_strings.py:802
-#, fuzzy
+#: cps/spa_strings.py:886
 msgid "…or paste an image URL"
-msgstr "Image de couverture"
+msgstr ""
 
-#: cps/spa_strings.py:803
+#: cps/spa_strings.py:887
 msgid "← Back to book"
 msgstr ""
 
-#: cps/spa_strings.py:804
-#, fuzzy
+#: cps/spa_strings.py:888
 msgid "← Back to sign in"
-msgstr "Retour au panneau d'administration"
+msgstr ""
 
-#: cps/spa_strings.py:805
-#, fuzzy
+#: cps/spa_strings.py:889
 msgid "← Library"
-msgstr "Dans la librairie"
+msgstr ""
 
-#: cps/spa_strings.py:806
+#: cps/spa_strings.py:890
 msgid "≤"
 msgstr ""
 
-#: cps/spa_strings.py:807
+#: cps/spa_strings.py:891
 msgid "≥"
 msgstr ""
 
@@ -6035,7 +5983,7 @@ msgstr "Le nom et les règles sont obligatoires"
 msgid "Shelf name too long (max 100 characters)"
 msgstr "Nom de l'étagère trop long (100 caractères maximum)"
 
-#: cps/web.py:1507 cps/web.py:1642
+#: cps/web.py:1507 cps/web.py:1647
 msgid ""
 "Kobo sync for Magic Shelves is disabled globally — this shelf won't reach "
 "your Kobo until 'Sync Magic Shelves to Kobo' is enabled in CWA Settings."
@@ -6045,7 +5993,7 @@ msgstr ""
 msgid "Error creating shelf"
 msgstr "Erreur lors de la création de l'étagère"
 
-#: cps/templates/layout.html:648 cps/web.py:1531
+#: cps/templates/layout.html:658 cps/web.py:1531
 msgid "Create Magic Shelf"
 msgstr "Créer une étagère magique"
 
@@ -6057,31 +6005,31 @@ msgstr "Autorisation refusée pour modifier le statut public"
 msgid "Shelf name is required"
 msgstr "Le nom de l'étagère est obligatoire"
 
-#: cps/web.py:1650
+#: cps/web.py:1655
 msgid "Error updating shelf"
 msgstr "Erreur lors de la mise à jour de l'étagère"
 
-#: cps/web.py:1667
+#: cps/web.py:1672
 msgid "Edit Magic Shelf"
 msgstr "Modifier l'étagère magique"
 
-#: cps/web.py:1684
+#: cps/web.py:1689
 msgid "Shelf not found"
 msgstr "Étagère introuvable"
 
-#: cps/web.py:1689
+#: cps/web.py:1694
 msgid "Permission denied"
 msgstr "Permission refusée"
 
-#: cps/web.py:1720
+#: cps/web.py:1725
 msgid "Shelf duplicated successfully"
 msgstr "Étagère dupliquée avec succès"
 
-#: cps/web.py:1726
+#: cps/web.py:1731
 msgid "Error duplicating shelf"
 msgstr "Erreur lors de la duplication de l'étagère"
 
-#: cps/templates/magic_shelf_edit.html:506 cps/web.py:1753
+#: cps/templates/magic_shelf_edit.html:506 cps/web.py:1758
 msgid ""
 "System shelves cannot be deleted. You can hide them in your user profile "
 "settings."
@@ -6089,111 +6037,111 @@ msgstr ""
 "Les étagères système ne peuvent pas être supprimées. Vous pouvez les masquer "
 "dans les paramètres de votre profil utilisateur."
 
-#: cps/web.py:1771
+#: cps/web.py:1776
 msgid "Error deleting shelf"
 msgstr "Erreur lors de la suppression de l'étagère"
 
-#: cps/web.py:1787
+#: cps/web.py:1792
 msgid ""
 "You cannot hide your own shelves. Delete them instead if you don't want them."
 msgstr ""
 "Vous ne pouvez pas masquer vos propres étagères. Supprimez-les plutôt si "
 "vous ne les voulez pas."
 
-#: cps/web.py:1797
+#: cps/web.py:1802
 msgid "Shelf already hidden"
 msgstr "Étagère déjà masquée"
 
-#: cps/web.py:1811
+#: cps/web.py:1816
 msgid "Error hiding shelf"
 msgstr "Erreur lors du masquage de l'étagère"
 
-#: cps/web.py:1825
+#: cps/web.py:1830
 msgid "Shelf was not hidden"
 msgstr "L'étagère n'était pas masquée"
 
-#: cps/web.py:1834
+#: cps/web.py:1839
 msgid "Error unhiding shelf"
 msgstr "Erreur lors de l'affichage de l'étagère"
 
-#: cps/templates/admin.html:18 cps/web.py:1995
+#: cps/templates/admin.html:18 cps/web.py:2000
 msgid "Downloads"
 msgstr "Téléchargements"
 
-#: cps/web.py:2147
+#: cps/web.py:2152
 msgid "File formats list"
 msgstr "Liste de formats de fichiers"
 
-#: cps/web.py:2394 cps/web.py:2432
+#: cps/web.py:2399 cps/web.py:2437
 msgid "Please configure the SMTP mail settings first..."
 msgstr "Veuillez configurer les paramètres SMTP au préalable…"
 
-#: cps/web.py:2398
+#: cps/web.py:2403
 msgid "Oops! Please update your profile with a valid eReader Email."
 msgstr ""
 "Oups ! Veuillez mettre à jour votre profil avec une adresse e-mail valide "
 "pour votre liseuse."
 
-#: cps/web.py:2420
+#: cps/web.py:2425
 #, python-format
 msgid "Success! Book queued for sending to %(eReadermail)s"
 msgstr ""
 "Le livre a été mis en file de traitement avec succès pour un envoi vers "
 "%(eReadermail)s"
 
-#: cps/web.py:2423 cps/web.py:2500
+#: cps/web.py:2428 cps/web.py:2505
 #, python-format
 msgid "Oops! There was an error sending book: %(res)s"
 msgstr "Il y a eu une erreur en envoyant ce livre : %(res)s"
 
-#: cps/web.py:2440 cps/web.py:2450
+#: cps/web.py:2445 cps/web.py:2455
 msgid "No email addresses selected"
 msgstr "Aucune adresse e-mail sélectionnée"
 
-#: cps/web.py:2471
+#: cps/web.py:2476
 msgid "Additional email addresses are disabled for your account."
 msgstr ""
 "Les adresses e-mail supplémentaires sont désactivées pour votre compte."
 
-#: cps/web.py:2498
+#: cps/web.py:2503
 msgid "Success! Book queued for sending to the selected address(es)!"
 msgstr ""
 "Réussite ! Livre mis en attente pour être envoyé à l'adresse ou aux adresses "
 "sélectionnées !"
 
-#: cps/web.py:2517
+#: cps/web.py:2522
 msgid "Please wait one minute to register next user"
 msgstr "Merci de patienter une minute pour enregistrer un nouvel utilisateur"
 
 #: cps/templates/layout.html:345 cps/templates/layout.html:386
-#: cps/templates/login.html:48 cps/templates/register.html:17 cps/web.py:2518
-#: cps/web.py:2522 cps/web.py:2527 cps/web.py:2531 cps/web.py:2537
-#: cps/web.py:2566 cps/web.py:2570 cps/web.py:2583 cps/web.py:2586
+#: cps/templates/login.html:48 cps/templates/register.html:17 cps/web.py:2523
+#: cps/web.py:2527 cps/web.py:2532 cps/web.py:2536 cps/web.py:2542
+#: cps/web.py:2571 cps/web.py:2575 cps/web.py:2588 cps/web.py:2591
 msgid "Register"
 msgstr "Créer un compte"
 
-#: cps/web.py:2521 cps/web.py:2694
+#: cps/web.py:2526 cps/web.py:2699
 msgid "Connection error to limiter backend, please contact your administrator"
 msgstr ""
 "Erreur de connexion au backend du limiteur, veuillez contacter votre "
 "administrateur"
 
-#: cps/web.py:2526 cps/web.py:2582
+#: cps/web.py:2531 cps/web.py:2587
 msgid ""
 "Oops! Email server is not configured, please contact your administrator."
 msgstr ""
 "Le serveur de courriel n'est pas configuré, veuillez contacter votre "
 "administrateur."
 
-#: cps/web.py:2568
+#: cps/web.py:2573
 msgid "Oops! Your Email is not allowed."
 msgstr "Votre adresse de courriel n’est pas autorisée pour une inscription."
 
-#: cps/web.py:2571
+#: cps/web.py:2576
 msgid "Success! Confirmation Email has been sent."
 msgstr "Le courriel de confirmation a été envoyé à votre adresse."
 
-#: cps/web.py:2619
+#: cps/web.py:2624
 msgid ""
 "Authentication loop detected. If you're experiencing login issues, please "
 "contact your administrator."
@@ -6201,7 +6149,7 @@ msgstr ""
 "Boucle d'authentification détectée. Si vous rencontrez des problèmes de "
 "connexion, veuillez contacter votre administrateur."
 
-#: cps/web.py:2668
+#: cps/web.py:2673
 msgid ""
 "OAuth authentication is not properly configured. Please contact "
 "administrator."
@@ -6209,28 +6157,28 @@ msgstr ""
 "L'authentification OAuth n'est pas correctement configurée. Veuillez "
 "contacter l'administrateur."
 
-#: cps/web.py:2673 cps/web.py:2700
+#: cps/web.py:2678 cps/web.py:2705
 msgid "Cannot activate LDAP authentication"
 msgstr "Impossible d’activer l’authentification LDAP"
 
-#: cps/web.py:2682
+#: cps/web.py:2687
 msgid "Standard login is disabled."
 msgstr "La connexion standard est désactivée."
 
-#: cps/web.py:2690
+#: cps/web.py:2695
 msgid "Please wait one minute before next login"
 msgstr "Veuillez patienter une minute avant de vous reconnecter"
 
-#: cps/web.py:2708
+#: cps/web.py:2713
 msgid "Username cannot be empty"
 msgstr "Le nom d'utilisateur ne peut pas être vide"
 
-#: cps/web.py:2720
+#: cps/web.py:2725
 #, python-format
 msgid "you are now logged in as: '%(nickname)s'"
 msgstr "vous êtes maintenant connecté en tant que : '%(nickname)s'"
 
-#: cps/web.py:2739
+#: cps/web.py:2744
 #, python-format
 msgid ""
 "Welcome! Your account has been automatically created. You are now logged in "
@@ -6239,7 +6187,7 @@ msgstr ""
 "Bienvenue ! Votre compte a été créé automatiquement. Vous êtes désormais "
 "connecté sous le nom : « %(nickname)s »."
 
-#: cps/web.py:2744 cps/web.py:2747
+#: cps/web.py:2749 cps/web.py:2752
 msgid ""
 "Authentication successful, but account creation failed. Please contact your "
 "administrator."
@@ -6247,7 +6195,7 @@ msgstr ""
 "Authentification réussie, mais création du compte échouée. Veuillez "
 "contacter votre administrateur."
 
-#: cps/web.py:2751
+#: cps/web.py:2756
 msgid ""
 "Authentication successful, but no local account found. Please contact your "
 "administrator to create your account."
@@ -6255,7 +6203,7 @@ msgstr ""
 "Authentification réussie, mais aucun compte local trouvé. Veuillez contacter "
 "votre administrateur pour créer votre compte."
 
-#: cps/web.py:2759
+#: cps/web.py:2764
 #, python-format
 msgid ""
 "Fallback Login as: '%(nickname)s', LDAP Server not reachable, or user not "
@@ -6264,52 +6212,52 @@ msgstr ""
 "Connexion de secours en tant que : '%(nickname)s', le serveur LDAP est "
 "indisponible, ou l'utilisateur est inconnu"
 
-#: cps/web.py:2765
+#: cps/web.py:2770
 #, python-format
 msgid "Could not login: %(message)s"
 msgstr "Impossible de se connecter : %(message)s"
 
-#: cps/web.py:2788 cps/web.py:2789 cps/web.py:2832
+#: cps/web.py:2793 cps/web.py:2794 cps/web.py:2837
 msgid "Wrong Username or Password"
 msgstr "Mauvais nom d'utilisateur ou mot de passe"
 
-#: cps/web.py:2797
+#: cps/web.py:2802
 msgid "New Password was sent to your email address"
 msgstr "Le nouveau mot de passe a été envoyé vers votre adresse de courriel"
 
-#: cps/web.py:2801
+#: cps/web.py:2806
 msgid "An unknown error occurred. Please try again later."
 msgstr "Une erreur inconnue est survenue. Veuillez réessayer plus tard."
 
-#: cps/web.py:2803
+#: cps/web.py:2808
 msgid "Please enter valid username to reset password"
 msgstr ""
 "Veuillez entrer un nom d'utilisateur valide pour réinitialiser le mot de "
 "passe"
 
-#: cps/web.py:2811
+#: cps/web.py:2816
 #, python-format
 msgid "You are now logged in as: '%(nickname)s'"
 msgstr "Vous êtes maintenant connecté en tant que : '%(nickname)s'"
 
-#: cps/web.py:3124
+#: cps/web.py:3129
 msgid "Success! Profile Updated"
 msgstr "Profil mis à jour avec succès"
 
-#: cps/web.py:3130
+#: cps/web.py:3135
 msgid "Oops! An account already exists for this Email."
 msgstr "Un compte existant a été trouvé pour cette adresse de courriel."
 
-#: cps/web.py:3264
+#: cps/web.py:3269
 msgid "App-password label must be 1-64 characters."
 msgstr ""
 
-#: cps/web.py:3299
+#: cps/web.py:3304
 #, python-format
 msgid "App password '%(label)s' revoked."
 msgstr ""
 
-#: cps/web.py:3511
+#: cps/web.py:3516
 msgid "Invalid book ID."
 msgstr "Identifiant du livre invalide."
 
@@ -6544,7 +6492,7 @@ msgstr "Ajouter à l'étagère"
 #: cps/templates/detail.html:819 cps/templates/detail.html:989
 #: cps/templates/detail.html:1622 cps/templates/feed.xml:109
 #: cps/templates/feed.xml:111 cps/templates/index.html:162
-#: cps/templates/layout.html:632 cps/templates/layout.html:645
+#: cps/templates/layout.html:642 cps/templates/layout.html:655
 #: cps/templates/listenmp3.html:201 cps/templates/listenmp3.html:218
 #: cps/templates/search.html:23 cps/templates/shelf_reorder.html:31
 msgid "(Public)"
@@ -6883,7 +6831,7 @@ msgstr "Détails"
 msgid "Update available"
 msgstr "La mise à jour a échoué :"
 
-#: cps/templates/admin.html:263 cps/templates/layout.html:485
+#: cps/templates/admin.html:263 cps/templates/layout.html:495
 #, fuzzy
 msgid "Update now"
 msgstr "Canal de mise à jour"
@@ -6907,13 +6855,6 @@ msgstr "Effectuer la mise à jour"
 #: cps/templates/admin.html:298
 msgid "Are you sure you want to restart?"
 msgstr "Voulez-vous vraiment redémarrer Calibre-Web?"
-
-#: cps/templates/admin.html:300 cps/templates/admin.html:332
-#: cps/templates/config_db.html:4 cps/templates/config_edit.html:4
-#: cps/templates/cwa_settings.html:4 cps/templates/read.html:74
-#, fuzzy
-msgid "Loading"
-msgstr "Chargement…"
 
 #: cps/templates/admin.html:303 cps/templates/admin.html:317
 #: cps/templates/admin.html:337 cps/templates/config_db.html:139
@@ -6979,7 +6920,7 @@ msgstr ""
 
 #: cps/templates/annotations_import.html:49 cps/templates/book_edit.html:94
 #: cps/templates/book_edit.html:111 cps/templates/layout.html:360
-#: cps/templates/layout.html:551
+#: cps/templates/layout.html:561
 msgid "Uploading..."
 msgstr "Téléversement en cours…"
 
@@ -7806,106 +7747,117 @@ msgid "Server External Port (for port forwarded API calls)"
 msgstr "Port externe du serveur (pour les appels d’API transférés par port)"
 
 #: cps/templates/config_edit.html:221
-msgid "Sync Kobo read progress to Hardcover (Requires API key per user)"
-msgstr ""
-"Synchroniser la progression de lecture Kobo avec Hardcover (nécessite une "
-"clé API par utilisateur)"
-
-#: cps/templates/config_edit.html:225
 msgid "Sync Kobo annotations to Hardcover (Requires API key per user)"
 msgstr ""
 "Synchroniser les annotations Kobo avec Hardcover (nécessite une clé API par "
 "utilisateur)"
 
-#: cps/templates/config_edit.html:230
+#: cps/templates/config_edit.html:226
 msgid "Pad book covers to Kobo screen aspect ratio"
 msgstr ""
 
-#: cps/templates/config_edit.html:231
+#: cps/templates/config_edit.html:227
 msgid ""
 "Eliminates the white letterbox bars that Kobo devices show on covers whose "
 "aspect ratio does not match the screen. Padding is applied server-side; "
 "original cover files on disk are unchanged."
 msgstr ""
 
-#: cps/templates/config_edit.html:237 cps/templates/cover_picker.html:106
+#: cps/templates/config_edit.html:233 cps/templates/cover_picker.html:106
 msgid "Kobo Libra Color / Libra 2 (1264x1680)"
 msgstr ""
 
-#: cps/templates/config_edit.html:238 cps/templates/cover_picker.html:107
+#: cps/templates/config_edit.html:234 cps/templates/cover_picker.html:107
 msgid "Kobo Clara HD / 2E / BW / Colour (1072x1448)"
 msgstr ""
 
-#: cps/templates/config_edit.html:240 cps/templates/cover_picker.html:109
+#: cps/templates/config_edit.html:236 cps/templates/cover_picker.html:109
 msgid "2:3 (publisher cover, no padding for typical covers)"
 msgstr ""
 
-#: cps/templates/config_edit.html:249 cps/templates/cover_picker.html:119
+#: cps/templates/config_edit.html:245 cps/templates/cover_picker.html:119
 msgid "Solid: most-common color in the cover"
 msgstr ""
 
-#: cps/templates/config_edit.html:250 cps/templates/cover_picker.html:120
+#: cps/templates/config_edit.html:246 cps/templates/cover_picker.html:120
 msgid "Solid: average color of the cover"
 msgstr ""
 
-#: cps/templates/config_edit.html:251 cps/templates/cover_picker.html:121
+#: cps/templates/config_edit.html:247 cps/templates/cover_picker.html:121
 msgid "Solid: custom color"
 msgstr ""
 
-#: cps/templates/config_edit.html:255 cps/templates/cover_picker.html:126
+#: cps/templates/config_edit.html:251 cps/templates/cover_picker.html:126
 msgid "Custom border color (hex)"
 msgstr ""
 
-#: cps/templates/config_edit.html:257
+#: cps/templates/config_edit.html:253
 msgid "Only used when fill style is 'Solid: custom color'. Format: #RRGGBB."
 msgstr ""
 
-#: cps/templates/config_edit.html:265
+#: cps/templates/config_edit.html:261
 msgid "Use Goodreads"
 msgstr "Utiliser Goodreads"
 
-#: cps/templates/config_edit.html:269
+#: cps/templates/config_edit.html:265
 msgid "Goodreads API Key"
 msgstr "Clé de l’API Goodreads"
 
-#: cps/templates/config_edit.html:276
+#: cps/templates/config_edit.html:272
 msgid "Enable Hardcover Sync"
 msgstr "Activer la synchronisation Hardcover"
 
-#: cps/templates/config_edit.html:280
+#: cps/templates/config_edit.html:273
+msgid ""
+"Controls Hardcover auto-fetch and reading-progress sync from one setting."
+msgstr ""
+
+#: cps/templates/config_edit.html:275
+msgid ""
+"Managed by HARDCOVER_SYNC_ENABLED; change the environment variable to enable "
+"or disable Hardcover sync."
+msgstr ""
+
+#: cps/templates/config_edit.html:279
 msgid "Hardcover API Key"
 msgstr "Clef API Harcover"
 
-#: cps/templates/config_edit.html:282
+#: cps/templates/config_edit.html:281
 msgid ""
 "Free key from https://hardcover.app/account/api — required for Hardcover "
 "metadata results."
 msgstr ""
 
-#: cps/templates/config_edit.html:284
+#: cps/templates/config_edit.html:283
 msgid ""
 "A token from the HARDCOVER_TOKEN environment variable is currently active. "
 "It is not shown here; a key entered in this field would override it."
 msgstr ""
 
-#: cps/templates/config_edit.html:289
+#: cps/templates/config_edit.html:285
+msgid ""
+"A token from the file named by HARDCOVER_TOKEN_FILE is currently active. It "
+"is not shown here; a key entered in this field would override it."
+msgstr ""
+
+#: cps/templates/config_edit.html:290
 msgid "Token status: not configured."
 msgstr "État du jeton : non configuré."
 
-#: cps/templates/config_edit.html:291
+#: cps/templates/config_edit.html:292
 msgid "Token status: valid."
 msgstr "État du jeton : valide."
 
-#: cps/templates/config_edit.html:293
+#: cps/templates/config_edit.html:294
 msgid "Token status: rejected or expired."
 msgstr "État du jeton : refusé ou expiré."
 
-#: cps/templates/config_edit.html:295
+#: cps/templates/config_edit.html:296
 msgid "Token status: present; validation is temporarily unavailable."
 msgstr ""
 "État du jeton : présent ; la validation est temporairement indisponible."
 
-#: cps/templates/config_edit.html:300
+#: cps/templates/config_edit.html:301
 msgid "Expiry: not provided by this token."
 msgstr "Expiration : non indiquée par ce jeton."
 
@@ -7983,14 +7935,6 @@ msgstr "Port du serveur LDAP"
 msgid "LDAP Encryption"
 msgstr "Chiffrement LDAP"
 
-#: cps/templates/config_edit.html:360
-msgid "TLS"
-msgstr "TLS"
-
-#: cps/templates/config_edit.html:361
-msgid "SSL"
-msgstr "SSL"
-
 #: cps/templates/config_edit.html:365
 msgid ""
 "LDAP CACertificate Path (Only needed for Client Certificate Authentication)"
@@ -8014,14 +7958,6 @@ msgstr ""
 #: cps/templates/config_edit.html:388
 msgid "LDAP Authentication"
 msgstr "Authentification LDAP"
-
-#: cps/templates/config_edit.html:390
-msgid "Anonymous"
-msgstr "Anonyme"
-
-#: cps/templates/config_edit.html:391
-msgid "Unauthenticated"
-msgstr "Non authentifié"
 
 #: cps/templates/config_edit.html:392
 msgid "Simple"
@@ -8821,9 +8757,9 @@ msgid ""
 "\">kindle-epub-fix.netlify.app</a> tool made by <a href=\"https://github.com/"
 "innocenat\">innocenat</a>."
 msgstr ""
-"Cet outil a été adapté à partir de l'outil <a href=\"https://kindle-epub-fix."
-"netlify.app/\">kindle-epub-fix.netlify.app</a> créé par <a href=\"https://"
-"github.com/innocenat\">innocenat</a>."
+"Cet outil a été adapté à partir de l'outil <a href=\"https://kindle-epub-"
+"fix.netlify.app/\">kindle-epub-fix.netlify.app</a> créé par <a "
+"href=\"https://github.com/innocenat\">innocenat</a>."
 
 #: cps/templates/cwa_settings.html:181
 msgid "Enable KOReader Sync (NextGen Plugin)"
@@ -9207,9 +9143,16 @@ msgstr ""
 "configurer un jeton global dans la configuration de base. Sans jeton valide, "
 "cette fonctionnalité restera désactivée."
 
-#: cps/templates/cwa_settings.html:569
-msgid "Enable Hardcover Auto-Fetch"
-msgstr "Activer la récupération automatique Hardcover"
+#: cps/templates/cwa_settings.html:565
+msgid ""
+"Hardcover sync is enabled. The schedule below controls automatic ID fetching."
+msgstr ""
+
+#: cps/templates/cwa_settings.html:567
+msgid ""
+"Hardcover sync is disabled. Enable it once in Basic Configuration or set "
+"HARDCOVER_SYNC_ENABLED=true."
+msgstr ""
 
 #: cps/templates/cwa_settings.html:571
 msgid ""
@@ -9899,7 +9842,7 @@ msgid "No thanks"
 msgstr ""
 
 #: cps/templates/cwng_feedback_popup.html:39 cps/templates/feed.xml:31
-#: cps/templates/layout.html:680 cps/templates/layout.html:706
+#: cps/templates/layout.html:690 cps/templates/layout.html:716
 msgid "Next"
 msgstr "Suivant"
 
@@ -10022,11 +9965,6 @@ msgstr "Masquer cette étagère dans votre barre latérale"
 #, fuzzy
 msgid "Hide from your library"
 msgstr "Masquer cette étagère dans votre barre latérale"
-
-#: cps/templates/detail.html:770
-#, fuzzy
-msgid "Hidden"
-msgstr "Livre caché"
 
 #: cps/templates/detail.html:771
 msgid "Unhidden"
@@ -10312,7 +10250,7 @@ msgstr "Cette action ne peut être défaite !"
 msgid "The following books will be permanently deleted:"
 msgstr "Les livres suivants vont être effacés de manière permanante :"
 
-#: cps/templates/duplicates.html:730 cps/templates/layout.html:780
+#: cps/templates/duplicates.html:730 cps/templates/layout.html:790
 msgid "Merge Books"
 msgstr "Fusionner les livres"
 
@@ -10682,160 +10620,160 @@ msgstr "Paramètres"
 msgid "Refresh Library"
 msgstr "Actualiser la bibliothèque"
 
-#: cps/templates/layout.html:399
+#: cps/templates/layout.html:397
 #, fuzzy
 msgid "New interface available"
 msgstr "Aucune information concernant cette version n’est disponible"
 
-#: cps/templates/layout.html:401
+#: cps/templates/layout.html:399
 #, fuzzy
 msgid "A faster, redesigned Calibre-Web NextGen interface is ready."
 msgstr "Catalogue de livres électroniques Calibre-Web Automated"
 
-#: cps/templates/layout.html:401
+#: cps/templates/layout.html:399
 msgid "Your classic view stays the default until you switch."
 msgstr ""
 
-#: cps/templates/layout.html:404
+#: cps/templates/layout.html:402
 msgid "Try the new UI"
 msgstr ""
 
-#: cps/templates/layout.html:486
+#: cps/templates/layout.html:496
 msgid "See Changelog"
 msgstr "Voir le Changelog"
 
-#: cps/templates/layout.html:496
+#: cps/templates/layout.html:506
 #, fuzzy
 msgid "Open Duplicates"
 msgstr "Doubles"
 
-#: cps/templates/layout.html:518
+#: cps/templates/layout.html:528
 msgid "Contribute here!"
 msgstr "Contribuer ici !"
 
-#: cps/templates/layout.html:552
+#: cps/templates/layout.html:562
 msgid "Please do not refresh the page"
 msgstr "Veuillez ne pas rafraîchir la page"
 
-#: cps/templates/layout.html:635
+#: cps/templates/layout.html:645
 msgid "Create Shelf"
 msgstr "Créer une étagère"
 
-#: cps/templates/layout.html:643
+#: cps/templates/layout.html:653
 msgid "Magic Shelves ✨"
 msgstr "Étagères magiques ✨"
 
-#: cps/templates/layout.html:665 cps/templates/layout.html:691
+#: cps/templates/layout.html:675 cps/templates/layout.html:701
 msgid "Previous"
 msgstr "Précédent"
 
-#: cps/templates/layout.html:718
+#: cps/templates/layout.html:728
 msgid "Book Details"
 msgstr "Détails du livre"
 
-#: cps/templates/layout.html:786
+#: cps/templates/layout.html:796
 #, fuzzy
 msgid "This cannot be undone."
 msgstr "Cette action ne peut être défaite !"
 
-#: cps/templates/layout.html:792
+#: cps/templates/layout.html:802
 #, fuzzy
 msgid "Will be deleted"
 msgstr "Effacer la sélection"
 
-#: cps/templates/layout.html:796 cps/templates/layout.html:809
+#: cps/templates/layout.html:806 cps/templates/layout.html:819
 #, fuzzy
 msgid "Formats:"
 msgstr "Format"
 
-#: cps/templates/layout.html:805
+#: cps/templates/layout.html:815
 msgid "Will be kept"
 msgstr ""
 
-#: cps/templates/layout.html:817
+#: cps/templates/layout.html:827
 msgid "Format conflicts — choose what to do:"
 msgstr ""
 
-#: cps/templates/layout.html:823
+#: cps/templates/layout.html:833
 #, fuzzy
 msgid "Result will have formats:"
 msgstr "Supprimer les formats :"
 
-#: cps/templates/layout.html:832
+#: cps/templates/layout.html:842
 msgid "Merge &amp; Delete Source"
 msgstr ""
 
-#: cps/templates/layout.html:866
+#: cps/templates/layout.html:876
 msgid "Duplicate Books Detected"
 msgstr "Livres en double détectés"
 
-#: cps/templates/layout.html:867
+#: cps/templates/layout.html:877
 msgid "You have unresolved duplicate books in your library"
 msgstr "Vous avez des livres en double non résolus dans votre bibliothèque"
 
-#: cps/templates/layout.html:872
+#: cps/templates/layout.html:882
 msgid "Duplicate Groups Found"
 msgstr "Groupes en double trouvés"
 
-#: cps/templates/layout.html:880
+#: cps/templates/layout.html:890
 msgid "Remind Me Later"
 msgstr "Rappelez-moi plus tard"
 
-#: cps/templates/layout.html:883
+#: cps/templates/layout.html:893
 msgid "View & Resolve Duplicates"
 msgstr "Afficher et résoudre les doublons"
 
-#: cps/templates/layout.html:892
+#: cps/templates/layout.html:902
 #, fuzzy
 msgid "Scroll to top"
 msgstr "Mise à l’échelle optimale"
 
-#: cps/templates/layout.html:894
+#: cps/templates/layout.html:904
 #, fuzzy
 msgid "Top"
 msgstr "Astuce"
 
-#: cps/templates/layout.html:984
+#: cps/templates/layout.html:994
 #, fuzzy
 msgid "Confirm"
 msgstr "Configuration"
 
-#: cps/templates/layout.html:990
+#: cps/templates/layout.html:1000
 #, fuzzy, python-brace-format
 msgid "Added {n} books to {shelf}"
 msgstr "Ajouter à l'étagère"
 
-#: cps/templates/layout.html:991
+#: cps/templates/layout.html:1001
 #, python-brace-format
 msgid "Added {ok} of {n} books to {shelf} (rest were already there)"
 msgstr ""
 
-#: cps/templates/layout.html:992
+#: cps/templates/layout.html:1002
 #, python-brace-format
 msgid "All {n} book(s) were already on {shelf}."
 msgstr ""
 
-#: cps/templates/layout.html:993
+#: cps/templates/layout.html:1003
 #, fuzzy, python-brace-format
 msgid "Marked {n} books as read"
 msgstr "Marquer les livres sélectionnés comme lus"
 
-#: cps/templates/layout.html:994
+#: cps/templates/layout.html:1004
 #, fuzzy, python-brace-format
 msgid "Marked {n} books as unread"
 msgstr "Marqué comme non lu"
 
-#: cps/templates/layout.html:995
+#: cps/templates/layout.html:1005
 #, fuzzy, python-brace-format
 msgid "Deleted {n} books"
 msgstr "Supprimer le livre"
 
-#: cps/templates/layout.html:996
+#: cps/templates/layout.html:1006
 #, fuzzy
 msgid "Delete books?"
 msgstr "Supprimer le livre"
 
-#: cps/templates/layout.html:997
+#: cps/templates/layout.html:1007
 #, fuzzy, python-brace-format
 msgid ""
 "This will permanently delete {n} book(s) from your library. This cannot be "
@@ -10844,12 +10782,12 @@ msgstr ""
 "Cela supprimera définitivement les livres. Les fichiers originaux seront "
 "sauvegardés sur"
 
-#: cps/templates/layout.html:998
+#: cps/templates/layout.html:1008
 #, fuzzy
 msgid "Select at least one book first."
 msgstr "Sélectionner d'abord un livre"
 
-#: cps/templates/layout.html:999
+#: cps/templates/layout.html:1009
 #, fuzzy, python-brace-format
 msgid "Request failed: {err}"
 msgstr "Échec de la restauration : %(err)s"
@@ -11482,10 +11420,6 @@ msgstr ""
 
 #: cps/templates/shelf_reorder.html:83
 msgid "Order saved. The sidebar reflects the new order on next page load."
-msgstr ""
-
-#: cps/templates/shelf_reorder.html:88
-msgid "Could not save order."
 msgstr ""
 
 #: cps/templates/stats.html:8
@@ -12155,6 +12089,14 @@ msgstr "Synchroniser les étagères sélectionnées avec Kobo"
 #: cps/templates/user_table.html:158
 msgid "Show Read/Unread Section"
 msgstr "Afficher la section Lu / Non lu"
+
+#~ msgid "Sync Kobo read progress to Hardcover (Requires API key per user)"
+#~ msgstr ""
+#~ "Synchroniser la progression de lecture Kobo avec Hardcover (nécessite une "
+#~ "clé API par utilisateur)"
+
+#~ msgid "Enable Hardcover Auto-Fetch"
+#~ msgstr "Activer la récupération automatique Hardcover"
 
 #, fuzzy
 #~ msgid "Log in with a magic link"

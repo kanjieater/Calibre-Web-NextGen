@@ -181,7 +181,7 @@ def test_create_magic_shelf_persists_opds_expose(monkeypatch):
 
 
 def test_edit_magic_shelf_updates_opds_expose(monkeypatch):
-    shelf = types.SimpleNamespace(id=12, user_id=4, name="Magic", rules={"rules": [1]}, icon="🪄", kobo_sync=False, is_public=0)
+    shelf = types.SimpleNamespace(id=12, user_id=4, name="Magic", rules={"rules": [1]}, icon="🪄", kobo_sync=False, is_public=0, is_system=False)
     current_user = types.SimpleNamespace(id=4, role_admin=lambda: False, role_edit_shelfs=lambda: True, opds_only_shelves_sync=1)
     calls = []
 
@@ -213,6 +213,47 @@ def test_edit_magic_shelf_updates_opds_expose(monkeypatch):
 
     assert response.get_json()["success"] is True
     assert calls == [(4, 12, True)]
+
+
+def test_edit_system_magic_shelf_preserves_canonical_name(monkeypatch):
+    """A translated SPA display name must never replace template identity."""
+    shelf = types.SimpleNamespace(id=12, user_id=4, name="Currently Reading",
+                                  rules={"rules": [1]}, icon="📖", kobo_sync=False,
+                                  is_public=0, is_system=True)
+    current_user = types.SimpleNamespace(id=4, role_admin=lambda: False,
+                                         role_edit_shelfs=lambda: True,
+                                         opds_only_shelves_sync=0)
+
+    class SessionStub(DummySession):
+        def query(self, entity):
+            if entity is web.ub.MagicShelf:
+                return QueryResult(get_value=shelf)
+            if entity is web.ub.MagicShelfCache:
+                return QueryResult()
+            raise AssertionError(f"Unexpected entity: {entity}")
+
+    session = SessionStub()
+    monkeypatch.setattr(web, "current_user", current_user)
+    monkeypatch.setattr(web, "strip_whitespaces", lambda value: value.strip())
+    monkeypatch.setattr(web, "flag_modified", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(web, "jsonify", lambda payload: types.SimpleNamespace(get_json=lambda: payload))
+    monkeypatch.setattr(web, "_", lambda value, **_kwargs: value)
+    monkeypatch.setattr(web, "ub", types.SimpleNamespace(
+        MagicShelf=web.ub.MagicShelf,
+        MagicShelfCache=web.ub.MagicShelfCache,
+        session=session,
+        session_commit=lambda: setattr(session, "committed", True),
+        is_opds_magic_shelf_exposed_for_user=lambda *_args, **_kwargs: False,
+    ))
+
+    with app.test_request_context(
+        "/magicshelf/12/edit", method="POST",
+        json={"name": "Lecture en cours", "rules": {"rules": [1]}},
+    ):
+        response = web.edit_magic_shelf.__wrapped__(12)
+
+    assert response.get_json()["success"] is True
+    assert shelf.name == "Currently Reading"
 
 
 def test_handle_new_user_sets_opds_only_shelves_sync(monkeypatch):

@@ -16,6 +16,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:8086';
+const SUBPATH_URL = process.env.E2E_SUBPATH_URL;
 const STORAGE = 'e2e/.auth/state.json';
 const isCI = !!process.env.CI;
 
@@ -66,11 +67,15 @@ export default defineConfig({
 
     // 4. Sub-path reverse proxy (opt-in: set E2E_SUBPATH_URL to the nginx rig).
     //    Guards Class 1 subpath breakage (v4.1.1 reader 404, #571 white page).
-    ...(process.env.E2E_SUBPATH_URL
+    ...(SUBPATH_URL
       ? [{
           name: 'subpath',
           testMatch: /subpath\.spec\.ts/,
-          use: { ...devices['Desktop Chrome'], baseURL: process.env.E2E_SUBPATH_URL, storageState: STORAGE },
+          use: {
+            ...devices['Desktop Chrome'],
+            baseURL: `${SUBPATH_URL.replace(/\/$/, '')}/`,
+            storageState: STORAGE,
+          },
           dependencies: ['setup'],
         }]
       : []),

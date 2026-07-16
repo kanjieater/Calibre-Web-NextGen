@@ -1602,7 +1602,12 @@ def edit_magic_shelf(shelf_id):
             icon = '🪄'
         
         try:
-            shelf.name = name
+            # System-shelf names are canonical template identity. The SPA API
+            # returns request-local display text, so persisting its submitted
+            # name would rename the template into the active locale and break
+            # matching, hiding, and future translation (#886).
+            if not getattr(shelf, "is_system", False):
+                shelf.name = name
             shelf.rules = rules
             shelf.icon = icon
             shelf.kobo_sync = kobo_sync

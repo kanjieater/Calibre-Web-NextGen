@@ -52,7 +52,7 @@ export function I18nProvider({ locale, children }: { locale: string; children: R
     document.documentElement.lang = (locale || 'en').replace('_', '-');
   }, [locale]);
 
-  const { data, isSuccess } = useQuery({
+  const { data, isFetched } = useQuery({
     queryKey: ['i18n', locale],
     queryFn: () =>
       apiGet<{ locale: string; catalog: Catalog }>(
@@ -67,10 +67,13 @@ export function I18nProvider({ locale, children }: { locale: string; children: R
     const catalog = data?.catalog ?? {};
     return {
       locale: locale || 'en',
-      ready: !enabled || isSuccess,
+      // A failed catalog request settles to the documented English fallback.
+      // Consumers waiting to measure translated DOM (for example page-title
+      // sync) must wait only while loading, not forever after an HTTP error.
+      ready: !enabled || isFetched,
       t: (key, vars) => interpolate(catalog[key] ?? key, vars),
     };
-  }, [data, locale, enabled, isSuccess]);
+  }, [data, locale, enabled, isFetched]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

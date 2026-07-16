@@ -130,6 +130,21 @@ def test_app_sets_document_title_from_instance_name():
     assert "RouteA11y" in app_src, "App must mount RouteA11y so titles sync on navigation"
 
 
+def test_route_title_waits_for_translated_catalog():
+    """#886: the transient English h1 must not become the persistent page title."""
+    route_a11y = (FRONTEND / "lib" / "a11y" / "useRouteA11y.ts").read_text()
+    assert "useI18n" in route_a11y
+    assert "if (!ready) return" in route_a11y
+    assert "locale, ready" in route_a11y
+
+    i18n = (FRONTEND / "lib" / "i18n.tsx").read_text()
+    assert "isFetched" in i18n, (
+        "a failed locale request must settle to English fallback so the title "
+        "does not remain stuck on the previous route"
+    )
+    assert "!enabled || isSuccess" not in i18n
+
+
 @pytest.mark.unit
 def test_api_types_declare_instance_name():
     src = (FRONTEND / "lib" / "api.ts").read_text()

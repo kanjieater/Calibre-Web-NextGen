@@ -560,13 +560,13 @@
       {% endif %}
       
       <div style="margin-top: 20px;">
-        <!-- Enable Auto-Fetch -->
-        {% if cwa_settings['hardcover_auto_fetch_enabled'] and hardcover_token_available %}
-        <input type="checkbox" id="hardcover_auto_fetch_enabled" name="hardcover_auto_fetch_enabled" value="True" checked style="accent-color: var(--color-secondary);" {% if not hardcover_token_available %}disabled{% endif %}>
-        {% else %}
-        <input type="checkbox" id="hardcover_auto_fetch_enabled" name="hardcover_auto_fetch_enabled" value="True" style="accent-color: var(--color-secondary);" {% if not hardcover_token_available %}disabled{% endif %}>
-        {% endif %}
-        <label for="hardcover_auto_fetch_enabled" style="padding-left: 10px; {% if not hardcover_token_available %}color: #888; cursor: not-allowed;{% endif %}">{{_('Enable Hardcover Auto-Fetch')}}</label>
+        <p class="cwa-settings-tooltip" role="status">
+          {% if config.hardcover_sync_enabled() %}
+            {{_('Hardcover sync is enabled. The schedule below controls automatic ID fetching.')}}
+          {% else %}
+            {{_('Hardcover sync is disabled. Enable it once in Basic Configuration or set HARDCOVER_SYNC_ENABLED=true.')}}
+          {% endif %}
+        </p>
         <p class="cwa-settings-tooltip">
           {{_('Automatically search Hardcover for books without Hardcover IDs. High-confidence matches are applied automatically; low-confidence matches are queued for manual review.')}}
         </p>

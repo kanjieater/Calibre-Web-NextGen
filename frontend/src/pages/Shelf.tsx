@@ -108,17 +108,17 @@ export function Shelf({ id }: { id: string }) {
       {
         onSuccess: () => setEditing(false),
         onError: (err) =>
-          setActionError(err instanceof ApiError ? err.message : 'Could not rename shelf.'),
+          setActionError(err instanceof ApiError ? err.message : t('Could not rename shelf.')),
       },
     );
   };
 
   const onDelete = () => {
-    if (!window.confirm(`Delete shelf "${data.name}"? This cannot be undone.`)) return;
+    if (!window.confirm(t('Delete shelf "{name}"? This cannot be undone.', { name: data.name }))) return;
     deleteShelf.mutate(Number(id), {
       onSuccess: () => navigate('/shelves'),
       onError: (err) =>
-        setActionError(err instanceof ApiError ? err.message : 'Could not delete shelf.'),
+        setActionError(err instanceof ApiError ? err.message : t('Could not delete shelf.')),
     });
   };
 
@@ -131,14 +131,14 @@ export function Shelf({ id }: { id: string }) {
   const toggleVisibility = () => {
     setActionError(null);
     updateShelf.mutate({ is_public: !data.is_public }, {
-      onError: (err) => setActionError(err instanceof ApiError ? err.message : 'Could not update shelf.'),
+      onError: (err) => setActionError(err instanceof ApiError ? err.message : t('Could not update shelf.')),
     });
   };
 
   const toggleKoboSync = () => {
     setActionError(null);
     updateShelf.mutate({ kobo_sync: !data.kobo_sync }, {
-      onError: (err) => setActionError(err instanceof ApiError ? err.message : 'Could not update shelf.'),
+      onError: (err) => setActionError(err instanceof ApiError ? err.message : t('Could not update shelf.')),
     });
   };
 
@@ -150,7 +150,7 @@ export function Shelf({ id }: { id: string }) {
     [next[index], next[target]] = [next[target], next[index]];
     setBooks(next);
     reorder.mutate(next.map((b) => b.id), {
-      onError: (err) => setActionError(err instanceof ApiError ? err.message : 'Could not save order.'),
+      onError: (err) => setActionError(err instanceof ApiError ? err.message : t('Could not save order.')),
     });
   };
 
@@ -203,7 +203,9 @@ export function Shelf({ id }: { id: string }) {
 
         <div className={styles.subRow}>
           <span className={styles.count}>
-            {total} book{total !== 1 ? 's' : ''}
+            {total === 1
+              ? t('{count} book', { count: total })
+              : t('{count} books', { count: total })}
           </span>
           {canEdit && !editing && (
             <div className={styles.manage}>
@@ -236,7 +238,7 @@ export function Shelf({ id }: { id: string }) {
       </div>
 
       {books.length === 0 && !isFetching ? (
-        <EmptyState message="This shelf is empty. Add books from any book's page." />
+        <EmptyState message={t("This shelf is empty. Add books from any book's page.")} />
       ) : reordering ? (
         <ol className={styles.reorderList}>
           {books.map((book, i) => (

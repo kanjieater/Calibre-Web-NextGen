@@ -133,7 +133,9 @@ def test_hardcover_key_presence_is_never_read_from_the_column():
 
 def test_admin_form_mentions_env_token():
     tpl = (REPO_ROOT / "cps/templates/config_edit.html").read_text(encoding="utf-8")
-    assert "hardcover_token_from_env()" in tpl, (
-        "config_edit.html must tell admins when an environment token is "
-        "active — the silent empty field is what got #743 reported."
+    assert "hardcover_token_source()" in tpl
+    assert "HARDCOVER_TOKEN_FILE" in tpl
+    assert "HARDCOVER_TOKEN" in tpl, (
+        "config_edit.html must identify the active non-database source; the "
+        "silent empty field is what got #743 reported."
     )

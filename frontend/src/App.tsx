@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Router, Route, Switch } from 'wouter';
 import { RouteA11y } from './lib/a11y/useRouteA11y';
-import { BASE_PREFIX } from './lib/api';
+import { BASE_PREFIX, type AdvancedSearchParams } from './lib/api';
 import { bodyFontStack, displayFontStack } from './lib/fonts';
 import { resolveTheme } from './lib/themes';
 import { useMe, useLogout } from './lib/queries';
@@ -30,6 +30,8 @@ import { MagicShelfView } from './pages/MagicShelfView';
 import { AppShell } from './components/AppShell';
 import { SpinnerCentered } from './components/Spinner';
 import { I18nProvider } from './lib/i18n';
+import { usePostAuthRedirect } from './lib/authRedirect';
+import { AUTH_ROUTES, SPA_ROUTES } from './lib/routes';
 
 // The reader pulls in epub.js (large) — load it only when a book is opened so it
 // stays out of the initial bundle.
@@ -41,6 +43,16 @@ const NativeReader = lazy(() => import('./pages/NativeReader').then((m) => ({ de
 // path (empty at the domain root). wouter needs the full base so client-side
 // links resolve to <prefix>/app/… rather than a prefix-less /app/….
 const ROUTER_BASE = BASE_PREFIX + '/app';
+
+function Library({ defaultFilter }: { defaultFilter?: AdvancedSearchParams }) {
+  return defaultFilter ? <AdvancedSearch defaultFilter={defaultFilter} /> : <Catalog />;
+}
+
+function AuthenticatedAuthLanding() {
+  const redirectAfterAuth = usePostAuthRedirect();
+  useEffect(() => { redirectAfterAuth(); }, [redirectAfterAuth]);
+  return <SpinnerCentered size={40} />;
+}
 
 export function App() {
   const { data: me, isLoading } = useMe();
@@ -93,7 +105,7 @@ export function App() {
       <Router base={ROUTER_BASE}>
         <RouteA11y />
         <Switch>
-          <Route path="/magic-link">{() => <MagicLink />}</Route>
+          <Route path={AUTH_ROUTES.magicLink}>{() => <MagicLink />}</Route>
           <Route>{() => <Login />}</Route>
         </Switch>
       </Router>
@@ -106,7 +118,7 @@ export function App() {
       <RouteA11y instanceName={me.instance_name} />
       <Switch>
         {/* Full-screen reader — outside the app shell (no sidebar/topbar). */}
-        <Route path="/read/:id">
+        <Route path={SPA_ROUTES.reader}>
           {(p) => (
             <Suspense fallback={<SpinnerCentered size={40} />}>
               <Reader id={p.id} />
@@ -115,7 +127,7 @@ export function App() {
         </Route>
 
         {/* Native non-EPUB reader (PDF / audio / text) — full screen */}
-        <Route path="/view/:id/:format">
+        <Route path={SPA_ROUTES.nativeReader}>
           {(p) => (
             <Suspense fallback={<SpinnerCentered size={40} />}>
               <NativeReader id={p.id} format={p.format} />
@@ -127,83 +139,83 @@ export function App() {
         <Route>
           <AppShell userName={me.name} instanceName={me.instance_name} onLogout={() => logout.mutate()}>
             <Switch>
-          <Route path="/book/:id/edit">{(p) => <EditBook id={p.id} />}</Route>
-          <Route path="/book/:id/cover">{(p) => <CoverPicker id={p.id} />}</Route>
-          <Route path="/book/:id/annotations">{(p) => <Annotations id={p.id} />}</Route>
-          <Route path="/book/:id" component={BookDetail} />
+          <Route path={AUTH_ROUTES.login}>{() => <AuthenticatedAuthLanding />}</Route>
+          <Route path={AUTH_ROUTES.magicLink}>{() => <AuthenticatedAuthLanding />}</Route>
+          <Route path={SPA_ROUTES.editBook}>{(p) => <EditBook id={p.id} />}</Route>
+          <Route path={SPA_ROUTES.coverPicker}>{(p) => <CoverPicker id={p.id} />}</Route>
+          <Route path={SPA_ROUTES.annotations}>{(p) => <Annotations id={p.id} />}</Route>
+          <Route path={SPA_ROUTES.book} component={BookDetail} />
 
           {/* Browse: entity lists + per-entity filtered catalog */}
-          <Route path="/authors">{() => <BrowseList plural="authors" title="Authors" />}</Route>
-          <Route path="/authors/:id">
+          <Route path={SPA_ROUTES.authors}>{() => <BrowseList plural="authors" title="Authors" />}</Route>
+          <Route path={SPA_ROUTES.author}>
             {(p) => <Catalog entityKind="author" entityId={decodeURIComponent(p.id)} />}
           </Route>
 
-          <Route path="/series">{() => <BrowseList plural="series" title="Series" />}</Route>
-          <Route path="/series/:id">
+          <Route path={SPA_ROUTES.seriesList}>{() => <BrowseList plural="series" title="Series" />}</Route>
+          <Route path={SPA_ROUTES.series}>
             {(p) => <Catalog entityKind="series" entityId={decodeURIComponent(p.id)} />}
           </Route>
 
-          <Route path="/tags">{() => <BrowseList plural="tags" title="Tags" />}</Route>
-          <Route path="/tags/:id">
+          <Route path={SPA_ROUTES.tags}>{() => <BrowseList plural="tags" title="Tags" />}</Route>
+          <Route path={SPA_ROUTES.tag}>
             {(p) => <Catalog entityKind="tag" entityId={decodeURIComponent(p.id)} />}
           </Route>
 
-          <Route path="/publishers">{() => <BrowseList plural="publishers" title="Publishers" />}</Route>
-          <Route path="/publishers/:id">
+          <Route path={SPA_ROUTES.publishers}>{() => <BrowseList plural="publishers" title="Publishers" />}</Route>
+          <Route path={SPA_ROUTES.publisher}>
             {(p) => <Catalog entityKind="publisher" entityId={decodeURIComponent(p.id)} />}
           </Route>
 
-          <Route path="/languages">{() => <BrowseList plural="languages" title="Languages" />}</Route>
-          <Route path="/languages/:id">
+          <Route path={SPA_ROUTES.languages}>{() => <BrowseList plural="languages" title="Languages" />}</Route>
+          <Route path={SPA_ROUTES.language}>
             {(p) => <Catalog entityKind="language" entityId={decodeURIComponent(p.id)} />}
           </Route>
 
-          <Route path="/ratings">{() => <BrowseList plural="ratings" title="Ratings" />}</Route>
-          <Route path="/ratings/:id">
+          <Route path={SPA_ROUTES.ratings}>{() => <BrowseList plural="ratings" title="Ratings" />}</Route>
+          <Route path={SPA_ROUTES.rating}>
             {(p) => <Catalog entityKind="rating" entityId={decodeURIComponent(p.id)} />}
           </Route>
 
-          <Route path="/formats">{() => <BrowseList plural="formats" title="Formats" />}</Route>
-          <Route path="/formats/:id">
+          <Route path={SPA_ROUTES.formats}>{() => <BrowseList plural="formats" title="Formats" />}</Route>
+          <Route path={SPA_ROUTES.format}>
             {(p) => <Catalog entityKind="format" entityId={decodeURIComponent(p.id)} />}
           </Route>
 
           {/* Shelves */}
-          <Route path="/shelves">{() => <Shelves />}</Route>
-          <Route path="/shelf/:id">{(p) => <Shelf id={p.id} />}</Route>
+          <Route path={SPA_ROUTES.shelves}>{() => <Shelves />}</Route>
+          <Route path={SPA_ROUTES.shelf}>{(p) => <Shelf id={p.id} />}</Route>
 
           {/* Discovery views (fixed server-side ?filter= categories) */}
-          <Route path="/hot">{() => <Catalog view="hot" />}</Route>
-          <Route path="/discover">{() => <Catalog view="discover" />}</Route>
-          <Route path="/rated">{() => <Catalog view="rated" />}</Route>
-          <Route path="/favorites">{() => <Catalog view="favorites" />}</Route>
-          <Route path="/archived">{() => <Catalog view="archived" />}</Route>
+          <Route path={SPA_ROUTES.hot}>{() => <Catalog view="hot" />}</Route>
+          <Route path={SPA_ROUTES.discover}>{() => <Catalog view="discover" />}</Route>
+          <Route path={SPA_ROUTES.rated}>{() => <Catalog view="rated" />}</Route>
+          <Route path={SPA_ROUTES.favorites}>{() => <Catalog view="favorites" />}</Route>
+          <Route path={SPA_ROUTES.archived}>{() => <Catalog view="archived" />}</Route>
 
           {/* Advanced search */}
-          <Route path="/search">{() => <AdvancedSearch />}</Route>
+          <Route path={SPA_ROUTES.search}>{() => <AdvancedSearch />}</Route>
 
           {/* Account / settings */}
-          <Route path="/account">{() => <Account />}</Route>
+          <Route path={SPA_ROUTES.account}>{() => <Account />}</Route>
 
           {/* Upload */}
-          <Route path="/upload">{() => <Upload />}</Route>
+          <Route path={SPA_ROUTES.upload}>{() => <Upload />}</Route>
 
           {/* Admin */}
-          <Route path="/admin">{() => <Admin />}</Route>
+          <Route path={SPA_ROUTES.admin}>{() => <Admin />}</Route>
 
           {/* Info pages */}
-          <Route path="/whats-new">{() => <WhatsNew />}</Route>
-          <Route path="/about">{() => <About />}</Route>
-          <Route path="/tasks">{() => <Tasks />}</Route>
-          <Route path="/table">{() => <Table />}</Route>
-          <Route path="/duplicates">{() => <Duplicates />}</Route>
-          <Route path="/magic/:id/edit">{(p) => <MagicShelf editId={p.id} />}</Route>
-          <Route path="/magic/:id">{(p) => <MagicShelfView id={p.id} />}</Route>
-          <Route path="/magic">{() => <MagicShelf />}</Route>
+          <Route path={SPA_ROUTES.whatsNew}>{() => <WhatsNew />}</Route>
+          <Route path={SPA_ROUTES.about}>{() => <About />}</Route>
+          <Route path={SPA_ROUTES.tasks}>{() => <Tasks />}</Route>
+          <Route path={SPA_ROUTES.table}>{() => <Table />}</Route>
+          <Route path={SPA_ROUTES.duplicates}>{() => <Duplicates />}</Route>
+          <Route path={SPA_ROUTES.magicEdit}>{(p) => <MagicShelf editId={p.id} />}</Route>
+          <Route path={SPA_ROUTES.magicView}>{(p) => <MagicShelfView id={p.id} />}</Route>
+          <Route path={SPA_ROUTES.magic}>{() => <MagicShelf />}</Route>
 
-          <Route path="/">{() => me.catalog?.default_filter
-            ? <AdvancedSearch defaultFilter={me.catalog.default_filter} />
-            : <Catalog />}</Route>
+          <Route path={SPA_ROUTES.library}>{() => <Library defaultFilter={me.catalog?.default_filter ?? undefined} />}</Route>
 
           {/* Graceful 404 for any unmatched in-shell route (no blank page). */}
           <Route>{() => <NotFound />}</Route>

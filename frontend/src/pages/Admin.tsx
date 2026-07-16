@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'wouter';
 import { Shield, Trash2, Mail, UserPlus, ChevronRight, Settings, Database, Server, Clock, FileText, Sliders, BarChart3, Files, Lock, RefreshCw, KeyRound } from 'lucide-react';
 import { useEffect } from 'react';
 import {
@@ -20,7 +21,7 @@ import styles from './Admin.module.css';
 // infrastructure surfaces (DB path, ingest/convert internals, scheduled tasks)
 // that are not part of the day-to-day user/auth flows. Login/authentication
 // security (LDAP/OAuth/SSL/reverse-proxy) and SMTP are rebuilt natively below.
-const SERVER_SETTINGS: { href: string; label: string; icon: typeof Settings }[] = [
+const SERVER_SETTINGS: { href: string; label: string; icon: typeof Settings; spa?: boolean }[] = [
   { href: '/admin/view', label: 'Full user table & restrictions', icon: Shield },
   { href: '/admin/config', label: 'Basic configuration', icon: Settings },
   { href: '/admin/viewconfig', label: 'UI / display configuration', icon: Sliders },
@@ -29,7 +30,7 @@ const SERVER_SETTINGS: { href: string; label: string; icon: typeof Settings }[] 
   { href: '/cwa-settings', label: 'CWA settings (ingest/convert)', icon: Server },
   { href: '/cwa-stats-show', label: 'Statistics dashboard', icon: BarChart3 },
   { href: '/admin/logfile', label: 'Logs', icon: FileText },
-  { href: '/duplicates', label: 'Duplicate books', icon: Files },
+  { href: '/duplicates', label: 'Duplicate books', icon: Files, spa: true },
 ];
 
 // Default-role checkboxes auto-granted to new OAuth users. Keys MUST match
@@ -72,7 +73,7 @@ export function Admin() {
   if (error || !data) {
     return (
       <main className={styles.container}>
-        <EmptyState message={error instanceof Error ? error.message : 'Could not load users.'} />
+        <EmptyState message={error instanceof Error ? error.message : t('Could not load users.')} />
       </main>
     );
   }
@@ -83,7 +84,7 @@ export function Admin() {
       { id: user.id, roles: { [key]: value } },
       {
         onError: (err) =>
-          setBanner({ ok: false, text: err instanceof ApiError ? err.message : 'Update failed.' }),
+          setBanner({ ok: false, text: err instanceof ApiError ? err.message : t('Update failed.') }),
       },
     );
   };
@@ -100,23 +101,26 @@ export function Admin() {
       },
       {
         onSuccess: (u) => {
-          setBanner({ ok: true, text: `Created ${u.name}.` });
+          setBanner({ ok: true, text: t('Created {name}.', { name: u.name }) });
           setForm({ name: '', password: '', email: '', upload: false });
           setShowNew(false);
         },
         onError: (err) =>
-          setBanner({ ok: false, text: err instanceof ApiError ? err.message : 'Create failed.' }),
+          setBanner({ ok: false, text: err instanceof ApiError ? err.message : t('Create failed.') }),
       },
     );
   };
 
   const onDelete = (user: AdminUser) => {
-    if (!window.confirm(`Delete user "${user.name}"? Their shelves and reading data are removed too.`)) return;
+    if (!window.confirm(t(
+      'Delete user "{name}"? Their shelves and reading data are removed too.',
+      { name: user.name },
+    ))) return;
     setBanner(null);
     deleteUser.mutate(user.id, {
-      onSuccess: () => setBanner({ ok: true, text: `Deleted ${user.name}.` }),
+      onSuccess: () => setBanner({ ok: true, text: t('Deleted {name}.', { name: user.name }) }),
       onError: (err) =>
-        setBanner({ ok: false, text: err instanceof ApiError ? err.message : 'Delete failed.' }),
+        setBanner({ ok: false, text: err instanceof ApiError ? err.message : t('Delete failed.') }),
     });
   };
 
@@ -209,7 +213,7 @@ export function Admin() {
                       </button>
                     )}
                     <button className={styles.deleteBtn} onClick={() => onDelete(user)}
-                      disabled={deleteUser.isPending} aria-label={`Delete ${user.name}`}>
+                      disabled={deleteUser.isPending} aria-label={t('Delete {name}', { name: user.name })}>
                       <Trash2 size={15} aria-hidden="true" focusable={false} />
                     </button>
                   </div>
@@ -243,21 +247,23 @@ export function Admin() {
         <h2 className={styles.settingsTitle}>{t('More server configuration')}</h2>
       </div>
       <p className={styles.settingsHint}>
-        {t('These open the full configuration pages. Changes there apply to the whole server.')}
+        {t('Pages marked below open in the classic view. Changes there apply to the whole server.')}
       </p>
       <div className={styles.settingsGrid}>
         {/* Same-tab on purpose: these are in-app pages, not external sites (#738). */}
-        {SERVER_SETTINGS.map(({ href, label, icon: Icon }) => (
-          <a
-            key={href}
-            href={resourceUrl(href)}
-            className={styles.settingsCard}
-          >
-            <Icon size={18} className={styles.settingsIcon} aria-hidden="true" />
-            <span className={styles.settingsLabel}>{t(label)}</span>
-            <ChevronRight size={13} className={styles.settingsExt} aria-hidden="true" />
-          </a>
-        ))}
+        {SERVER_SETTINGS.map(({ href, label, icon: Icon, spa }) => {
+          const content = <>
+            <Icon size={18} className={styles.settingsIcon} aria-hidden="true" focusable={false} />
+            <span className={styles.settingsLabel}>
+              <span>{t(label)}</span>
+              {!spa && <small>{t('Opens in classic view')}</small>}
+            </span>
+            <ChevronRight size={13} className={styles.settingsExt} aria-hidden="true" focusable={false} />
+          </>;
+          return spa
+            ? <Link key={href} href={href} className={styles.settingsCard}>{content}</Link>
+            : <a key={href} href={resourceUrl(href)} className={styles.settingsCard}>{content}</a>;
+        })}
       </div>
     </main>
   );

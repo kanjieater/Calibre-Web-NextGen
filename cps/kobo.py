@@ -1593,7 +1593,7 @@ def push_reading_state_to_hardcover(user, book: db.Books, progress_percentage: i
     :return: None
     """
 
-    if not config.config_hardcover_sync or not bool(hardcover):
+    if not config.hardcover_sync_enabled() or not bool(hardcover):
         return
 
     # Check if book is blacklisted from reading progress syncing

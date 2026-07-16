@@ -12,8 +12,9 @@ detail-page read toggle on the check/unchecked action pair, but the
 cover-hover "Toggle Read Status" button in listing views still showed
 glyphicon-eye-open — the visibility glyph, which is exactly the
 read-vs-hide icon confusion #319 was opened about. The icon must show
-the ACTION the click performs: unread book -> glyphicon-check ("mark as
-read"), read book -> glyphicon-unchecked ("mark as unread").
+the CURRENT STATE, matching the detail-page checkbox convention:
+read -> glyphicon-check, unread -> glyphicon-unchecked. The tooltip
+separately names the action the click will perform.
 """
 
 from pathlib import Path
@@ -35,18 +36,18 @@ class TestGridReadToggleIcon:
         # not come back on any of the three states (rest, success, error).
         assert "glyphicon-eye-open" not in self._src()
 
-    def test_construction_uses_action_pair_from_read_state(self):
+    def test_construction_uses_current_state_icon_and_action_title(self):
         src = self._src()
-        assert "linkIsRead ? 'glyphicon-unchecked' : 'glyphicon-check'" in src
+        assert "linkIsRead ? 'glyphicon-check' : 'glyphicon-unchecked'" in src
         assert "linkIsRead ? 'Mark As Unread' : 'Mark As Read'" in src
 
-    def test_success_handler_rests_on_next_action_icon(self):
+    def test_success_handler_rests_on_resulting_state_icon(self):
         src = self._src()
-        assert "nowRead ? 'glyphicon-unchecked' : 'glyphicon-check'" in src
+        assert "nowRead ? 'glyphicon-check' : 'glyphicon-unchecked'" in src
         assert "nowRead ? 'Mark As Unread' : 'Mark As Read'" in src
 
     def test_error_handler_restores_unchanged_state_icon(self):
         src = self._src()
         assert (
-            "isCurrentlyRead ? 'glyphicon-unchecked' : 'glyphicon-check'" in src
+            "isCurrentlyRead ? 'glyphicon-check' : 'glyphicon-unchecked'" in src
         )

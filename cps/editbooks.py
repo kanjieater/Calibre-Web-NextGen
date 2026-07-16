@@ -512,7 +512,12 @@ def _ensure_ingest_dir_writable(ingest_dir=None, allow_create=False, check_write
 #
 @login_required_if_no_ano
 @edit_required
+@metadata_db_write_lock()
 def edit_book_param(param, vals):
+    # The full inline-edit transaction is locked, rather than only commit:
+    # relationship helpers issue queries that can autoflush pending metadata
+    # writes. This also makes a per-book tag edit mutually exclusive with the
+    # global tag-rename route while it snapshots every linked book (#914).
     book = calibre_db.get_book(vals['pk'])
     sort_param = ""
     ret = ""
@@ -1023,7 +1028,7 @@ def do_edit_book(book_id, upload_formats=None):
         modify_date |= edit_all_cc_data(book_id, book, to_save)
 
         # Handle hardcover sync blacklist settings
-        if config.config_kobo_sync and config.config_hardcover_sync:
+        if config.config_kobo_sync and config.hardcover_sync_enabled():
             modify_date |= edit_hardcover_blacklist(book_id, to_save)
 
         if to_save.get("pubdate"):

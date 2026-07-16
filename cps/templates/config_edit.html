@@ -217,10 +217,6 @@
         <input type="number" min="1" max="65535" class="form-control" name="config_external_port" id="config_external_port" value="{% if config.config_external_port != None %}{{ config.config_external_port }}{% endif %}" autocomplete="off" required>
       </div>
       <div class="form-group" style="margin-left:10px;">
-        <input type="checkbox" id="config_hardcover_sync" name="config_hardcover_sync"  {% if config.config_hardcover_sync %}checked{% endif %}>
-        <label for="config_hardcover_sync">{{_('Sync Kobo read progress to Hardcover (Requires API key per user)')}}</label>
-      </div>
-      <div class="form-group" style="margin-left:10px;">
         <input type="checkbox" id="config_hardcover_annotations_sync" name="config_hardcover_annotations_sync"  {% if config.config_hardcover_annotations_sync %}checked{% endif %}>
         <label for="config_hardcover_annotations_sync">{{_('Sync Kobo annotations to Hardcover (Requires API key per user)')}}</label>
       </div>
@@ -272,36 +268,40 @@
     </div>
     {% endif %}
     <div class="form-group">
-      <input type="checkbox" id="config_hardcover_sync" name="config_hardcover_sync" data-control="hardcover-settings" {% if config.config_hardcover_sync %}checked{% endif %}>
+      <input type="checkbox" id="config_hardcover_sync" name="config_hardcover_sync" {% if config.hardcover_sync_enabled() %}checked{% endif %} {% if config.hardcover_sync_source() == 'HARDCOVER_SYNC_ENABLED' %}disabled{% endif %}>
       <label for="config_hardcover_sync">{{_('Enable Hardcover Sync')}}</label>
+      <div class="help-block">{{_('Controls Hardcover auto-fetch and reading-progress sync from one setting.')}}</div>
+      {% if config.hardcover_sync_source() == 'HARDCOVER_SYNC_ENABLED' %}
+      <div class="help-block">{{_('Managed by HARDCOVER_SYNC_ENABLED; change the environment variable to enable or disable Hardcover sync.')}}</div>
+      {% endif %}
     </div>
-    <div data-related="hardcover-settings">
-      <div class="form-group">
-        <label for="config_hardcover_token">{{_('Hardcover API Key')}}</label>
-        <input type="text" class="form-control" id="config_hardcover_token" name="config_hardcover_token" value="{% if config.config_hardcover_token != None %}{{ config.config_hardcover_token }}{% endif %}" autocomplete="off">
-        <div class="help-block">{{_('Free key from https://hardcover.app/account/api — required for Hardcover metadata results.')}}</div>
-        {% if config.hardcover_token_from_env() %}
-        <div class="help-block">{{_('A token from the HARDCOVER_TOKEN environment variable is currently active. It is not shown here; a key entered in this field would override it.')}}</div>
+    <div class="form-group">
+      <label for="config_hardcover_token">{{_('Hardcover API Key')}}</label>
+      <input type="text" class="form-control" id="config_hardcover_token" name="config_hardcover_token" value="{% if config.config_hardcover_token != None %}{{ config.config_hardcover_token }}{% endif %}" autocomplete="off">
+      <div class="help-block">{{_('Free key from https://hardcover.app/account/api — required for Hardcover metadata results.')}}</div>
+      {% if config.hardcover_token_source() == 'HARDCOVER_TOKEN' %}
+      <div class="help-block">{{_('A token from the HARDCOVER_TOKEN environment variable is currently active. It is not shown here; a key entered in this field would override it.')}}</div>
+      {% elif config.hardcover_token_source() == 'HARDCOVER_TOKEN_FILE' %}
+      <div class="help-block">{{_('A token from the file named by HARDCOVER_TOKEN_FILE is currently active. It is not shown here; a key entered in this field would override it.')}}</div>
+      {% endif %}
+      {% if hardcover_token_status %}
+      <div class="help-block" role="status">
+        {% if not hardcover_token_status.present %}
+          {{_('Token status: not configured.')}}
+        {% elif hardcover_token_status.valid == true %}
+          {{_('Token status: valid.')}}
+        {% elif hardcover_token_status.valid == false %}
+          {{_('Token status: rejected or expired.')}}
+        {% else %}
+          {{_('Token status: present; validation is temporarily unavailable.')}}
         {% endif %}
-        {% if hardcover_token_status %}
-        <div class="help-block" role="status">
-          {% if not hardcover_token_status.present %}
-            {{_('Token status: not configured.')}}
-          {% elif hardcover_token_status.valid == true %}
-            {{_('Token status: valid.')}}
-          {% elif hardcover_token_status.valid == false %}
-            {{_('Token status: rejected or expired.')}}
-          {% else %}
-            {{_('Token status: present; validation is temporarily unavailable.')}}
-          {% endif %}
-          {% if hardcover_token_status.expires_at %}
-            {{ hardcover_token_status.expires_label }}: {{ hardcover_token_status.expires_at|strftime }}
-          {% elif hardcover_token_status.present %}
-            {{_('Expiry: not provided by this token.')}}
-          {% endif %}
-        </div>
+        {% if hardcover_token_status.expires_at %}
+          {{ hardcover_token_status.expires_label }}: {{ hardcover_token_status.expires_at|strftime }}
+        {% elif hardcover_token_status.present %}
+          {{_('Expiry: not provided by this token.')}}
         {% endif %}
       </div>
+      {% endif %}
     </div>
     <div class="form-group">
       <label for="config_google_books_api_key">{{_('Google Books API Key')}}</label>

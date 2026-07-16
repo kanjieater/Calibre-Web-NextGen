@@ -141,6 +141,170 @@ def test_fr_read_toggle_strings_are_correct():
 
 
 @pytest.mark.unit
+def test_fr_reporter_residual_spa_strings_are_served():
+    """#615/#886: the exact residual labels reported after v4.1.12 must
+    survive extraction and msgfmt-equivalent fuzzy filtering.
+
+    This tests the catalog the SPA actually consumes, rather than accepting a
+    fuzzy or empty ``msgstr`` that looks translated in messages.po but is
+    intentionally omitted at runtime.
+    """
+    body, _ = _call_view("fr")
+    catalog = body["catalog"]
+    assert catalog.get("A few random picks from your library") == (
+        "Une sélection aléatoire de votre bibliothèque"
+    )
+    assert catalog.get("Favorites") == "Favoris"
+    assert catalog.get("Hot") == "Populaires"
+    assert catalog.get("Top Rated") == "Les mieux notés"
+    assert catalog.get("Table view") == "Vue en tableau"
+    assert catalog.get("Smart shelves") == "Étagères intelligentes"
+    assert catalog.get("Load more") == "Charger plus"
+
+
+@pytest.mark.parametrize(
+    ("locale", "expected"),
+    [
+        (
+            "fr",
+            {
+                "Currently Reading": "Lecture en cours",
+                "Ratings": "Évaluations",
+                "Loading": "Chargement…",
+                "Smart shelves": "Étagères intelligentes",
+                "Table view": "Vue en tableau",
+                "{count} books": "{count} livres",
+                "Hot — Most Downloaded": "Populaires — Les plus téléchargés",
+                "Comfortable": "Confortable",
+                "contains": "contient",
+                "Standard (username / password)": "Standard (nom d’utilisateur / mot de passe)",
+                "Simple (service account)": "Simple (compte de service)",
+                "Help & support": "Aide et assistance",
+            },
+        ),
+        (
+            "ru",
+            {
+                "Currently Reading": "Читаю сейчас",
+                "Ratings": "Рейтинги",
+                "Loading": "Загрузка",
+                "Smart shelves": "Смарт-полки",
+                "Table view": "Табличный вид",
+                "{count} books": "Книг: {count}",
+                "Discover — Random Picks": "Открытия — Случайная подборка",
+                "Page {number}": "Страница {number}",
+                "contains": "содержит",
+                "Standard (username / password)": "Стандартный (имя пользователя / пароль)",
+                "Simple (service account)": "Простая (служебная учётная запись)",
+                "Help & support": "Помощь и поддержка",
+            },
+        ),
+        (
+            "de",
+            {
+                "Currently Reading": "Wird gerade gelesen",
+                "Ratings": "Bewertungen",
+                "Loading": "Wird geladen…",
+                "Smart shelves": "Intelligente Regale",
+                "Table view": "Tabellenansicht",
+                "{count} books": "{count} Bücher",
+                "Hot — Most Downloaded": "Beliebt — Am häufigsten heruntergeladen",
+                "Compact": "Kompakt",
+                "contains": "enthält",
+                "Standard (username / password)": "Standard (Benutzername / Passwort)",
+                "Simple (service account)": "Einfach (Dienstkonto)",
+                "Help & support": "Hilfe und Support",
+            },
+        ),
+        (
+            "hu",
+            {
+                "Currently Reading": "Jelenleg olvasott",
+                "Ratings": "Értékelések",
+                "Loading": "Betöltés…",
+                "Smart shelves": "Intelligens polcok",
+                "Table view": "Táblázatos nézet",
+                "{count} books": "{count} könyv",
+                "Discover — Random Picks": "Felfedezés — Véletlenszerű válogatás",
+                "Page {number}": "{number}. oldal",
+                "contains": "tartalmazza",
+                "Standard (username / password)": "Normál (felhasználónév / jelszó)",
+                "Simple (service account)": "Egyszerű (szolgáltatási fiók)",
+                "Help & support": "Súgó és támogatás",
+            },
+        ),
+    ],
+)
+def test_reviewed_new_ui_translations_survive_runtime_fuzzy_filter(locale, expected):
+    """#879/#886: reviewed reporter and household translations must be in the
+    exact catalog consumed by the SPA, rather than merely present as fuzzy PO
+    guesses that the safe runtime policy intentionally drops.
+    """
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    assert {msgid: catalog.get(msgid) for msgid in expected} == expected
+
+
+@pytest.mark.parametrize("locale", ["fr", "ru", "de", "hu"])
+def test_newly_wrapped_shelf_states_are_translated(locale):
+    """A representative newly wrapped state and error remain non-English in
+    every reporter/household locale after extraction and catalog filtering.
+    """
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    for msgid in (
+        "No shelves yet. Create one above to start collecting books.",
+        "Could not save order.",
+    ):
+        assert catalog.get(msgid)
+        assert catalog[msgid] != msgid
+
+
+@pytest.mark.parametrize("locale", ["fr", "ru", "de", "hu"])
+def test_smart_shelf_editor_copy_is_runtime_catalog_eligible(locale):
+    """#886: the whole named Smart shelves surface, not only its operators,
+    must survive the runtime empty/fuzzy filter in the target locales.
+    """
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    keys = (
+        "Add rule", "Could not create the shelf.", "Could not save the shelf.",
+        "Create smart shelf", "Date Added", "Edit smart shelf",
+        "Give your smart shelf a name.", "Icon", "Match", "Match condition",
+        "Name", "New smart shelf", "Remove rule", "Rule field",
+        "Rule operator", "Save changes", "Saving…", "Tag", "all rules",
+        "any rule", "books match", "e.g. Unread sci-fi", "value",
+    )
+    assert [key for key in keys if not catalog.get(key)] == []
+
+
+@pytest.mark.parametrize("locale", ["fr", "ru", "de", "hu"])
+def test_reporter_catalog_controls_have_accessible_translations(locale):
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    keys = ("Read status filter", "Sort order", "Shuffle picks", "Hide Discover section")
+    assert [key for key in keys if not catalog.get(key)] == []
+
+
+@pytest.mark.parametrize(
+    ("locale", "keys"),
+    [
+        ("fr", (
+            "Book density", "Grid view", "List view", "Loading…", "Rows per load",
+            "Select multiple", "Series order", "Series order (reverse)", "Series view",
+            "Show Discover section", "Failed to load books.",
+            'No results for "{q}".', "No {filter} books here.",
+        )),
+        ("ru", ("Book density", "Rows per load", "Series view")),
+    ],
+)
+def test_household_and_reporter_catalog_surface_is_complete(locale, keys):
+    body, _ = _call_view(locale)
+    catalog = body["catalog"]
+    assert [key for key in keys if not catalog.get(key)] == []
+
+
+@pytest.mark.unit
 def test_i18n_endpoint_is_public():
     """The auth gate must let the catalog through (login screen needs strings)."""
     from cps.api import _PUBLIC_ENDPOINTS

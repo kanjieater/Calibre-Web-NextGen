@@ -241,6 +241,12 @@ def trigger_hardcover_auto_fetch():
     show_text = {}
     
     try:
+        if not config.hardcover_sync_enabled():
+            show_text['text'] = _(
+                'Error: Hardcover sync is disabled. Enable it in Basic Configuration or with HARDCOVER_SYNC_ENABLED.'
+            )
+            return json.dumps(show_text), 400
+
         # Check if token is available
         token_available = bool(config.resolved_hardcover_token())
 
@@ -2548,6 +2554,8 @@ def _db_configuration_update_helper():
 def _configuration_update_helper():
     reboot_required = False
     to_save = request.form.to_dict()
+    prev_hardcover_sync = config.hardcover_sync_enabled()
+    prev_hardcover_token_available = bool(config.resolved_hardcover_token())
     try:
         reboot_required |= _config_string(to_save, "config_trustedhosts")
         reboot_required |= _config_string(to_save, "config_keyfile")
@@ -2587,8 +2595,6 @@ def _configuration_update_helper():
         # auto-enable only fires on the off→on transition.
         if not prev_kobo_sync and bool(config.config_kobo_sync):
             config.config_kobo_cover_padding_enabled = 1
-
-        _config_checkbox_int(to_save, "config_hardcover_sync")
 
         if "config_upload_formats" in to_save:
             to_save["config_upload_formats"] = ','.join(
@@ -2631,7 +2637,11 @@ def _configuration_update_helper():
                                                config.config_use_goodreads)
 
         # Hardcover configuration
-        _config_checkbox(to_save, "config_hardcover_sync")
+        # A deployment-managed override disables the checkbox in HTML, so it
+        # submits no value. Preserve the stored fallback rather than silently
+        # clearing it on an unrelated Basic Configuration save.
+        if config.hardcover_sync_source() == "database":
+            _config_checkbox(to_save, "config_hardcover_sync")
         _config_checkbox(to_save, "config_hardcover_annotations_sync")
         _config_string(to_save, "config_hardcover_token")
 
@@ -2730,6 +2740,13 @@ def _configuration_update_helper():
         _configuration_result(_("Oops! Database Error: %(error)s.", error=e.orig))
 
     config.save()
+    # Keep the retired cwa.db auto-fetch flag synchronized solely for safe
+    # rollback. Runtime consumers use ConfigSQL.hardcover_sync_enabled().
+    effective_hardcover_sync, _ = schedule.reconcile_hardcover_configuration()
+    hardcover_token_available = bool(config.resolved_hardcover_token())
+    if (effective_hardcover_sync != prev_hardcover_sync
+            or hardcover_token_available != prev_hardcover_token_available):
+        schedule.refresh_hardcover_auto_fetch()
     apply_https_runtime_config()
     if reboot_required:
         web_server.stop(True)

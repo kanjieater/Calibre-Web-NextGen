@@ -25,6 +25,24 @@ def _uid():
     return int(current_user.id) if current_user.is_authenticated else None
 
 
+def _shelf_item(shelf, uid):
+    """Serialize a shelf with request-local display text.
+
+    Built-in shelf names are canonical English database identity, while custom
+    shelf names are literal user data.  The translation helper distinguishes
+    them so changing locale never mutates or accidentally translates a user's
+    own shelf.
+    """
+    return {
+        "id": shelf.id,
+        "name": magic_shelf.system_magic_shelf_display_name(shelf),
+        "icon": shelf.icon or "🪄",
+        "is_public": bool(shelf.is_public),
+        "is_owner": shelf.user_id == uid,
+        "is_system": bool(getattr(shelf, "is_system", False)),
+    }
+
+
 @api_v1.route("/magicshelves")
 @login_required_if_no_ano
 def list_magic_shelves():
@@ -43,10 +61,7 @@ def list_magic_shelves():
     else:
         shelves = ub.session.query(ub.MagicShelf).filter(
             ub.MagicShelf.is_public == 1).order_by(ub.MagicShelf.name).all()
-    items = [{
-        "id": s.id, "name": s.name, "icon": s.icon or "🪄",
-        "is_public": bool(s.is_public), "is_owner": (s.user_id == uid),
-    } for s in shelves]
+    items = [_shelf_item(s, uid) for s in shelves]
     return jsonify({"items": items})
 
 
@@ -69,8 +84,10 @@ def magic_shelf_books(shelf_id):
     except Exception:
         log.error("Bad magic-shelf rules for shelf %s", shelf_id, exc_info=True)
         query_filter = None
+    display_name = magic_shelf.system_magic_shelf_display_name(shelf)
     if query_filter is None:
-        return jsonify({"id": shelf.id, "name": shelf.name, "icon": shelf.icon or "🪄",
+        return jsonify({"id": shelf.id, "name": display_name, "icon": shelf.icon or "🪄",
+                        "is_system": bool(getattr(shelf, "is_system", False)),
                         "is_owner": (shelf.user_id == uid),
                         "items": [], "page": 1, "per_page": per_page, "total": 0})
 
@@ -79,7 +96,8 @@ def magic_shelf_books(shelf_id):
         page, per_page, db.Books, query_filter, [db.Books.timestamp.desc()],
         True, config.config_read_column, *series_join)
     return jsonify({
-        "id": shelf.id, "name": shelf.name, "icon": shelf.icon or "🪄",
+        "id": shelf.id, "name": display_name, "icon": shelf.icon or "🪄",
+        "is_system": bool(getattr(shelf, "is_system", False)),
         "is_owner": (shelf.user_id == uid),
         # rules included so the builder can load this shelf for editing
         "rules": shelf.rules or {"condition": "AND", "rules": []},

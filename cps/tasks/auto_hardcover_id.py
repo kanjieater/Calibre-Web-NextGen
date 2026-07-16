@@ -79,6 +79,11 @@ class TaskAutoHardcoverID(CalibreTask):
         return True
 
     def run(self, worker_thread):
+        if not config.hardcover_sync_enabled():
+            self.log.info("Hardcover auto-fetch skipped because Hardcover sync is disabled")
+            self._handleSuccess()
+            return
+
         # Check if Hardcover provider is available
         if Hardcover is None:
             self._handleError("Hardcover provider not available")
@@ -106,6 +111,10 @@ class TaskAutoHardcoverID(CalibreTask):
             # Process books in batches
             batch_count = (total_books + self.batch_size - 1) // self.batch_size
             for batch_num in range(batch_count):
+                if not config.hardcover_sync_enabled():
+                    self.log.info("Hardcover auto-fetch stopped because Hardcover sync was disabled")
+                    self._handleSuccess()
+                    return
                 # Check if task was cancelled
                 if self._cancel_requested():
                     self.log.info("Task cancelled by user")
@@ -119,6 +128,10 @@ class TaskAutoHardcoverID(CalibreTask):
                 self.log.info(f"Processing batch {batch_num + 1}/{batch_count} ({len(books)} books)")
                 
                 for book in books:
+                    if not config.hardcover_sync_enabled():
+                        self.log.info("Hardcover auto-fetch stopped because Hardcover sync was disabled")
+                        self._handleSuccess()
+                        return
                     book_id = book.id
                     # Check if cancelled
                     if self._cancel_requested():

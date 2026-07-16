@@ -32,7 +32,7 @@ export function BrowseList({ plural, title }: BrowseListProps) {
     <main className={styles.container}>
       <div className={styles.header}>
         <div className={styles.heading}>
-          <h1 className={styles.title}>{title}</h1>
+          <h1 className={styles.title}>{t(title)}</h1>
           {data && <span className={styles.count}>{data.items.length}</span>}
         </div>
         <div className={styles.viewToggle} role="group" aria-label={t('View')}>
@@ -51,10 +51,10 @@ export function BrowseList({ plural, title }: BrowseListProps) {
           <input
             type="search"
             className={styles.searchInput}
-            placeholder={`Filter ${title.toLowerCase()}…`}
+            placeholder={t('Filter {items}…', { items: t(title).toLocaleLowerCase() })}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            aria-label={`Filter ${title.toLowerCase()}`}
+            aria-label={t('Filter {items}', { items: t(title).toLocaleLowerCase() })}
           />
         </div>
       )}
@@ -64,7 +64,9 @@ export function BrowseList({ plural, title }: BrowseListProps) {
       ) : error ? (
         <EmptyState message={error instanceof Error ? error.message : t('Failed to load.')} />
       ) : items.length === 0 ? (
-        <EmptyState message={q ? `No ${title.toLowerCase()} match "${q}".` : `No ${title.toLowerCase()} yet.`} />
+        <EmptyState message={q
+          ? t('No matching {items} for "{query}".', { items: t(title).toLocaleLowerCase(), query: q })
+          : t('No {items} yet.', { items: t(title).toLocaleLowerCase() })} />
       ) : (
         <ul className={compact ? styles.list : styles.grid} role="list">
           {items.map((e) => (

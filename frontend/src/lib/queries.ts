@@ -205,6 +205,19 @@ export function useEntityList(plural: string) {
   });
 }
 
+export function useRenameTag(id: string | number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => apiPost<{ id: number; name: string }>(`/api/v1/tags/${id}`, { name }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['entities', 'tags'] });
+      void qc.invalidateQueries({ queryKey: ['books'] });
+      void qc.invalidateQueries({ queryKey: ['book'] });
+      void qc.invalidateQueries({ queryKey: ['metadata'] });
+    },
+  });
+}
+
 export function useBook(id: string | number) {
   return useQuery<BookDetail>({
     queryKey: ['book', String(id)],
@@ -822,6 +835,11 @@ export function useUpdateProfile() {
       qc.setQueryData(['account'], data);
       // name/locale also surface in the top bar via useMe
       void qc.invalidateQueries({ queryKey: ['me'] });
+      // Built-in magic-shelf names are translated by the authenticated API.
+      // Refetch them after a locale change so request-local display text does
+      // not remain cached in the previous language (#886).
+      void qc.invalidateQueries({ queryKey: ['magicshelves'] });
+      void qc.invalidateQueries({ queryKey: ['magicshelf'] });
     },
   });
 }
@@ -925,7 +943,7 @@ export function useEditMagicShelf(id: string | number) {
   });
 }
 
-export interface MagicShelfItem { id: number; name: string; icon: string; is_public: boolean; is_owner: boolean }
+export interface MagicShelfItem { id: number; name: string; icon: string; is_public: boolean; is_owner: boolean; is_system: boolean }
 
 export function useMagicShelves() {
   return useQuery<{ items: MagicShelfItem[] }>({
@@ -936,7 +954,7 @@ export function useMagicShelves() {
 }
 
 export function useMagicShelfBooks(id: string | number, page = 1) {
-  return useQuery<{ id: number; name: string; icon: string; is_owner: boolean } & BooksPage>({
+  return useQuery<{ id: number; name: string; icon: string; is_owner: boolean; is_system: boolean } & BooksPage>({
     queryKey: ['magicshelf', String(id), page],
     queryFn: () => apiGet(`/api/v1/magicshelf/${id}?page=${page}`),
     enabled: String(id).length > 0,

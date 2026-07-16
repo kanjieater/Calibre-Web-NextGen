@@ -202,6 +202,18 @@ class TestMetadataDbWriteLockModuleSurface:
         with cm:
             pass
 
+    def test_inline_metadata_edits_lock_before_relationship_helpers_can_autoflush(self):
+        """Per-book tag edits must serialize with global tag rename (#914)."""
+        import inspect
+        from cps import editbooks
+
+        source = inspect.getsource(editbooks.edit_book_param)
+        assert "@metadata_db_write_lock()" in source, (
+            "edit_book_param must acquire the process-shared metadata writer lock "
+            "around the whole function; its relationship queries can autoflush "
+            "before a commit-only lock is reached"
+        )
+
     def test_lock_serializes_two_python_processes_via_threads(self, tmp_path):
         """Use TWO separate Python processes spawned through subprocess.
         The underlying fcntl flock is process-level so this is the

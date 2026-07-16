@@ -436,7 +436,7 @@ Without this, CWA may see different client IPs across requests and trigger Sessi
 
 Hardcover then appears in the Fetch Metadata modal.
 
-If you set the token through the `HARDCOVER_TOKEN` environment variable, the **Hardcover API Key** field in the admin UI stays empty — that field only shows a key entered through the UI, and an environment-supplied token is not echoed back into the page. When an environment token is active, the admin page shows a note under the field saying so; a key typed into the field overrides the environment value.
+If you set the token through the `HARDCOVER_TOKEN` environment variable, the **Hardcover API Key** field in the admin UI stays empty — that field only shows a key entered through the UI, and an environment-supplied token is not echoed back into the page. The admin page identifies whether `HARDCOVER_TOKEN` or `HARDCOVER_TOKEN_FILE` is active without displaying its value; a key typed into the field overrides either environment source.
 
 To keep the token out of your compose file entirely, point `HARDCOVER_TOKEN_FILE` at a file containing just the token (docker-secrets style):
 
@@ -445,6 +445,14 @@ To keep the token out of your compose file entirely, point `HARDCOVER_TOKEN_FILE
 ```
 
 Precedence: UI-configured key → `HARDCOVER_TOKEN` → `HARDCOVER_TOKEN_FILE`.
+
+Enable the server-wide integration once under Admin → Edit Basic Configuration → **Enable Hardcover Sync**. This single switch controls both scheduled Hardcover ID fetching and Kobo/KOReader reading-progress sync. A declarative deployment can override it instead:
+
+```yaml
+   - HARDCOVER_SYNC_ENABLED=true
+```
+
+Accepted true values are `true`, `1`, `yes`, and `on`; false values are `false`, `0`, `no`, and `off` (case-insensitive). When the variable is set, the UI shows the effective state but leaves changes to the deployment configuration.
 
 ### KOReader sync
 
@@ -583,34 +591,34 @@ The interface ships with the locales below. Completion is auto-refreshed on ever
 | Language | Completion | Strings | Fuzzy |
 |---|---|---:|---:|
 | English (source) | 100% | source | — |
-| Russian (`ru`) | `████████████████████` 99% | 2466/2499 | 54 |
-| Hungarian (`hu`) | `█████████████████░░░` 83% | 2071/2499 | 532 |
-| German (`de`) | `████████████████░░░░` 80% | 2003/2499 | 528 |
-| French (`fr`) | `████████████████░░░░` 80% | 1994/2499 | 496 |
-| Japanese (`ja`) | `████████████████░░░░` 79% | 1979/2499 | 659 |
-| Spanish (`es`) | `████████████████░░░░` 79% | 1978/2499 | 602 |
-| Slovenian (`sl`) | `████████████████░░░░` 78% | 1948/2499 | 733 |
-| Chinese (Simplified, China) (`zh_Hans_CN`) | `███████████████░░░░░` 77% | 1934/2499 | 759 |
-| Dutch (`nl`) | `█████████████░░░░░░░` 67% | 1665/2499 | 685 |
-| Italian (`it`) | `█████████████░░░░░░░` 65% | 1618/2499 | 662 |
-| Polish (`pl`) | `█████████████░░░░░░░` 65% | 1618/2499 | 667 |
-| Portuguese (Brazil) (`pt_BR`) | `█████████████░░░░░░░` 65% | 1618/2499 | 794 |
-| Korean (`ko`) | `█████████████░░░░░░░` 64% | 1611/2499 | 661 |
-| Arabic (`ar`) | `████████████░░░░░░░░` 59% | 1467/2499 | 676 |
-| Portuguese (`pt`) | `████████████░░░░░░░░` 58% | 1456/2499 | 755 |
-| Slovak (`sk`) | `████████████░░░░░░░░` 58% | 1457/2499 | 707 |
-| Indonesian (`id`) | `████████████░░░░░░░░` 58% | 1436/2499 | 757 |
-| Galician (`gl`) | `███████████░░░░░░░░░` 57% | 1434/2499 | 756 |
-| Chinese (Traditional, Taiwan) (`zh_Hant_TW`) | `███████████░░░░░░░░░` 55% | 1384/2499 | 766 |
-| Swedish (`sv`) | `███████████░░░░░░░░░` 54% | 1359/2499 | 774 |
-| Greek (`el`) | `██████████░░░░░░░░░░` 51% | 1285/2499 | 778 |
-| Czech (`cs`) | `██████████░░░░░░░░░░` 50% | 1263/2499 | 785 |
-| Norwegian (`no`) | `██████████░░░░░░░░░░` 50% | 1251/2499 | 820 |
-| Ukrainian (`uk`) | `█████████░░░░░░░░░░░` 47% | 1178/2499 | 735 |
-| Vietnamese (`vi`) | `█████████░░░░░░░░░░░` 46% | 1150/2499 | 728 |
-| Finnish (`fi`) | `█████████░░░░░░░░░░░` 45% | 1114/2499 | 759 |
-| Turkish (`tr`) | `████████░░░░░░░░░░░░` 41% | 1030/2499 | 740 |
-| Khmer (`km`) | `███████░░░░░░░░░░░░░` 35% | 873/2499 | 666 |
+| Russian (`ru`) | `███████████████████░` 97% | 2477/2558 | 4 |
+| Hungarian (`hu`) | `██████████████░░░░░░` 69% | 1770/2558 | 124 |
+| French (`fr`) | `██████████████░░░░░░` 69% | 1766/2558 | 130 |
+| German (`de`) | `█████████████░░░░░░░` 67% | 1709/2558 | 127 |
+| Spanish (`es`) | `████████████░░░░░░░░` 62% | 1572/2558 | 197 |
+| Japanese (`ja`) | `████████████░░░░░░░░` 61% | 1569/2558 | 250 |
+| Slovenian (`sl`) | `████████████░░░░░░░░` 60% | 1535/2558 | 321 |
+| Chinese (Simplified, China) (`zh_Hans_CN`) | `████████████░░░░░░░░` 60% | 1525/2558 | 351 |
+| Dutch (`nl`) | `██████████░░░░░░░░░░` 50% | 1273/2558 | 293 |
+| Italian (`it`) | `██████████░░░░░░░░░░` 48% | 1225/2558 | 270 |
+| Polish (`pl`) | `██████████░░░░░░░░░░` 48% | 1224/2558 | 274 |
+| Korean (`ko`) | `██████████░░░░░░░░░░` 48% | 1219/2558 | 270 |
+| Portuguese (Brazil) (`pt_BR`) | `██████████░░░░░░░░░░` 48% | 1220/2558 | 397 |
+| Arabic (`ar`) | `████████░░░░░░░░░░░░` 42% | 1078/2558 | 287 |
+| Slovak (`sk`) | `████████░░░░░░░░░░░░` 42% | 1066/2558 | 316 |
+| Portuguese (`pt`) | `████████░░░░░░░░░░░░` 42% | 1064/2558 | 363 |
+| Indonesian (`id`) | `████████░░░░░░░░░░░░` 41% | 1044/2558 | 365 |
+| Galician (`gl`) | `████████░░░░░░░░░░░░` 41% | 1042/2558 | 364 |
+| Chinese (Traditional, Taiwan) (`zh_Hant_TW`) | `████████░░░░░░░░░░░░` 39% | 1000/2558 | 382 |
+| Swedish (`sv`) | `████████░░░░░░░░░░░░` 38% | 977/2558 | 392 |
+| Greek (`el`) | `███████░░░░░░░░░░░░░` 36% | 909/2558 | 402 |
+| Czech (`cs`) | `███████░░░░░░░░░░░░░` 35% | 889/2558 | 411 |
+| Norwegian (`no`) | `███████░░░░░░░░░░░░░` 34% | 870/2558 | 439 |
+| Ukrainian (`uk`) | `██████░░░░░░░░░░░░░░` 32% | 818/2558 | 375 |
+| Vietnamese (`vi`) | `██████░░░░░░░░░░░░░░` 31% | 783/2558 | 361 |
+| Finnish (`fi`) | `██████░░░░░░░░░░░░░░` 29% | 746/2558 | 391 |
+| Turkish (`tr`) | `█████░░░░░░░░░░░░░░░` 26% | 678/2558 | 388 |
+| Khmer (`km`) | `████░░░░░░░░░░░░░░░░` 22% | 554/2558 | 347 |
 <!-- TRANSLATION_STATUS_END -->
 
 ---

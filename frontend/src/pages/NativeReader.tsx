@@ -112,7 +112,8 @@ function ComicViewer({ id }: { id: string }) {
     <div className={styles.comic}>
       <button className={styles.comicNav} onClick={() => go(-1)} disabled={page === 0}
         aria-label={t('Previous page')}><ChevronLeft size={28} /></button>
-      <img className={styles.comicPage} src={apiUrl(`/api/v1/books/${id}/comic/${page}`)} alt={`Page ${page + 1}`} />
+      <img className={styles.comicPage} src={apiUrl(`/api/v1/books/${id}/comic/${page}`)}
+        alt={t('Page {number}', { number: page + 1 })} />
       <button className={styles.comicNav} onClick={() => go(1)} disabled={page >= pages - 1}
         aria-label={t('Next page')}><ChevronRight size={28} /></button>
       <div className={styles.comicPager}>{page + 1} / {pages}</div>

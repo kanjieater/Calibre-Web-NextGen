@@ -61,15 +61,17 @@ export function MagicShelf({ editId }: { editId?: string }) {
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('🪄');
+  const [isSystem, setIsSystem] = useState(false);
   const [condition, setCondition] = useState<'AND' | 'OR'>('AND');
   const [rules, setRules] = useState<(MagicRule & { _k: number })[]>([newRule()]);
   const [seeded, setSeeded] = useState(false);
 
   useEffect(() => {
     if (!editId || seeded || !existing.data) return;
-    const d = existing.data as unknown as { name: string; icon: string; rules?: { condition?: 'AND' | 'OR'; rules?: MagicRule[] } };
+    const d = existing.data as unknown as { name: string; icon: string; is_system?: boolean; rules?: { condition?: 'AND' | 'OR'; rules?: MagicRule[] } };
     setName(d.name || '');
     setIcon(d.icon || '🪄');
+    setIsSystem(Boolean(d.is_system));
     setCondition(d.rules?.condition === 'OR' ? 'OR' : 'AND');
     const loaded = (d.rules?.rules || []).map((r) => ({ _k: ++_rid, id: r.id, operator: r.operator, value: String(r.value ?? '') }));
     setRules(loaded.length ? loaded : [newRule()]);
@@ -145,7 +147,7 @@ export function MagicShelf({ editId }: { editId?: string }) {
         </label>
         <label className={styles.nameField}>
           <span>{t('Name')}</span>
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={100}
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={100} disabled={isSystem}
             placeholder={t('e.g. Unread sci-fi')} />
         </label>
       </div>
@@ -170,7 +172,7 @@ export function MagicShelf({ editId }: { editId?: string }) {
                 {FIELDS.map((f) => <option key={f.id} value={f.id}>{t(f.label)}</option>)}
               </select>
               <select aria-label={t('Rule operator')} value={r.operator} onChange={(e) => setRule(r._k, { operator: e.target.value })}>
-                {ops.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                {ops.map((o) => <option key={o.id} value={o.id}>{t(o.label)}</option>)}
               </select>
               <input value={r.value} onChange={(e) => setRule(r._k, { value: e.target.value })}
                 placeholder={t('value')} type={inputType(r)} min={isDate(r.id) && inputType(r) === 'number' ? 1 : undefined} />
