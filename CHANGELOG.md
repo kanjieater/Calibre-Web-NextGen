@@ -22,6 +22,11 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- Brazilian Portuguese users now see more of the New UI in Portuguese,
+  including book actions, upload feedback, favorites, and hide/archive status;
+  stale catalog entries and misleading action/toast wording were corrected
+  during adoption. Translation update by @pedronora (#865).
+
 - Russian users now see the newly added New UI controls, smart-shelf date
   filters, theme choices, upload flow, and accessibility announcements in
   Russian instead of English fallback text. Translation update by
