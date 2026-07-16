@@ -58,7 +58,12 @@ export function resolvePostAuthDestination(currentHref: string, parser: Parser):
     return { kind: 'spa', path: `${spaPath}${target.search}${target.hash}` };
   }
 
-  return { kind: 'classic', path: `${pathname}${target.search}${target.hash}` };
+  const classicPath = `${pathname}${target.search}${target.hash}`;
+  // Re-parse the exact value handed to location.assign. WHATWG dot-segment
+  // normalization can turn a raw path such as `/..//evil.tld` into a
+  // protocol-relative `//evil.tld` even though the first origin check passed.
+  if (new URL(classicPath, current.origin).origin !== current.origin) return LIBRARY;
+  return { kind: 'classic', path: classicPath };
 }
 
 export function usePostAuthRedirect() {

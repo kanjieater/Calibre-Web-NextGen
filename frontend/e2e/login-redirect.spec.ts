@@ -50,6 +50,9 @@ test.describe('SPA post-auth destination', () => {
     'https://evil.tld',
     '//evil.tld',
     '/\\evil.tld',
+    '/..//evil.tld',
+    '/.//evil.tld',
+    '/a/../..//evil.tld',
     'javascript:alert(1)',
     'data:text/html,phish',
   ]) {
