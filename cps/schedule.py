@@ -6,8 +6,9 @@
 # See CONTRIBUTORS for full list of authors.
 
 import datetime
+import threading
 
-from . import config, constants
+from . import config, constants, logger
 from .services.background_scheduler import BackgroundScheduler, CronTrigger, IntervalTrigger, use_APScheduler, DateTrigger
 from .tasks.database import TaskReconnectDatabase, TaskCleanArchivedBooks
 from .tasks.clean import TaskClean
@@ -16,6 +17,38 @@ from .tasks.thumbnail_migration import check_and_migrate_thumbnails
 from .services.worker import WorkerThread
 from .tasks.metadata_backup import TaskBackupMetadata
 from .tasks.auto_hardcover_id import TaskAutoHardcoverID
+
+log = logger.create()
+_hardcover_schedule_lock = threading.Lock()
+
+
+def reconcile_hardcover_configuration():
+    """Migrate the former two enable flags and maintain a rollback mirror."""
+    try:
+        import sys as _sys
+        if '/app/calibre-web-automated/scripts/' not in _sys.path:
+            _sys.path.insert(1, '/app/calibre-web-automated/scripts/')
+        from cwa_db import CWA_DB
+
+        db = CWA_DB()
+        cwa_settings = db.get_cwa_settings()
+        effective = config.reconcile_hardcover_sync(
+            bool(cwa_settings.get('hardcover_auto_fetch_enabled', False))
+        )
+        # The old column is no longer runtime truth, but mirroring the
+        # canonical persisted value keeps a downgrade operational. An env
+        # override is intentionally not copied into either database.
+        db.execute_write(
+            "UPDATE cwa_settings SET hardcover_auto_fetch_enabled = ?",
+            (1 if bool(getattr(config, 'config_hardcover_sync', False)) else 0,),
+        )
+        return effective, cwa_settings
+    except (Exception, SystemExit):
+        log.exception("Unable to reconcile Hardcover configuration")
+        # CWA_DB historically raises SystemExit on a connection failure.
+        # Keep the app.db setting usable, but signal that CWA-backed schedule
+        # details and the downgrade mirror were unavailable.
+        return config.hardcover_sync_enabled(), None
 
 def get_scheduled_tasks(reconnect=True):
     tasks = list()
@@ -50,6 +83,9 @@ def end_scheduled_tasks():
 
 
 def register_scheduled_tasks(reconnect=True):
+    # Reconcile even when APScheduler is unavailable, then reuse the result so
+    # normal startup performs one CWA DB read/mirror write rather than two.
+    hardcover_configuration = reconcile_hardcover_configuration()
     scheduler = BackgroundScheduler()
 
     if scheduler:
@@ -69,7 +105,9 @@ def register_scheduled_tasks(reconnect=True):
                                                                          timezone=timezone_info),
                            name="end scheduled task")
 
-        _schedule_hardcover_auto_fetch(scheduler, timezone_info)
+        _schedule_hardcover_auto_fetch(
+            scheduler, timezone_info, configuration=hardcover_configuration
+        )
         _schedule_archived_book_cleanup(scheduler, timezone_info)
 
         # Kick-off tasks, if they should currently be running
@@ -235,22 +273,33 @@ def _schedule_duplicate_scan(scheduler, timezone_info):
         pass
 
 
-def _schedule_hardcover_auto_fetch(scheduler, timezone_info):
-    """Schedule background Hardcover auto-fetch based on CWA settings."""
+def _schedule_hardcover_auto_fetch(scheduler, timezone_info, configuration=None):
+    """Schedule background Hardcover auto-fetch from the unified setting."""
     try:
-        import sys as _sys
-        if '/app/calibre-web-automated/scripts/' not in _sys.path:
-            _sys.path.insert(1, '/app/calibre-web-automated/scripts/')
-        from cwa_db import CWA_DB
-        from .tasks.auto_hardcover_id import TaskAutoHardcoverID
-
-        db = CWA_DB()
-        cwa_settings = db.get_cwa_settings()
-        
-        # Check if enabled and token available
-        enabled = bool(cwa_settings.get('hardcover_auto_fetch_enabled', False))
+        enabled, cwa_settings = (
+            configuration
+            if configuration is not None
+            else reconcile_hardcover_configuration()
+        )
         token_available = bool(config.resolved_hardcover_token())
-        
+        token_source = config.hardcover_token_source()
+
+        if enabled:
+            log.info("Hardcover sync is enabled via %s", config.hardcover_sync_source())
+        else:
+            log.info("Hardcover sync is disabled via %s", config.hardcover_sync_source())
+        if token_available:
+            log.info("Hardcover token is configured via %s", token_source)
+        else:
+            log.info("Hardcover token is not configured")
+
+        if cwa_settings is None:
+            log.warning(
+                "Hardcover auto-fetch was not scheduled because CWA settings "
+                "are unavailable"
+            )
+            return
+
         if not enabled or not token_available:
             return
 
@@ -309,8 +358,24 @@ def _schedule_hardcover_auto_fetch(scheduler, timezone_info):
         if trigger:
             scheduler.schedule_task(task_lambda, user='System', trigger=trigger, name=name, hidden=False)
     except Exception:
-        # Scheduling is best-effort; never block startup
-        pass
+        # Scheduling is best-effort; never block startup, but it must be
+        # diagnosable (#899).
+        log.exception("Unable to schedule Hardcover auto-fetch")
+
+
+def refresh_hardcover_auto_fetch():
+    """Replace only Hardcover's recurring job, preserving one-shot jobs."""
+    with _hardcover_schedule_lock:
+        scheduler = BackgroundScheduler()
+        if not scheduler:
+            return
+
+        for job in scheduler.get_jobs():
+            if getattr(job, "name", None) == "hardcover auto-fetch":
+                scheduler.remove_job(job.id)
+
+        timezone_info = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+        _schedule_hardcover_auto_fetch(scheduler, timezone_info)
 
 
 def _schedule_archived_book_cleanup(scheduler, timezone_info):

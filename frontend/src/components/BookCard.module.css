@@ -115,6 +115,28 @@
   pointer-events: none;
 }
 
+/* Personal-library state: quiet but explicit when Show hidden books is on.
+   Bottom-left avoids the read badge and the catalog's quick-edit affordance. */
+.hiddenBadge {
+  position: absolute;
+  bottom: var(--sp-2);
+  left: var(--sp-2);
+  min-height: 22px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-full);
+  background: var(--cover-control-bg);
+  color: var(--cover-control-fg);
+  border: 1px solid var(--cover-control-border);
+  box-shadow: var(--elev-1);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  line-height: 1;
+  pointer-events: none;
+}
+
 /* Series position (#573): pinned to the bottom-left of the cover so it never
    collides with the read badge (top-right) or the select/remove controls
    (top-left). Shown only in a series view. */

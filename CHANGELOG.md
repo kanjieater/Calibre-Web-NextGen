@@ -16,7 +16,77 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Added
+
+- **You can now hide books from your personal library in the new interface without deleting them or affecting anyone else.** Hide/Unhide lives beside Delete on book details, and View settings can reveal clearly marked hidden books whenever you want one back.
+
 ### Fixed
+
+- New UI translation updates no longer manufacture fuzzy guesses that look
+  complete but disappear at runtime. Legacy SPA guesses are now an explicit
+  untranslated review queue, an all-locale gate prevents fuzzy entries from
+  returning, and reviewed French, Russian, German, and Hungarian navigation,
+  shelf, status, error, and accessibility text now renders in those languages.
+  Built-in smart-shelf names also follow the signed-in user's language without
+  renaming the shelf (#879, #886).
+
+- Hardcover setup no longer hides token status behind a disabled sync switch,
+  points secret-file users at the wrong environment variable, or shows two
+  conflicting enable checkboxes. One server-wide switch now controls both
+  reading-progress sync and scheduled Hardcover ID fetching, existing enabled
+  installations are preserved during migration, and compose deployments can
+  manage it with `HARDCOVER_SYNC_ENABLED`. Startup logs report enabled/token
+  presence and their sources without exposing the token. ([#897](https://github.com/new-usemame/Calibre-Web-NextGen/issues/897), [#898](https://github.com/new-usemame/Calibre-Web-NextGen/issues/898), [#899](https://github.com/new-usemame/Calibre-Web-NextGen/issues/899), [#900](https://github.com/new-usemame/Calibre-Web-NextGen/issues/900))
+
+- **Classic catalog cards now use the same read checkbox state as book details:**
+  checked means read and empty means unread, while the tooltip still names the
+  action clicking will perform. Thanks @darkmatterpelican for the cache-free,
+  list-versus-detail reproduction (#771).
+
+- **Dismissing the classic-view “Try the new UI” banner now keeps it dismissed
+  after updates.** It is a one-time adoption cue, not a What's New notice, so a
+  previous version-specific dismissal is migrated to one durable browser choice.
+  Thanks @darkmatterpelican (#907).
+
+- **Advanced server settings now say before you click that they open in the
+  classic view.** Those deep configuration pages intentionally remain in the
+  proven server-rendered interface during the hybrid cutover; the New UI no
+  longer makes that transition look accidental. Thanks @HLRobius (#909).
+
+- **Series, tag, author, publisher, and language pages now put their real name
+  in the browser tab.** Direct links previously captured the `…` loading state
+  before the entity query finished and never refreshed it. Thanks
+  @chloeroform (#892).
+
+- **Tags can now be renamed from their New UI page.** Editors previously reached
+  a read-only tag page with no rename action; the corrected name now updates the
+  shared tag in the library and every linked book. Thanks @chloeroform (#914).
+
+- **Signing in through the new interface now opens the requested page instead of showing “This page doesn't exist here.”** Password and magic-link logins honor safe same-site destinations, fall back to the library when no destination was supplied, preserve reverse-proxy subpaths, and reject links that try to send the browser to another site.
+
+- **Syncing highlights from a second KOReader device no longer wipes the
+  highlights from your first one.** Opening a book on another device could
+  silently delete every highlight the other device had made, permanently and
+  with no error — a later sync never brought them back. Deleting a highlight on
+  a device still removes it everywhere, which is what this path is for; the
+  device now says which highlights the user deleted instead of the server
+  guessing from what a sync left out. Caught before release, so no published
+  version ever shipped it (#920).
+
+- **Deleting a KOReader highlight now actually syncs.** The fix released for
+  this in v4.1.13 never reached the server: the plugin set the field, but its
+  request spec did not list it, so it was dropped before the request was sent
+  and the deleted highlight stayed in your library. Update the plugin to
+  4.1.14 (Highlight sync → the plugin ships with this release) for device
+  deletions to sync (#905, #906).
+- Admin → Theme no longer says "Settings saved." and then changes nothing. The
+  picker stored its choice in an old numbering the theme system stopped reading,
+  so "Light" always came back dark. It is now the default theme for **new
+  accounts**, it offers every theme (System, Light, Dark, Sepia, High contrast,
+  Midnight) instead of just two, and a "Light" you saved earlier is honoured
+  rather than discarded. Your own theme stays where it belongs, under Account →
+  Theme. Thanks @auspex for reporting it and pushing back when the first fix
+  missed the part you filed about.
 
 - KOReader progress now appears on both classic and new book pages even when
   the book already had a read/unread record before its first matched sync. The

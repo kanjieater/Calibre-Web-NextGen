@@ -22,7 +22,7 @@ double-checkmark if possible."
 These tests pin the UX-safety contract added in PR #337:
 
 A. ``config_user_hide_enabled`` column exists on settings, defaults to
-   False, has a migration entry so existing installs pick it up.
+   True, and has a migration entry so existing installs pick it up.
 B. Admin form (Feature Configuration) exposes the toggle.
 C. detail.html: the hide BUTTON is rendered only when
    ``config.config_user_hide_enabled`` is true OR the book is already
@@ -96,31 +96,28 @@ def web_src() -> str:
 @pytest.mark.unit
 class TestConfigUserHideEnabledColumn:
     def test_column_defined_on_settings(self, config_sql_src):
-        """SethMilliken: 'making this default off'. The column must exist
-        on the _Settings ORM model so admin saves persist + reads
-        default to False on fresh installs."""
+        """The column must exist on the _Settings ORM model so the retained
+        admin kill switch persists while fresh installs default to enabled."""
         assert re.search(
             r"config_user_hide_enabled\s*=\s*Column\(",
             config_sql_src,
         ), (
             "config_user_hide_enabled column missing from _Settings — "
-            "without it the admin toggle has nowhere to persist (#319 "
-            "SethMilliken: 'making this default off')"
+            "without it the admin toggle has nowhere to persist (#319)"
         )
 
-    def test_column_defaults_to_false(self, config_sql_src):
-        """Off by default — SethMilliken's #1 ask. Existing installs
-        without the column already get False from the model default; the
-        migration ALTER below ensures legacy DBs match."""
+    def test_column_defaults_to_true(self, config_sql_src):
+        """The safer new-UI placement makes Hide reachable by default; admins
+        can still opt the instance out through the existing switch."""
         m = re.search(
             r"config_user_hide_enabled\s*=\s*Column\([^)]+\)",
             config_sql_src,
         )
         assert m, "config_user_hide_enabled column declaration not found"
         body = m.group(0)
-        assert "default=False" in body or "default=0" in body, (
-            f"config_user_hide_enabled must default to False so the "
-            f"feature is off on every fresh install (#319). Got: {body!r}"
+        assert "default=True" in body or "default=1" in body, (
+            f"config_user_hide_enabled must default to True so Hide is reachable "
+            f"without admin setup. Got: {body!r}"
         )
 
     def test_migration_alters_legacy_db_via_auto_reflection(self, config_sql_src):

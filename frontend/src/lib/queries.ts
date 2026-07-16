@@ -40,6 +40,8 @@ export interface BooksQuery {
   entityId?: string | number;
   /** Discovery view (hot/discover/rated/favorites/archived) — sent as ?filter=. */
   view?: DiscoveryView;
+  /** SPA-only escape hatch: include this user's hidden books in Your Library. */
+  showHidden?: boolean;
 }
 
 export function useMe() {
@@ -165,7 +167,10 @@ export function useLogout() {
 }
 
 export function useBooks(q: BooksQuery) {
-  const { page, perPage = 24, search = '', sort = 'new', readFilter = 'all', entityKind, entityId, view } = q;
+  const {
+    page, perPage = 24, search = '', sort = 'new', readFilter = 'all',
+    entityKind, entityId, view, showHidden = false,
+  } = q;
   const params = new URLSearchParams();
   params.set('page', String(page));
   params.set('per_page', String(perPage));
@@ -178,11 +183,13 @@ export function useBooks(q: BooksQuery) {
   // otherwise the read/unread segmented control does.
   if (view) params.set('filter', view);
   else if (readFilter !== 'all') params.set('filter', readFilter);
+  if (showHidden && !entityKind && !view) params.set('show_hidden', '1');
   if (entityKind && entityId !== undefined && entityId !== '') {
     params.set(entityKind, String(entityId));
   }
   return useQuery<BooksPage>({
-    queryKey: ['books', page, perPage, search, sort, readFilter, entityKind ?? '', entityId ?? '', view ?? ''],
+    queryKey: ['books', page, perPage, search, sort, readFilter,
+      entityKind ?? '', entityId ?? '', view ?? '', showHidden],
     queryFn: () => apiGet<BooksPage>(`/api/v1/books?${params.toString()}`),
     placeholderData: (prev) => prev,
   });
@@ -195,6 +202,19 @@ export function useEntityList(plural: string) {
     queryKey: ['entities', plural],
     queryFn: () => apiGet<EntityList>(`/api/v1/${plural}`),
     staleTime: 60000,
+  });
+}
+
+export function useRenameTag(id: string | number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => apiPost<{ id: number; name: string }>(`/api/v1/tags/${id}`, { name }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['entities', 'tags'] });
+      void qc.invalidateQueries({ queryKey: ['books'] });
+      void qc.invalidateQueries({ queryKey: ['book'] });
+      void qc.invalidateQueries({ queryKey: ['metadata'] });
+    },
   });
 }
 
@@ -243,7 +263,8 @@ export function useToggleArchived(id: string | number) {
 export function useToggleHidden(id: string | number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => apiPost<{ hidden: boolean }>(`/api/v1/books/${id}/hidden`),
+    mutationFn: (hidden: boolean) =>
+      apiPost<{ hidden: boolean }>(`/api/v1/books/${id}/hidden`, { hidden }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['book', String(id)] });
       void qc.invalidateQueries({ queryKey: ['books'] });
@@ -380,7 +401,8 @@ export interface AdminConfig {
   config_books_per_page: number;
   config_random_books: number;
   config_authors_max: number;
-  config_theme: number;
+  /** ui_themes slug (e.g. "light"), not the legacy int code — see #736. */
+  config_theme: string;
   config_default_language: string;
   config_default_locale: string;
   config_server_announcement: string;
@@ -813,6 +835,11 @@ export function useUpdateProfile() {
       qc.setQueryData(['account'], data);
       // name/locale also surface in the top bar via useMe
       void qc.invalidateQueries({ queryKey: ['me'] });
+      // Built-in magic-shelf names are translated by the authenticated API.
+      // Refetch them after a locale change so request-local display text does
+      // not remain cached in the previous language (#886).
+      void qc.invalidateQueries({ queryKey: ['magicshelves'] });
+      void qc.invalidateQueries({ queryKey: ['magicshelf'] });
     },
   });
 }
@@ -941,7 +968,7 @@ export function useEditMagicShelf(id: string | number) {
   });
 }
 
-export interface MagicShelfItem { id: number; name: string; icon: string; is_public: boolean; is_owner: boolean }
+export interface MagicShelfItem { id: number; name: string; icon: string; is_public: boolean; is_owner: boolean; is_system: boolean }
 
 export function useMagicShelves() {
   return useQuery<{ items: MagicShelfItem[] }>({
@@ -952,7 +979,7 @@ export function useMagicShelves() {
 }
 
 export function useMagicShelfBooks(id: string | number, page = 1) {
-  return useQuery<{ id: number; name: string; icon: string; is_owner: boolean } & BooksPage>({
+  return useQuery<{ id: number; name: string; icon: string; is_owner: boolean; is_system: boolean } & BooksPage>({
     queryKey: ['magicshelf', String(id), page],
     queryFn: () => apiGet(`/api/v1/magicshelf/${id}?page=${page}`),
     enabled: String(id).length > 0,

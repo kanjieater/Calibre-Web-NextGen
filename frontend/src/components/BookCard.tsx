@@ -1,4 +1,4 @@
-import { BookOpen, Check, X, Pencil } from 'lucide-react';
+import { BookOpen, Check, EyeOff, X, Pencil } from 'lucide-react';
 import { Link } from 'wouter';
 import type { Book } from '../lib/api';
 import { useT } from '../lib/i18n';
@@ -52,6 +52,13 @@ export function BookCard({
       {book.read && (
         <span className={styles.readBadge} role="img" aria-label={t('Read')}>
           <Check size={14} strokeWidth={3} aria-hidden="true" />
+        </span>
+      )}
+      {book.hidden && (
+        <span className={styles.hiddenBadge} role="img" aria-label={t('Hidden')}
+          data-testid="hidden-book-badge">
+          <EyeOff size={12} aria-hidden="true" focusable={false} />
+          {t('Hidden')}
         </span>
       )}
       {seriesIndexLabel && (

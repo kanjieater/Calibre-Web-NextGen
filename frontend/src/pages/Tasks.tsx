@@ -14,7 +14,7 @@ export function Tasks() {
   if (error || !data) {
     return (
       <main className={styles.container}>
-        <EmptyState message={error instanceof Error ? error.message : 'Could not load tasks.'} />
+        <EmptyState message={error instanceof Error ? error.message : t('Could not load tasks.')} />
       </main>
     );
   }
@@ -38,7 +38,7 @@ export function Tasks() {
               <th>{t('Status')}</th>
               <th>{t('Progress')}</th>
               <th>{t('Run time')}</th>
-              <th aria-label="Cancel" />
+              <th aria-label={t('Cancel')} />
             </tr>
           </thead>
           <tbody>
@@ -54,7 +54,7 @@ export function Tasks() {
                     <button className={styles.cancelBtn}
                       onClick={() => cancel.mutate(task.task_id)}
                       disabled={cancel.isPending}
-                      aria-label={`Cancel ${task.taskMessage}`}>
+                      aria-label={t('Cancel {task}', { task: task.taskMessage })}>
                       <X size={15} />
                     </button>
                   )}

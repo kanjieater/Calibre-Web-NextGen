@@ -16,6 +16,9 @@ generator can never disagree.
 """
 import importlib.util
 import os
+import re
+import subprocess
+import sys
 
 import pytest
 
@@ -24,6 +27,7 @@ pytestmark = pytest.mark.unit
 
 _REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _SCRIPT = os.path.join(_REPO, "scripts", "extract_spa_strings.py")
+_FUZZY_SCRIPT = os.path.join(_REPO, "scripts", "check_spa_fuzzy.py")
 
 
 def _load_extractor():
@@ -52,11 +56,14 @@ def test_every_static_spa_translation_key_is_anchored():
 @pytest.mark.parametrize(
     "msgid",
     [
+        "A few random picks from your library",
         "Table view",
         "Smart shelves",
         "Formats",
+        "Favorites",
         "Hot",
         "Top Rated",
+        "Load more",
         "Full user table & restrictions",
         "Basic configuration",
         "Database & library path",
@@ -93,3 +100,140 @@ def test_extractor_finds_data_driven_labels(msgid):
     """Variable-rendered labels must not escape extraction again (#719/#615)."""
     keys = extractor.extract_frontend_keys()
     assert msgid in keys
+
+
+def test_accessible_names_and_empty_states_are_not_raw_english_literals():
+    """Derive this gate from every TSX file instead of pinning today's file
+    list: visible empty states and accessible names are user-facing SPA copy
+    and must go through ``t()`` just like ordinary JSX text (#886).
+    """
+    offenders = []
+    for root, _, files in os.walk(extractor.FRONTEND_SRC):
+        for filename in files:
+            if not filename.endswith(".tsx"):
+                continue
+            path = os.path.join(root, filename)
+            with open(path, encoding="utf-8") as source_file:
+                source = source_file.read()
+            for pattern in (
+                r'aria-label="[A-Za-z][^"]*"',
+                r'<EmptyState\b[^>]*\bmessage="[A-Za-z][^"]*"',
+            ):
+                for match in re.finditer(pattern, source):
+                    line = source.count("\n", 0, match.start()) + 1
+                    offenders.append(f"{os.path.relpath(path, extractor._REPO)}:{line}: {match.group(0)}")
+    assert offenders == []
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "raw_snippet"),
+    [
+        ("pages/Upload.tsx", "e.message : 'Upload failed.'"),
+        ("pages/Upload.tsx", "file\n                {result.queued.length"),
+        ("pages/AdvancedSearch.tsx", "{total} result{total !== 1"),
+        ("pages/NativeReader.tsx", "alt={`Page ${page + 1}`}"),
+        ("pages/BookDetail.tsx", "{' · Book '}"),
+        ("pages/Catalog.tsx", "t(choice === 'comfortable'"),
+    ],
+)
+def test_known_residual_raw_spa_copy_does_not_return(relative_path, raw_snippet):
+    """Source-pin the raw-copy shapes found by the #886 adversarial sweep.
+
+    The general anchor extractor covers the replacement ``t()`` calls; these
+    pins cover the syntactic forms that previously escaped that extractor.
+    """
+    path = os.path.join(extractor.FRONTEND_SRC, relative_path)
+    with open(path, encoding="utf-8") as source_file:
+        assert raw_snippet not in source_file.read()
+
+
+@pytest.mark.parametrize(
+    "msgid",
+    [
+        "Hot — Most Downloaded",
+        "Discover — Random Picks",
+        "Comfortable",
+        "Compact",
+        "Dense",
+        "{count} files queued for import",
+        "{count} results",
+        "Page {number}",
+        "Book {number}",
+        "Currently Reading",
+        "Standard (username / password)",
+        "Simple (service account)",
+    ],
+)
+def test_dynamic_and_interpolated_residual_keys_are_anchored(msgid):
+    assert msgid in extractor.parse_anchored()
+
+
+def test_magic_shelf_operator_labels_are_translated_at_render_time():
+    """The labels are anchored data, but rendering them raw still leaks English."""
+    path = os.path.join(extractor.FRONTEND_SRC, "pages", "MagicShelf.tsx")
+    with open(path, encoding="utf-8") as source_file:
+        source = source_file.read()
+    assert "{t(o.label)}" in source
+    assert "{o.label}" not in source
+
+
+def test_locale_change_invalidates_translated_magic_shelf_names():
+    queries = os.path.join(extractor.FRONTEND_SRC, "lib", "queries.ts")
+    with open(queries, encoding="utf-8") as source_file:
+        source = source_file.read()
+    profile_success = source[source.index("export function useUpdateProfile"):
+                             source.index("export function useChangePassword")]
+    assert "invalidateQueries({ queryKey: ['magicshelves'] })" in profile_success
+    assert "invalidateQueries({ queryKey: ['magicshelf'] })" in profile_success
+
+
+def test_no_spa_anchored_msgid_is_fuzzy_in_any_locale():
+    """#879 all-locale quality gate: fuzzy guesses are unsafe to compile and
+    silently absent from the SPA, so the update pipeline must reject them.
+    """
+    result = subprocess.run(
+        [sys.executable, _FUZZY_SCRIPT],
+        cwd=_REPO,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_legacy_fuzzy_migration_clears_guess_instead_of_compiling_it(tmp_path):
+    spec = importlib.util.spec_from_file_location("check_spa_fuzzy", _FUZZY_SCRIPT)
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    po = tmp_path / "messages.po"
+    po.write_text(
+        '#, fuzzy, python-brace-format\n'
+        '#| msgid "Wrong longer label"\n'
+        'msgid "Read {title}"\n'
+        'msgstr "Semantically wrong {title}"\n',
+        encoding="utf-8",
+    )
+    assert checker.process(po, {"Read {title}"}, clear=False) == ["Read {title}"]
+    assert "fuzzy" in po.read_text(encoding="utf-8")
+    assert checker.process(po, {"Read {title}"}, clear=True) == ["Read {title}"]
+    migrated = po.read_text(encoding="utf-8")
+    assert "fuzzy" not in migrated
+    assert "#, python-brace-format" in migrated
+    assert 'msgstr ""' in migrated
+    assert "Semantically wrong" not in migrated
+
+
+def test_fuzzy_word_in_translator_comment_cannot_erase_reviewed_translation(tmp_path):
+    spec = importlib.util.spec_from_file_location("check_spa_fuzzy_comment", _FUZZY_SCRIPT)
+    checker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(checker)
+    po = tmp_path / "messages.po"
+    original = (
+        '# Translator note: reviewed, not fuzzy\n'
+        'msgid "Loading"\n'
+        'msgstr "Chargement"\n'
+    )
+    po.write_text(original, encoding="utf-8")
+    assert checker.process(po, {"Loading"}, clear=False) == []
+    assert checker.process(po, {"Loading"}, clear=True) == []
+    assert po.read_text(encoding="utf-8") == original

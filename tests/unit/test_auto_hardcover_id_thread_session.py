@@ -69,6 +69,7 @@ def test_auto_hardcover_id_loads_books_with_a_worker_local_calibre_session(monke
     factory.  The provider is mocked only to avoid external HTTP.
     """
     engine, factory = _worker_local_calibre_db(monkeypatch)
+    monkeypatch.setattr(module.config, "hardcover_sync_enabled", lambda: True)
     monkeypatch.setattr(module.config, "resolved_hardcover_token", lambda: "token")
     monkeypatch.setattr(module, "Hardcover", _NoResultsHardcover)
     monkeypatch.setattr(TaskAutoHardcoverID, "_save_stats", lambda self: None)

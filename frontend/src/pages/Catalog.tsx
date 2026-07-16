@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearch } from 'wouter';
-import { ChevronLeft, SlidersHorizontal, ListChecks, Settings, RefreshCw, UploadCloud, LayoutGrid, List } from 'lucide-react';
+import { ChevronLeft, SlidersHorizontal, ListChecks, Settings, RefreshCw, UploadCloud, LayoutGrid, List, Pencil, Check, X } from 'lucide-react';
 import { useIntersectionObserver } from '../lib/useIntersectionObserver';
 import { BookCard } from '../components/BookCard';
 import { BookCover } from '../components/BookCover';
@@ -9,21 +9,22 @@ import { BulkBar } from '../components/BulkBar';
 import { Spinner, SpinnerCentered } from '../components/Spinner';
 import { EmptyState } from '../components/EmptyState';
 import { DiscoverSection } from '../components/DiscoverSection';
-import { useBooks, useEntityList, ENTITY_PLURAL, useMe } from '../lib/queries';
+import { useBooks, useEntityList, ENTITY_PLURAL, useMe, useRenameTag } from '../lib/queries';
 import type { EntityKind, ReadFilter, DiscoveryView } from '../lib/queries';
-import { apiPost, apiGet, type Book } from '../lib/api';
+import { apiPost, apiGet, ApiError, type Book } from '../lib/api';
 import { saveCatalog, loadCatalog } from '../lib/scrollCache';
 import { usePersistentBool } from '../lib/usePersistentBool';
 import { usePersistentChoice } from '../lib/usePersistentChoice';
 import { useT } from '../lib/i18n';
+import { useAnnouncer } from '../lib/a11y/announcer';
 import styles from './Catalog.module.css';
 
-const VIEW_LABEL: Record<DiscoveryView, string> = {
-  hot: 'Hot — Most Downloaded',
-  discover: 'Discover — Random Picks',
-  rated: 'Top Rated',
-  favorites: 'Favorites',
-  archived: 'Archived',
+const VIEW_OPTIONS: Record<DiscoveryView, { label: string }> = {
+  hot: { label: 'Hot — Most Downloaded' },
+  discover: { label: 'Discover — Random Picks' },
+  rated: { label: 'Top Rated' },
+  favorites: { label: 'Favorites' },
+  archived: { label: 'Archived' },
 };
 
 const SORT_OPTIONS = [
@@ -52,15 +53,21 @@ const READ_FILTERS: { label: string; value: ReadFilter }[] = [
   { label: 'Read', value: 'read' },
 ];
 
-const KIND_LABEL: Record<EntityKind, string> = {
-  author: 'Author',
-  series: 'Series',
-  tag: 'Tag',
-  publisher: 'Publisher',
-  language: 'Language',
-  rating: 'Rating',
-  format: 'Format',
+const KIND_OPTIONS: Record<EntityKind, { label: string }> = {
+  author: { label: 'Author' },
+  series: { label: 'Series' },
+  tag: { label: 'Tag' },
+  publisher: { label: 'Publisher' },
+  language: { label: 'Language' },
+  rating: { label: 'Rating' },
+  format: { label: 'Format' },
 };
+
+const DENSITY_OPTIONS = [
+  { value: 'comfortable', label: 'Comfortable' },
+  { value: 'compact', label: 'Compact' },
+  { value: 'dense', label: 'Dense' },
+] as const;
 
 interface CatalogProps {
   /** When set, the catalog is scoped to books linked to this entity. */
@@ -170,10 +177,15 @@ function useLibraryRefresh() {
 
 export function Catalog({ entityKind, entityId, view }: CatalogProps) {
   const t = useT();
+  const announce = useAnnouncer();
   const libraryRefresh = useLibraryRefresh();
   const filtered = !!entityKind;
   const isView = !!view;
   const isSeries = entityKind === 'series';
+  const renameTag = useRenameTag(entityId ?? '');
+  const [renamingTag, setRenamingTag] = useState(false);
+  const [tagNameDraft, setTagNameDraft] = useState('');
+  const [tagRenameError, setTagRenameError] = useState('');
   // Series views expose two extra series-order options and default to ascending
   // series order so the list reads 1, 2, 3… instead of newest-first (#573).
   const sortOptions = isSeries ? [...SERIES_SORT_OPTIONS, ...SORT_OPTIONS] : SORT_OPTIONS;
@@ -214,10 +226,12 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
   // never while multi-selecting (the whole card toggles selection then).
   const me = useMe().data;
   const canEdit = !!me?.role?.edit;
+  const canRenameTag = entityKind === 'tag' && canEdit;
   const canUpload = !!me?.role?.upload;
 
   // Discover section visibility (persisted; toggled by the gear menu or its ×).
   const [discoverHidden, setDiscoverHidden] = usePersistentBool('cwng_discover_hidden_v1', false);
+  const [showHidden, setShowHidden] = usePersistentBool('cwng_show_hidden_books_v1', false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [density, setDensity] = usePersistentChoice(
     'cwng:catalog-density-v1', ['comfortable', 'compact', 'dense'] as const, 'compact');
@@ -254,6 +268,8 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
   const entityName = filtered
     ? entityListQuery.data?.items.find((e) => String(e.id) === String(entityId))?.name
     : undefined;
+  const entityFailed = filtered && !!entityListQuery.error;
+  const entityMissing = filtered && !entityListQuery.isPending && !!entityListQuery.data && !entityName;
 
   // Seed the search box from a ?q= query param (the persistent top-bar search
   // navigates here as /?q=<term>). Library view only.
@@ -283,7 +299,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
     };
   }, [settingsOpen]);
 
-  const resetKey = [search, sort, readFilter, entityKind ?? '', entityId ?? '', view ?? '', perPage].join('|');
+  const resetKey = [search, sort, readFilter, entityKind ?? '', entityId ?? '', view ?? '', perPage, showHidden].join('|');
 
   // Any filter change resets paging to the first page — except on the first
   // restored mount, where the rehydrated page must survive (#578).
@@ -356,6 +372,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
     entityKind,
     entityId,
     view,
+    showHidden: !hideLibraryControls && showHidden,
   });
 
   // Accumulate pages; replace the accumulator whenever the filter set changes.
@@ -388,7 +405,50 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
     enabled: hasMore && !isFetching,
   });
 
-  const heading = isView ? t(VIEW_LABEL[view!]) : filtered ? (entityName ?? '…') : t('Your Library');
+  const heading = isView
+    ? t(VIEW_OPTIONS[view!].label)
+    : filtered
+      ? entityFailed
+        ? t('Could not load this page')
+        : entityMissing
+          ? t('Page not found')
+          : (entityName ?? '…')
+      : t('Your Library');
+  const renameTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeTagRename = () => {
+    setRenamingTag(false);
+    requestAnimationFrame(() => renameTriggerRef.current?.focus());
+  };
+  const beginTagRename = () => {
+    setTagNameDraft(entityName ?? '');
+    setTagRenameError('');
+    setRenamingTag(true);
+  };
+  const submitTagRename = (event: React.FormEvent) => {
+    event.preventDefault();
+    const next = tagNameDraft.trim();
+    if (!next) { setTagRenameError(t('Tag name cannot be empty')); return; }
+    renameTag.mutate(next, {
+      onSuccess: () => {
+        closeTagRename();
+        announce(t('Tag renamed to {name}', { name: next }));
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          const messages: Record<number, string> = {
+            400: t('Enter a valid tag name'),
+            401: t('You must be signed in'),
+            403: t('You are not allowed to edit metadata'),
+            404: t('Tag not found'),
+            409: t('A tag with that name already exists'),
+          };
+          setTagRenameError(messages[error.status] ?? t('Could not rename tag'));
+        } else {
+          setTagRenameError(t('Could not rename tag'));
+        }
+      },
+    });
+  };
   const countLabel = total > 0
     ? search && !filtered
       ? t('{count} results for "{query}"', { count: total, query: search })
@@ -400,13 +460,34 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
       {filtered && (
         <Link href={`/${ENTITY_PLURAL[entityKind!]}`} className={styles.back}>
           <ChevronLeft size={16} />
-          All {ENTITY_PLURAL[entityKind!]}
+          {t('Show all {items}', { items: t(ENTITY_PLURAL[entityKind!]) })}
         </Link>
       )}
 
       <div className={styles.header}>
-        {filtered && <span className={styles.kindLabel}>{t(KIND_LABEL[entityKind!])}</span>}
-        <h1 className={styles.title}>{heading}</h1>
+        {filtered && <span className={styles.kindLabel}>{t(KIND_OPTIONS[entityKind!].label)}</span>}
+        <h1 className={renamingTag ? 'sr-only' : styles.title}>{heading}</h1>
+        {renamingTag ? (
+          <form className={styles.renameForm} onSubmit={submitTagRename}>
+            <label className="sr-only" htmlFor="tag-name-input">{t('Tag name')}</label>
+            <input id="tag-name-input" className={styles.renameInput} value={tagNameDraft} autoFocus
+              aria-invalid={!!tagRenameError} aria-describedby={tagRenameError ? 'tag-rename-error' : undefined}
+              onKeyDown={(event) => { if (event.key === 'Escape') closeTagRename(); }}
+              onChange={(event) => setTagNameDraft(event.target.value)} />
+            <button type="submit" className={styles.renameButton} disabled={renameTag.isPending}
+              aria-label={t('Save tag name')}><Check size={18} aria-hidden="true" focusable={false} /></button>
+            <button type="button" className={styles.renameButton} onClick={closeTagRename}
+              aria-label={t('Cancel')}><X size={18} aria-hidden="true" focusable={false} /></button>
+            {tagRenameError && <span id="tag-rename-error" className={styles.renameError} role="alert">{tagRenameError}</span>}
+          </form>
+        ) : (
+          canRenameTag && entityName ? (
+            <button ref={renameTriggerRef} type="button" className={styles.renameButton} onClick={beginTagRename}
+              aria-label={t('Rename tag {name}', { name: entityName })}>
+              <Pencil size={16} aria-hidden="true" focusable={false} />
+            </button>
+          ) : null
+        )}
         {/* role=status so the result count is announced when filters/search
             change it and when load-more grows it (SC 4.1.3). */}
         {countLabel && <span className={styles.count} role="status">{countLabel}</span>}
@@ -506,6 +587,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
           <div className={styles.settingsWrap} ref={settingsRef}>
             <button
               type="button"
+              data-testid="catalog-view-settings"
               className={settingsOpen ? styles.gearBtnActive : styles.gearBtn}
               onClick={() => setSettingsOpen((o) => !o)}
               aria-haspopup="true"
@@ -527,13 +609,25 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
                   />
                   <span>{t('Show Discover section')}</span>
                 </label>
+                {!me?.role?.anonymous && (
+                  <label className={styles.settingsItem}>
+                    <input
+                      type="checkbox"
+                      data-testid="show-hidden-books"
+                      className={styles.settingsCheck}
+                      checked={showHidden}
+                      onChange={(e) => setShowHidden(e.target.checked)}
+                    />
+                    <span>{t('Show hidden books')}</span>
+                  </label>
+                )}
                 <fieldset className={styles.densityField}>
                   <legend>{t('Book density')}</legend>
-                  {(['comfortable', 'compact', 'dense'] as const).map((choice) => (
-                    <label key={choice} className={styles.settingsItem}>
-                      <input type="radio" name="book-density" value={choice}
-                        checked={density === choice} onChange={() => setDensity(choice)} />
-                      <span>{t(choice === 'comfortable' ? 'Comfortable' : choice === 'compact' ? 'Compact' : 'Dense')}</span>
+                  {DENSITY_OPTIONS.map((option) => (
+                    <label key={option.value} className={styles.settingsItem}>
+                      <input type="radio" name="book-density" value={option.value}
+                        checked={density === option.value} onChange={() => setDensity(option.value)} />
+                      <span>{t(option.label)}</span>
                     </label>
                   ))}
                 </fieldset>

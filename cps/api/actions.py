@@ -77,13 +77,23 @@ def toggle_book_hidden(book_id):
     guard = _require_real_user()
     if guard:
         return guard
+    data = request.get_json(silent=True)
+    desired = None
+    if isinstance(data, dict) and "hidden" in data:
+        if not isinstance(data["hidden"], bool):
+            return _err("invalid_request", "hidden must be a boolean", 400)
+        desired = data["hidden"]
     existing = (ub.session.query(ub.UserHiddenBook)
                 .filter(ub.UserHiddenBook.user_id == int(current_user.id),
                         ub.UserHiddenBook.book_id == int(book_id))
                 .first())
     if existing:
+        if desired is True:
+            return jsonify({"hidden": True})
         ub.session.delete(existing)
         ub.session.commit()
+        return jsonify({"hidden": False})
+    if desired is False:
         return jsonify({"hidden": False})
     # Hide path — gated; a direct POST must not bypass the disabled feature.
     if not bool(getattr(config, "config_user_hide_enabled", False)):

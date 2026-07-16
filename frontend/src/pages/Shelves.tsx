@@ -36,7 +36,7 @@ export function Shelves() {
           navigate(`/shelf/${shelf.id}`);
         },
         onError: (err) =>
-          setFormError(err instanceof ApiError ? err.message : 'Could not create shelf.'),
+          setFormError(err instanceof ApiError ? err.message : t('Could not create shelf.')),
       },
     );
   };
@@ -78,9 +78,9 @@ export function Shelves() {
       {isLoading ? (
         <SpinnerCentered size={36} />
       ) : error ? (
-        <EmptyState message={error instanceof Error ? error.message : 'Failed to load shelves.'} />
+        <EmptyState message={error instanceof Error ? error.message : t('Failed to load shelves.')} />
       ) : !data || data.items.length === 0 ? (
-        <EmptyState message="No shelves yet. Create one above to start collecting books." />
+        <EmptyState message={t('No shelves yet. Create one above to start collecting books.')} />
       ) : (
         <ul className={styles.grid}>
           {data.items.map((shelf) => (
@@ -97,7 +97,9 @@ export function Shelves() {
                 </div>
                 <div className={styles.cardBottom}>
                   <span className={styles.bookCount}>
-                    {shelf.count} book{shelf.count !== 1 ? 's' : ''}
+                    {shelf.count === 1
+                      ? t('{count} book', { count: shelf.count })
+                      : t('{count} books', { count: shelf.count })}
                   </span>
                   {!shelf.is_owner && <span className={styles.sharedBadge}>{t('shared')}</span>}
                 </div>

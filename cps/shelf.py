@@ -33,7 +33,7 @@ def queue_hardcover_sync(shelf_obj, book_ids):
     button used no longer changes whether Hardcover hears about the book.
     The token is captured here because the worker thread has no request
     context."""
-    if not (shelf_obj.kobo_sync and config.config_hardcover_sync and bool(hardcover)):
+    if not (shelf_obj.kobo_sync and config.hardcover_sync_enabled() and bool(hardcover)):
         return
     if not book_ids:
         return
@@ -911,9 +911,12 @@ def _shelf_book_count(shelf, user=None):
             archived_ids = (ub.session.query(ub.ArchivedBook.book_id)
                             .filter(ub.ArchivedBook.user_id == int(user.id))
                             .filter(ub.ArchivedBook.is_archived.is_(True)))
+            hidden_ids = (ub.session.query(ub.UserHiddenBook.book_id)
+                          .filter(ub.UserHiddenBook.user_id == int(user.id)))
             return int(ub.session.query(ub.BookShelf)
                        .filter(ub.BookShelf.shelf == shelf_id)
                        .filter(ub.BookShelf.book_id.notin_(archived_ids))
+                       .filter(ub.BookShelf.book_id.notin_(hidden_ids))
                        .count())
         except Exception:
             pass  # fall through to the archive-blind raw count

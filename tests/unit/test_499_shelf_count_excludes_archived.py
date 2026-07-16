@@ -83,6 +83,13 @@ def _archive(session, *, user_id, book_id, is_archived=True):
     session.commit()
 
 
+def _hide(session, *, user_id, book_id):
+    import cps.ub as ub
+
+    session.add(ub.UserHiddenBook(user_id=user_id, book_id=book_id))
+    session.commit()
+
+
 def _user(uid):
     return SimpleNamespace(id=uid, is_anonymous=False)
 
@@ -113,6 +120,29 @@ def test_other_user_unaffected_by_someone_elses_archive(session):
     shelf = _make_shelf(session, book_ids=(1, 2, 3))
     _archive(session, user_id=1, book_id=2)
     assert _shelf_book_count(shelf, _user(2)) == 3
+
+
+def test_user_count_excludes_personally_hidden_book(session):
+    """Shelf badges must match the shelf grid, which uses common_filters()."""
+    from cps.shelf import _shelf_book_count
+    shelf = _make_shelf(session, book_ids=(1, 2, 3))
+    _hide(session, user_id=1, book_id=2)
+    assert _shelf_book_count(shelf, _user(1)) == 2
+
+
+def test_other_user_shelf_count_ignores_someone_elses_hidden_state(session):
+    from cps.shelf import _shelf_book_count
+    shelf = _make_shelf(session, book_ids=(1, 2, 3))
+    _hide(session, user_id=1, book_id=2)
+    assert _shelf_book_count(shelf, _user(2)) == 3
+
+
+def test_archive_and_hide_are_independent_but_each_excludes_from_shelf_count(session):
+    from cps.shelf import _shelf_book_count
+    shelf = _make_shelf(session, book_ids=(1, 2, 3))
+    _archive(session, user_id=1, book_id=1)
+    _hide(session, user_id=1, book_id=2)
+    assert _shelf_book_count(shelf, _user(1)) == 1
 
 
 def test_is_archived_false_row_does_not_reduce_count(session):

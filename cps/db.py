@@ -1462,7 +1462,11 @@ class CalibreDB:
     def fill_indexpage(self, page, pagesize, database, db_filter, order,
                        join_archive_read=False, config_read_column=0, *join, **kwargs):
         self.ensure_session()
-        return self.fill_indexpage_with_archived_books(page, database, pagesize, db_filter, order, False,
+        # Opt-in passthrough for callers that need archived rows while retaining
+        # the historical default for classic/OPDS/Kobo/shelf callers.
+        allow_show_archived = kwargs.pop('allow_show_archived', False)
+        return self.fill_indexpage_with_archived_books(page, database, pagesize, db_filter, order,
+                                                       allow_show_archived,
                                                        join_archive_read, config_read_column, *join, **kwargs)
 
     def fill_indexpage_with_archived_books(self, page, database, pagesize, db_filter, order, allow_show_archived,
@@ -1681,7 +1685,7 @@ class CalibreDB:
         return self.session.query(Books) \
             .filter(and_(Books.authors.any(and_(*q)), func.lower(Books.title).ilike("%" + title + "%"))).first()
 
-    def search_query(self, term, config, *join):
+    def search_query(self, term, config, *join, allow_show_hidden=False):
         self.ensure_session()
         strip_whitespaces(term).lower()
         q = list()
@@ -1712,7 +1716,8 @@ class CalibreDB:
                         func.lower(cc_classes[c.id].value).ilike("%" + term + "%")))
         # Eagerly load the data relationship to prevent session errors
         query = query.options(joinedload(Books.data))
-        return query.filter(self.common_filters(True)).filter(or_(*filter_expression))
+        return query.filter(self.common_filters(True, allow_show_hidden=allow_show_hidden)) \
+            .filter(or_(*filter_expression))
 
     def get_cc_columns(self, config, filter_config_custom_read=False):
         self.ensure_session()
@@ -1732,11 +1737,13 @@ class CalibreDB:
         return cc
 
     # read search results from calibre-database and return it (function is used for feed and simple search
-    def get_search_results(self, term, config, offset=None, order=None, limit=None, *join):
+    def get_search_results(self, term, config, offset=None, order=None, limit=None, *join,
+                           allow_show_hidden=False):
         self.ensure_session()
         order = order[0] if order else [Books.sort]
         pagination = None
-        result = self.search_query(term, config, *join).order_by(*order).all()
+        result = self.search_query(term, config, *join,
+                                   allow_show_hidden=allow_show_hidden).order_by(*order).all()
         result_count = len(result)
         if offset is not None and limit is not None:
             offset = int(offset)

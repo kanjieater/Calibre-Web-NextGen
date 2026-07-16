@@ -391,10 +391,8 @@
     </div>
 
     {% if cwng_spa_enabled and (current_user.is_authenticated or g.allow_anonymous) and request.cookies.get('cwng_prefer_spa') != '1' %}
-    {# Opt-in nudge into the React SPA. Shown by default; dismissal is remembered
-       per running version, so it returns after each update to keep nudging until
-       the new UI becomes the default. The element starts hidden and is revealed
-       by JS only when not dismissed for this version — no flash for dismissers. #}
+    {# Opt-in nudge into the React SPA. A dismissal is durable: this adoption cue
+       is not release news, and repeatedly resurfacing it punished updaters. #}
     <div id="cwng-newui-banner" class="cwng-newui-banner" data-version="{{ cwng_app_version }}"
          role="region" aria-label="{{_('New interface available')}}" hidden>
       <span class="cwng-newui-icon glyphicon glyphicon-flash" aria-hidden="true"></span>
@@ -409,8 +407,20 @@
       (function () {
         var b = document.getElementById('cwng-newui-banner');
         if (!b) return;
-        var key = 'cwng_newui_banner_dismissed_' + (b.getAttribute('data-version') || '');
-        try { if (window.localStorage && localStorage.getItem(key) === '1') return; } catch (e) {}
+        var key = 'cwng_newui_banner_dismissed_v1';
+        try {
+          if (window.localStorage && localStorage.getItem(key) === '1') return;
+          // Carry forward any dismissal written by the old per-version scheme,
+          // so the first update containing this fix does not nag once more.
+          for (var i = 0; window.localStorage && i < localStorage.length; i++) {
+            var oldKey = localStorage.key(i) || '';
+            if (oldKey.indexOf('cwng_newui_banner_dismissed_') === 0 &&
+                localStorage.getItem(oldKey) === '1') {
+              localStorage.setItem(key, '1');
+              return;
+            }
+          }
+        } catch (e) {}
         var root = document.documentElement;
         // Publish the banner's real height so the CSS offsets above can reserve
         // exactly its space (it wraps to two lines on narrow/long-locale layouts).

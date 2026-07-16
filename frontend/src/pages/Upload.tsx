@@ -22,10 +22,10 @@ export function Upload() {
       setResult(null);
       upload.mutate(files, {
         onSuccess: (r) => setResult(r),
-        onError: (e) => setError(e instanceof ApiError ? e.message : 'Upload failed.'),
+        onError: (e) => setError(e instanceof ApiError ? e.message : t('Upload failed.')),
       });
     },
-    [upload],
+    [upload, t],
   );
 
   const onDrop = (e: React.DragEvent) => {
@@ -78,8 +78,10 @@ export function Upload() {
           {result.queued.length > 0 && (
             <div className={styles.queued}>
               <p className={styles.resultHeading}>
-                <CheckCircle2 size={16} aria-hidden="true" focusable={false} /> {result.queued.length} file
-                {result.queued.length !== 1 ? 's' : ''} queued for import
+                <CheckCircle2 size={16} aria-hidden="true" focusable={false} />{' '}
+                {result.queued.length === 1
+                  ? t('{count} file queued for import', { count: result.queued.length })
+                  : t('{count} files queued for import', { count: result.queued.length })}
               </p>
               <ul>{result.queued.map((f) => <li key={f}>{f}</li>)}</ul>
             </div>
@@ -87,8 +89,10 @@ export function Upload() {
           {result.errors.length > 0 && (
             <div className={styles.failed}>
               <p className={styles.resultHeading}>
-                <AlertCircle size={16} aria-hidden="true" focusable={false} /> {result.errors.length} file
-                {result.errors.length !== 1 ? 's' : ''} rejected
+                <AlertCircle size={16} aria-hidden="true" focusable={false} />{' '}
+                {result.errors.length === 1
+                  ? t('{count} file rejected', { count: result.errors.length })
+                  : t('{count} files rejected', { count: result.errors.length })}
               </p>
               <ul>{result.errors.map((e) => <li key={e.filename}>{e.filename} — {e.error}</li>)}</ul>
             </div>

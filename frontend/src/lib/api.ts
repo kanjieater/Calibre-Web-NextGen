@@ -90,6 +90,8 @@ export interface Book {
   last_modified?: string | null;
   read?: boolean;
   archived?: boolean;
+  /** Personal-library declutter state. Present on list items from current servers. */
+  hidden?: boolean;
 }
 
 export interface BookFormat {

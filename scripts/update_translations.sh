@@ -51,11 +51,16 @@ for po in "$ROOT_DIR"/cps/translations/*/LC_MESSAGES/messages.po; do
     echo "[i] Updating $po"
     
     # Try msgmerge, but capture any failures
-    if ! msgmerge --update "$po" "$POT" 2>/dev/null; then
+    # Never let gettext guess a translation for a new msgid from a merely
+    # similar old sentence. Those guesses are marked fuzzy, excluded by msgfmt
+    # and the SPA catalog, and previously made translation status look fuller
+    # while users still saw English (#879). New strings stay empty until a
+    # locale's translation is reviewed.
+    if ! msgmerge --no-fuzzy-matching --update "$po" "$POT" 2>/dev/null; then
         echo "[!] msgmerge failed for $po, checking for duplicates..."
         
         # Check if the error is related to duplicates
-        msgmerge_output=$(msgmerge --update "$po" "$POT" 2>&1 || true)
+        msgmerge_output=$(msgmerge --no-fuzzy-matching --update "$po" "$POT" 2>&1 || true)
         if echo "$msgmerge_output" | grep -q "duplicate message definition"; then
             echo "[i] Duplicate messages detected in $po, attempting to fix..."
             
@@ -68,7 +73,7 @@ for po in "$ROOT_DIR"/cps/translations/*/LC_MESSAGES/messages.po; do
                 
                 # Try msgmerge again after fixing duplicates
                 echo "[i] Retrying msgmerge for $po after duplicate fix..."
-                if ! msgmerge --update "$po" "$POT"; then
+                if ! msgmerge --no-fuzzy-matching --update "$po" "$POT"; then
                     echo "[!] msgmerge still failed for $po even after duplicate fix"
                     continue
                 fi
@@ -84,6 +89,11 @@ for po in "$ROOT_DIR"/cps/translations/*/LC_MESSAGES/messages.po; do
         fi
     fi
 done
+
+# Existing fuzzy SPA entries are never safe to compile, and newly introduced
+# ones indicate that a manual edit bypassed the no-fuzzy merge policy. Keep the
+# all-locale catalog invariant explicit instead of silently dropping them.
+"$PYTHON_CMD" "$SCRIPT_DIR/check_spa_fuzzy.py"
 
 # 3. Final validation and compile
 for po in "$ROOT_DIR"/cps/translations/*/LC_MESSAGES/messages.po; do

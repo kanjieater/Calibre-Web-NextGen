@@ -54,6 +54,12 @@
   font-size: var(--fs-xl);
   color: var(--text);
 }
+.renameForm { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2); min-width: 0; }
+.renameInput { min-width: 0; width: min(22rem, 58vw); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border-strong); border-radius: var(--r-md); background: var(--surface-1); color: var(--text); font: inherit; }
+.renameInput:focus-visible, .renameButton:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 2px; }
+.renameButton { display: inline-grid; place-items: center; min-width: 40px; min-height: 40px; border-radius: var(--r-md); color: var(--accent); background: var(--surface-1); border: 1px solid var(--border); }
+.renameButton:hover:not(:disabled) { background: var(--accent-soft); }
+.renameError { flex-basis: 100%; color: var(--danger); font-size: var(--fs-sm); }
 
 .count {
   color: var(--text-muted);

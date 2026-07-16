@@ -90,6 +90,7 @@ def serialize_user(user):
             "edit_shelfs": user.role_edit_shelfs(),
             "viewer": user.role_viewer(),
             "passwd": user.role_passwd(),
+            "anonymous": user.role_anonymous(),
         },
         # Fork #585: which sidebar entries the admin/user has enabled.
         "sidebar": serialize_sidebar_visibility(user),
@@ -117,7 +118,7 @@ def _iso_datetime(value):
     return value.isoformat() if isinstance(value, (datetime, date)) else None
 
 
-def serialize_book_list_item(book, read=False, archived=False):
+def serialize_book_list_item(book, read=False, archived=False, hidden=False):
     series = book.series[0].name if getattr(book, "series", None) else None
     return {
         "id": book.id,
@@ -139,6 +140,7 @@ def serialize_book_list_item(book, read=False, archived=False):
         "last_modified": _iso_datetime(getattr(book, "last_modified", None)),
         "read": bool(read),
         "archived": bool(archived),
+        "hidden": bool(hidden),
     }
 
 
