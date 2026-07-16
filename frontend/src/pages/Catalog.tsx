@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearch } from 'wouter';
-import { ChevronLeft, SlidersHorizontal, ListChecks, Settings, RefreshCw, UploadCloud, LayoutGrid, List } from 'lucide-react';
+import { ChevronLeft, SlidersHorizontal, ListChecks, Settings, RefreshCw, UploadCloud, LayoutGrid, List, Pencil, Check, X } from 'lucide-react';
 import { useIntersectionObserver } from '../lib/useIntersectionObserver';
 import { BookCard } from '../components/BookCard';
 import { BookCover } from '../components/BookCover';
@@ -9,13 +9,14 @@ import { BulkBar } from '../components/BulkBar';
 import { Spinner, SpinnerCentered } from '../components/Spinner';
 import { EmptyState } from '../components/EmptyState';
 import { DiscoverSection } from '../components/DiscoverSection';
-import { useBooks, useEntityList, ENTITY_PLURAL, useMe } from '../lib/queries';
+import { useBooks, useEntityList, ENTITY_PLURAL, useMe, useRenameTag } from '../lib/queries';
 import type { EntityKind, ReadFilter, DiscoveryView } from '../lib/queries';
-import { apiPost, apiGet, type Book } from '../lib/api';
+import { apiPost, apiGet, ApiError, type Book } from '../lib/api';
 import { saveCatalog, loadCatalog } from '../lib/scrollCache';
 import { usePersistentBool } from '../lib/usePersistentBool';
 import { usePersistentChoice } from '../lib/usePersistentChoice';
 import { useT } from '../lib/i18n';
+import { useAnnouncer } from '../lib/a11y/announcer';
 import styles from './Catalog.module.css';
 
 const VIEW_LABEL: Record<DiscoveryView, string> = {
@@ -170,10 +171,15 @@ function useLibraryRefresh() {
 
 export function Catalog({ entityKind, entityId, view }: CatalogProps) {
   const t = useT();
+  const announce = useAnnouncer();
   const libraryRefresh = useLibraryRefresh();
   const filtered = !!entityKind;
   const isView = !!view;
   const isSeries = entityKind === 'series';
+  const renameTag = useRenameTag(entityId ?? '');
+  const [renamingTag, setRenamingTag] = useState(false);
+  const [tagNameDraft, setTagNameDraft] = useState('');
+  const [tagRenameError, setTagRenameError] = useState('');
   // Series views expose two extra series-order options and default to ascending
   // series order so the list reads 1, 2, 3… instead of newest-first (#573).
   const sortOptions = isSeries ? [...SERIES_SORT_OPTIONS, ...SORT_OPTIONS] : SORT_OPTIONS;
@@ -214,6 +220,7 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
   // never while multi-selecting (the whole card toggles selection then).
   const me = useMe().data;
   const canEdit = !!me?.role?.edit;
+  const canRenameTag = entityKind === 'tag' && canEdit;
   const canUpload = !!me?.role?.upload;
 
   // Discover section visibility (persisted; toggled by the gear menu or its ×).
@@ -254,6 +261,8 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
   const entityName = filtered
     ? entityListQuery.data?.items.find((e) => String(e.id) === String(entityId))?.name
     : undefined;
+  const entityFailed = filtered && !!entityListQuery.error;
+  const entityMissing = filtered && !entityListQuery.isPending && !!entityListQuery.data && !entityName;
 
   // Seed the search box from a ?q= query param (the persistent top-bar search
   // navigates here as /?q=<term>). Library view only.
@@ -388,7 +397,50 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
     enabled: hasMore && !isFetching,
   });
 
-  const heading = isView ? t(VIEW_LABEL[view!]) : filtered ? (entityName ?? '…') : t('Your Library');
+  const heading = isView
+    ? t(VIEW_LABEL[view!])
+    : filtered
+      ? entityFailed
+        ? t('Could not load this page')
+        : entityMissing
+          ? t('Page not found')
+          : (entityName ?? '…')
+      : t('Your Library');
+  const renameTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeTagRename = () => {
+    setRenamingTag(false);
+    requestAnimationFrame(() => renameTriggerRef.current?.focus());
+  };
+  const beginTagRename = () => {
+    setTagNameDraft(entityName ?? '');
+    setTagRenameError('');
+    setRenamingTag(true);
+  };
+  const submitTagRename = (event: React.FormEvent) => {
+    event.preventDefault();
+    const next = tagNameDraft.trim();
+    if (!next) { setTagRenameError(t('Tag name cannot be empty')); return; }
+    renameTag.mutate(next, {
+      onSuccess: () => {
+        closeTagRename();
+        announce(t('Tag renamed to {name}', { name: next }));
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          const messages: Record<number, string> = {
+            400: t('Enter a valid tag name'),
+            401: t('You must be signed in'),
+            403: t('You are not allowed to edit metadata'),
+            404: t('Tag not found'),
+            409: t('A tag with that name already exists'),
+          };
+          setTagRenameError(messages[error.status] ?? t('Could not rename tag'));
+        } else {
+          setTagRenameError(t('Could not rename tag'));
+        }
+      },
+    });
+  };
   const countLabel = total > 0
     ? search && !filtered
       ? t('{count} results for "{query}"', { count: total, query: search })
@@ -406,7 +458,28 @@ export function Catalog({ entityKind, entityId, view }: CatalogProps) {
 
       <div className={styles.header}>
         {filtered && <span className={styles.kindLabel}>{t(KIND_LABEL[entityKind!])}</span>}
-        <h1 className={styles.title}>{heading}</h1>
+        <h1 className={renamingTag ? 'sr-only' : styles.title}>{heading}</h1>
+        {renamingTag ? (
+          <form className={styles.renameForm} onSubmit={submitTagRename}>
+            <label className="sr-only" htmlFor="tag-name-input">{t('Tag name')}</label>
+            <input id="tag-name-input" className={styles.renameInput} value={tagNameDraft} autoFocus
+              aria-invalid={!!tagRenameError} aria-describedby={tagRenameError ? 'tag-rename-error' : undefined}
+              onKeyDown={(event) => { if (event.key === 'Escape') closeTagRename(); }}
+              onChange={(event) => setTagNameDraft(event.target.value)} />
+            <button type="submit" className={styles.renameButton} disabled={renameTag.isPending}
+              aria-label={t('Save tag name')}><Check size={18} aria-hidden="true" focusable={false} /></button>
+            <button type="button" className={styles.renameButton} onClick={closeTagRename}
+              aria-label={t('Cancel')}><X size={18} aria-hidden="true" focusable={false} /></button>
+            {tagRenameError && <span id="tag-rename-error" className={styles.renameError} role="alert">{tagRenameError}</span>}
+          </form>
+        ) : (
+          canRenameTag && entityName ? (
+            <button ref={renameTriggerRef} type="button" className={styles.renameButton} onClick={beginTagRename}
+              aria-label={t('Rename tag {name}', { name: entityName })}>
+              <Pencil size={16} aria-hidden="true" focusable={false} />
+            </button>
+          ) : null
+        )}
         {/* role=status so the result count is announced when filters/search
             change it and when load-more grows it (SC 4.1.3). */}
         {countLabel && <span className={styles.count} role="status">{countLabel}</span>}

@@ -36,6 +36,16 @@ def _read(rel: str) -> str:
     return (_FE / rel).read_text()
 
 
+def _spa_routes() -> set[str]:
+    """Parse the canonical SPA_ROUTES values consumed by App.tsx."""
+    source = _read("lib/routes.ts")
+    table = re.search(r"export const SPA_ROUTES\s*=\s*\{(.*?)\}\s*as const", source, re.S)
+    assert table, "SPA_ROUTES table not found in lib/routes.ts"
+    routes = set(re.findall(r":\s*'(/[^']*)'", table.group(1)))
+    assert routes, "no routes parsed from SPA_ROUTES"
+    return routes
+
+
 @pytest.mark.unit
 def test_whats_new_chrome_msgids_anchored_in_spa_strings():
     """The page/menu chrome strings must be anchored so babel extracts them.
@@ -70,7 +80,8 @@ def test_category_chip_labels_anchored():
 def test_route_and_help_menu_wired():
     """A page you can't reach is dead code. Pin the route + the Help-menu link."""
     app = _read("App.tsx")
-    assert 'path="/whats-new"' in app, "/whats-new route not registered in App.tsx"
+    assert "/whats-new" in _spa_routes(), "/whats-new missing from canonical SPA_ROUTES"
+    assert "path={SPA_ROUTES.whatsNew}" in app, "/whats-new route not registered in App.tsx"
     assert "WhatsNew" in app and "from './pages/WhatsNew'" in app
 
     topbar = _read("components/TopBar.tsx")
@@ -108,13 +119,15 @@ def test_latest_version_derives_from_newest_entry():
 @pytest.mark.unit
 def test_every_deep_link_resolves_to_a_real_route():
     """A 'Try it' deep-link that points at a non-existent SPA route 404s. Pin
-    that every link.to in the data file matches a registered route in App.tsx."""
+    that every link.to in the data file matches the canonical route table consumed
+    by App.tsx."""
     data = _read("data/whatsNew.ts")
     app = _read("App.tsx")
-    routes = set(re.findall(r'path="(/[^"]*)"', app))
-    assert routes, "no routes parsed from App.tsx"
+    routes = _spa_routes()
+    assert "SPA_ROUTES" in app and "from './lib/routes'" in app, \
+        "App.tsx does not consume the canonical SPA route table"
     links = re.findall(r"to:\s*'([^']+)'", data)
     assert links, "no deep-links parsed from whatsNew.ts (expected several)"
     for to in links:
         # Compare against the static route (strip any :params — none expected here).
-        assert to in routes, f"deep-link {to!r} has no matching route in App.tsx"
+        assert to in routes, f"deep-link {to!r} has no matching canonical SPA route"

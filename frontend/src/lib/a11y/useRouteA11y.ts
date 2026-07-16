@@ -28,14 +28,31 @@ export function useRouteA11y(instanceName?: string): void {
       main?.focus();
     }
 
-    // Defer a frame so the destination route's <h1> has rendered before we read
-    // it for the title.
-    const raf = requestAnimationFrame(() => {
+    const base = instanceName || 'Calibre-Web NextGen';
+    document.title = base;
+    const updateTitle = () => {
       const heading = document.querySelector('main h1')?.textContent?.trim();
-      const base = instanceName || 'Calibre-Web NextGen';
-      document.title = heading ? `${heading} · ${base}` : base;
+      // Entity routes intentionally render an ellipsis while their list query
+      // resolves. Never leak that loading placeholder into browser history.
+      if (heading && heading !== '…' && heading !== '...') {
+        document.title = `${heading} · ${base}`;
+      }
+    };
+
+    // The first frame covers synchronous routes. MutationObserver covers async
+    // headings (series/tag/author/publisher/language direct URLs) whose real
+    // name arrives after that frame.
+    const raf = requestAnimationFrame(updateTitle);
+    const observer = new MutationObserver(updateTitle);
+    observer.observe(document.getElementById('root') || document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
     });
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+    };
   }, [location, instanceName]);
 }
 
