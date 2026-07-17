@@ -99,6 +99,18 @@
   -webkit-box-orient: vertical;
 }
 
+/* Series name + position under the cover (fork #657). Slightly quieter than the
+ * author line so the title stays the visual anchor; one line, ellipsised. */
+.series {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  opacity: 0.85;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
 .readBadge {
   position: absolute;
   top: var(--sp-2);
