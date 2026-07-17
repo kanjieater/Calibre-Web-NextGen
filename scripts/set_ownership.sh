@@ -3,24 +3,43 @@
 #
 # Called by the cwa-init s6 unit at every container start.
 #
-# The list is a fixed floor (/config, the app tree) plus whatever dirs.json
-# declares. dirs.json ships calibre_library_dir=/calibre-library and
+# The list is a fixed floor (/config, plus the narrow set of app-tree dirs the
+# runtime user writes) and whatever dirs.json declares. dirs.json ships
+# calibre_library_dir=/calibre-library and
 # tmp_conversion_dir=/config/.cwa_conversion_tmp, and the old inline version of
 # this logic hardcoded /calibre-library and /config on top of that -- so every
 # start chowned the whole library twice and re-walked a subtree of /config that
 # /config's own recursive pass had already covered (#874).
 #
-# The floor is not optional. dirs.json declares neither /config nor the app tree,
-# and both are load-bearing:
+# The floor is not optional. dirs.json declares neither /config nor the app-tree
+# writables, and all are load-bearing:
 #
 #   * /config holds app.db and user_profiles.json, which cwa-init writes as root
 #     *after* the early chown at the top of the unit. This pass is the only thing
 #     that hands them to the runtime user; without it, profile-picture uploads
 #     fail with EACCES on a fresh install.
 #
-#   * /app/calibre-web-automated ships from the image owned by the build-time abc
-#     (uid 911); the linuxserver base then usermods abc to $PUID at runtime, which
-#     orphans the tree for any install using the documented PUID.
+# The app tree at /app/calibre-web-automated ships from the image owned by the
+# build-time abc (uid 911); the linuxserver base then usermods abc to $PUID at
+# runtime, which orphans the tree for any install using the documented PUID.
+# The whole tree used to be chowned -R here to repair that -- ~1820 entries,
+# 2.5-26s of wall time on a fresh container, and on overlayfs every chown copies
+# the file up into the writable layer, so it cost disk too (#941). Almost none
+# of it needs re-owning: the static tree is world-readable and every directory
+# world-traversable (`find ... ! -perm -o+r` and `... -type d ! -perm -o+x` are
+# both empty), so Python imports and template reads work regardless of owner.
+# Only the dirs the runtime user *writes* under the app tree need ownership:
+#
+#   * metadata_change_logs/ -- cps/editbooks.py (metadata edits) and
+#     scripts/kindle_epub_fixer.py both open files here as abc, with no mkdir,
+#     so the dir must exist and be abc-writable or the write raises EACCES.
+#   * metadata_temp/        -- scripts/kindle_epub_fixer.py (spawned by the abc
+#     Flask process without s6-setuidgid) exports here as abc.
+#
+# cps/cache is the third such dir; it is created and chowned earlier in the
+# cwa-init unit (before first-run app.db creation needs it), so it is not
+# repeated here. The rest of the tree (dirs.json, the code) is written only by
+# root or never, so orphaned build-time ownership is harmless.
 #
 # scripts/auto_library.py also rewrites dirs.json in place at runtime, so a crash
 # mid-write can leave it unparseable -- which must not be able to silently reduce
@@ -37,6 +56,11 @@ CWA_DIRS_JSON="${CWA_DIRS_JSON:-${CWA_APP_ROOT}/dirs.json}"
 CWA_OWNER_USER="${CWA_OWNER_USER:-abc}"
 CWA_CHOWN="${CWA_CHOWN:-chown}"
 CWA_PYTHON="${CWA_PYTHON:-python3}"
+
+# The app-tree directories the runtime user writes to. These, not the whole
+# tree, are the floor's app-tree contribution (#941). cps/cache is handled
+# earlier in cwa-init, so it is intentionally absent here.
+CWA_APP_WRITABLE_DIRS="${CWA_APP_WRITABLE_DIRS:-${CWA_APP_ROOT}/metadata_change_logs ${CWA_APP_ROOT}/metadata_temp}"
 
 log() { echo "[cwa-init] $*"; }
 
@@ -118,8 +142,17 @@ dedupe_paths() {
 }
 
 main() {
-  local -a candidates=("${CWA_CONFIG_ROOT}" "${CWA_APP_ROOT}")
+  local -a candidates=("${CWA_CONFIG_ROOT}")
   local dir
+
+  # The app tree is world-readable and never re-walked (#941); only the dirs the
+  # runtime user writes under it are chowned. They ship in the image but a
+  # missing one must not turn into a soft chown failure, so ensure they exist.
+  for dir in ${CWA_APP_WRITABLE_DIRS}; do
+    [ -n "$dir" ] || continue
+    mkdir -p "$dir" 2>/dev/null || true
+    candidates+=("$dir")
+  done
 
   while IFS= read -r dir; do
     [ -n "$dir" ] && candidates+=("$dir")

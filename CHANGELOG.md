@@ -16,6 +16,10 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Changed
+
+- **Faster container startup, less disk churn.** On every boot the container was re-setting ownership across the entire application tree — around 1,800 files — which took anywhere from a couple of seconds to half a minute depending on your hardware, and on some storage back-ends copied every one of those files into the container's writable layer. The application code is read-only and already readable by everyone, so almost none of that work was needed. Startup now re-owns only the handful of folders the app actually writes to (metadata change logs and export temp), leaving the static code untouched ([#941](https://github.com/new-usemame/Calibre-Web-NextGen/issues/941)). Reported by @auspex and @chloeroform.
+
 ### Fixed
 
 - **Brazilian Portuguese now covers ~150 more of the interface.** Strings across the reader, shelves, and admin screens that still showed in English — including the "New" badge — now appear in Portuguese, and four entries that displayed the wrong text are corrected ("Shelf duplicated successfully" had been showing the message for deleting users; "Read Status" now reads "Status de leitura"). Translation work by @pedronora ([#949](https://github.com/new-usemame/Calibre-Web-NextGen/pull/949)).

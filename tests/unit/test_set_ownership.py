@@ -64,6 +64,11 @@ class Harness:
         self.library = tmp_path / "calibre-library"
         self.ingest = tmp_path / "cwa-book-ingest"
         self.conv_tmp = self.config_root / ".cwa_conversion_tmp"
+        # The app-tree dirs the runtime user writes; the default value of
+        # CWA_APP_WRITABLE_DIRS derives them from CWA_APP_ROOT, so overriding the
+        # app root (below, in run()) points them into this fake tree for free.
+        self.metadata_change_logs = self.app_root / "metadata_change_logs"
+        self.metadata_temp = self.app_root / "metadata_temp"
         for d in (self.app_root, self.config_root, self.library, self.ingest, self.conv_tmp):
             d.mkdir(parents=True, exist_ok=True)
 
@@ -227,20 +232,46 @@ def test_trailing_slash_does_not_defeat_deduplication(harness: Harness):
 
 
 # --------------------------------------------------------------------------
-# The floor: dirs.json declares neither /config nor the app tree
+# The floor: dirs.json declares neither /config nor the app-tree writables
 # --------------------------------------------------------------------------
 
 
-def test_config_and_app_root_are_always_walked(harness: Harness):
+def test_config_and_app_writables_are_always_walked(harness: Harness):
     harness.run()
     walked = harness.chowned_paths()
     assert str(harness.config_root) in walked, (
         "/config holds app.db and user_profiles.json, both written as root after "
         f"the early chown; got {walked}"
     )
-    assert str(harness.app_root) in walked, (
-        f"the app tree ships owned by the build-time uid; got {walked}"
+    assert str(harness.metadata_change_logs) in walked, (
+        "metadata_change_logs is written as abc by editbooks / kindle_epub_fixer "
+        f"and ships owned by the build-time uid; got {walked}"
     )
+    assert str(harness.metadata_temp) in walked, (
+        f"metadata_temp is exported to as abc by kindle_epub_fixer; got {walked}"
+    )
+
+
+def test_full_app_tree_is_not_recursively_walked(harness: Harness):
+    """#941: the ~1820-entry app tree is world-readable and traversable, so the
+    whole-tree chown -R (2.5-26s + overlayfs copy-up) is gone -- only the narrow
+    writables under it are re-owned."""
+    harness.run()
+    walked = harness.chowned_paths()
+    assert str(harness.app_root) not in walked, (
+        "the whole app tree must not be recursively chowned (#941); "
+        f"got {walked}"
+    )
+
+
+def test_app_writable_dirs_are_created_if_missing(harness: Harness):
+    """They ship in the image, but a missing one must be pre-created rather than
+    degrade to a soft chown failure that leaves it unwritable."""
+    # Fresh harness state: the dirs do not exist yet.
+    assert not harness.metadata_change_logs.exists()
+    harness.run()
+    assert harness.metadata_change_logs.is_dir()
+    assert harness.metadata_temp.is_dir()
 
 
 def test_missing_dirs_json_still_walks_the_floor(harness: Harness):
@@ -248,7 +279,8 @@ def test_missing_dirs_json_still_walks_the_floor(harness: Harness):
     harness.run()
     walked = harness.chowned_paths()
     assert str(harness.config_root) in walked
-    assert str(harness.app_root) in walked
+    assert str(harness.metadata_change_logs) in walked
+    assert str(harness.app_root) not in walked
 
 
 def test_truncated_dirs_json_still_walks_the_floor(harness: Harness):
@@ -259,7 +291,7 @@ def test_truncated_dirs_json_still_walks_the_floor(harness: Harness):
     walked = harness.chowned_paths()
     assert result.returncode == 0
     assert str(harness.config_root) in walked
-    assert str(harness.app_root) in walked
+    assert str(harness.metadata_change_logs) in walked
 
 
 def test_non_absolute_dirs_json_values_are_ignored(harness: Harness):
@@ -298,10 +330,13 @@ def test_network_share_mode_skips_bind_mounts(tmp_path: Path, truthy: str):
     assert "/cwa-book-ingest" not in walked
 
 
-def test_network_share_mode_still_walks_the_app_tree(harness: Harness):
-    """The app tree is inside the image, never on the share."""
+def test_network_share_mode_still_walks_the_app_writables(harness: Harness):
+    """The app-tree writables live inside the image, never on the share, so the
+    share exemption must not skip them."""
     harness.run(NETWORK_SHARE_MODE="true")
-    assert str(harness.app_root) in harness.chowned_paths()
+    walked = harness.chowned_paths()
+    assert str(harness.metadata_change_logs) in walked
+    assert str(harness.metadata_temp) in walked
 
 
 def test_falsey_network_share_mode_walks_everything(harness: Harness):
