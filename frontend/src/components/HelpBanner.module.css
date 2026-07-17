@@ -61,26 +61,7 @@
   align-items: center;
   justify-content: center;
   flex: none;
-}
-
-.kofiMark {
-  display: block;
-  overflow: visible;
-}
-
-.kofiCup {
-  fill: var(--hb-icon);
-}
-
-.kofiHandle {
-  fill: none;
-  stroke: var(--hb-icon);
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
-.kofiHeart {
-  fill: var(--hb-icon);
+  color: var(--hb-icon);
 }
 
 .text {

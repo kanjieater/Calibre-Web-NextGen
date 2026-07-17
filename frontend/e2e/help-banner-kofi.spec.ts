@@ -1,10 +1,53 @@
 import { test, expect, type Page } from '@playwright/test';
+import { prioritizeAnnouncements } from '../src/lib/announcementQueue';
 
 const LEGACY_HELP_KEY = 'cwng_help_banner_dismissed_v1';
 const LEGACY_KOFI_KEY = 'cwng_kofi_banner_dismissed_v1';
 const HELP_KEY = 'cwng_banner_dismissed:help-announcement-v1';
 const KOFI_KEY = 'cwng_banner_dismissed:kofi-support-v1';
+const SUPERSEDED_KOFI_KEY = 'cwng_banner_dismissed:kofi-support-v0';
 const SUPPORT_URL = 'https://ko-fi.com/calibrewebnextgen';
+
+test('announcement channels keep only the last-declared entry before priority sorting', () => {
+  const announcements = [
+    { id: 'channel-less-high', priority: 300 },
+    { id: 'kofi-old', priority: 900, channel: 'kofi' },
+    { id: 'channel-less-low', priority: 10 },
+    { id: 'kofi-new', priority: 100, channel: 'kofi' },
+  ];
+
+  expect(prioritizeAnnouncements(announcements).map(({ id }) => id)).toEqual([
+    'channel-less-high',
+    'kofi-new',
+    'channel-less-low',
+  ]);
+});
+
+test('superseded dismissal IDs cannot pre-dismiss or revive the current channel entry', () => {
+  const announcements = prioritizeAnnouncements([
+    { id: 'kofi-old', priority: 900, channel: 'kofi' },
+    { id: 'help', priority: 200 },
+    { id: 'kofi-new', priority: 100, channel: 'kofi' },
+  ]);
+
+  const dismissed = new Set(['kofi-old']);
+  expect(announcements.find(({ id }) => !dismissed.has(id))?.id).toBe('help');
+  dismissed.add('help');
+  expect(announcements.find(({ id }) => !dismissed.has(id))?.id).toBe('kofi-new');
+  dismissed.add('kofi-new');
+  expect(announcements.find(({ id }) => !dismissed.has(id))).toBeUndefined();
+});
+
+test('a reused object reference still contributes only its last channel declaration', () => {
+  const reused = { id: 'kofi-reused', priority: 100, channel: 'kofi' };
+  const announcements = prioritizeAnnouncements([
+    reused,
+    { id: 'help', priority: 200 },
+    reused,
+  ]);
+
+  expect(announcements.map(({ id }) => id)).toEqual(['help', 'kofi-reused']);
+});
 
 async function resetDismissals(page: Page) {
   await page.goto('/app');
@@ -13,6 +56,7 @@ async function resetDismissals(page: Page) {
     LEGACY_KOFI_KEY,
     HELP_KEY,
     KOFI_KEY,
+    SUPERSEDED_KOFI_KEY,
   ]);
   await page.reload();
 }
@@ -73,15 +117,15 @@ test('clicking the Ko-fi banner opens Ko-fi and dismisses it durably', async ({ 
       };
     },
   );
-  expect(renderedStyle).toEqual({
-    bannerWidth: renderedStyle.linkWidth,
-    bannerHeight: 40,
-    linkWidth: renderedStyle.bannerWidth,
-    linkHeight: 40,
-    background: 'linear-gradient(90deg, rgb(7, 56, 77), rgb(8, 70, 94) 58%, rgb(6, 68, 94))',
-    borderBottom: '0px',
-    boxShadow: 'none',
-  });
+  expect(renderedStyle.bannerWidth).toBe(renderedStyle.linkWidth);
+  expect(renderedStyle.bannerHeight).toBeCloseTo(40, 4);
+  expect(renderedStyle.linkWidth).toBe(renderedStyle.bannerWidth);
+  expect(renderedStyle.linkHeight).toBeCloseTo(40, 4);
+  expect(renderedStyle.background).toBe(
+    'linear-gradient(90deg, rgb(7, 56, 77), rgb(8, 70, 94) 58%, rgb(6, 68, 94))',
+  );
+  expect(renderedStyle.borderBottom).toBe('0px');
+  expect(renderedStyle.boxShadow).toBe('none');
 
   await supportLink.click({ position: { x: 4, y: 4 } });
 
@@ -188,6 +232,53 @@ test('a namespaced Ko-fi dismissal alone survives cold load without hiding Help'
   await expect(slot).toHaveAttribute('data-announcement-id', 'help-announcement-v1');
   await page.getByRole('button', { name: 'Dismiss help announcement' }).click();
   await expect(slot).toHaveCount(0);
+});
+
+test('a superseded Ko-fi dismissal ID does not pre-dismiss the current Ko-fi banner', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem('cwng_banner_dismissed:kofi-support-v0', '1');
+    localStorage.setItem('cwng_banner_dismissed:help-announcement-v1', '1');
+  });
+  await page.reload();
+
+  await expect(page.locator('[data-announcement-id]')).toHaveAttribute(
+    'data-announcement-id',
+    'kofi-support-v1',
+  );
+});
+
+test('Help menu ends with a secure external Ko-fi support link', async ({ page }) => {
+  const trigger = page.getByRole('button', { name: /^Help(?: — new updates available)?$/ });
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+
+  const panel = page.getByText('Help & support').locator('..');
+  const items = panel.locator('a, button');
+  const supportLink = panel.getByRole('link', { name: 'Support on Ko-fi →' });
+  await expect(supportLink).toHaveAttribute('href', SUPPORT_URL);
+  await expect(supportLink).toHaveAttribute('target', '_blank');
+  await expect(supportLink).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(items.last()).toHaveText('Support on Ko-fi →');
+
+  for (let index = 0; index < 6; index += 1) await page.keyboard.press('Tab');
+  await expect(supportLink).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await expect(panel).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
+test('Help menu renders the Ko-fi label from an authenticated translated catalog', async ({ page }) => {
+  await page.route('**/api/v1/auth/me', async (route) => {
+    const response = await route.fetch();
+    const me = await response.json();
+    await route.fulfill({ response, json: { ...me, locale: 'de' } });
+  });
+  await page.reload();
+
+  await page.getByRole('button', { name: /^Hilfe/ }).click();
+  await expect(page.getByRole('link', { name: 'Auf Ko-fi unterstützen →' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de');
 });
 
 test('storage failures keep the in-memory queue usable', async ({ page }) => {
