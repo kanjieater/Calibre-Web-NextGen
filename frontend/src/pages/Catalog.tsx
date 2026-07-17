@@ -54,6 +54,27 @@ const READ_FILTERS: { label: string; value: ReadFilter }[] = [
   { label: 'Read', value: 'read' },
 ];
 
+// Fork #640 — the plain Library view remembers its sort order and read filter
+// across full page reloads (localStorage, per browser). The in-memory scrollCache
+// only survives client-side back/forward, so an F5 previously reset sort → "Newest"
+// and the read filter → "All". Entity/series/discovery views keep their contextual
+// defaults (#573 series-order, #498 saved view) and are intentionally excluded — a
+// remembered whole-library sort must not leak into a series or author listing.
+const LIBRARY_SORT_KEY = 'cwng:library-sort-v1';
+const LIBRARY_READ_FILTER_KEY = 'cwng:library-readfilter-v1';
+const LIBRARY_SORT_VALUES = SORT_OPTIONS.map((o) => o.value);
+const LIBRARY_READ_FILTER_VALUES: ReadFilter[] = READ_FILTERS.map((f) => f.value);
+
+// A stored choice is honoured only if it is still a valid option; anything else
+// (a stale value, a foreign key, disabled storage) safely falls back to undefined
+// so the caller uses the contextual default.
+function readStoredChoice<T extends string>(key: string, allowed: readonly T[]): T | undefined {
+  try {
+    const stored = localStorage.getItem(key) as T | null;
+    return stored && allowed.includes(stored) ? stored : undefined;
+  } catch { return undefined; }
+}
+
 const KIND_OPTIONS: Record<EntityKind, { label: string }> = {
   author: { label: 'Author' },
   series: { label: 'Series' },
@@ -216,6 +237,8 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
   // Library-only controls (search box, advanced link, read-status filter) are
   // hidden for both entity-scoped and discovery views.
   const hideLibraryControls = filtered || isView;
+  // The plain Library tab — the only view whose sort/read-filter is persisted (#640).
+  const isPlainLibrary = !filtered && !isView;
 
   // Scroll/state restoration (#578): identity of THIS catalog instance (library
   // vs a specific entity vs a discovery view) — stable across a book → Back trip.
@@ -238,8 +261,25 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
   const [allBooks, setAllBooks] = useState<Book[]>(() => snap?.books ?? []);
   const [searchInput, setSearchInput] = useState(() => snap?.searchInput ?? '');
   const [search, setSearch] = useState(() => snap?.search ?? '');
-  const [sort, setSort] = useState(() => snap?.sort ?? defaultSort);
-  const [readFilter, setReadFilter] = useState<ReadFilter>(() => (snap?.readFilter as ReadFilter) ?? 'all');
+  const [sort, setSort] = useState(() =>
+    snap?.sort
+    ?? (isPlainLibrary ? readStoredChoice(LIBRARY_SORT_KEY, LIBRARY_SORT_VALUES) : undefined)
+    ?? defaultSort);
+  const [readFilter, setReadFilter] = useState<ReadFilter>(() =>
+    (snap?.readFilter as ReadFilter)
+    ?? (isPlainLibrary ? readStoredChoice(LIBRARY_READ_FILTER_KEY, LIBRARY_READ_FILTER_VALUES) : undefined)
+    ?? 'all');
+
+  // Persist the Library view's sort + read filter so a full reload restores them (#640).
+  // Scoped to the plain library — entity/discovery views must not overwrite the key.
+  useEffect(() => {
+    if (!isPlainLibrary) return;
+    try { localStorage.setItem(LIBRARY_SORT_KEY, sort); } catch { /* storage can be disabled */ }
+  }, [isPlainLibrary, sort]);
+  useEffect(() => {
+    if (!isPlainLibrary) return;
+    try { localStorage.setItem(LIBRARY_READ_FILTER_KEY, readFilter); } catch { /* storage can be disabled */ }
+  }, [isPlainLibrary, readFilter]);
 
   // Is the saved default view (#498) driving this listing? It scopes the plain
   // library only — an entity or discovery view, or a search, is an explicit
