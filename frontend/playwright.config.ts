@@ -62,7 +62,12 @@ export default defineConfig({
         storageState: STORAGE,
       },
       dependencies: ['setup'],
-      testIgnore: /subpath\.spec\.ts/,
+      // default-library-view mutates ACCOUNT state (the saved default view) and
+      // every project shares one seed login, so running it here in parallel with
+      // desktop makes each project clobber the other's writes — a race, not a
+      // defect. Desktop owns it until the harness can hand each project its own
+      // account; it passes standalone at 375px.
+      testIgnore: [/subpath\.spec\.ts/, /default-library-view\.spec\.ts/],
     },
 
     // 4. iPad-class touch viewport — #863 was reported at this width, where

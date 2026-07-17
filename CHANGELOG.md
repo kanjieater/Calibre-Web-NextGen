@@ -19,6 +19,86 @@ is for things you can see or feel when running the app.
 ### Fixed
 
 - **“Read now” actions now form a straight bottom row across New UI book cards on iPad and other touch devices.** Short titles reserve the same two-line space as long ones, while shelf removal and quick edit are no longer hidden behind hover on touch hardware. Desktop keeps its uncluttered hover treatment, with keyboard focus revealing the actions. Thanks @Andrew-H2O (#863).
+- **Brazilian Portuguese now covers ~150 more of the interface.** Strings across the reader, shelves, and admin screens that still showed in English — including the "New" badge — now appear in Portuguese, and four entries that displayed the wrong text are corrected ("Shelf duplicated successfully" had been showing the message for deleting users; "Read Status" now reads "Status de leitura"). Translation work by @pedronora ([#949](https://github.com/new-usemame/Calibre-Web-NextGen/pull/949)).
+- **Russian is now fully translated.** The last 48 English strings — renaming a tag and its error messages, smart-shelf rule failures, page-not-found and page-load errors, and the Hardcover token-file notice — now appear in Russian, and a fuzzy entry on the Hardcover notice is confirmed. Translation update by @standhaftsohnsergius ([#970](https://github.com/new-usemame/Calibre-Web-NextGen/pull/970)).
+
+## [v4.1.16] - 2026-07-17
+
+### Added
+
+- **You can now support CWNG development from the app** — announcements queue in the top banner, and clicking anywhere on the Ko-fi message opens Ko-fi and dismisses it; dismissals are remembered. A Support on Ko-fi link is also available in the Help menu.
+
+## [v4.1.15] - 2026-07-17
+
+### Fixed
+
+- **KOReader stopped seeing new versions of the sync plugin.** If you update the
+  plugin from inside KOReader — through Updates Manager or appstore.koplugin —
+  the newest version it offered was the one from 13 July, even though three
+  plugin fixes have shipped since: highlights and notes syncing into your
+  library, highlight deletions syncing to the server, and a guard that stops a
+  device deleting highlights it never had. The plugin releases those tools read
+  had quietly stopped being published, so the fixes were in the server but never
+  reached the device. The current plugin is published now, and publishing it is
+  no longer a manual step that can be missed. If you install the plugin by
+  downloading it from your own server's KOReader page, nothing changed for you —
+  that copy was always current. Thanks to @KucharczykL for spotting it and to
+  @filiporlo for #400.
+
+- **Books with two or more authors were hard to read in the new UI.** Authors were separated
+  with a comma — but an author's name can contain a comma itself ("Dumas, Alexandre"), so
+  two authors came out as "Dumas, Alexandre, Maquet, Auguste" and you could not tell where
+  one person ended and the next began. Authors are now separated with "&", the same way the
+  classic interface, Calibre itself, and the new UI's own edit box ("Authors (separate with
+  &)") have always done it — so the book page, the library grid and the table view now agree
+  with the edit form instead of contradicting it. Tags, languages and publishers are
+  unaffected and still use commas. Thanks to @chloeroform for the report.
+
+- **New accounts ignored the default theme you picked in Admin.** Whichever theme an admin
+  chose under Admin → Theme, some new accounts still started on Dark. Which accounts
+  depended on how they signed up: people who registered themselves through the new UI got
+  it wrong only on servers upgraded from an older build, while accounts created by OAuth,
+  LDAP import, or an external/proxy login always got Dark no matter what you had set —
+  those three still carried a hardcoded default from back when Light was removed, and were
+  never updated when the six themes returned. Admin-created accounts were always fine, so
+  the same setting could produce two different results on one server. All seven ways an
+  account can be created now seed the theme you configured.
+
+- **"Change cover" made the whole server unreachable until it finished.** Opening the
+  cover picker on one book froze every other page for everyone using the server — up to
+  about 12 seconds, however long the slowest metadata source took to answer. The same
+  freeze hit the "Search metadata" button on the edit page. Measured on a test library: a
+  book page that normally answers in 30ms took 11.4 seconds while a cover search ran; it
+  now answers in well under a quarter second, and the cover search itself is no slower.
+  Thanks to @darkmatterpelican for reporting it in #954.
+
+- **Setting a default library view turned your library into the search page.** After saving
+  a default view, the library home showed the "Advanced search" form pinned above the books,
+  the page was retitled "Advanced search", and the library heading, its actions and the
+  Discover strip disappeared. Your library now stays your library — it simply shows the
+  books your default view selects, with a note saying so and a "Show all books" link to see
+  everything again. Reported by @chloeroform.
+
+- **Automatic duplicate resolution never ran if you set a cooldown.** Turning on the
+  cooldown ("wait N minutes between automatic resolutions") stopped automatic duplicate
+  resolution from running at all, and the log reported a wait of about four hours
+  counting up rather than down. Two separate causes: the cooldown you typed was thrown
+  away and replaced with one minute, and the clock comparison mixed your local time with
+  UTC, so the wait never elapsed. If your server runs east of UTC the opposite happened —
+  the cooldown was ignored and resolution ran on every scan. Both are fixed and your
+  existing resolution history stays intact. Thanks to @jdbway, who diagnosed both causes
+  and pinpointed the exact lines in #944.
+
+- **Startup no longer sets permissions on your Calibre library twice.** Every container
+  start walked the whole library once from a hardcoded list and again from `dirs.json`,
+  and re-walked a folder inside `/config` that had already been covered. Each folder is
+  now visited once, which shortens startup on large libraries. Thanks to @chloeroform for
+  spotting it in the startup log and measuring it.
+
+- **Russian screen readers announced the reader's progress as "Прочитано: 45% r"** — a
+  stray letter left over from the English "read". It only ever reached people using a
+  screen reader, since the text is spoken rather than drawn on screen. Brazilian
+  Portuguese was already correct and is unchanged.
 
 ## [v4.1.14] - 2026-07-16
 
