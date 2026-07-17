@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-17 00:59-0400\n"
+"POT-Creation-Date: 2026-07-17 01:20-0400\n"
 "PO-Revision-Date: 2018-02-07 02:20-0500\n"
 "Last-Translator: subdiox <subdiox@gmail.com>\n"
 "Language-Team: ja <LL@li.org>\n"
@@ -172,7 +172,7 @@ msgstr "全て表示"
 msgid "Malformed request"
 msgstr "不正なリクエスト"
 
-#: cps/admin.py:851 cps/admin.py:3084
+#: cps/admin.py:851 cps/admin.py:3088
 msgid "Guest Name can't be changed"
 msgstr "ゲストユーザーの名前は変更できません"
 
@@ -180,7 +180,7 @@ msgstr "ゲストユーザーの名前は変更できません"
 msgid "Guest can't have this role"
 msgstr "ゲストユーザーはこのロールを持つことができません"
 
-#: cps/admin.py:879 cps/admin.py:2908
+#: cps/admin.py:879 cps/admin.py:2912
 msgid "No admin user remaining, can't remove admin role"
 msgstr "管理者ユーザーが残っておらず、管理者ロールを削除できません"
 
@@ -231,7 +231,7 @@ msgstr "無効な読み取り列"
 msgid "Invalid Restricted Column"
 msgstr "無効な制限列"
 
-#: cps/admin.py:1007 cps/admin.py:2764
+#: cps/admin.py:1007 cps/admin.py:2768
 msgid "Calibre-Web NextGen configuration updated"
 msgstr ""
 
@@ -420,8 +420,8 @@ msgstr "メールサーバー設定を編集"
 msgid "Success! Gmail Account Verified."
 msgstr "成功！Gmailアカウントが確認されました。"
 
-#: cps/admin.py:1896 cps/admin.py:1899 cps/admin.py:2504 cps/admin.py:2740
-#: cps/admin.py:2865 cps/admin.py:3127 cps/editbooks.py:1157
+#: cps/admin.py:1896 cps/admin.py:1899 cps/admin.py:2508 cps/admin.py:2744
+#: cps/admin.py:2869 cps/admin.py:3131 cps/editbooks.py:1157
 #: cps/editbooks.py:2059 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
 #: cps/shelf.py:332 cps/shelf.py:389 cps/shelf.py:464 cps/shelf.py:547
 #: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3090
@@ -521,7 +521,7 @@ msgstr "指定したタスクの期間が無効です"
 msgid "Scheduled tasks settings updated"
 msgstr "スケジュールタスクの設定を更新しました"
 
-#: cps/admin.py:2082 cps/admin.py:2226 cps/admin.py:3123 cps/web.py:2520
+#: cps/admin.py:2082 cps/admin.py:2226 cps/admin.py:3127 cps/web.py:2520
 msgid "Oops! An unknown error occurred. Please try again later."
 msgstr "不明なエラーが発生しました。あとで再試行してください。"
 
@@ -535,7 +535,7 @@ msgstr "設定DBが書き込みできません"
 msgid "title"
 msgstr "タイトル"
 
-#: cps/admin.py:2211 cps/admin.py:3115
+#: cps/admin.py:2211 cps/admin.py:3119
 #, python-format
 msgid "Edit User %(nick)s"
 msgstr "ユーザー %(nick)s を編集"
@@ -614,60 +614,60 @@ msgstr "更新中にファイルを置換できませんでした"
 msgid "Failed to extract at least One LDAP User"
 msgstr "少なくとも1人のLDAPユーザーの抽出に失敗しました"
 
-#: cps/admin.py:2397
+#: cps/admin.py:2401
 msgid "Failed to Create at Least One LDAP User"
 msgstr "少なくとも1人のLDAPユーザーの作成に失敗しました"
 
-#: cps/admin.py:2410
+#: cps/admin.py:2414
 #, python-format
 msgid "Error: %(ldaperror)s"
 msgstr "エラー: %(ldaperror)s"
 
-#: cps/admin.py:2414
+#: cps/admin.py:2418
 msgid "Error: No user returned in response of LDAP server"
 msgstr "エラー: LDAPサーバーのレスポンスでユーザーが返されません"
 
-#: cps/admin.py:2450
+#: cps/admin.py:2454
 msgid "At Least One LDAP User Not Found in Database"
 msgstr "DB内にLDAPユーザーが1人も見つかりません"
 
-#: cps/admin.py:2452
+#: cps/admin.py:2456
 #, python-brace-format
 msgid "{} User Successfully Imported"
 msgstr "{}人のユーザーをインポートしました"
 
-#: cps/admin.py:2516
+#: cps/admin.py:2520
 msgid "Books path not valid"
 msgstr "書籍パスが無効です"
 
-#: cps/admin.py:2523
+#: cps/admin.py:2527
 msgid "DB Location is not Valid, Please Enter Correct Path"
 msgstr "DBの場所が無効です。正しいパスを入力してください"
 
-#: cps/admin.py:2548
+#: cps/admin.py:2552
 msgid "DB is not Writeable"
 msgstr "DBへの書き込みができません"
 
-#: cps/admin.py:2563
+#: cps/admin.py:2567
 msgid "Keyfile Location is not Valid, Please Enter Correct Path"
 msgstr "キーファイルの場所が無効です。正しいパスを入力してください"
 
-#: cps/admin.py:2567
+#: cps/admin.py:2571
 msgid "Certfile Location is not Valid, Please Enter Correct Path"
 msgstr "証明書ファイルの場所が無効です。正しいパスを入力してください"
 
-#: cps/admin.py:2661
+#: cps/admin.py:2665
 msgid ""
 "Auto-create users cannot be enabled without enabling reverse proxy "
 "authentication"
 msgstr ""
 "リバースプロキシ認証を有効にしないと、ユーザー自動作成は有効にできません"
 
-#: cps/admin.py:2664
+#: cps/admin.py:2668
 msgid "Auto-create users requires a valid reverse proxy header name"
 msgstr "ユーザー自動作成には有効なリバースプロキシヘッダー名が必要です"
 
-#: cps/admin.py:2683 cps/admin.py:2690
+#: cps/admin.py:2687 cps/admin.py:2694
 msgid ""
 "Invalid OAuth Redirect Host format. Please include the full URL with "
 "protocol (e.g., https://your-domain.com)"
@@ -675,7 +675,7 @@ msgstr ""
 "OAuthリダイレクトホストの形式が無効です。プロトコルを含む完全なURLを入力して"
 "ください（例：https://your-domain.com）"
 
-#: cps/admin.py:2687
+#: cps/admin.py:2691
 msgid ""
 "OAuth Redirect Host should not include a path. Use only the base URL (e.g., "
 "https://your-domain.com)"
@@ -683,70 +683,70 @@ msgstr ""
 "OAuthリダイレクトホストにはパスを含めないでください。ベースURLのみを使用して"
 "ください（例：https://your-domain.com）"
 
-#: cps/admin.py:2723
+#: cps/admin.py:2727
 msgid "Password length has to be between 1 and 40"
 msgstr "パスワードの長さは1〜40文字である必要があります"
 
-#: cps/admin.py:2791
+#: cps/admin.py:2795
 msgid "Database Settings updated"
 msgstr "DB設定を更新しました"
 
-#: cps/admin.py:2799
+#: cps/admin.py:2803
 msgid "Database Configuration"
 msgstr "DB設定"
 
-#: cps/admin.py:2820 cps/web.py:2485
+#: cps/admin.py:2824 cps/web.py:2485
 msgid "Oops! Please complete all fields."
 msgstr "全ての項目を入力してください"
 
-#: cps/admin.py:2829
+#: cps/admin.py:2833
 msgid "E-mail is not from valid domain"
 msgstr "このメールは有効なドメインからのものではありません"
 
-#: cps/admin.py:2837
+#: cps/admin.py:2841
 msgid "Add new user"
 msgstr "新規ユーザー追加"
 
-#: cps/admin.py:2855
+#: cps/admin.py:2859
 #, python-format
 msgid "User '%(user)s' created"
 msgstr "ユーザー '%(user)s' を作成しました"
 
-#: cps/admin.py:2861
+#: cps/admin.py:2865
 msgid "Oops! An account already exists for this Email. or name."
 msgstr ""
 "このメールアドレスかニックネームで登録されたアカウントがすでに存在します。"
 
-#: cps/admin.py:2887
+#: cps/admin.py:2891
 #, python-format
 msgid "User '%(nick)s' deleted"
 msgstr "ユーザー '%(nick)s' を削除しました"
 
-#: cps/admin.py:2890
+#: cps/admin.py:2894
 msgid "Can't delete Guest User"
 msgstr "ゲストユーザーは削除できません"
 
-#: cps/admin.py:2893
+#: cps/admin.py:2897
 msgid "No admin user remaining, can't delete user"
 msgstr "管理者ユーザーが残っておらず、ユーザーを削除できません"
 
-#: cps/admin.py:3078 cps/web.py:2821
+#: cps/admin.py:3082 cps/web.py:2821
 msgid "Email can't be empty and has to be a valid Email"
 msgstr "メールアドレスは空欄にできず、有効なメールアドレスである必要があります"
 
-#: cps/admin.py:3119
+#: cps/admin.py:3123
 #, python-format
 msgid "User '%(nick)s' updated"
 msgstr "ユーザー '%(nick)s' を更新しました"
 
-#: cps/admin.py:3184
+#: cps/admin.py:3188
 #, python-format
 msgid ""
 "Connection successful! OIDC discovery endpoint is accessible.%(endpoints)s"
 msgstr ""
 "接続成功！OIDCディスカバリーエンドポイントにアクセスできます。%(endpoints)s"
 
-#: cps/admin.py:3189
+#: cps/admin.py:3193
 msgid ""
 "Connection failed: OIDC discovery endpoint not found (404). Check if the "
 "base URL is correct."
@@ -754,12 +754,12 @@ msgstr ""
 "接続失敗：OIDCディスカバリーエンドポイントが見つかりません（404）。ベースURL"
 "が正しいか確認してください。"
 
-#: cps/admin.py:3191 cps/admin.py:3248
+#: cps/admin.py:3195 cps/admin.py:3252
 #, python-format
 msgid "Connection failed: Server returned status code %(code)s"
 msgstr "接続失敗：サーバーがステータスコード %(code)s を返しました"
 
-#: cps/admin.py:3193
+#: cps/admin.py:3197
 msgid ""
 "Connection failed: Could not connect to server. Check the URL and network "
 "connectivity."
@@ -767,13 +767,13 @@ msgstr ""
 "接続失敗：サーバーに接続できませんでした。URLとネットワーク接続を確認してくだ"
 "さい。"
 
-#: cps/admin.py:3195
+#: cps/admin.py:3199
 msgid ""
 "Connection failed: Request timed out. The server may be slow or unreachable."
 msgstr ""
 "接続失敗：リクエストがタイムアウトしました。サーバーが遅いか到達不能です。"
 
-#: cps/admin.py:3197
+#: cps/admin.py:3201
 msgid ""
 "Connection failed: Server returned invalid JSON. This may not be an OIDC "
 "endpoint."
@@ -781,12 +781,12 @@ msgstr ""
 "接続失敗：サーバーが無効なJSONを返しました。OIDCエンドポイントではない可能性"
 "があります。"
 
-#: cps/admin.py:3200
+#: cps/admin.py:3204
 #, fuzzy, python-format
 msgid "Connection failed: %(error)s"
 msgstr "接続失敗：%(error)s"
 
-#: cps/admin.py:3226
+#: cps/admin.py:3230
 #, python-format
 msgid ""
 "Metadata is missing required OIDC fields: %(fields)s. This may not be a "
@@ -795,29 +795,29 @@ msgstr ""
 "メタデータに必要なOIDCフィールドがありません：%(fields)s。有効なOIDCメタデー"
 "タエンドポイントではない可能性があります。"
 
-#: cps/admin.py:3237
+#: cps/admin.py:3241
 #, python-format
 msgid "Metadata URL is valid! Found %(count)s OAuth endpoints."
 msgstr ""
 "メタデータURLは有効です！%(count)s個のOAuthエンドポイントが見つかりました。"
 
-#: cps/admin.py:3239
+#: cps/admin.py:3243
 #, fuzzy
 msgid " User info endpoint is available."
 msgstr "リリース情報がありません"
 
-#: cps/admin.py:3241
+#: cps/admin.py:3245
 msgid ""
 " Note: User info endpoint not found - this may cause authentication issues."
 msgstr ""
 " 注意：ユーザー情報エンドポイントが見つかりません。認証で問題が発生する可能性"
 "があります。"
 
-#: cps/admin.py:3246
+#: cps/admin.py:3250
 msgid "Metadata URL not found (404). Please check the URL is correct."
 msgstr "メタデータURLが見つかりません（404）。URLが正しいか確認してください。"
 
-#: cps/admin.py:3250
+#: cps/admin.py:3254
 msgid ""
 "Connection failed: Could not connect to metadata URL. Check the URL and "
 "network connectivity."
@@ -825,48 +825,48 @@ msgstr ""
 "接続失敗：メタデータURLに接続できませんでした。URLとネットワーク接続を確認し"
 "てください。"
 
-#: cps/admin.py:3252
+#: cps/admin.py:3256
 msgid "Connection failed: Request timed out."
 msgstr "接続失敗：リクエストがタイムアウトしました。"
 
-#: cps/admin.py:3254
+#: cps/admin.py:3258
 msgid "Connection failed: Invalid JSON in response."
 msgstr "接続失敗：レスポンスに無効なJSONが含まれています。"
 
-#: cps/admin.py:3257
+#: cps/admin.py:3261
 msgid "An unknown error occurred."
 msgstr "不明なエラーが発生しました。"
 
-#: cps/admin.py:3269
+#: cps/admin.py:3273
 msgid "Restore already in progress."
 msgstr "復元は既に進行中です。"
 
-#: cps/admin.py:3273
+#: cps/admin.py:3277
 msgid "Restore failed: Calibre library path is not configured."
 msgstr "復元失敗：Calibreライブラリパスが設定されていません。"
 
-#: cps/admin.py:3278
+#: cps/admin.py:3282
 #, python-format
 msgid "Restore failed: metadata.db not found at %(path)s"
 msgstr "復元失敗：metadata.dbが%(path)sに見つかりません"
 
-#: cps/admin.py:3283
+#: cps/admin.py:3287
 #, python-format
 msgid "Restore failed: app.db not found at %(path)s"
 msgstr "復元失敗：app.dbが%(path)sに見つかりません"
 
-#: cps/admin.py:3355 cps/admin.py:3398
+#: cps/admin.py:3359 cps/admin.py:3402
 #, python-format
 msgid "Restore failed: %(err)s"
 msgstr "復元失敗：%(err)s"
 
-#: cps/admin.py:3375
+#: cps/admin.py:3379
 msgid "Restore completed but app.db cleanup failed. See logs for details."
 msgstr ""
 "復元は完了しましたが、app.dbのクリーンアップに失敗しました。詳細はログを確認"
 "してください。"
 
-#: cps/admin.py:3394
+#: cps/admin.py:3398
 #, python-format
 msgid ""
 "Restore complete. Backups and restore log saved to %(dir)s. All book-linked "
@@ -1805,12 +1805,12 @@ msgstr ""
 msgid "Recent Publications"
 msgstr ""
 
-#: cps/oauth_bb.py:287
+#: cps/oauth_bb.py:288
 #, python-format
 msgid "Register with %(provider)s"
 msgstr "%(provider)s で登録"
 
-#: cps/oauth_bb.py:342
+#: cps/oauth_bb.py:343
 msgid ""
 "Login failed: OAuth token validation error. This may be due to scope "
 "configuration mismatch. Please check your OAuth scopes configuration or "
@@ -1819,13 +1819,13 @@ msgstr ""
 "ログイン失敗：OAuthトークンの検証エラー。スコープ設定の不一致が原因の可能性が"
 "あります。OAuthスコープ設定を確認するか、管理者にお問い合わせください。"
 
-#: cps/oauth_bb.py:347
+#: cps/oauth_bb.py:348
 msgid "Login failed: OAuth token expired. Please try logging in again."
 msgstr ""
 "ログイン失敗：OAuthトークンの有効期限が切れています。再度ログインしてくださ"
 "い。"
 
-#: cps/oauth_bb.py:351
+#: cps/oauth_bb.py:352
 msgid ""
 "Login failed: Could not connect to the OAuth provider's user info endpoint. "
 "Please try again or contact your administrator."
@@ -1833,14 +1833,14 @@ msgstr ""
 "ログイン失敗：OAuthプロバイダーのユーザー情報エンドポイントに接続できませんで"
 "した。再試行するか、管理者にお問い合わせください。"
 
-#: cps/oauth_bb.py:356
+#: cps/oauth_bb.py:357
 #, fuzzy
 msgid ""
 "Login failed: The OAuth provider returned invalid user profile data. Please "
 "contact your administrator."
 msgstr "メールサーバーが設定されていません。管理者に連絡してください"
 
-#: cps/oauth_bb.py:378
+#: cps/oauth_bb.py:379
 #, python-format
 msgid ""
 "Login failed: OAuth provider response is missing required fields: "
@@ -1850,37 +1850,37 @@ msgstr ""
 "ログイン失敗：OAuthプロバイダーの応答に必要なフィールドがありません："
 "%(fields)s。OAuth設定を確認するか、管理者にお問い合わせください。"
 
-#: cps/oauth_bb.py:404 cps/oauth_bb.py:663
+#: cps/oauth_bb.py:405 cps/oauth_bb.py:666
 msgid "Failed to link OAuth account. Please try again."
 msgstr "OAuthアカウントの連携に失敗しました。再試行してください。"
 
-#: cps/oauth_bb.py:437
+#: cps/oauth_bb.py:438
 msgid "Login failed: your account is not allowed to access this application."
 msgstr ""
 
-#: cps/oauth_bb.py:626
+#: cps/oauth_bb.py:629
 msgid ""
 "OAuth error: Provider returned invalid user information. Please try again."
 msgstr ""
 "OAuthエラー：プロバイダーが無効なユーザー情報を返しました。再試行してくださ"
 "い。"
 
-#: cps/oauth_bb.py:640
+#: cps/oauth_bb.py:643
 #, python-format
 msgid "This %(oauth)s account is already linked to a different user"
 msgstr ""
 
-#: cps/oauth_bb.py:647 cps/remotelogin.py:149
+#: cps/oauth_bb.py:650 cps/remotelogin.py:149
 #, python-format
 msgid "Success! You are now logged in as: %(nickname)s"
 msgstr "%(nickname)s としてログイン中"
 
-#: cps/oauth_bb.py:657
+#: cps/oauth_bb.py:660
 #, python-format
 msgid "Link to %(oauth)s Succeeded"
 msgstr "%(oauth)s との連携に成功しました"
 
-#: cps/oauth_bb.py:665
+#: cps/oauth_bb.py:668
 #, python-format
 msgid ""
 "Login failed: No user account is linked to your %(provider)s account. Please "
@@ -1891,62 +1891,62 @@ msgstr ""
 "ん。アカウントの作成または既存アカウントの連携については管理者にお問い合わせ"
 "ください。"
 
-#: cps/oauth_bb.py:673
+#: cps/oauth_bb.py:676
 msgid "OAuth authentication failed. Please try again or contact administrator."
 msgstr "OAuth認証に失敗しました。再試行するか、管理者にお問い合わせください。"
 
-#: cps/oauth_bb.py:677
+#: cps/oauth_bb.py:680
 #, fuzzy
 msgid "OAuth system error. Please contact administrator."
 msgstr "メールサーバーが設定されていません。管理者に連絡してください"
 
-#: cps/oauth_bb.py:710
+#: cps/oauth_bb.py:713
 #, python-format
 msgid "Unlink to %(oauth)s Succeeded"
 msgstr "%(oauth)s との連携解除に成功しました"
 
-#: cps/oauth_bb.py:715
+#: cps/oauth_bb.py:718
 #, python-format
 msgid "Unlink to %(oauth)s Failed"
 msgstr "%(oauth)s との連携解除に失敗しました"
 
-#: cps/oauth_bb.py:718
+#: cps/oauth_bb.py:721
 #, python-format
 msgid "Not Linked to %(oauth)s"
 msgstr "%(oauth)s と連携していません"
 
-#: cps/oauth_bb.py:939
+#: cps/oauth_bb.py:942
 msgid "Failed to log in with GitHub."
 msgstr "GitHubアカウントでのログインに失敗しました。"
 
-#: cps/oauth_bb.py:945
+#: cps/oauth_bb.py:948
 msgid "Failed to fetch user info from GitHub."
 msgstr "GitHubからのユーザー情報取得に失敗しました。"
 
-#: cps/oauth_bb.py:966
+#: cps/oauth_bb.py:969
 msgid "Failed to log in with Google."
 msgstr "Googleアカウントでのログインに失敗しました。"
 
-#: cps/oauth_bb.py:975
+#: cps/oauth_bb.py:978
 msgid "Failed to fetch user info from Google."
 msgstr "Googleからのユーザー情報取得に失敗しました。"
 
-#: cps/oauth_bb.py:1000
+#: cps/oauth_bb.py:1003
 msgid "Failed to log in with Generic OAuth."
 msgstr "汎用OAuthでのログインに失敗しました。"
 
-#: cps/oauth_bb.py:1016
+#: cps/oauth_bb.py:1019
 msgid "OAuth authentication failed: Token validation error. Please try again."
 msgstr "OAuth認証失敗：トークンの検証エラー。再試行してください。"
 
-#: cps/oauth_bb.py:1020
+#: cps/oauth_bb.py:1023
 msgid ""
 "OAuth authentication failed due to an unexpected error. Please contact "
 "administrator."
 msgstr ""
 "予期しないエラーによりOAuth認証に失敗しました。管理者にお問い合わせください。"
 
-#: cps/oauth_bb.py:1028 cps/oauth_bb.py:1046 cps/oauth_bb.py:1064
+#: cps/oauth_bb.py:1031 cps/oauth_bb.py:1049 cps/oauth_bb.py:1067
 msgid ""
 "OAuth error: Invalid redirect URI. If you're experiencing this error "
 "repeatedly, please configure the 'OAuth Redirect Host' setting in Admin > "
@@ -1955,25 +1955,25 @@ msgstr ""
 "OAuthエラー：無効なリダイレクトURIです。このエラーが繰り返し発生する場合は、"
 "管理 > 基本設定 > OAuthで「OAuthリダイレクトホスト」を設定してください。"
 
-#: cps/oauth_bb.py:1100
+#: cps/oauth_bb.py:1103
 msgid "GitHub Oauth error, please retry later."
 msgstr "GitHub OAuth エラー、再度お試しください。"
 
-#: cps/oauth_bb.py:1107
+#: cps/oauth_bb.py:1110
 #, python-brace-format
 msgid "GitHub Oauth error: {}"
 msgstr "GitHub OAuth エラー: {}"
 
-#: cps/oauth_bb.py:1157
+#: cps/oauth_bb.py:1160
 msgid "Google Oauth error, please retry later."
 msgstr "Google OAuth エラー、再度お試しください。"
 
-#: cps/oauth_bb.py:1164
+#: cps/oauth_bb.py:1167
 #, python-brace-format
 msgid "Google Oauth error: {}"
 msgstr "Google OAuth エラー: {}"
 
-#: cps/oauth_bb.py:1200 cps/oauth_bb.py:1208
+#: cps/oauth_bb.py:1203 cps/oauth_bb.py:1211
 #, python-brace-format
 msgid "OAuth error: {}"
 msgstr "OAuthエラー: {}"
@@ -4801,7 +4801,7 @@ msgstr ""
 
 #: cps/spa_strings.py:667
 msgid "Support us on Ko-fi!"
-msgstr "Ko-fiで私たちを応援してください！"
+msgstr ""
 
 #: cps/spa_strings.py:668
 msgid "Support on Ko-fi →"
@@ -4809,7 +4809,7 @@ msgstr "Ko-fiで支援する →"
 
 #: cps/spa_strings.py:669
 msgid "Open Ko-fi →"
-msgstr "Ko-fiを開く →"
+msgstr ""
 
 #: cps/spa_strings.py:670
 msgid "Dismiss help announcement"
@@ -12004,12 +12004,6 @@ msgstr "選択した本棚をKoboと同期"
 #: cps/templates/user_table.html:158
 msgid "Show Read/Unread Section"
 msgstr "既読/未読セクションを表示"
-
-#~ msgid "Less than Netflix to keep us afloat"
-#~ msgstr "Netflixより少ない金額で、運営を支えてください"
-
-#~ msgid "Join on Ko-fi →"
-#~ msgstr "Ko-fiでメンバーになる →"
 
 #~ msgid "Sync Kobo read progress to Hardcover (Requires API key per user)"
 #~ msgstr "Koboの読書進捗をHardcoverに同期（ユーザーごとにAPIキーが必要）"

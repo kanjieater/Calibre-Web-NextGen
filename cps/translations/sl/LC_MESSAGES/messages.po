@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Calibre-Web NextGen\n"
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-"
 "Automated\n"
-"POT-Creation-Date: 2026-07-17 00:59-0400\n"
+"POT-Creation-Date: 2026-07-17 01:20-0400\n"
 "PO-Revision-Date: 2025-08-11 07:03+0000\n"
 "Last-Translator: Andrej Kralj\n"
 "Language-Team: Slovenian\n"
@@ -178,7 +178,7 @@ msgstr "Pokaži vse"
 msgid "Malformed request"
 msgstr "Napačno oblikovana zahteva"
 
-#: cps/admin.py:851 cps/admin.py:3084
+#: cps/admin.py:851 cps/admin.py:3088
 msgid "Guest Name can't be changed"
 msgstr "Imena gosta ni mogoče spremeniti"
 
@@ -186,7 +186,7 @@ msgstr "Imena gosta ni mogoče spremeniti"
 msgid "Guest can't have this role"
 msgstr "Gost ne more imeti te vloge"
 
-#: cps/admin.py:879 cps/admin.py:2908
+#: cps/admin.py:879 cps/admin.py:2912
 msgid "No admin user remaining, can't remove admin role"
 msgstr "Ni več nobenega admin uporabnika, ne morem odstraniti vloge admin"
 
@@ -236,7 +236,7 @@ msgstr "Nepravilen stolpec za branje"
 msgid "Invalid Restricted Column"
 msgstr "Neveljavni stolpec za omejitev"
 
-#: cps/admin.py:1007 cps/admin.py:2764
+#: cps/admin.py:1007 cps/admin.py:2768
 msgid "Calibre-Web NextGen configuration updated"
 msgstr ""
 
@@ -441,8 +441,8 @@ msgstr "Urejanje nastavitev e-poštnega strežnika"
 msgid "Success! Gmail Account Verified."
 msgstr "Uspeh! Račun Gmail je potrjen."
 
-#: cps/admin.py:1896 cps/admin.py:1899 cps/admin.py:2504 cps/admin.py:2740
-#: cps/admin.py:2865 cps/admin.py:3127 cps/editbooks.py:1157
+#: cps/admin.py:1896 cps/admin.py:1899 cps/admin.py:2508 cps/admin.py:2744
+#: cps/admin.py:2869 cps/admin.py:3131 cps/editbooks.py:1157
 #: cps/editbooks.py:2059 cps/shelf.py:148 cps/shelf.py:226 cps/shelf.py:297
 #: cps/shelf.py:332 cps/shelf.py:389 cps/shelf.py:464 cps/shelf.py:547
 #: cps/shelf.py:672 cps/tasks/convert.py:145 cps/web.py:3090
@@ -543,7 +543,7 @@ msgstr "Nepravilno trajanje za določeno nalogo"
 msgid "Scheduled tasks settings updated"
 msgstr "Posodobljene nastavitve načrtovanih opravil"
 
-#: cps/admin.py:2082 cps/admin.py:2226 cps/admin.py:3123 cps/web.py:2520
+#: cps/admin.py:2082 cps/admin.py:2226 cps/admin.py:3127 cps/web.py:2520
 msgid "Oops! An unknown error occurred. Please try again later."
 msgstr "Ups! Zgodila se je neznana napaka. Prosimo, poskusite znova pozneje."
 
@@ -557,7 +557,7 @@ msgstr "DB nastavitev ni mogoče zapisati"
 msgid "title"
 msgstr "Naslov"
 
-#: cps/admin.py:2211 cps/admin.py:3115
+#: cps/admin.py:2211 cps/admin.py:3119
 #, python-format
 msgid "Edit User %(nick)s"
 msgstr "Urejanje uporabnika %(nick)s"
@@ -636,49 +636,49 @@ msgstr "Datotek med posodabljanjem ni bilo mogoče zamenjati"
 msgid "Failed to extract at least One LDAP User"
 msgstr "Nisem uspel izpisati vsaj enega uporabnika LDAP"
 
-#: cps/admin.py:2397
+#: cps/admin.py:2401
 msgid "Failed to Create at Least One LDAP User"
 msgstr "Nisem uspel ustvariti vsaj enega uporabnika LDAP"
 
-#: cps/admin.py:2410
+#: cps/admin.py:2414
 #, python-format
 msgid "Error: %(ldaperror)s"
 msgstr "Napaka: %(ldaperror)s"
 
-#: cps/admin.py:2414
+#: cps/admin.py:2418
 msgid "Error: No user returned in response of LDAP server"
 msgstr "Napaka: V odzivu strežnika LDAP ni vrnjenega nobenega uporabnika"
 
-#: cps/admin.py:2450
+#: cps/admin.py:2454
 msgid "At Least One LDAP User Not Found in Database"
 msgstr "V podatkovni zbirki ni najden vsaj en uporabnik LDAP"
 
-#: cps/admin.py:2452
+#: cps/admin.py:2456
 #, python-brace-format
 msgid "{} User Successfully Imported"
 msgstr "{} Uporabnik je bil uspešno uvožen"
 
-#: cps/admin.py:2516
+#: cps/admin.py:2520
 msgid "Books path not valid"
 msgstr "Pot do knjig ni veljavna"
 
-#: cps/admin.py:2523
+#: cps/admin.py:2527
 msgid "DB Location is not Valid, Please Enter Correct Path"
 msgstr "Lokacija do DB ni veljavna, vnesite pravilno pot"
 
-#: cps/admin.py:2548
+#: cps/admin.py:2552
 msgid "DB is not Writeable"
 msgstr "V DB ni mogoče zapisati"
 
-#: cps/admin.py:2563
+#: cps/admin.py:2567
 msgid "Keyfile Location is not Valid, Please Enter Correct Path"
 msgstr "Lokacija datoteka Keyfile ni veljavna, vnesite pravilno pot"
 
-#: cps/admin.py:2567
+#: cps/admin.py:2571
 msgid "Certfile Location is not Valid, Please Enter Correct Path"
 msgstr "Lokacija datoteke Certfile ni veljavna, vnesite pravilno pot"
 
-#: cps/admin.py:2661
+#: cps/admin.py:2665
 msgid ""
 "Auto-create users cannot be enabled without enabling reverse proxy "
 "authentication"
@@ -686,13 +686,13 @@ msgstr ""
 "Samodejnega ustvarjanja uporabnikov ni mogoče omogočiti brez omogočene "
 "avtentikacije preko povratnega proksija"
 
-#: cps/admin.py:2664
+#: cps/admin.py:2668
 msgid "Auto-create users requires a valid reverse proxy header name"
 msgstr ""
 "Samodejno ustvarjanje uporabnikov zahteva veljavno ime glave povratnega "
 "proksija"
 
-#: cps/admin.py:2683 cps/admin.py:2690
+#: cps/admin.py:2687 cps/admin.py:2694
 msgid ""
 "Invalid OAuth Redirect Host format. Please include the full URL with "
 "protocol (e.g., https://your-domain.com)"
@@ -700,7 +700,7 @@ msgstr ""
 "Neveljavna oblika gostitelja za preusmeritev OAuth. Vključite celoten URL s "
 "protokolom (npr. https://vasa-domena.si)"
 
-#: cps/admin.py:2687
+#: cps/admin.py:2691
 msgid ""
 "OAuth Redirect Host should not include a path. Use only the base URL (e.g., "
 "https://your-domain.com)"
@@ -708,69 +708,69 @@ msgstr ""
 "Gostitelj preusmeritve OAuth ne sme vsebovati poti. Uporabite le osnovni URL "
 "(npr. https://vasa-domena.si)"
 
-#: cps/admin.py:2723
+#: cps/admin.py:2727
 msgid "Password length has to be between 1 and 40"
 msgstr "Dolžina gesla mora biti med 1 in 40"
 
-#: cps/admin.py:2791
+#: cps/admin.py:2795
 msgid "Database Settings updated"
 msgstr "Posodobljene nastavitve zbirke podatkov"
 
-#: cps/admin.py:2799
+#: cps/admin.py:2803
 msgid "Database Configuration"
 msgstr "Nastavitev zbirke podatkov"
 
-#: cps/admin.py:2820 cps/web.py:2485
+#: cps/admin.py:2824 cps/web.py:2485
 msgid "Oops! Please complete all fields."
 msgstr "Ups! Izpolnite vsa polja."
 
-#: cps/admin.py:2829
+#: cps/admin.py:2833
 msgid "E-mail is not from valid domain"
 msgstr "E-pošta ni iz veljavne domene"
 
-#: cps/admin.py:2837
+#: cps/admin.py:2841
 msgid "Add new user"
 msgstr "Dodajanje novega uporabnika"
 
-#: cps/admin.py:2855
+#: cps/admin.py:2859
 #, python-format
 msgid "User '%(user)s' created"
 msgstr "Ustvarjen uporabnik '%(user)s'"
 
-#: cps/admin.py:2861
+#: cps/admin.py:2865
 msgid "Oops! An account already exists for this Email. or name."
 msgstr "Ups! Za to e-pošto že obstaja račun ali ime."
 
-#: cps/admin.py:2887
+#: cps/admin.py:2891
 #, python-format
 msgid "User '%(nick)s' deleted"
 msgstr "Uporabnik '%(nick)s' je izbrisan"
 
-#: cps/admin.py:2890
+#: cps/admin.py:2894
 msgid "Can't delete Guest User"
 msgstr "Ne morem izbrisati uporabnika gosta"
 
-#: cps/admin.py:2893
+#: cps/admin.py:2897
 msgid "No admin user remaining, can't delete user"
 msgstr ""
 "Ni preostalega uporabnika administratorja, uporabnika ni mogoče izbrisati"
 
-#: cps/admin.py:3078 cps/web.py:2821
+#: cps/admin.py:3082 cps/web.py:2821
 msgid "Email can't be empty and has to be a valid Email"
 msgstr "E-pošta ne sme biti prazna in mora biti veljavna."
 
-#: cps/admin.py:3119
+#: cps/admin.py:3123
 #, python-format
 msgid "User '%(nick)s' updated"
 msgstr "Uporabnik '%(nick)s' je posodobljen"
 
-#: cps/admin.py:3184
+#: cps/admin.py:3188
 #, python-format
 msgid ""
 "Connection successful! OIDC discovery endpoint is accessible.%(endpoints)s"
 msgstr "Povezava uspešna! OIDC odkritna točka je dostopna. %(endpoints)s"
 
-#: cps/admin.py:3189
+#: cps/admin.py:3193
 msgid ""
 "Connection failed: OIDC discovery endpoint not found (404). Check if the "
 "base URL is correct."
@@ -778,12 +778,12 @@ msgstr ""
 "Povezava ni uspela: OIDC odkritna točka ni bila najdena (404). Preverite, "
 "ali je osnovni URL pravilen."
 
-#: cps/admin.py:3191 cps/admin.py:3248
+#: cps/admin.py:3195 cps/admin.py:3252
 #, python-format
 msgid "Connection failed: Server returned status code %(code)s"
 msgstr "Povezava ni uspela: Strežnik je vrnil kodo stanja %(code)s"
 
-#: cps/admin.py:3193
+#: cps/admin.py:3197
 msgid ""
 "Connection failed: Could not connect to server. Check the URL and network "
 "connectivity."
@@ -791,14 +791,14 @@ msgstr ""
 "Povezava ni uspela: Ni se bilo mogoče povezati s strežnikom. Preverite URL "
 "in omrežno povezavo."
 
-#: cps/admin.py:3195
+#: cps/admin.py:3199
 msgid ""
 "Connection failed: Request timed out. The server may be slow or unreachable."
 msgstr ""
 "Povezava ni uspela: Zahteva je potekla. Strežnik je morda počasen ali "
 "nedosegljiv."
 
-#: cps/admin.py:3197
+#: cps/admin.py:3201
 msgid ""
 "Connection failed: Server returned invalid JSON. This may not be an OIDC "
 "endpoint."
@@ -806,12 +806,12 @@ msgstr ""
 "Povezava ni uspela: Strežnik je vrnil neveljaven JSON. To morda ni končna "
 "točka OIDC."
 
-#: cps/admin.py:3200
+#: cps/admin.py:3204
 #, fuzzy, python-format
 msgid "Connection failed: %(error)s"
 msgstr "Napaka povezave"
 
-#: cps/admin.py:3226
+#: cps/admin.py:3230
 #, python-format
 msgid ""
 "Metadata is missing required OIDC fields: %(fields)s. This may not be a "
@@ -820,26 +820,26 @@ msgstr ""
 "V metapodatkih manjkajo zahtevana polja OIDC: %(fields)s. To morda ni "
 "veljavna končna točka metapodatkov OIDC."
 
-#: cps/admin.py:3237
+#: cps/admin.py:3241
 #, python-format
 msgid "Metadata URL is valid! Found %(count)s OAuth endpoints."
 msgstr "URL metapodatkov je veljaven! Najdenih %(count)s OAuth končnih točk."
 
-#: cps/admin.py:3239
+#: cps/admin.py:3243
 #, fuzzy
 msgid " User info endpoint is available."
 msgstr "Informacije o izdaji niso na voljo"
 
-#: cps/admin.py:3241
+#: cps/admin.py:3245
 msgid ""
 " Note: User info endpoint not found - this may cause authentication issues."
 msgstr ""
 
-#: cps/admin.py:3246
+#: cps/admin.py:3250
 msgid "Metadata URL not found (404). Please check the URL is correct."
 msgstr "URL metapodatkov ni bil najden (404). Preverite, ali je URL pravilen."
 
-#: cps/admin.py:3250
+#: cps/admin.py:3254
 msgid ""
 "Connection failed: Could not connect to metadata URL. Check the URL and "
 "network connectivity."
@@ -847,50 +847,50 @@ msgstr ""
 "Povezava ni uspela: Ni se bilo mogoče povezati z URL-jem metapodatkov. "
 "Preverite URL in omrežno povezavo."
 
-#: cps/admin.py:3252
+#: cps/admin.py:3256
 msgid "Connection failed: Request timed out."
 msgstr "Povezava ni uspela: Čas za zahtevo se je iztekel."
 
-#: cps/admin.py:3254
+#: cps/admin.py:3258
 msgid "Connection failed: Invalid JSON in response."
 msgstr "Povezava ni uspela: Neveljaven JSON v odgovoru."
 
-#: cps/admin.py:3257
+#: cps/admin.py:3261
 #, fuzzy
 msgid "An unknown error occurred."
 msgstr "Zgodila se je neznana napaka. Prosimo, poskusite znova pozneje."
 
-#: cps/admin.py:3269
+#: cps/admin.py:3273
 #, fuzzy
 msgid "Restore already in progress."
 msgstr "Napaka povezave"
 
-#: cps/admin.py:3273
+#: cps/admin.py:3277
 msgid "Restore failed: Calibre library path is not configured."
 msgstr "Obnova ni uspela: Pot do knjižnice Calibre ni nastavljena."
 
-#: cps/admin.py:3278
+#: cps/admin.py:3282
 #, python-format
 msgid "Restore failed: metadata.db not found at %(path)s"
 msgstr "Obnova ni uspela: metadata.db ni bil najden na %(path)s"
 
-#: cps/admin.py:3283
+#: cps/admin.py:3287
 #, python-format
 msgid "Restore failed: app.db not found at %(path)s"
 msgstr "Obnova ni uspela: app.db ni bil najden na %(path)s"
 
-#: cps/admin.py:3355 cps/admin.py:3398
+#: cps/admin.py:3359 cps/admin.py:3402
 #, fuzzy, python-format
 msgid "Restore failed: %(err)s"
 msgstr "Napaka povezave"
 
-#: cps/admin.py:3375
+#: cps/admin.py:3379
 msgid "Restore completed but app.db cleanup failed. See logs for details."
 msgstr ""
 "Obnova končana, vendar čiščenje app.db ni uspelo. Za podrobnosti glejte "
 "dnevnike."
 
-#: cps/admin.py:3394
+#: cps/admin.py:3398
 #, python-format
 msgid ""
 "Restore complete. Backups and restore log saved to %(dir)s. All book-linked "
@@ -1840,12 +1840,12 @@ msgstr ""
 msgid "Recent Publications"
 msgstr ""
 
-#: cps/oauth_bb.py:287
+#: cps/oauth_bb.py:288
 #, python-format
 msgid "Register with %(provider)s"
 msgstr "Registracija pri %(provider)s"
 
-#: cps/oauth_bb.py:342
+#: cps/oauth_bb.py:343
 msgid ""
 "Login failed: OAuth token validation error. This may be due to scope "
 "configuration mismatch. Please check your OAuth scopes configuration or "
@@ -1855,13 +1855,13 @@ msgstr ""
 "napačne konfiguracije obsega (scope). Preverite nastavitve OAuth ali se "
 "obrnite na skrbnika."
 
-#: cps/oauth_bb.py:347
+#: cps/oauth_bb.py:348
 msgid "Login failed: OAuth token expired. Please try logging in again."
 msgstr ""
 "Prijava ni uspela: Žeton OAuth je potekel. Prosimo, poskusite se ponovno "
 "prijaviti."
 
-#: cps/oauth_bb.py:351
+#: cps/oauth_bb.py:352
 msgid ""
 "Login failed: Could not connect to the OAuth provider's user info endpoint. "
 "Please try again or contact your administrator."
@@ -1869,14 +1869,14 @@ msgstr ""
 "Prijava ni uspela: Ni se bilo mogoče povezati s končno točko ponudnika "
 "OAuth. Poskusite znova ali se obrnite na skrbnika."
 
-#: cps/oauth_bb.py:356
+#: cps/oauth_bb.py:357
 #, fuzzy
 msgid ""
 "Login failed: The OAuth provider returned invalid user profile data. Please "
 "contact your administrator."
 msgstr "Ups! E-poštni strežnik ni nastavljen, obrnite se na skrbnika."
 
-#: cps/oauth_bb.py:378
+#: cps/oauth_bb.py:379
 #, python-format
 msgid ""
 "Login failed: OAuth provider response is missing required fields: "
@@ -1886,37 +1886,37 @@ msgstr ""
 "Prijava ni uspela: Odgovor ponudnika OAuth ne vsebuje zahtevanih polj: "
 "%(fields)s. Preverite nastavitve OAuth ali se obrnite na skrbnika."
 
-#: cps/oauth_bb.py:404 cps/oauth_bb.py:663
+#: cps/oauth_bb.py:405 cps/oauth_bb.py:666
 msgid "Failed to link OAuth account. Please try again."
 msgstr "Povezovanje računa OAuth ni uspelo. Prosimo, poskusite znova."
 
-#: cps/oauth_bb.py:437
+#: cps/oauth_bb.py:438
 msgid "Login failed: your account is not allowed to access this application."
 msgstr ""
 
-#: cps/oauth_bb.py:626
+#: cps/oauth_bb.py:629
 msgid ""
 "OAuth error: Provider returned invalid user information. Please try again."
 msgstr ""
 "Napaka OAuth: Ponudnik je vrnil neveljavne podatke o uporabniku. Prosimo, "
 "poskusite znova."
 
-#: cps/oauth_bb.py:640
+#: cps/oauth_bb.py:643
 #, python-format
 msgid "This %(oauth)s account is already linked to a different user"
 msgstr ""
 
-#: cps/oauth_bb.py:647 cps/remotelogin.py:149
+#: cps/oauth_bb.py:650 cps/remotelogin.py:149
 #, python-format
 msgid "Success! You are now logged in as: %(nickname)s"
 msgstr "Uspeh! Prijavljeni ste kot: %(nickname)s"
 
-#: cps/oauth_bb.py:657
+#: cps/oauth_bb.py:660
 #, python-format
 msgid "Link to %(oauth)s Succeeded"
 msgstr "Povezava do %(oauth)s je bila uspešna"
 
-#: cps/oauth_bb.py:665
+#: cps/oauth_bb.py:668
 #, python-format
 msgid ""
 "Login failed: No user account is linked to your %(provider)s account. Please "
@@ -1927,58 +1927,58 @@ msgstr ""
 "%(provider)s. Obrnite se na skrbnika, da vam ustvari račun ali poveže "
 "obstoječega."
 
-#: cps/oauth_bb.py:673
+#: cps/oauth_bb.py:676
 msgid "OAuth authentication failed. Please try again or contact administrator."
 msgstr ""
 "Avtentikacija OAuth ni uspela. Poskusite znova ali se obrnite na skrbnika."
 
-#: cps/oauth_bb.py:677
+#: cps/oauth_bb.py:680
 #, fuzzy
 msgid "OAuth system error. Please contact administrator."
 msgstr "Ups! E-poštni strežnik ni nastavljen, obrnite se na skrbnika."
 
-#: cps/oauth_bb.py:710
+#: cps/oauth_bb.py:713
 #, python-format
 msgid "Unlink to %(oauth)s Succeeded"
 msgstr "Odklop povezave z %(oauth)s je bil uspešen"
 
-#: cps/oauth_bb.py:715
+#: cps/oauth_bb.py:718
 #, python-format
 msgid "Unlink to %(oauth)s Failed"
 msgstr "Odklop povezave z %(oauth)s ni bil uspešen"
 
-#: cps/oauth_bb.py:718
+#: cps/oauth_bb.py:721
 #, python-format
 msgid "Not Linked to %(oauth)s"
 msgstr "Ni povezano z %(oauth)s"
 
-#: cps/oauth_bb.py:939
+#: cps/oauth_bb.py:942
 msgid "Failed to log in with GitHub."
 msgstr "Neuspešna prijava v GitHub."
 
-#: cps/oauth_bb.py:945
+#: cps/oauth_bb.py:948
 msgid "Failed to fetch user info from GitHub."
 msgstr "Neuspešna pridobitev informacij o uporabniku iz storitve GitHub."
 
-#: cps/oauth_bb.py:966
+#: cps/oauth_bb.py:969
 msgid "Failed to log in with Google."
 msgstr "Neuspešna prijava v Google."
 
-#: cps/oauth_bb.py:975
+#: cps/oauth_bb.py:978
 msgid "Failed to fetch user info from Google."
 msgstr "Neuspešna ridobititev informacij o uporabniku iz Googla."
 
-#: cps/oauth_bb.py:1000
+#: cps/oauth_bb.py:1003
 #, fuzzy
 msgid "Failed to log in with Generic OAuth."
 msgstr "Neuspešna prijava v GitHub."
 
-#: cps/oauth_bb.py:1016
+#: cps/oauth_bb.py:1019
 msgid "OAuth authentication failed: Token validation error. Please try again."
 msgstr ""
 "Avtentikacija OAuth ni uspela: Napaka pri validaciji žetona. Poskusite znova."
 
-#: cps/oauth_bb.py:1020
+#: cps/oauth_bb.py:1023
 msgid ""
 "OAuth authentication failed due to an unexpected error. Please contact "
 "administrator."
@@ -1986,7 +1986,7 @@ msgstr ""
 "Avtentikacija OAuth ni uspela zaradi nepričakovane napake. Obrnite se na "
 "skrbnika."
 
-#: cps/oauth_bb.py:1028 cps/oauth_bb.py:1046 cps/oauth_bb.py:1064
+#: cps/oauth_bb.py:1031 cps/oauth_bb.py:1049 cps/oauth_bb.py:1067
 msgid ""
 "OAuth error: Invalid redirect URI. If you're experiencing this error "
 "repeatedly, please configure the 'OAuth Redirect Host' setting in Admin > "
@@ -1996,25 +1996,25 @@ msgstr ""
 "konfigurirajte nastavitev 'OAuth Redirect Host' v Skrbnik > Osnovne "
 "nastavitve > OAuth."
 
-#: cps/oauth_bb.py:1100
+#: cps/oauth_bb.py:1103
 msgid "GitHub Oauth error, please retry later."
 msgstr "Napaka GitHub Oauth, prosimo, poskusite pozneje."
 
-#: cps/oauth_bb.py:1107
+#: cps/oauth_bb.py:1110
 #, python-brace-format
 msgid "GitHub Oauth error: {}"
 msgstr "Napaka GitHub Oauth: {}"
 
-#: cps/oauth_bb.py:1157
+#: cps/oauth_bb.py:1160
 msgid "Google Oauth error, please retry later."
 msgstr "Napaka Google Oauth, poskusite pozneje."
 
-#: cps/oauth_bb.py:1164
+#: cps/oauth_bb.py:1167
 #, python-brace-format
 msgid "Google Oauth error: {}"
 msgstr "Napaka Google Oauth: {}"
 
-#: cps/oauth_bb.py:1200 cps/oauth_bb.py:1208
+#: cps/oauth_bb.py:1203 cps/oauth_bb.py:1211
 #, fuzzy, python-brace-format
 msgid "OAuth error: {}"
 msgstr "Napaka GitHub Oauth: {}"

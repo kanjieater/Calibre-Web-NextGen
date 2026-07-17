@@ -20,7 +20,41 @@ is for things you can see or feel when running the app.
 
 - **You can now support CWNG development from the app** — announcements queue in the top banner, and clicking anywhere on the Ko-fi message opens Ko-fi and dismisses it; dismissals are remembered. A Support on Ko-fi link is also available in the Help menu.
 
+## [v4.1.15] - 2026-07-17
+
 ### Fixed
+
+- **KOReader stopped seeing new versions of the sync plugin.** If you update the
+  plugin from inside KOReader — through Updates Manager or appstore.koplugin —
+  the newest version it offered was the one from 13 July, even though three
+  plugin fixes have shipped since: highlights and notes syncing into your
+  library, highlight deletions syncing to the server, and a guard that stops a
+  device deleting highlights it never had. The plugin releases those tools read
+  had quietly stopped being published, so the fixes were in the server but never
+  reached the device. The current plugin is published now, and publishing it is
+  no longer a manual step that can be missed. If you install the plugin by
+  downloading it from your own server's KOReader page, nothing changed for you —
+  that copy was always current. Thanks to @KucharczykL for spotting it and to
+  @filiporlo for #400.
+
+- **Books with two or more authors were hard to read in the new UI.** Authors were separated
+  with a comma — but an author's name can contain a comma itself ("Dumas, Alexandre"), so
+  two authors came out as "Dumas, Alexandre, Maquet, Auguste" and you could not tell where
+  one person ended and the next began. Authors are now separated with "&", the same way the
+  classic interface, Calibre itself, and the new UI's own edit box ("Authors (separate with
+  &)") have always done it — so the book page, the library grid and the table view now agree
+  with the edit form instead of contradicting it. Tags, languages and publishers are
+  unaffected and still use commas. Thanks to @chloeroform for the report.
+
+- **New accounts ignored the default theme you picked in Admin.** Whichever theme an admin
+  chose under Admin → Theme, some new accounts still started on Dark. Which accounts
+  depended on how they signed up: people who registered themselves through the new UI got
+  it wrong only on servers upgraded from an older build, while accounts created by OAuth,
+  LDAP import, or an external/proxy login always got Dark no matter what you had set —
+  those three still carried a hardcoded default from back when Light was removed, and were
+  never updated when the six themes returned. Admin-created accounts were always fine, so
+  the same setting could produce two different results on one server. All seven ways an
+  account can be created now seed the theme you configured.
 
 - **"Change cover" made the whole server unreachable until it finished.** Opening the
   cover picker on one book froze every other page for everyone using the server — up to
