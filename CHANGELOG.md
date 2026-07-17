@@ -16,16 +16,24 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
-### Fixed
-
-- **Brazilian Portuguese now covers ~150 more of the interface.** Strings across the reader, shelves, and admin screens that still showed in English — including the "New" badge — now appear in Portuguese, and four entries that displayed the wrong text are corrected ("Shelf duplicated successfully" had been showing the message for deleting users; "Read Status" now reads "Status de leitura"). Translation work by @pedronora ([#949](https://github.com/new-usemame/Calibre-Web-NextGen/pull/949)).
-- **Russian is now fully translated.** The last 48 English strings — renaming a tag and its error messages, smart-shelf rule failures, page-not-found and page-load errors, and the Hardcover token-file notice — now appear in Russian, and a fuzzy entry on the Hardcover notice is confirmed. Translation update by @standhaftsohnsergius ([#970](https://github.com/new-usemame/Calibre-Web-NextGen/pull/970)).
-
 ## [v4.1.16] - 2026-07-17
 
 ### Added
 
 - **You can now support CWNG development from the app** — announcements queue in the top banner, and clicking anywhere on the Ko-fi message opens Ko-fi and dismisses it; dismissals are remembered. A Support on Ko-fi link is also available in the Help menu.
+
+### Fixed
+
+- **GitHub releases include the KOReader sync plugin again.** The
+  `cwasync.koplugin.zip` download disappeared after v4.1.11 even as three plugin
+  fixes shipped, so people installing from the release page could not get the
+  current plugin. v4.1.16 restores the ready-to-install archive and identifies
+  the bundled plugin as version 4.1.16. Thanks to @KucharczykL for flagging the
+  missing asset in [#400](https://github.com/new-usemame/Calibre-Web-NextGen/issues/400).
+
+- **Brazilian Portuguese now covers ~150 more of the interface.** Strings across the reader, shelves, and admin screens that still showed in English — including the "New" badge — now appear in Portuguese, and four entries that displayed the wrong text are corrected ("Shelf duplicated successfully" had been showing the message for deleting users; "Read Status" now reads "Status de leitura"). Translation work by @pedronora ([#949](https://github.com/new-usemame/Calibre-Web-NextGen/pull/949)).
+
+- **Russian is now fully translated.** The last 48 English strings — renaming a tag and its error messages, smart-shelf rule failures, page-not-found and page-load errors, and the Hardcover token-file notice — now appear in Russian, and a fuzzy entry on the Hardcover notice is confirmed. Translation update by @standhaftsohnsergius ([#970](https://github.com/new-usemame/Calibre-Web-NextGen/pull/970)).
 
 ## [v4.1.15] - 2026-07-17
 
