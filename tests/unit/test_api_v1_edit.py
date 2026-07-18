@@ -206,6 +206,7 @@ def test_convert_success_calls_core():
         with patch.object(mod, "current_user", _editor()), \
              patch.object(mod.calibre_db, "get_book", return_value=SimpleNamespace(id=5)), \
              patch.object(mod, "config", SimpleNamespace(get_book_path=lambda: "/books")), \
+             patch.object(mod, "get_convert_options", return_value=(["epub"], ["mobi"])), \
              patch.object(mod, "convert_book_format", return_value=None) as core:
             resp = inspect.unwrap(mod.convert_format)(5)
     # success returns a Response (jsonify), not an (resp, status) tuple

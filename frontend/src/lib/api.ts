@@ -163,6 +163,13 @@ export interface BookDetail {
    *  ISO date, or null when not synced or for progress that predates
    *  this field. */
   kosync_progress_created_at: string | null;
+  /** Allowed conversion source/target formats for this book, derived from the
+   *  configured converters and formats already present (mirror of the legacy
+   *  edit page). Absent on older servers → no conversion UI. */
+  convert_options?: {
+    sources: string[];
+    targets: string[];
+  };
 }
 
 export interface BooksPage {
