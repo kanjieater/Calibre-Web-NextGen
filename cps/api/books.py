@@ -12,7 +12,7 @@ from . import api_v1
 from .serializers import serialize_book_list_item, serialize_book_detail
 from .. import calibre_db, config, db, ub, isoLanguages, logger
 from ..cw_login import current_user
-from ..helper import edit_book_read_status, book_is_in_progress
+from ..helper import edit_book_read_status, book_is_in_progress, get_convert_options
 from ..usermanagement import login_required_if_no_ano
 
 log = logger.create()
@@ -432,6 +432,11 @@ def book_detail(book_id):
         custom_column_definitions=_detail_custom_columns(),
         original_filename=_original_filename(book_id),
     )
+    source_formats, target_formats = get_convert_options(book)
+    body["convert_options"] = {
+        "sources": source_formats,
+        "targets": target_formats,
+    }
     body["kosync_progress"] = kosync_progress
     body["kosync_progress_timestamp"] = kosync_progress_timestamp
     body["kosync_progress_created_at"] = kosync_progress_created_at
