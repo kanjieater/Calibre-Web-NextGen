@@ -131,6 +131,7 @@
 .formatDelete { color: var(--text-muted); padding: var(--sp-1); }
 .formatDelete:hover:not(:disabled) { color: var(--danger); }
 .convertForm { display: flex; align-items: flex-end; gap: var(--sp-3); flex-wrap: wrap; }
+.convertToLabel { font-size: var(--fs-sm); color: var(--text-muted); padding-bottom: calc(var(--sp-2) + 1px); }
 
 .coverSection { display: flex; gap: var(--sp-4); margin-bottom: var(--sp-5); align-items: flex-start; }
 .coverPreview { flex-shrink: 0; }

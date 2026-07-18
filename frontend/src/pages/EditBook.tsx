@@ -704,9 +704,19 @@ function FormatsManager({ id }: { id: string }) {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   const formats = book?.formats.map((f) => f.format) ?? [];
+  const convertOptions = book?.convert_options;
+  // Sources/targets come from the server as lowercase; display them uppercased
+  // to match the legacy edit page and the format list.
+  const sources = (convertOptions?.sources.length ? convertOptions.sources : formats.map((f) => f.toLowerCase()));
+  const targets = convertOptions?.targets ?? [];
   if (!book) return null;
   const canDelete = !!me?.role?.delete_books;
   const canUpload = !!me?.role?.upload;
+
+  // Keep the selected source/target normalized to lowercase option values.
+  const selectedFrom = (from || sources[0] || '').toLowerCase();
+  const availableTargets = targets.filter((t) => t.toLowerCase() !== selectedFrom);
+  const selectedTo = (to || '').toLowerCase();
 
   const onAddFormat = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -722,8 +732,11 @@ function FormatsManager({ id }: { id: string }) {
   const onConvert = (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
+    const src = selectedFrom;
+    const dst = selectedTo;
+    if (!src || !dst || src === dst) return;
     convertFormat.mutate(
-      { from: from || formats[0], to: to.trim().toUpperCase() },
+      { from: src.toUpperCase(), to: dst.toUpperCase() },
       {
         onSuccess: (r) => { setMsg({ ok: true, text: r.message }); setTo(''); },
         onError: (err) => setMsg({ ok: false, text: err instanceof ApiError ? err.message : t('Convert failed.') }),
@@ -755,20 +768,24 @@ function FormatsManager({ id }: { id: string }) {
         ))}
       </ul>
 
-      {formats.length > 0 && (
+      {sources.length > 0 && availableTargets.length > 0 && (
         <form className={styles.convertForm} onSubmit={onConvert}>
           <label className={styles.fieldNarrow}>
             <span className={styles.label}>{t('Convert from')}</span>
-            <select className={styles.inputNarrow} value={from || formats[0]} onChange={(e) => setFrom(e.target.value)}>
-              {formats.map((f) => <option key={f} value={f}>{f}</option>)}
+            <select className={styles.inputNarrow} value={selectedFrom} onChange={(e) => setFrom(e.target.value)}>
+              {sources.map((f) => <option key={f} value={f.toLowerCase()}>{f.toUpperCase()}</option>)}
             </select>
           </label>
+          <span className={styles.convertToLabel} aria-hidden="true">{t('to')}</span>
           <label className={styles.fieldNarrow}>
-            <span className={styles.label}>{t('to')}</span>
-            <input className={styles.inputNarrow} value={to} onChange={(e) => setTo(e.target.value)}
-              aria-label={t('Convert to format')} placeholder={t('e.g. MOBI')} />
+            <span className={styles.label}>{t('Convert to')}</span>
+            <select className={styles.inputNarrow} value={selectedTo} onChange={(e) => setTo(e.target.value)}
+              aria-label={t('Convert to format')}>
+              <option value="" disabled>{t('Select format')}</option>
+              {availableTargets.map((f) => <option key={f} value={f.toLowerCase()}>{f.toUpperCase()}</option>)}
+            </select>
           </label>
-          <Button type="submit" variant="ghost" disabled={convertFormat.isPending || !to.trim()}>
+          <Button type="submit" variant="ghost" disabled={convertFormat.isPending || !selectedTo}>
             <RefreshCw size={15} /> {t('Convert')}
           </Button>
         </form>

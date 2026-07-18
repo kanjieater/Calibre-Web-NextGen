@@ -21,7 +21,7 @@ from ..usermanagement import login_required_if_no_ano
 import time
 
 from ..editbooks import edit_book_param, delete_book_from_table, modify_identifiers
-from ..helper import convert_book_format, save_cover, save_cover_from_url, tags_filters
+from ..helper import convert_book_format, save_cover, save_cover_from_url, tags_filters, get_convert_options
 
 # Fields the SPA edit form can change, applied in this order. Title/authors come
 # first because they may restructure the book's directory; the rest follow.
@@ -270,7 +270,8 @@ def convert_format(book_id):
     guard = _require_edit()
     if guard:
         return guard
-    if not calibre_db.get_book(book_id):
+    book = calibre_db.get_book(book_id)
+    if not book:
         return _err("not_found", "Book not found", 404)
     data = request.get_json(silent=True) or {}
     src = (data.get("from") or "").strip().upper()
@@ -279,6 +280,13 @@ def convert_format(book_id):
         return _err("invalid_request", "Source and target formats are required", 400)
     if src == dst:
         return _err("invalid_request", "Source and target formats are the same", 400)
+    allowed_sources, allowed_targets = get_convert_options(book)
+    allowed_sources = [f.upper() for f in allowed_sources]
+    allowed_targets = [f.upper() for f in allowed_targets]
+    if src not in allowed_sources:
+        return _err("invalid_request", "Source format is not valid for conversion", 400)
+    if dst not in allowed_targets:
+        return _err("invalid_request", "Target format is not valid for conversion", 400)
     rtn = convert_book_format(book_id, config.get_book_path(), src, dst, current_user.name)
     if rtn is None:
         return jsonify({"ok": True, "message": "Queued for conversion to %s" % dst})

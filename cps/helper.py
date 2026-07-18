@@ -48,7 +48,7 @@ from .tasks.convert import TaskConvert
 from . import logger, config, db, ub, fs
 from . import gdriveutils as gd
 from .constants import (STATIC_DIR as _STATIC_DIR, CACHE_TYPE_THUMBNAILS, THUMBNAIL_TYPE_COVER, THUMBNAIL_TYPE_SERIES,
-                        SUPPORTED_CALIBRE_BINARIES)
+                        SUPPORTED_CALIBRE_BINARIES, EXTENSIONS_CONVERT_FROM, EXTENSIONS_CONVERT_TO)
 from .subproc_wrapper import process_wait, process_open
 from .services.file_move import copy_with_metadata_fallback
 
@@ -298,6 +298,39 @@ def send_broadcast_email(subject, body_html, recipients, sender_name):
             ))
             queued += 1
     return queued, skipped
+
+
+def get_convert_options(book):
+    """Return the allowed source and target conversion formats for a book.
+
+    Mirrors the logic in ``editbooks.render_edit_book`` so the SPA and the
+    legacy edit page agree on what can be converted to what. Source formats are
+    book formats present on the book that calibre's converter can read; target
+    formats depend on whether the calibre converter and/or kepubify are
+    configured and exclude formats the book already has.
+    """
+    converter_path = getattr(config, "config_converterpath", "")
+    kepubify_path = getattr(config, "config_kepubifypath", "")
+    valid_source_formats = list()
+    allowed_conversion_formats = list()
+    kepub_possible = None
+    if converter_path:
+        for file in book.data:
+            if file.format.lower() in EXTENSIONS_CONVERT_FROM:
+                valid_source_formats.append(file.format.lower())
+    if kepubify_path and 'epub' in [file.format.lower() for file in book.data]:
+        kepub_possible = True
+        if not converter_path:
+            valid_source_formats.append('epub')
+
+    if converter_path:
+        allowed_conversion_formats = EXTENSIONS_CONVERT_TO[:]
+        for file in book.data:
+            if file.format.lower() in allowed_conversion_formats:
+                allowed_conversion_formats.remove(file.format.lower())
+    if kepub_possible:
+        allowed_conversion_formats.append('kepub')
+    return valid_source_formats, allowed_conversion_formats
 
 
 # Convert existing book entry to new format
