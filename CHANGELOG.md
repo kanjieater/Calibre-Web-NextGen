@@ -16,6 +16,9 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Changed
+
+- **Convert on the book edit page now offers a dropdown of valid target formats instead of a free-text box.** The control reads "Convert from [EPUB] to [MOBI]", the source list is limited to formats the configured converter can read, and the target list excludes the already-selected source.
 ## [v4.1.16] - 2026-07-17
 
 ### Added

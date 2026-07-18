@@ -1690,26 +1690,7 @@ def render_edit_book(book_id):
         author_names.append(authr.name.replace('|', ','))
 
     # Option for showing convert_book button
-    valid_source_formats = list()
-    allowed_conversion_formats = list()
-    kepub_possible = None
-    if config.config_converterpath:
-        for file in book.data:
-            if file.format.lower() in constants.EXTENSIONS_CONVERT_FROM:
-                valid_source_formats.append(file.format.lower())
-    if config.config_kepubifypath and 'epub' in [file.format.lower() for file in book.data]:
-        kepub_possible = True
-        if not config.config_converterpath:
-            valid_source_formats.append('epub')
-
-    # Determine what formats don't already exist
-    if config.config_converterpath:
-        allowed_conversion_formats = constants.EXTENSIONS_CONVERT_TO[:]
-        for file in book.data:
-            if file.format.lower() in allowed_conversion_formats:
-                allowed_conversion_formats.remove(file.format.lower())
-    if kepub_possible:
-        allowed_conversion_formats.append('kepub')
+    valid_source_formats, allowed_conversion_formats = helper.get_convert_options(book)
     # Check for existing hardcover blacklist settings
     hardcover_blacklist = ub.session.query(ub.HardcoverBookBlacklist).filter(
         ub.HardcoverBookBlacklist.book_id == book.id
