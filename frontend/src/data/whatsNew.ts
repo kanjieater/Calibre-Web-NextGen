@@ -64,6 +64,17 @@ export const WHATS_NEW: WhatsNewRelease[] = [
         body: 'The app can now show occasional project announcements in its top banner, starting with a Ko-fi support message. Selecting the message opens Ko-fi and dismisses it, the choice is remembered, and a permanent Support on Ko-fi link now lives in the Help menu.',
         category: 'Under the hood',
       },
+      {
+        title: 'Install the current KOReader sync plugin from the release',
+        body: 'GitHub releases stopped including the ready-to-install cwasync.koplugin.zip after v4.1.11, even as highlight and deletion-sync fixes moved forward. The archive is back for v4.1.16 and carries the current plugin version.',
+        category: 'Sync',
+      },
+      {
+        title: 'More of the interface speaks Russian and Brazilian Portuguese',
+        body: 'Russian now covers its last 48 English fallbacks, including tag renaming, smart-shelf errors, page errors, and the Hardcover token-file notice. Brazilian Portuguese adds about 150 translations across the reader, shelves, and admin screens and corrects four misleading messages.',
+        category: 'Under the hood',
+        link: { to: '/account', label: 'Open account settings' },
+      },
     ],
   },
   {

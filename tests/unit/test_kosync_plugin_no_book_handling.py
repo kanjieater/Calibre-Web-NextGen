@@ -40,9 +40,9 @@ SYNC_LOGIC_TEST_LUA = PLUGIN_DIR / "tests" / "sync_logic_test.lua"
 # Standing rule: plugin version mirrors the CWNG release tag (drop the `v`).
 # Update this in lockstep with main.lua on every plugin-touching release — it is
 # a deliberate forcing function, not a value to read dynamically. Currently
-# 4.1.11 (latest shipped plugin tag; the release train performs future source
-# bumps when a plugin-touching release is tagged).
-EXPECTED_PLUGIN_VERSION = "4.1.14"
+# 4.1.16 (the release that restores the CWNG release-page plugin archive after
+# three plugin-changing fixes landed beyond its last attached copy in v4.1.11).
+EXPECTED_PLUGIN_VERSION = "4.1.16"
 
 
 def _read(path: Path) -> str:
