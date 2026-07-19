@@ -53,8 +53,14 @@ def test_catalog_defaults_to_series_order_in_series_view():
     src = (_FE / "pages" / "Catalog.tsx").read_text()
     assert "const isSeries = entityKind === 'series'" in src
     assert "defaultSort = isSeries ? 'seriesasc' : 'new'" in src
-    # The sort state seeds from defaultSort (falling back through the snapshot).
-    assert "snap?.sort ?? defaultSort" in src
+    # The sort state seeds from defaultSort, falling back through the snapshot
+    # and (plain-library only, #640) the persisted choice. A scoped view must
+    # never read the persisted library sort, and 'seriesasc' is not a library
+    # option so it can never round-trip through the persisted key.
+    assert "snap?.sort" in src
+    assert "?? (isPlainLibrary ? readStoredChoice(LIBRARY_SORT_KEY, LIBRARY_SORT_VALUES) : undefined)" in src
+    assert "?? defaultSort" in src
+    assert "const LIBRARY_SORT_VALUES = SORT_OPTIONS.map((o) => o.value)" in src
 
 
 @pytest.mark.unit

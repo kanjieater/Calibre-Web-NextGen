@@ -42,7 +42,10 @@ def test_default_books_api_requests_newest_first_and_returns_seeded_order():
 def test_catalog_initial_sort_and_accumulator_reset_are_fresh():
     src = (Path(__file__).resolve().parents[2] / "frontend/src/pages/Catalog.tsx").read_text()
     assert "const defaultSort = isSeries ? 'seriesasc' : 'new'" in src
-    assert "useState(() => snap?.sort ?? defaultSort)" in src
+    # #640 extended the initializer: snapshot first, then (plain library only)
+    # the persisted choice, then the contextual default — still a lazy useState,
+    # so the first render is fresh and there is no post-mount correction.
+    assert "useState(() =>\n    snap?.sort\n    ?? (isPlainLibrary ? readStoredChoice(LIBRARY_SORT_KEY, LIBRARY_SORT_VALUES) : undefined)\n    ?? defaultSort)" in src
     assert "if (!data || isPlaceholderData) return" in src
     reset = src.index("if (resetKey !== accKeyRef.current)")
     replace = src.index("setAllBooks(data.items)", reset)
