@@ -30,11 +30,15 @@
 # both empty), so Python imports and template reads work regardless of owner.
 # Only the dirs the runtime user *writes* under the app tree need ownership:
 #
-#   * metadata_change_logs/ -- cps/editbooks.py (metadata edits) and
-#     scripts/kindle_epub_fixer.py both open files here as abc, with no mkdir,
-#     so the dir must exist and be abc-writable or the write raises EACCES.
-#   * metadata_temp/        -- scripts/kindle_epub_fixer.py (spawned by the abc
-#     Flask process without s6-setuidgid) exports here as abc.
+#   * metadata_change_logs/ -- cps/editbooks.py (metadata edits, bare open with
+#     no mkdir) and cps/helper.py both write here as abc, so the dir must exist
+#     and be abc-writable or the write raises EACCES.
+#   * metadata_temp/        -- written by scripts/cover_enforcer.py (calibredb
+#     export --to-dir), which today runs as root: the metadata-change-detector
+#     unit setuidgids only the inotifywait side of its pipe, not the python
+#     dispatcher that spawns it. abc ownership here is defense-in-depth, not a
+#     repair -- kept because the writer's uid is one s6 wrapping change away
+#     from abc. (kindle_epub_fixer.py's metadata_temp_dir global is dead code.)
 #
 # cps/cache is the third such dir; it is created and chowned earlier in the
 # cwa-init unit (before first-run app.db creation needs it), so it is not
