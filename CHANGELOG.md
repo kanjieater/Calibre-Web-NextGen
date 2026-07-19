@@ -16,10 +16,18 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Added
+
+- **Series name and number are back under the book covers in the new UI.** If your library is organized into series, each book card in the library, search results, and shelves now shows its series and position (for example "Dune #2") under the title and author, so you can see at a glance which series a book belongs to without opening it. The series-heavy library view already showed the position badge; this restores the series name that the classic view had. Requested by several users through the in-app feedback form ([#657](https://github.com/new-usemame/Calibre-Web-NextGen/issues/657)).
+
 ### Changed
 
 - **Convert on the book edit page now offers a dropdown of valid target formats instead of a free-text box.** The control reads "Convert from [EPUB] to [MOBI]", the source list is limited to formats the configured converter can read, and the target list excludes the already-selected source.
 - **Faster container startup, less disk churn.** On every boot the container was re-setting ownership across the entire application tree — around 1,800 files — which took anywhere from a couple of seconds to half a minute depending on your hardware, and on some storage back-ends copied every one of those files into the container's writable layer. The application code is read-only and already readable by everyone, so almost none of that work was needed. Startup now re-owns only the handful of folders the app actually writes to (metadata change logs and export temp), leaving the static code untouched ([#941](https://github.com/new-usemame/Calibre-Web-NextGen/issues/941)). Reported by @auspex and @chloeroform.
+
+### Fixed
+
+- **“Read now” actions now form a straight bottom row across New UI book cards on iPad and other touch devices.** Short titles reserve the same two-line space as long ones, while shelf removal and quick edit are no longer hidden behind hover on touch hardware. Desktop keeps its uncluttered hover treatment, with keyboard focus revealing the actions. Thanks @Andrew-H2O (#863).
 
 ## [v4.1.16] - 2026-07-17
 

@@ -70,7 +70,22 @@ export default defineConfig({
       testIgnore: [/subpath\.spec\.ts/, /default-library-view\.spec\.ts/],
     },
 
-    // 4. Sub-path reverse proxy (opt-in: set E2E_SUBPATH_URL to the nginx rig).
+    // 4. iPad-class touch viewport — #863 was reported at this width, where
+    //    card actions are persistent because hover is unavailable.
+    {
+      name: 'ipad-touch',
+      testMatch: /book-card-actions\.spec\.ts/,
+      use: {
+        browserName: 'chromium',
+        viewport: { width: 1024, height: 1366 },
+        isMobile: true,
+        hasTouch: true,
+        storageState: STORAGE,
+      },
+      dependencies: ['setup'],
+    },
+
+    // 5. Sub-path reverse proxy (opt-in: set E2E_SUBPATH_URL to the nginx rig).
     //    Guards Class 1 subpath breakage (v4.1.1 reader 404, #571 white page).
     ...(SUBPATH_URL
       ? [{

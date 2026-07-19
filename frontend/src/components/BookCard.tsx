@@ -45,6 +45,20 @@ export function BookCard({
   const seriesIndexLabel = showSeriesIndex ? formatSeriesIndex(book.series_index) : null;
   const readTarget = getPrimaryReadTarget(book.id, book.formats);
 
+  // Series name + position under the cover (fork #657, #673, #855). Series-heavy
+  // libraries navigate by series and want it visible without clicking into each
+  // book — parity with the classic view, which showed it under the cover. Shown
+  // wherever a book appears in a general list; suppressed in the series-detail
+  // view (showSeriesIndex), where every card is the same series and the position
+  // already shows as the #N badge, so a repeated name would be noise.
+  const cardIndexLabel = formatSeriesIndex(book.series_index);
+  const seriesLine =
+    !showSeriesIndex && book.series
+      ? cardIndexLabel
+        ? t('{series} #{n}', { series: book.series, n: cardIndexLabel })
+        : book.series
+      : null;
+
   // Cover + overlay badges. All non-interactive (pointer-events: none via CSS) so
   // the single wrapping control (link or toggle button) is the only tab stop.
   const cover = (
@@ -83,6 +97,9 @@ export function BookCard({
     <div className={styles.info}>
       <p className={styles.title}>{book.title}</p>
       <p className={styles.author}>{authorStr}</p>
+      {seriesLine && (
+        <p className={styles.series} data-testid="book-card-series">{seriesLine}</p>
+      )}
     </div>
   );
 
