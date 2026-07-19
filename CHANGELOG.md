@@ -16,6 +16,10 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Added
+
+- **Series name and number are back under the book covers in the new UI.** If your library is organized into series, each book card in the library, search results, and shelves now shows its series and position (for example "Dune #2") under the title and author, so you can see at a glance which series a book belongs to without opening it. The series-heavy library view already showed the position badge; this restores the series name that the classic view had. Requested by several users through the in-app feedback form ([#657](https://github.com/new-usemame/Calibre-Web-NextGen/issues/657)).
+
 ### Changed
 
 - **Convert on the book edit page now offers a dropdown of valid target formats instead of a free-text box.** The control reads "Convert from [EPUB] to [MOBI]", the source list is limited to formats the configured converter can read, and the target list excludes the already-selected source.
