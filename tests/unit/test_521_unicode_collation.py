@@ -102,3 +102,36 @@ def test_latin_folding_still_works_after_the_guard():
     assert unicode_initial("Álbum") == "A"
     assert unicode_sort_key("Straße") == "strasse"
     assert unicode_initial("Ñandú") == "Ñ"
+
+
+def test_real_sqlite_udfs_keep_non_latin_letters_apart():
+    """Exercise the actual UDF path the app uses: ORDER BY + letter buckets.
+
+    cps/db.py registers these as SQLite functions, so ordering and the A-Z
+    filter run inside SQL, not in Python. A pure-function test alone would
+    not prove the library list and OPDS feeds recovered.
+    """
+    conn = sqlite3.connect(":memory:")
+    conn.create_function("ng_sort_key", 1, unicode_sort_key)
+    conn.create_function("ng_initial", 1, unicode_initial)
+    conn.execute("create table items (id integer, value text)")
+    values = ["Иогурт", "Йогурт", "Іжак", "Їжак", "かく", "がく", "Éclair"]
+    conn.executemany("insert into items values (?, ?)", enumerate(values, 1))
+
+    # Distinct letters must not collapse into one bucket.
+    buckets = dict(conn.execute(
+        "select value, ng_initial(value) from items"
+    ))
+    assert buckets["Йогурт"] != buckets["Иогурт"]
+    assert buckets["Їжак"] != buckets["Іжак"]
+    assert buckets["Éclair"] == "E"
+
+    # ...and they must occupy distinct sort positions, not tie.
+    keys = [r[0] for r in conn.execute("select ng_sort_key(value) from items")]
+    assert len(set(keys)) == len(values)
+
+    grouped = conn.execute(
+        "select count(distinct ng_initial(value)) from items where value like 'Й%' or value like 'И%'"
+    ).fetchone()[0]
+    assert grouped == 2
+    conn.close()
