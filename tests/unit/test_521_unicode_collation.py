@@ -50,3 +50,55 @@ def test_real_sqlite_udfs_sort_group_and_filter():
         "group by ng_initial(value)"
     )]
     assert buckets.count("E") == 1
+
+
+# --- Regression: the fold must only touch Latin script -----------------------
+#
+# The #521 fix folded combining marks for every script, not just Latin. That
+# silently merged letters that are distinct in their own alphabet: Russian
+# Й/И, Ukrainian Ї/І, Greek ά/α, and Japanese voiced kana が/か (dakuten is a
+# combining mark). Those cohorts had *correct* ordering before #521 shipped,
+# so this is a regression, not a missing feature. Folding is only ever
+# meaningful for Latin text; every other script keeps its own letters.
+
+
+@pytest.mark.parametrize(
+    ("left", "right"),
+    [
+        ("Йогурт", "Иогурт"),      # ru: short I vs I
+        ("Їжак", "Іжак"),          # uk: yi vs i
+        ("άλφα", "αλφα"),          # el: tonos is not a fold
+        ("がく", "かく"),           # ja: dakuten
+        ("ぱん", "はん"),           # ja: handakuten
+        ("ガク", "カク"),           # ja: katakana dakuten
+    ],
+)
+def test_non_latin_letters_stay_distinct(left, right):
+    assert unicode_sort_key(left) != unicode_sort_key(right)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected_initial"),
+    [
+        ("Йогурт", "Й"),
+        ("Їжак", "Ї"),
+        ("Ярослав", "Я"),
+        ("άλφα", "Ά"),
+        ("がく", "が"),
+    ],
+)
+def test_non_latin_initials_are_not_folded(value, expected_initial):
+    assert unicode_initial(value) == expected_initial
+
+
+def test_mixed_script_title_folds_only_the_latin_part():
+    # A Latin accent still folds even when the string also carries Cyrillic.
+    assert unicode_sort_key("Café Йогурт") == "cafe йогурт"
+
+
+def test_latin_folding_still_works_after_the_guard():
+    # The reporter's original #521 cases must keep passing.
+    assert unicode_sort_key("Èclair") == "eclair"
+    assert unicode_initial("Álbum") == "A"
+    assert unicode_sort_key("Straße") == "strasse"
+    assert unicode_initial("Ñandú") == "Ñ"
