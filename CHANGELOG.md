@@ -16,6 +16,9 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Added
+- **The classic interface now has a way to support the project.** There was no link anywhere in the classic UI — only the new interface had one — so anyone who wanted to chip in had to go looking for it. There is now a "Support Calibre-Web NextGen" entry in the user menu, in both the default and caliBlur themes.
+
 ### Fixed
 
 - **The new UI no longer signs you out when a request doesn't make it through.** Clicking between shelves could spin and then drop you on the sign-in page, and signing back in didn't help for long — "remember me" included. The new UI treated any request that failed to reach the server as proof your session had expired, and it responded by ending the session for real, so one dropped request on a busy or slow server logged you out for good. It now checks whether you're actually still signed in before doing anything, and a request that simply didn't get through is reported as an error instead. Sessions that genuinely have expired still return you to the sign-in page as before. Reported by [@mrfearless](https://github.com/new-usemame/Calibre-Web-NextGen/issues/1067) ([#1067](https://github.com/new-usemame/Calibre-Web-NextGen/issues/1067)).

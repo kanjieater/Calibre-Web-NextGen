@@ -5,7 +5,7 @@
 [![Latest release](https://img.shields.io/github/v/release/new-usemame/Calibre-Web-NextGen)](https://github.com/new-usemame/Calibre-Web-NextGen/releases/latest)
 [![Container](https://img.shields.io/badge/ghcr.io-calibre--web--nextgen-blue?logo=docker)](https://github.com/new-usemame/Calibre-Web-NextGen/pkgs/container/calibre-web-nextgen)
 [![Open issues](https://img.shields.io/github/issues/new-usemame/Calibre-Web-NextGen)](https://github.com/new-usemame/Calibre-Web-NextGen/issues)
-[![Support monthly on Ko-fi](https://img.shields.io/badge/Ko--fi-Subscribe%20monthly-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/calibrewebnextgen)
+[![Support monthly on Ko-fi](https://img.shields.io/badge/Ko--fi-Subscribe%20monthly-cc7b19?logo=kofi&logoColor=white)](https://ko-fi.com/calibrewebnextgen)
 
 ---
 
