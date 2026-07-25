@@ -32,3 +32,5 @@ export async function assertNoHorizontalOverflow(page: Page) {
   });
   expect(overflow, 'page scrolls horizontally (mobile reflow regression)').toBeLessThanOrEqual(1);
 }
+
+// seed-verification probe — removed before merge.
