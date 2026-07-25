@@ -453,16 +453,26 @@ jobs:
           echo "Waiting for the app to answer..."
           timeout 240 bash -c 'until curl -fsS http://localhost:8083/ -o /dev/null; do sleep 5; done'
 
-      - name: Seed a book and wait for ingest
+      - name: Seed books and wait for ingest
         run: |
-          # Drop a public-domain EPUB into the ingest folder; auto-ingest imports it.
-          # The container's init chowns the bind-mounted /cwa-book-ingest to uid
-          # 1000, so the runner can't write to it from the host. Use `docker cp`
-          # (root inside the container) and hand the file to uid 1000, which the
-          # ingest service needs to process and then remove it.
-          docker cp tests/fixtures/sample_books/alice_in_wonderland.epub \
-            cwn-e2e:/cwa-book-ingest/alice_in_wonderland.epub
-          docker exec -u 0 cwn-e2e chown 1000:1000 /cwa-book-ingest/alice_in_wonderland.epub
+          # Drop public-domain EPUBs into the ingest folder; auto-ingest imports
+          # them. The container's init chowns the bind-mounted /cwa-book-ingest
+          # to uid 1000, so the runner can't write to it from the host. Use
+          # `docker cp` (root inside the container) and hand each file to uid
+          # 1000, which the ingest service needs to process and then remove it.
+          #
+          # THREE books, not one. A single-book library silently failed 24 specs
+          # on every run of this job — "the catalog fixture needs at least two
+          # books" — and because the job is advisory, nobody ever read it. A
+          # release gate that cannot tell a real failure from a fixture that was
+          # never big enough is not a gate. pride_and_prejudice.epub is left out
+          # deliberately: at 24 MB it dominates ingest time for no extra
+          # coverage.
+          for book in alice_in_wonderland christmas_carol metamorphosis; do
+            docker cp "tests/fixtures/sample_books/${book}.epub" \
+              "cwn-e2e:/cwa-book-ingest/${book}.epub"
+            docker exec -u 0 cwn-e2e chown 1000:1000 "/cwa-book-ingest/${book}.epub"
+          done
           echo "Polling for the imported book via the API..."
           jar=$(mktemp); total=0
           for i in $(seq 1 60); do
@@ -472,11 +482,13 @@ jobs:
               -d '{"username":"admin","password":"admin123"}' -o /dev/null || true
             total=$(curl -s -b "$jar" 'http://localhost:8083/api/v1/books?limit=1' | python3 -c 'import sys,json;print(json.load(sys.stdin).get("total",0))' 2>/dev/null || echo 0)
             echo "  attempt $i: books total=$total"
-            [ "${total:-0}" -gt 0 ] && break
+            # Wait for ALL of them: breaking at the first import is what left
+            # the library at one book while the step reported success.
+            [ "${total:-0}" -ge 3 ] && break
             sleep 5
           done
-          if [ "${total:-0}" -eq 0 ]; then
-            echo "::error::ingest never imported the seed book (books total=0) — dumping ingest logs"
+          if [ "${total:-0}" -lt 3 ]; then
+            echo "::error::ingest imported only ${total:-0} of 3 seed books — dumping ingest logs"
             docker logs cwn-e2e 2>&1 | grep -iE 'ingest|convert|import|error|watch' | tail -40 || true
             exit 1
           fi
