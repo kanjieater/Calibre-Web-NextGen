@@ -32,3 +32,5 @@ export async function assertNoHorizontalOverflow(page: Page) {
   });
   expect(overflow, 'page scrolls horizontally (mobile reflow regression)').toBeLessThanOrEqual(1);
 }
+
+// #953 wiring probe — removed before merge.
