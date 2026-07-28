@@ -647,11 +647,10 @@ that weren't going to reach anybody. Shipping them turned out to be a full-time 
 
 **Nothing here is paywalled and nothing ever will be.** No sponsor-only features, no private
 Discord, no early access, no "pro" tier. Every line is GPL-3.0 and free whether you contribute
-or not. Sponsoring buys exactly one thing: this continuing to exist.
+or not. Sponsorship supports one thing: keeping this going.
 
-If you've been paying a monthly subscription to read books you already own, this has saved you
-real money. A few dollars back is a fair trade. If it hasn't saved you anything, then don't —
-go read something instead.
+If the project has been useful to you, a few dollars is a fair trade and genuinely appreciated.
+If it hasn't, that's completely fine — it stays free either way.
 
 - **[GitHub Sponsors](https://github.com/sponsors/new-usemame)** — one-time or monthly. GitHub takes 0%, so all of it arrives.
 - **[Ko-fi](https://ko-fi.com/calibrewebnextgen)** — the same thing, if you already have an account there.
