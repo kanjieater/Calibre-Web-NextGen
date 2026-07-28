@@ -92,6 +92,16 @@ export const WHATS_NEW: WhatsNewRelease[] = [
         category: 'Under the hood',
       },
       {
+        title: 'A very long title or author name no longer breaks the book page on a phone',
+        body: 'The header column beside the cover is only about 217 pixels wide on a phone. A word longer than that — a German compound title, a long transliterated name, a lengthy series title — ran past the edge and made the whole book page scroll sideways. Those lines now wrap mid-word when a word cannot fit on a line by itself. Ordinary titles look exactly as they did, because wrapping still prefers to break between words.',
+        category: 'Library',
+      },
+      {
+        title: 'Book pages stop scrolling sideways on a phone',
+        body: 'Libraries catalogued with Library-of-Congress subject headings — "France -- History -- Revolution, 1789-1799 -- Fiction" and the like — carry tags wider than a phone screen, and the tag row would not break one onto a second line, so the whole book page could be dragged sideways. It hit anyone reading without an editor account, guests included, because the editing view already wrapped its tags. Long tags now wrap.',
+        category: 'Library',
+      },
+      {
         title: 'The series line under a cover is easier to read',
         body: 'The small series text on a book cover was given the muted grey the rest of the interface uses and then faded a second time on top of that, which took it below the contrast small text needs to stay legible. The extra fade is gone, so the line is the muted grey it was meant to be.',
         category: 'Under the hood',

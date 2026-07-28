@@ -495,6 +495,77 @@ def test_integration_tests_job_authenticates_to_ghcr():
     )
 
 
+# ─── Wall 6: manifest-merge jobs don't boot BuildKit ───────────────────
+#
+# `docker buildx imagetools create` is a registry-only operation: it
+# reads the per-arch manifests and writes a manifest list. It needs no
+# builder. But `docker/setup-buildx-action` defaults to the
+# docker-container driver, which boots moby/buildkit pulled from Docker
+# Hub — so a job that only merges manifests took a hard dependency on a
+# third-party registry it never otherwise touches.
+#
+# Docker Hub egress from GitHub-hosted runners intermittently times out.
+# On 2026-07-27 three consecutive dev builds died at "booting buildkit"
+# with `Get "https://registry-1.docker.io/v2/": context deadline
+# exceeded` — after both arch builds had already succeeded and pushed.
+# The :dev tag went stale and the household canary stopped receiving
+# merges. The same shape sits in the release workflow's merge job, where
+# it is worse: the tag publishes, the manifest never lands, and
+# `docker pull ...:vX.Y.Z` 404s for everyone (the v4.0.169 failure mode).
+#
+# So: a job that merges manifests and does not itself build an image
+# must not set up a container-driver buildx.
+
+
+def _job_text(job: dict) -> str:
+    """Flatten every step's `run` + `uses` into one searchable string."""
+    parts = []
+    for step in _steps(job):
+        parts.append(str(step.get("run", "")))
+        parts.append(str(step.get("uses", "")))
+    return "\n".join(parts)
+
+
+def test_manifest_merge_jobs_do_not_boot_container_buildkit():
+    """Registry-only manifest merges must not pull moby/buildkit.
+
+    Applies to any job that runs `imagetools create` but never builds an
+    image. Such a job may either omit setup-buildx-action entirely (the
+    buildx CLI plugin is preinstalled on GitHub runners) or pin
+    `driver: docker`, which reuses the local dockerd. What it may not do
+    is take the default container driver.
+    """
+    offenders = []
+    for path in all_workflows():
+        wf = _load(path)
+        for job_name, job in (wf.get("jobs") or {}).items():
+            if not isinstance(job, dict):
+                continue
+            text = _job_text(job)
+            if "imagetools create" not in text:
+                continue
+            # A job that genuinely builds an image needs a real builder.
+            builds = "docker/build-push-action" in text or re.search(
+                r"docker\s+buildx\s+build\b", text
+            )
+            if builds:
+                continue
+            for step in _steps(job):
+                if not str(step.get("uses", "")).startswith(
+                    "docker/setup-buildx-action"
+                ):
+                    continue
+                driver = (step.get("with") or {}).get("driver")
+                if driver != "docker":
+                    offenders.append(f"{path.name}:{job_name}")
+    assert not offenders, (
+        "Manifest-merge job(s) boot a container-driver BuildKit for a "
+        "registry-only `imagetools create`, taking a needless Docker Hub "
+        "dependency that has already broken the dev channel: "
+        f"{offenders}. Drop the setup-buildx step or pin `driver: docker`."
+    )
+
+
 def test_all_workflows_have_minimum_permissions_block():
     """Every workflow that does any mutating action (commenting,
     labeling, merging) must have an explicit top-level OR job-level
@@ -523,4 +594,110 @@ def test_all_workflows_have_minimum_permissions_block():
     assert not offenders, (
         "Workflow(s) with mutating gh calls but no explicit permissions block: "
         f"{offenders}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 6. The SPA e2e job seeds every admin toggle its specs actually exercise.
+#
+# login-redirect.spec.ts drives a REAL magic-link flow: it POSTs
+# /api/v1/auth/magic-link/start from a logged-out page and asserts a 2xx.
+# That endpoint is gated on config_remote_login, which is `default=False`
+# (cps/config_sql.py). A fresh e2e container therefore answered 403
+# magic_link_disabled and the spec failed on the FIXTURE, not the product —
+# on every branch, including a CHANGELOG-only one. A permanently-red
+# advisory gate teaches everyone to ignore it, which is worse than no gate.
+#
+# This pins the seed so the fixture can't silently regress again.
+# ---------------------------------------------------------------------------
+
+
+def _e2e_steps() -> list[dict]:
+    wf = _load(WF_DIR / "tests.yml")
+    job = (wf.get("jobs") or {}).get("e2e-tests") or {}
+    return [s for s in (job.get("steps") or []) if isinstance(s, dict)]
+
+
+def test_e2e_job_enables_remote_login_before_running_the_harness():
+    steps = _e2e_steps()
+    assert steps, "tests.yml has no e2e-tests steps — did the job get renamed?"
+
+    def _index_of(pred) -> int:
+        for i, step in enumerate(steps):
+            if pred(step):
+                return i
+        return -1
+
+    seed_idx = _index_of(
+        lambda s: "remote_login" in (s.get("run") or "")
+        and "/api/v1/admin/security" in (s.get("run") or "")
+    )
+    assert seed_idx >= 0, (
+        "The e2e job never enables config_remote_login. login-redirect.spec.ts "
+        "POSTs /api/v1/auth/magic-link/start logged-out and asserts 2xx, but that "
+        "endpoint 403s ('magic_link_disabled') while the admin toggle is off, and "
+        "the toggle defaults to False on a fresh container. Seed it via "
+        "POST /api/v1/admin/security {\"remote_login\": true} before the harness runs."
+    )
+
+    harness_idx = _index_of(lambda s: "npm run test:e2e" in (s.get("run") or ""))
+    assert harness_idx >= 0, "tests.yml e2e job no longer runs `npm run test:e2e`"
+    assert seed_idx < harness_idx, (
+        "remote_login is enabled AFTER the Playwright harness runs — the specs "
+        "will still see the feature disabled."
+    )
+
+
+def test_e2e_remote_login_seed_fails_loudly_when_the_endpoint_regresses():
+    """The seed must verify the logged-out endpoint, not just flip the toggle.
+
+    Flipping the flag and hoping is how this class of failure hides: the toggle
+    write succeeds, something else breaks the endpoint, and the operator gets 15
+    minutes of confusing spec failures instead of one clear seed error.
+    """
+    steps = _e2e_steps()
+    seed = next(
+        (
+            s
+            for s in steps
+            if "remote_login" in (s.get("run") or "")
+            and "/api/v1/admin/security" in (s.get("run") or "")
+        ),
+        None,
+    )
+    assert seed is not None, "no remote_login seed step (see the test above)"
+    run = seed.get("run") or ""
+
+    assert "/api/v1/auth/magic-link/start" in run, (
+        "The seed enables remote_login but never checks that "
+        "/api/v1/auth/magic-link/start actually answers for a logged-out client. "
+        "Assert it in the seed so a regression fails here, loudly, instead of "
+        "resurfacing as an opaque spec failure later."
+    )
+    assert "::error::" in run, "seed step should emit a GitHub ::error:: annotation on failure"
+    assert "exit 1" in run, "seed step must fail the job when the fixture is broken"
+
+
+def test_changed_paths_treats_tests_yml_as_frontend_relevant():
+    """A change to the e2e harness must be able to run the e2e harness.
+
+    The e2e job's container setup and seed steps live in tests.yml. While the
+    detector only matched frontend/ and cps/static/app/, a PR fixing the e2e
+    fixture could not be validated by the e2e job — the fix for a red gate
+    would not run the gate.
+    """
+    wf = _load(WF_DIR / "tests.yml")
+    detect = next(
+        (
+            s
+            for s in ((wf.get("jobs") or {}).get("changed_paths") or {}).get("steps", [])
+            if isinstance(s, dict) and s.get("id") == "detect"
+        ),
+        None,
+    )
+    assert detect is not None, "changed_paths has no `detect` step"
+    run = detect.get("run") or ""
+    assert "workflows/tests" in run.replace("\\", ""), (
+        "changed_paths does not treat .github/workflows/tests.yml as frontend-relevant, "
+        "so a PR that changes the e2e seed/setup will skip the e2e job that it changes."
     )
