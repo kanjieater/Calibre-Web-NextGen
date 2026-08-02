@@ -49,10 +49,12 @@ test.describe('#1288 — upload stays reachable outside the plain Library view',
     // Authors (not tags) because every fixture book has one — a tag-based walk
     // silently skipped on the cwn-local seed, which is coverage theater.
     await gotoAuthed(page, '/app/authors');
-    const firstAuthor = page.locator('a[href*="/author/"]').first();
+    // Detail route is /authors/:id (plural), per lib/routes.ts — the list page
+    // itself is /authors with no trailing slash, so this matches only entries.
+    const firstAuthor = page.locator('a[href*="/authors/"]').first();
     await expect(firstAuthor).toBeVisible({ timeout: 20_000 });
     await firstAuthor.click();
-    await expect(page).toHaveURL(/\/author\//);
+    await expect(page).toHaveURL(/\/authors\/[^/]+$/);
 
     const upload = page.getByRole('link', { name: UPLOAD_NAME });
     await expect(upload).toBeVisible();
