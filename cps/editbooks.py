@@ -50,7 +50,11 @@ log = logger.create()
 def upload_required(f):
     @wraps(f)
     def inner(*args, **kwargs):
-        if current_user.role_upload():
+        # The admin's "Enable Uploads" switch (config_uploading) only ever hid
+        # the navbar button in layout.html — the routes behind it still served
+        # the POST, so turning uploads off did not actually turn them off
+        # (#1288). Absent attribute ⇒ enabled, matching the column default.
+        if current_user.role_upload() and getattr(config, "config_uploading", True):
             return f(*args, **kwargs)
         abort(403)
 

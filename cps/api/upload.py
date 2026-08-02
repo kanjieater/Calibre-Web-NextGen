@@ -34,6 +34,25 @@ def _err(code, message, status):
     return jsonify({"error": {"code": code, "message": message}}), status
 
 
+def _uploads_disabled():
+    """The admin's "Enable Uploads" switch, enforced (#1288).
+
+    ``_server_features`` describes the split it belongs to: the flag gates the
+    SPA's UI, "authoritative enforcement stays server-side on each endpoint".
+    That second half was missing here — the switch only ever hid the classic
+    navbar button, so an admin who turned uploads off still had a working
+    upload API. Absent attribute ⇒ enabled, matching the column default.
+
+    Returned as a ready error so both endpoints refuse identically, and kept
+    distinct from the role refusal above it so the client can tell "you may not
+    upload" from "nobody may upload right now".
+    """
+    if getattr(config, "config_uploading", True):
+        return None
+    return _err("uploads_disabled",
+                "Uploading is disabled on this server", 403)
+
+
 @api_v1.route("/upload", methods=["POST"])
 @login_required_if_no_ano
 def upload_books():
@@ -41,6 +60,9 @@ def upload_books():
         return _err("unauthorized", "You must be signed in", 401)
     if not current_user.role_upload():
         return _err("forbidden", "You are not allowed to upload books", 403)
+    disabled = _uploads_disabled()
+    if disabled:
+        return disabled
 
     files = [f for f in request.files.getlist("file") if f and f.filename]
     if not files:
@@ -93,6 +115,9 @@ def add_format(book_id):
         return _err("unauthorized", "You must be signed in", 401)
     if not current_user.role_upload():
         return _err("forbidden", "You are not allowed to upload books", 403)
+    disabled = _uploads_disabled()
+    if disabled:
+        return disabled
     if not calibre_db.get_book(book_id):
         return _err("not_found", "Book not found", 404)
 

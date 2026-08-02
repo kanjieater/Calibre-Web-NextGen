@@ -128,6 +128,14 @@ def _server_features():
         # per-shelf toggle that would otherwise store inert intent (#870).
         "kobo_sync_magic_shelves": bool(
             getattr(config, "config_kobo_sync_magic_shelves", False)),
+        # The admin's "Enable Uploads" switch. Classic gates its navbar upload
+        # button on this (layout.html: role_upload() and g.allow_upload); the
+        # SPA had no way to see it and offered Upload regardless (#1288).
+        # Defaults ON when absent, matching the column default (config_sql.py
+        # config_uploading = Column(SmallInteger, default=1)) — unlike the
+        # opt-in flags above, a minimal config object here means "not
+        # configured", not "switched off".
+        "uploading": bool(getattr(config, "config_uploading", True)),
     }
 
 

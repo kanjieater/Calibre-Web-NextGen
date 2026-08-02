@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
-import { BookMarked, LogIn, LogOut, Menu, Search, ChevronDown, User, Bug, BookOpen, Undo2, Sparkles, Shield } from 'lucide-react';
+import { BookMarked, LogIn, LogOut, Menu, Search, ChevronDown, User, Bug, BookOpen, Undo2, Sparkles, Shield, UploadCloud } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { GithubMark, DiscordMark } from './BrandIcons';
 import { KofiMark, KOFI_URL } from './KofiMark';
@@ -212,6 +212,13 @@ function UserMenu({ userName, onLogout }: { userName: string; onLogout: () => vo
   // sense instead. `me` being non-null no longer implies "signed in"; role
   // .anonymous is the discriminator.
   const isGuest = !!me?.role?.anonymous;
+  // #1288: same shape, same cause as #659/#720 above. Upload lives in the
+  // Library toolbar, so a user standing anywhere else — a book page, a shelf,
+  // the table view — had no upload affordance at all, and at least one person
+  // switched back to classic (which keeps Upload in the global navbar) over it.
+  // Gated on the role AND the admin's "Enable Uploads" switch, exactly as
+  // layout.html gates the classic button.
+  const canUpload = !!me?.role?.upload && me?.features?.uploading !== false;
   return (
     <div className={styles.menu} {...wrapperProps}>
       <button
@@ -232,6 +239,9 @@ function UserMenu({ userName, onLogout }: { userName: string; onLogout: () => vo
         <div className={styles.panel}>
           {!isGuest && (
             <MenuItem icon={<User size={15} />} label={t('My account')} to="/account" onSelect={close} />
+          )}
+          {canUpload && (
+            <MenuItem icon={<UploadCloud size={15} />} label={t('Upload books')} to="/upload" onSelect={close} />
           )}
           {isAdmin && (
             <MenuItem icon={<Shield size={15} />} label={t('Admin')} to="/admin" onSelect={close} />
