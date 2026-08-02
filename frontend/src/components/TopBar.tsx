@@ -11,6 +11,7 @@ import { AUTH_ROUTES } from '../lib/routes';
 import { useT } from '../lib/i18n';
 import { useWhatsNewUnread } from '../lib/whatsNew';
 import styles from './TopBar.module.css';
+import { canUploadBooks } from '../lib/permissions';
 
 interface TopBarProps {
   userName: string;
@@ -218,7 +219,7 @@ function UserMenu({ userName, onLogout }: { userName: string; onLogout: () => vo
   // switched back to classic (which keeps Upload in the global navbar) over it.
   // Gated on the role AND the admin's "Enable Uploads" switch, exactly as
   // layout.html gates the classic button.
-  const canUpload = !!me?.role?.upload && me?.features?.uploading !== false;
+  const canUpload = canUploadBooks(me);
   return (
     <div className={styles.menu} {...wrapperProps}>
       <button

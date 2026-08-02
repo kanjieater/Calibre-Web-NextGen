@@ -19,6 +19,7 @@ import { usePersistentChoice } from '../lib/usePersistentChoice';
 import { useT } from '../lib/i18n';
 import { useAnnouncer } from '../lib/a11y/announcer';
 import styles from './Catalog.module.css';
+import { canUploadBooks } from '../lib/permissions';
 
 const VIEW_OPTIONS: Record<DiscoveryView, { label: string }> = {
   hot: { label: 'Hot — Most Downloaded' },
@@ -298,9 +299,8 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
   const canEdit = !!me?.role?.edit;
   const canRenameTag = entityKind === 'tag' && canEdit;
   // #1288: the role is only half the gate — classic also requires the admin's
-  // "Enable Uploads" switch (layout.html: role_upload() and g.allow_upload).
-  // Absent on older servers ⇒ on, matching the server's column default.
-  const canUpload = !!me?.role?.upload && me?.features?.uploading !== false;
+  // "Enable Uploads" switch. See lib/permissions.ts.
+  const canUpload = canUploadBooks(me);
 
   // Discover section visibility (persisted; toggled by the gear menu or its ×).
   const [discoverHidden, setDiscoverHidden] = usePersistentBool('cwng_discover_hidden_v1', false);
