@@ -18,6 +18,7 @@ from markupsafe import escape
 
 from . import api_v1, log
 from .. import config, calibre_db
+from ..config_sql import uploads_enabled
 from ..cw_login import current_user
 from ..usermanagement import login_required_if_no_ano
 from ..services.worker import WorkerThread
@@ -41,13 +42,18 @@ def _uploads_disabled():
     SPA's UI, "authoritative enforcement stays server-side on each endpoint".
     That second half was missing here — the switch only ever hid the classic
     navbar button, so an admin who turned uploads off still had a working
-    upload API. Absent attribute ⇒ enabled, matching the column default.
+    upload API.
+
+    Delegates the predicate itself to ``config_sql.uploads_enabled`` (which
+    fails closed, and explains why) so the classic route, these two endpoints
+    and the ``features.uploading`` hint can never disagree about what the
+    switch means.
 
     Returned as a ready error so both endpoints refuse identically, and kept
     distinct from the role refusal above it so the client can tell "you may not
     upload" from "nobody may upload right now".
     """
-    if getattr(config, "config_uploading", True):
+    if uploads_enabled(config):
         return None
     return _err("uploads_disabled",
                 "Uploading is disabled on this server", 403)

@@ -14,9 +14,15 @@ Jinja template gates … authoritative enforcement stays server-side on each
 endpoint"), so these pin both sides: the flag reaches the SPA, and the endpoints
 refuse when it is off.
 
-Absent attribute ⇒ enabled, matching the column default (config_sql.py:
-``config_uploading = Column(SmallInteger, default=1)``). Only a real, explicit
-opt-out blocks an upload; a minimal bootstrap/test config object must not.
+The predicate **fails closed** and lives in one place (``config_sql.uploads_enabled``).
+``ConfigSQL`` always defines ``config_uploading`` as a mapped Column, so a config
+object without it is broken, not an admin decision, and an authorization
+boundary must not read a defect as consent. The ``default=1`` on that Column
+governs what value a new *row* gets — it says nothing about what an absent
+*attribute* means. (Cross-family review on #1295 flagged the original fail-open
+reading; this is the corrected one.) Client compatibility is a separate
+question and stays permissive on the frontend: an absent ``features.uploading``
+JSON key means the peer server predates the flag.
 """
 import inspect
 import io
@@ -78,15 +84,22 @@ def test_upload_allowed_when_uploading_enabled():
 
 
 @pytest.mark.unit
-def test_upload_allowed_when_setting_absent():
-    """A minimal config object (bootstrap/test paths) must not lock uploads out."""
+def test_upload_refused_when_setting_absent():
+    """Fail closed: a config object missing the attribute is a defect, not consent.
+
+    ConfigSQL declares config_uploading as a Column, so this state cannot arise
+    from an admin choice — only from a half-built config, a partial backport, or
+    a future refactor. An enforcement boundary should surface that, not grant on
+    it.
+    """
     from cps.api import upload as mod
-    with _ctx(files=None):
+    with _ctx(files=[(io.BytesIO(b"x"), "a.epub")]):
         with patch.object(mod, "current_user", _uploader()), \
              patch.object(mod, "config", SimpleNamespace(config_upload_formats="epub")), \
              patch.object(mod, "_ensure_ingest_dir_writable", return_value=None):
             resp = inspect.unwrap(mod.upload_books)()
-    assert resp[1] == 400
+    assert resp[1] == 403
+    assert json.loads(resp[0].get_data())["error"]["code"] == "uploads_disabled"
 
 
 @pytest.mark.unit
@@ -116,7 +129,7 @@ def test_add_format_refused_when_uploading_disabled():
     assert json.loads(resp[0].get_data())["error"]["code"] == "uploads_disabled"
 
 
-# ── legacy upload_required (classic /upload, add-format, cover paths) ────────
+# ── legacy upload_required (decorates the classic /upload route only) ───────
 
 @pytest.mark.unit
 def test_upload_required_aborts_when_uploading_disabled():
@@ -167,10 +180,13 @@ def test_server_features_exposes_uploading():
 
 
 @pytest.mark.unit
-def test_server_features_uploading_defaults_on_when_absent():
-    """Mirrors the column default so an older/minimal config reads as enabled —
-    the opposite of the other flags here, which are opt-in features."""
+def test_server_features_uploading_matches_the_enforcement_gate():
+    """The advertised flag must equal what the endpoints will do, including in
+    the fail-closed case — otherwise the SPA offers an upload the server
+    refuses, which is the exact split #1288 was about."""
     from cps.api import auth as mod
-    with patch.object(mod, "config", SimpleNamespace(
-            get_mail_server_configured=lambda: False)):
-        assert mod._server_features()["uploading"] is True
+    from cps.config_sql import uploads_enabled
+    broken = SimpleNamespace(get_mail_server_configured=lambda: False)
+    with patch.object(mod, "config", broken):
+        assert mod._server_features()["uploading"] is False
+    assert uploads_enabled(broken) is False
