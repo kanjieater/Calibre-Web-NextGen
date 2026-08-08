@@ -20,10 +20,13 @@ from library_paths import connect_calibre_metadata_db
 DB_FILE = "cwa.db"
 
 
+_LEGACY_NOTICE_SHOWN = False
+
+
 def _as_dir(path: str) -> str:
     """Normalise to a directory string with exactly one trailing separator."""
-    path = path.strip()
-    return path if path.endswith(os.sep) else path + os.sep
+    path = path.strip().rstrip(os.sep)
+    return path + os.sep if path else os.sep
 
 
 def default_db_dir() -> str:
@@ -52,6 +55,8 @@ def default_db_dir() -> str:
     operator knows which copy they want — the same stance #1462 took for
     ``app.db`` in :func:`app_paths.stray_legacy_config_dir`. See #1474.
     """
+    global _LEGACY_NOTICE_SHOWN
+
     raw = os.environ.get("CWA_DB_PATH")
     if raw is not None and raw.strip():
         return _as_dir(raw)
@@ -62,13 +67,18 @@ def default_db_dir() -> str:
         same = os.path.realpath(resolved) == os.path.realpath(legacy)
         if not same and not os.path.isfile(os.path.join(resolved, DB_FILE)) \
                 and os.path.isfile(os.path.join(legacy, DB_FILE)):
-            print(
-                f"[cwa-db]: using the existing settings database at "
-                f"{os.path.join(legacy, DB_FILE)} rather than starting an empty one at "
-                f"{os.path.join(resolved, DB_FILE)}. Move it to keep everything in one "
-                f"place, or set CWA_DB_PATH to choose explicitly.",
-                flush=True,
-            )
+            # Once per process, not once per call. CWA_DB is constructed inside
+            # web requests, so an unqualified print here puts the same line in
+            # the log on every request that touches settings.
+            if not _LEGACY_NOTICE_SHOWN:
+                _LEGACY_NOTICE_SHOWN = True
+                print(
+                    f"[cwa-db]: using the existing settings database at "
+                    f"{os.path.join(legacy, DB_FILE)} rather than starting an empty one at "
+                    f"{os.path.join(resolved, DB_FILE)}. Move it to keep everything in one "
+                    f"place, or set CWA_DB_PATH to choose explicitly.",
+                    flush=True,
+                )
             return _as_dir(legacy)
     except OSError:
         pass

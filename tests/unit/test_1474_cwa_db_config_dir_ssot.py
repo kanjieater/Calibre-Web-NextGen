@@ -28,13 +28,26 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def _fresh_cwa_db_module():
-    """Import ``cwa_db`` fresh so module-level path state can't leak between tests."""
+def _fresh_cwa_db_module(monkeypatch=None, legacy=None):
+    """Import ``cwa_db`` fresh, with the legacy config dir FORCED.
+
+    Every test here has to state where the legacy directory is, because the
+    answer changes the behaviour under test. Reading the real one is what broke
+    this file in CI: the test container has a genuine ``/config/cwa.db``, so the
+    compatibility branch fired and ``default_db_dir()`` correctly returned
+    ``/config`` — the product was right and the test was asserting the runner.
+    Pass ``legacy`` pointing at a directory with a ``cwa.db`` to exercise the
+    compatibility branch, or at an empty/absent one to exercise the normal path.
+    """
     import sys
 
     sys.modules.pop("cwa_db", None)
     import cwa_db
 
+    if monkeypatch is not None:
+        monkeypatch.setattr(cwa_db, "_LEGACY_NOTICE_SHOWN", False)
+        if legacy is not None:
+            monkeypatch.setattr(cwa_db.app_paths, "DEFAULT_CONFIG_DIR", str(legacy))
     return cwa_db
 
 
@@ -47,7 +60,7 @@ def test_default_db_dir_follows_calibre_dbpath_not_the_literal_config(tmp_path, 
     """
     monkeypatch.delenv("CWA_DB_PATH", raising=False)
     monkeypatch.setenv("CALIBRE_DBPATH", str(tmp_path))
-    cwa_db = _fresh_cwa_db_module()
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
 
     resolved = cwa_db.default_db_dir()
 
@@ -55,11 +68,11 @@ def test_default_db_dir_follows_calibre_dbpath_not_the_literal_config(tmp_path, 
     assert os.path.realpath(resolved) != "/config"
 
 
-def test_container_default_is_byte_for_byte_unchanged(monkeypatch):
+def test_container_default_is_byte_for_byte_unchanged(tmp_path, monkeypatch):
     """With CALIBRE_DBPATH=/config — what the image sets — nothing moves."""
     monkeypatch.delenv("CWA_DB_PATH", raising=False)
     monkeypatch.setenv("CALIBRE_DBPATH", "/config")
-    cwa_db = _fresh_cwa_db_module()
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
 
     assert cwa_db.default_db_dir().rstrip("/") == "/config"
 
@@ -68,7 +81,7 @@ def test_cwa_db_path_still_wins_for_test_isolation(tmp_path, monkeypatch):
     """The explicit override keeps beating the resolver; parallel workers rely on it."""
     monkeypatch.setenv("CALIBRE_DBPATH", "/config")
     monkeypatch.setenv("CWA_DB_PATH", str(tmp_path))
-    cwa_db = _fresh_cwa_db_module()
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
 
     assert cwa_db.default_db_dir().rstrip("/") == str(tmp_path).rstrip("/")
 
@@ -81,14 +94,12 @@ def test_source_install_opens_cwa_db_beside_app_db(tmp_path, monkeypatch):
     """
     monkeypatch.delenv("CWA_DB_PATH", raising=False)
     monkeypatch.setenv("CALIBRE_DBPATH", str(tmp_path))
-    cwa_db = _fresh_cwa_db_module()
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
 
     db = cwa_db.CWA_DB(verbose=False)
     try:
         assert (tmp_path / "cwa.db").is_file()
-        assert not os.path.exists("/config/cwa.db") or os.path.realpath(
-            db.db_path
-        ) != "/config"
+        assert os.path.realpath(db.db_path) == os.path.realpath(str(tmp_path))
     finally:
         if db.con:
             db.con.close()
@@ -105,7 +116,7 @@ def test_schema_column_add_does_not_depend_on_a_writable_slash_config(tmp_path, 
     """
     monkeypatch.delenv("CWA_DB_PATH", raising=False)
     monkeypatch.setenv("CALIBRE_DBPATH", str(tmp_path))
-    cwa_db = _fresh_cwa_db_module()
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
 
     db = cwa_db.CWA_DB(verbose=False)
     try:
@@ -170,10 +181,39 @@ def test_existing_legacy_database_is_kept_not_stranded(tmp_path, monkeypatch):
 
     monkeypatch.delenv("CWA_DB_PATH", raising=False)
     monkeypatch.setenv("CALIBRE_DBPATH", str(resolved))
-    cwa_db = _fresh_cwa_db_module()
-    monkeypatch.setattr(cwa_db.app_paths, "DEFAULT_CONFIG_DIR", str(legacy))
+    cwa_db = _fresh_cwa_db_module(monkeypatch, legacy)
 
     assert os.path.realpath(cwa_db.default_db_dir()) == os.path.realpath(str(legacy))
+
+
+def test_legacy_notice_is_printed_once_per_process_not_per_call(tmp_path, monkeypatch, capsys):
+    """CWA_DB is constructed inside web requests, so a per-call print is log spam.
+
+    Found by the second adversarial pass: an install left on the legacy path
+    would emit the same line on every request that reads settings.
+    """
+    legacy = tmp_path / "legacy"
+    resolved = tmp_path / "resolved"
+    legacy.mkdir()
+    resolved.mkdir()
+    (legacy / "cwa.db").write_bytes(b"")
+
+    monkeypatch.delenv("CWA_DB_PATH", raising=False)
+    monkeypatch.setenv("CALIBRE_DBPATH", str(resolved))
+    cwa_db = _fresh_cwa_db_module(monkeypatch, legacy)
+
+    for _ in range(25):
+        cwa_db.default_db_dir()
+
+    assert capsys.readouterr().out.count("using the existing settings database") == 1
+
+
+def test_repeated_trailing_separators_collapse(tmp_path, monkeypatch):
+    """`_as_dir` promises exactly one trailing separator; make that true."""
+    monkeypatch.setenv("CWA_DB_PATH", "/tmp/multi///")
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
+
+    assert cwa_db.default_db_dir() == "/tmp/multi/"
 
 
 def test_legacy_is_ignored_once_the_resolved_database_exists(tmp_path, monkeypatch):
@@ -187,8 +227,7 @@ def test_legacy_is_ignored_once_the_resolved_database_exists(tmp_path, monkeypat
 
     monkeypatch.delenv("CWA_DB_PATH", raising=False)
     monkeypatch.setenv("CALIBRE_DBPATH", str(resolved))
-    cwa_db = _fresh_cwa_db_module()
-    monkeypatch.setattr(cwa_db.app_paths, "DEFAULT_CONFIG_DIR", str(legacy))
+    cwa_db = _fresh_cwa_db_module(monkeypatch, legacy)
 
     assert os.path.realpath(cwa_db.default_db_dir()) == os.path.realpath(str(resolved))
 
@@ -203,8 +242,7 @@ def test_cwa_db_path_overrides_the_legacy_rescue(tmp_path, monkeypatch):
 
     monkeypatch.setenv("CALIBRE_DBPATH", str(tmp_path / "resolved"))
     monkeypatch.setenv("CWA_DB_PATH", str(chosen))
-    cwa_db = _fresh_cwa_db_module()
-    monkeypatch.setattr(cwa_db.app_paths, "DEFAULT_CONFIG_DIR", str(legacy))
+    cwa_db = _fresh_cwa_db_module(monkeypatch, legacy)
 
     assert os.path.realpath(cwa_db.default_db_dir()) == os.path.realpath(str(chosen))
 
@@ -216,7 +254,7 @@ def test_override_with_surrounding_whitespace_is_normalised(tmp_path, monkeypatc
     so a stray space made the resolver create directories under the CWD.
     """
     monkeypatch.setenv("CWA_DB_PATH", f"  {tmp_path}  ")
-    cwa_db = _fresh_cwa_db_module()
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
 
     resolved = cwa_db.default_db_dir()
     assert not resolved.startswith(" ")
@@ -226,7 +264,7 @@ def test_override_with_surrounding_whitespace_is_normalised(tmp_path, monkeypatc
 def test_failure_message_names_the_knob_actually_in_force(tmp_path, monkeypatch, capsys):
     """Telling someone to set CALIBRE_DBPATH while CWA_DB_PATH wins is a loop."""
     monkeypatch.setenv("CWA_DB_PATH", str(tmp_path / "missing"))
-    cwa_db = _fresh_cwa_db_module()
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
     monkeypatch.setattr(
         cwa_db.sqlite3,
         "connect",
@@ -268,7 +306,7 @@ def test_unwritable_config_dir_is_reported_not_exited_silently(tmp_path, monkeyp
     unwritable = tmp_path / "nope"
     unwritable.mkdir()
     monkeypatch.setenv("CALIBRE_DBPATH", str(unwritable / "child"))
-    cwa_db = _fresh_cwa_db_module()
+    cwa_db = _fresh_cwa_db_module(monkeypatch, tmp_path / "no-legacy")
 
     monkeypatch.setattr(
         cwa_db.sqlite3,
