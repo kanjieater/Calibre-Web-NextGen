@@ -153,6 +153,110 @@ def test_no_hardcoded_slash_config_literal_remains_in_cwa_db():
     assert not offenders, f"hardcoded /config paths left in cwa_db.py: {offenders}"
 
 
+def test_existing_legacy_database_is_kept_not_stranded(tmp_path, monkeypatch):
+    """An upgrade must never silently open a fresh, empty settings database.
+
+    Anyone overriding ``CALIBRE_DBPATH`` has ``app.db`` at their path and
+    ``cwa.db`` at the legacy location today, because the old literal ignored
+    the override. Resolving both to the new path would leave the real settings
+    database behind and start an empty one — settings, import history and
+    enforcement records apparently gone. Found by adversarial review of #1474.
+    """
+    legacy = tmp_path / "legacy"
+    resolved = tmp_path / "resolved"
+    legacy.mkdir()
+    resolved.mkdir()
+    (legacy / "cwa.db").write_bytes(b"")
+
+    monkeypatch.delenv("CWA_DB_PATH", raising=False)
+    monkeypatch.setenv("CALIBRE_DBPATH", str(resolved))
+    cwa_db = _fresh_cwa_db_module()
+    monkeypatch.setattr(cwa_db.app_paths, "DEFAULT_CONFIG_DIR", str(legacy))
+
+    assert os.path.realpath(cwa_db.default_db_dir()) == os.path.realpath(str(legacy))
+
+
+def test_legacy_is_ignored_once_the_resolved_database_exists(tmp_path, monkeypatch):
+    """The legacy branch is a one-way rescue, not a permanent redirect."""
+    legacy = tmp_path / "legacy"
+    resolved = tmp_path / "resolved"
+    legacy.mkdir()
+    resolved.mkdir()
+    (legacy / "cwa.db").write_bytes(b"")
+    (resolved / "cwa.db").write_bytes(b"")
+
+    monkeypatch.delenv("CWA_DB_PATH", raising=False)
+    monkeypatch.setenv("CALIBRE_DBPATH", str(resolved))
+    cwa_db = _fresh_cwa_db_module()
+    monkeypatch.setattr(cwa_db.app_paths, "DEFAULT_CONFIG_DIR", str(legacy))
+
+    assert os.path.realpath(cwa_db.default_db_dir()) == os.path.realpath(str(resolved))
+
+
+def test_cwa_db_path_overrides_the_legacy_rescue(tmp_path, monkeypatch):
+    """The explicit knob is the escape hatch from the legacy branch."""
+    legacy = tmp_path / "legacy"
+    chosen = tmp_path / "chosen"
+    legacy.mkdir()
+    chosen.mkdir()
+    (legacy / "cwa.db").write_bytes(b"")
+
+    monkeypatch.setenv("CALIBRE_DBPATH", str(tmp_path / "resolved"))
+    monkeypatch.setenv("CWA_DB_PATH", str(chosen))
+    cwa_db = _fresh_cwa_db_module()
+    monkeypatch.setattr(cwa_db.app_paths, "DEFAULT_CONFIG_DIR", str(legacy))
+
+    assert os.path.realpath(cwa_db.default_db_dir()) == os.path.realpath(str(chosen))
+
+
+def test_override_with_surrounding_whitespace_is_normalised(tmp_path, monkeypatch):
+    """``CWA_DB_PATH=' /x '`` must not become the relative path ``' /x /'``.
+
+    ``strip()`` was used to test emptiness but the untrimmed value was returned,
+    so a stray space made the resolver create directories under the CWD.
+    """
+    monkeypatch.setenv("CWA_DB_PATH", f"  {tmp_path}  ")
+    cwa_db = _fresh_cwa_db_module()
+
+    resolved = cwa_db.default_db_dir()
+    assert not resolved.startswith(" ")
+    assert os.path.realpath(resolved) == os.path.realpath(str(tmp_path))
+
+
+def test_failure_message_names_the_knob_actually_in_force(tmp_path, monkeypatch, capsys):
+    """Telling someone to set CALIBRE_DBPATH while CWA_DB_PATH wins is a loop."""
+    monkeypatch.setenv("CWA_DB_PATH", str(tmp_path / "missing"))
+    cwa_db = _fresh_cwa_db_module()
+    monkeypatch.setattr(
+        cwa_db.sqlite3,
+        "connect",
+        lambda *a, **k: (_ for _ in ()).throw(sqlite3.OperationalError("unable to open database file")),
+    )
+
+    with pytest.raises(SystemExit):
+        cwa_db.CWA_DB(verbose=False)
+
+    out = capsys.readouterr().out
+    assert "CWA_DB_PATH" in out
+
+
+def test_schema_migration_writes_no_breadcrumb_file_at_all():
+    """The ``.cwa_db_debug`` append target is gone, not relocated.
+
+    It had no delimiters, recorded intent before outcome, and was a predictable
+    append path inside a user-controlled config volume — a FIFO left there
+    blocks the writer before any OSError can be caught.
+    """
+    import cwa_db as _mod
+
+    source = open(_mod.__file__, "r", encoding="utf-8").read()
+    executable = [
+        line for line in source.splitlines()
+        if ".cwa_db_debug" in line and not line.strip().startswith("#")
+    ]
+    assert not executable, f".cwa_db_debug is still written: {executable}"
+
+
 def test_unwritable_config_dir_is_reported_not_exited_silently(tmp_path, monkeypatch):
     """A DB that cannot be opened must not look like a clean exit to the caller.
 
