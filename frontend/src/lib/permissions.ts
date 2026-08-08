@@ -26,3 +26,15 @@ import type { Me } from './api';
 export function canUploadBooks(me: Me | undefined | null): boolean {
   return !!me?.role?.upload && me?.features?.uploading !== false;
 }
+
+/** May this user see or call the experimental Store surface? Both gates are
+ * required; an absent deployment feature flag is OFF so rolling upgrades never
+ * expose an unfinished route. Server endpoints enforce the same policy. */
+export function canUseStore(me: Me | undefined | null): boolean {
+  return me?.features?.store_discover === true && me?.role?.store_access === true;
+}
+
+/** Store access and approval bypass are independent role bits. */
+export function canAutoApproveStore(me: Me | undefined | null): boolean {
+  return canUseStore(me) && me?.role?.store_auto_approve === true;
+}

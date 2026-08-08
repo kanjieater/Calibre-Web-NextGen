@@ -12724,3 +12724,262 @@ msgstr "Toon gelezen/niet gelezen selectie"
 
 #~ msgid "Click the cover to load metadata to the form"
 #~ msgstr "Klik op de omslag om de metagegevens in het formulier te laden"
+
+# Store / Discover
+msgid "Active downloads"
+msgstr "Actieve downloads"
+
+msgid "Already queued."
+msgstr "Staat al in de wachtrij."
+
+msgid "Anna's Archive"
+msgstr "Anna's Archive"
+
+msgid "Approve"
+msgstr "Goedkeuren"
+
+msgid "AudiobookBay"
+msgstr "AudiobookBay"
+
+msgid "Cancel {title}"
+msgstr "{title} annuleren"
+
+msgid "Choose an edition"
+msgstr "Kies een editie"
+
+msgid "Choose an edition to continue."
+msgstr "Kies een editie om door te gaan."
+
+msgid "Choose the work"
+msgstr "Kies het werk"
+
+msgid "Choose {title}"
+msgstr "Kies {title}"
+
+msgid "Configured · ending in {last4}"
+msgstr "Geconfigureerd · eindigt op {last4}"
+
+msgid "Could not load Store requests."
+msgstr "Kan winkelaanvragen niet laden."
+
+msgid "Could not load credentials."
+msgstr "Kan aanmeldgegevens niet laden."
+
+msgid "Could not load editions."
+msgstr "Kan edities niet laden."
+
+msgid "Could not load experimental features."
+msgstr "Kan experimentele functies niet laden."
+
+msgid "Could not load release sources."
+msgstr "Kan uitgavebronnen niet laden."
+
+msgid "Could not load your requests."
+msgstr "Kan uw aanvragen niet laden."
+
+msgid "Could not queue this release."
+msgstr "Kan deze uitgave niet in de wachtrij plaatsen."
+
+msgid "Could not revoke credential."
+msgstr "Kan aanmeldgegeven niet intrekken."
+
+msgid "Could not save credential."
+msgstr "Kan aanmeldgegeven niet opslaan."
+
+msgid "Could not save experimental settings."
+msgstr "Kan experimentele instellingen niet opslaan."
+
+msgid "Could not search the Store."
+msgstr "Kan de winkel niet doorzoeken."
+
+msgid "Could not update the request."
+msgstr "Kan de aanvraag niet bijwerken."
+
+msgid "Credential revoked."
+msgstr "Aanmeldgegeven ingetrokken."
+
+msgid "Credential saved."
+msgstr "Aanmeldgegeven opgeslagen."
+
+msgid "Developer preview"
+msgstr "Ontwikkelaarsvoorbeeld"
+
+msgid "Download progress"
+msgstr "Downloadvoortgang"
+
+msgid "Download queued."
+msgstr "Download in de wachtrij geplaatst."
+
+msgid "Download this edition"
+msgstr "Deze editie downloaden"
+
+msgid "Early features stay hidden until you enable them here. They may change or require additional services."
+msgstr "Vroege functies blijven verborgen totdat u ze hier inschakelt. Ze kunnen veranderen of aanvullende diensten vereisen."
+
+msgid "Enter a replacement key"
+msgstr "Voer een vervangende sleutel in"
+
+msgid "Enter provider key"
+msgstr "Voer de providersleutel in"
+
+msgid "Experimental"
+msgstr "Experimenteel"
+
+msgid "Experimental settings saved."
+msgstr "Experimentele instellingen opgeslagen."
+
+msgid "Find a work, then choose the exact edition you want."
+msgstr "Zoek een werk en kies daarna precies de gewenste editie."
+
+msgid "IRC"
+msgstr "IRC"
+
+msgid "LibGen"
+msgstr "LibGen"
+
+msgid "My requests"
+msgstr "Mijn aanvragen"
+
+msgid "Newznab"
+msgstr "Newznab"
+
+msgid "No Store requests are waiting."
+msgstr "Er wachten geen winkelaanvragen."
+
+msgid "No additional edition details"
+msgstr "Geen aanvullende editiegegevens"
+
+msgid "No editions found from this source."
+msgstr "Geen edities gevonden bij deze bron."
+
+msgid "No experimental features are registered."
+msgstr "Er zijn geen experimentele functies geregistreerd."
+
+msgid "No matching works found."
+msgstr "Geen overeenkomende werken gevonden."
+
+msgid "No release sources are enabled."
+msgstr "Er zijn geen uitgavebronnen ingeschakeld."
+
+msgid "Pending"
+msgstr "In afwachting"
+
+msgid "Provider credentials"
+msgstr "Provideraanmeldgegevens"
+
+msgid "Prowlarr"
+msgstr "Prowlarr"
+
+msgid "Reject"
+msgstr "Afwijzen"
+
+msgid "Release details come from the acquisition source so you can verify format, size, and language."
+msgstr "De uitgavegegevens komen van de acquisitiebron, zodat u formaat, grootte en taal kunt controleren."
+
+msgid "Release source"
+msgstr "Uitgavebron"
+
+msgid "Replace"
+msgstr "Vervangen"
+
+msgid "Request"
+msgstr "Aanvragen"
+
+msgid "Request approved."
+msgstr "Aanvraag goedgekeurd."
+
+msgid "Request rejected."
+msgstr "Aanvraag afgewezen."
+
+msgid "Request sent for approval."
+msgstr "Aanvraag ter goedkeuring verzonden."
+
+msgid "Request this edition"
+msgstr "Deze editie aanvragen"
+
+msgid "Requested by {name}"
+msgstr "Aangevraagd door {name}"
+
+msgid "Retry {title}"
+msgstr "{title} opnieuw proberen"
+
+msgid "Review the exact work and edition each user selected."
+msgstr "Controleer het exacte werk en de editie die elke gebruiker heeft geselecteerd."
+
+msgid "Revoke the saved {provider} credential?"
+msgstr "Het opgeslagen aanmeldgegeven voor {provider} intrekken?"
+
+msgid "Revoke the {provider} credential for {name}?"
+msgstr "Het aanmeldgegeven voor {provider} van {name} intrekken?"
+
+msgid "Revoke {provider}"
+msgstr "{provider} intrekken"
+
+msgid "Revoke {provider} credential"
+msgstr "Aanmeldgegeven voor {provider} intrekken"
+
+msgid "Saved Store credentials are write-only. Administrators can revoke them but can never reveal or copy their values."
+msgstr "Opgeslagen winkelaanmeldgegevens zijn alleen beschrijfbaar. Beheerders kunnen ze intrekken, maar de waarden nooit weergeven of kopiëren."
+
+msgid "Search external acquisition sources through a configured Shelfmark service."
+msgstr "Doorzoek externe acquisitiebronnen via een geconfigureerde Shelfmark-dienst."
+
+msgid "Search the Store"
+msgstr "De winkel doorzoeken"
+
+msgid "Selected"
+msgstr "Geselecteerd"
+
+msgid "Selected {title}"
+msgstr "{title} geselecteerd"
+
+msgid "Store"
+msgstr "Winkel"
+
+msgid "Store / Discover"
+msgstr "Winkel / Ontdekken"
+
+msgid "Store access"
+msgstr "Winkeltoegang"
+
+msgid "Store download"
+msgstr "Winkeldownload"
+
+msgid "Store downloads without approval"
+msgstr "Winkeldownloads zonder goedkeuring"
+
+msgid "Store requests"
+msgstr "Winkelaanvragen"
+
+msgid "The Store is not available right now."
+msgstr "De winkel is momenteel niet beschikbaar."
+
+msgid "Unknown author"
+msgstr "Onbekende auteur"
+
+msgid "Unknown user"
+msgstr "Onbekende gebruiker"
+
+msgid "Untitled request"
+msgstr "Naamloze aanvraag"
+
+msgid "Working…"
+msgstr "Bezig…"
+
+msgid "You have no pending requests."
+msgstr "U hebt geen openstaande aanvragen."
+
+msgid "Your paid provider keys are encrypted in the server database. They are write-only here: neither you nor an administrator can reveal a saved key. Administrators can only revoke it."
+msgstr "Uw betaalde providersleutels zijn versleuteld in de serverdatabase. Ze zijn hier alleen beschrijfbaar: noch u, noch een beheerder kan een opgeslagen sleutel weergeven. Beheerders kunnen deze alleen intrekken."
+
+msgid "Z-Library"
+msgstr "Z-Library"
+
+msgid "download"
+msgstr "download"
+
+msgid "welib"
+msgstr "welib"
+
+msgid "{count} matches"
+msgstr "{count} overeenkomsten"

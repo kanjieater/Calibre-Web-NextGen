@@ -13191,3 +13191,262 @@ msgstr "Afficher la section Lu / Non lu"
 #~ msgid "Click the cover to load metadata to the form"
 #~ msgstr ""
 #~ "Cliquer sur la couverture pour importer les métadonnées dans le formulaire"
+
+# Store / Discover
+msgid "Active downloads"
+msgstr "Téléchargements actifs"
+
+msgid "Already queued."
+msgstr "Déjà dans la file d’attente."
+
+msgid "Anna's Archive"
+msgstr "Anna's Archive"
+
+msgid "Approve"
+msgstr "Approuver"
+
+msgid "AudiobookBay"
+msgstr "AudiobookBay"
+
+msgid "Cancel {title}"
+msgstr "Annuler {title}"
+
+msgid "Choose an edition"
+msgstr "Choisir une édition"
+
+msgid "Choose an edition to continue."
+msgstr "Choisissez une édition pour continuer."
+
+msgid "Choose the work"
+msgstr "Choisir l’œuvre"
+
+msgid "Choose {title}"
+msgstr "Choisir {title}"
+
+msgid "Configured · ending in {last4}"
+msgstr "Configuré · se termine par {last4}"
+
+msgid "Could not load Store requests."
+msgstr "Impossible de charger les demandes de la boutique."
+
+msgid "Could not load credentials."
+msgstr "Impossible de charger les identifiants."
+
+msgid "Could not load editions."
+msgstr "Impossible de charger les éditions."
+
+msgid "Could not load experimental features."
+msgstr "Impossible de charger les fonctionnalités expérimentales."
+
+msgid "Could not load release sources."
+msgstr "Impossible de charger les sources de versions."
+
+msgid "Could not load your requests."
+msgstr "Impossible de charger vos demandes."
+
+msgid "Could not queue this release."
+msgstr "Impossible d’ajouter cette version à la file d’attente."
+
+msgid "Could not revoke credential."
+msgstr "Impossible de révoquer l’identifiant."
+
+msgid "Could not save credential."
+msgstr "Impossible d’enregistrer l’identifiant."
+
+msgid "Could not save experimental settings."
+msgstr "Impossible d’enregistrer les paramètres expérimentaux."
+
+msgid "Could not search the Store."
+msgstr "Impossible d’effectuer une recherche dans la boutique."
+
+msgid "Could not update the request."
+msgstr "Impossible de mettre à jour la demande."
+
+msgid "Credential revoked."
+msgstr "Identifiant révoqué."
+
+msgid "Credential saved."
+msgstr "Identifiant enregistré."
+
+msgid "Developer preview"
+msgstr "Aperçu pour les développeurs"
+
+msgid "Download progress"
+msgstr "Progression du téléchargement"
+
+msgid "Download queued."
+msgstr "Téléchargement ajouté à la file d’attente."
+
+msgid "Download this edition"
+msgstr "Télécharger cette édition"
+
+msgid "Early features stay hidden until you enable them here. They may change or require additional services."
+msgstr "Les fonctionnalités préliminaires restent masquées jusqu’à ce que vous les activiez ici. Elles peuvent évoluer ou nécessiter des services supplémentaires."
+
+msgid "Enter a replacement key"
+msgstr "Saisir une clé de remplacement"
+
+msgid "Enter provider key"
+msgstr "Saisir la clé du fournisseur"
+
+msgid "Experimental"
+msgstr "Expérimental"
+
+msgid "Experimental settings saved."
+msgstr "Paramètres expérimentaux enregistrés."
+
+msgid "Find a work, then choose the exact edition you want."
+msgstr "Trouvez une œuvre, puis choisissez précisément l’édition souhaitée."
+
+msgid "IRC"
+msgstr "IRC"
+
+msgid "LibGen"
+msgstr "LibGen"
+
+msgid "My requests"
+msgstr "Mes demandes"
+
+msgid "Newznab"
+msgstr "Newznab"
+
+msgid "No Store requests are waiting."
+msgstr "Aucune demande de la boutique n’est en attente."
+
+msgid "No additional edition details"
+msgstr "Aucun détail supplémentaire sur l’édition"
+
+msgid "No editions found from this source."
+msgstr "Aucune édition trouvée auprès de cette source."
+
+msgid "No experimental features are registered."
+msgstr "Aucune fonctionnalité expérimentale n’est enregistrée."
+
+msgid "No matching works found."
+msgstr "Aucune œuvre correspondante trouvée."
+
+msgid "No release sources are enabled."
+msgstr "Aucune source de versions n’est activée."
+
+msgid "Pending"
+msgstr "En attente"
+
+msgid "Provider credentials"
+msgstr "Identifiants des fournisseurs"
+
+msgid "Prowlarr"
+msgstr "Prowlarr"
+
+msgid "Reject"
+msgstr "Rejeter"
+
+msgid "Release details come from the acquisition source so you can verify format, size, and language."
+msgstr "Les détails de la version proviennent de la source d’acquisition afin que vous puissiez vérifier le format, la taille et la langue."
+
+msgid "Release source"
+msgstr "Source de la version"
+
+msgid "Replace"
+msgstr "Remplacer"
+
+msgid "Request"
+msgstr "Demander"
+
+msgid "Request approved."
+msgstr "Demande approuvée."
+
+msgid "Request rejected."
+msgstr "Demande rejetée."
+
+msgid "Request sent for approval."
+msgstr "Demande envoyée pour approbation."
+
+msgid "Request this edition"
+msgstr "Demander cette édition"
+
+msgid "Requested by {name}"
+msgstr "Demandé par {name}"
+
+msgid "Retry {title}"
+msgstr "Réessayer {title}"
+
+msgid "Review the exact work and edition each user selected."
+msgstr "Examinez précisément l’œuvre et l’édition sélectionnées par chaque utilisateur."
+
+msgid "Revoke the saved {provider} credential?"
+msgstr "Révoquer l’identifiant {provider} enregistré ?"
+
+msgid "Revoke the {provider} credential for {name}?"
+msgstr "Révoquer l’identifiant {provider} de {name} ?"
+
+msgid "Revoke {provider}"
+msgstr "Révoquer {provider}"
+
+msgid "Revoke {provider} credential"
+msgstr "Révoquer l’identifiant {provider}"
+
+msgid "Saved Store credentials are write-only. Administrators can revoke them but can never reveal or copy their values."
+msgstr "Les identifiants enregistrés pour la boutique sont accessibles uniquement en écriture. Les administrateurs peuvent les révoquer, mais ne peuvent jamais afficher ni copier leurs valeurs."
+
+msgid "Search external acquisition sources through a configured Shelfmark service."
+msgstr "Rechercher dans des sources d’acquisition externes par l’intermédiaire d’un service Shelfmark configuré."
+
+msgid "Search the Store"
+msgstr "Rechercher dans la boutique"
+
+msgid "Selected"
+msgstr "Sélectionné"
+
+msgid "Selected {title}"
+msgstr "{title} sélectionné"
+
+msgid "Store"
+msgstr "Boutique"
+
+msgid "Store / Discover"
+msgstr "Boutique / Découvrir"
+
+msgid "Store access"
+msgstr "Accès à la boutique"
+
+msgid "Store download"
+msgstr "Téléchargement de la boutique"
+
+msgid "Store downloads without approval"
+msgstr "Téléchargements de la boutique sans approbation"
+
+msgid "Store requests"
+msgstr "Demandes de la boutique"
+
+msgid "The Store is not available right now."
+msgstr "La boutique n’est pas disponible pour le moment."
+
+msgid "Unknown author"
+msgstr "Auteur inconnu"
+
+msgid "Unknown user"
+msgstr "Utilisateur inconnu"
+
+msgid "Untitled request"
+msgstr "Demande sans titre"
+
+msgid "Working…"
+msgstr "Traitement en cours…"
+
+msgid "You have no pending requests."
+msgstr "Vous n’avez aucune demande en attente."
+
+msgid "Your paid provider keys are encrypted in the server database. They are write-only here: neither you nor an administrator can reveal a saved key. Administrators can only revoke it."
+msgstr "Vos clés de fournisseurs payantes sont chiffrées dans la base de données du serveur. Elles sont accessibles uniquement en écriture ici : ni vous ni un administrateur ne pouvez afficher une clé enregistrée. Les administrateurs peuvent uniquement la révoquer."
+
+msgid "Z-Library"
+msgstr "Z-Library"
+
+msgid "download"
+msgstr "téléchargement"
+
+msgid "welib"
+msgstr "welib"
+
+msgid "{count} matches"
+msgstr "{count} résultats"

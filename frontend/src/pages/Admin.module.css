@@ -270,3 +270,34 @@
   color: var(--accent);
   font-size: var(--fs-sm);
 }
+
+.credentialAdmin { margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--border); }
+.credentialAdmin p { margin: 0 0 var(--sp-2); color: var(--text-muted); font-size: var(--fs-sm); }
+.credentialAdmin > div { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.credentialAdmin button { min-height: 40px; display: inline-flex; align-items: center; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--danger-border); border-radius: var(--r-md); color: var(--danger); background: var(--danger-soft); font-size: var(--fs-sm); }
+.credentialAdmin button:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 2px; }
+.experimental, .approvals { margin-top: var(--sp-6); }
+.experimentalList { display: flex; flex-direction: column; gap: var(--sp-2); }
+.experimentalItem { min-height: 52px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--sp-3); padding: var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-1); cursor: pointer; }
+.experimentalItem input { width: 18px; height: 18px; accent-color: var(--accent); }
+.experimentalCopy { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.experimentalCopy strong { color: var(--text); }
+.experimentalCopy span { color: var(--text-muted); font-size: var(--fs-sm); }
+.experimentalItem small { padding: 2px var(--sp-2); border-radius: var(--r-full); color: var(--accent-text); background: var(--accent-soft); font-size: var(--fs-xs); }
+.approvalList { display: flex; flex-direction: column; gap: var(--sp-2); }
+.approvalList > li { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-1); }
+.approvalInfo { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.approvalInfo strong, .approvalInfo span, .approvalInfo small { overflow-wrap: anywhere; }
+.approvalInfo span { color: var(--text-muted); font-size: var(--fs-sm); }
+.approvalInfo small { color: var(--text-faint); font-size: var(--fs-xs); }
+.approvalActions { display: flex; flex: none; gap: var(--sp-2); }
+.approveBtn, .rejectBtn { min-height: 40px; display: inline-flex; align-items: center; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); font-size: var(--fs-sm); }
+.approveBtn { color: var(--success); border: 1px solid var(--success-border); background: var(--success-soft); }
+.rejectBtn { color: var(--danger); border: 1px solid var(--danger-border); background: var(--danger-soft); }
+.approveBtn:focus-visible, .rejectBtn:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .experimentalItem { grid-template-columns: auto 1fr; }
+  .experimentalItem small { grid-column: 2; justify-self: start; }
+  .approvalList > li { align-items: stretch; flex-direction: column; }
+  .approvalActions button { flex: 1; min-height: 44px; justify-content: center; }
+}

@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { Shield, Trash2, Mail, UserPlus, ChevronRight, Settings, Database, Server, Clock, FileText, Sliders, BarChart3, Files, Lock, RefreshCw, KeyRound } from 'lucide-react';
+import { Shield, Trash2, Mail, UserPlus, ChevronRight, Settings, Database, Server, Clock, FileText, Sliders, BarChart3, Files, Lock, RefreshCw, KeyRound, FlaskConical, Check, X, Store as StoreIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import {
   useAdminUsers, useUpdateAdminUser, useDeleteAdminUser, useCreateAdminUser, useMe,
   useResetAdminUserPassword,
   useAdminConfig, useUpdateAdminConfig, useMailConfig, useUpdateMailConfig,
   useSecurityConfig, useUpdateSecurityConfig,
+  useExperimentalFeatures, useSetExperimentalFeature, useAdminRevokeStoreCredential,
+  useStoreAdminRequests, useStoreAdminRequestAction,
 } from '../lib/queries';
 import type { SecurityConfig, SecurityUpdate } from '../lib/queries';
 import { SpinnerCentered } from '../components/Spinner';
 import { EmptyState } from '../components/EmptyState';
-import type { AdminUser } from '../lib/api';
+import type { AdminUser, StoreRequest } from '../lib/api';
 import { ApiError, resourceUrl } from '../lib/api';
 import { useT } from '../lib/i18n';
 import { THEMES, DEFAULT_THEME } from '../lib/themes';
@@ -58,7 +60,11 @@ const ROLE_FIELDS: { key: string; label: string }[] = [
   { key: 'edit_shelfs', label: 'Edit public shelves' },
   { key: 'passwd', label: 'Change password' },
   { key: 'viewer', label: 'Viewer' },
+  { key: 'store_access', label: 'Store access' },
+  { key: 'store_auto_approve', label: 'Store downloads without approval' },
 ];
+
+const STORE_ROLE_KEYS = new Set(['store_access', 'store_auto_approve']);
 
 export function Admin() {
   const t = useT();
@@ -71,6 +77,8 @@ export function Admin() {
   const [banner, setBanner] = useState<{ ok: boolean; text: string } | null>(null);
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState({ name: '', password: '', email: '', upload: false });
+  const revokeStoreCredential = useAdminRevokeStoreCredential();
+  const storeEnabled = me?.features?.store_discover === true;
 
   if (isLoading) return <SpinnerCentered size={40} />;
   if (error || !data) {
@@ -224,7 +232,7 @@ export function Admin() {
               </div>
 
               <div className={styles.roles}>
-                {ROLE_FIELDS.map(({ key, label }) => (
+                {ROLE_FIELDS.filter(({ key }) => storeEnabled || !STORE_ROLE_KEYS.has(key)).map(({ key, label }) => (
                   <label key={key} className={styles.roleToggle}>
                     <input
                       type="checkbox"
@@ -236,12 +244,34 @@ export function Admin() {
                   </label>
                 ))}
               </div>
+              {storeEnabled && (user.store_credential_providers?.length ?? 0) > 0 && (
+                <div className={styles.credentialAdmin}>
+                  <p>{t('Saved Store credentials are write-only. Administrators can revoke them but can never reveal or copy their values.')}</p>
+                  <div>
+                    {user.store_credential_providers!.map((provider) => (
+                      <button type="button" key={provider} disabled={revokeStoreCredential.isPending}
+                        onClick={() => {
+                          if (!window.confirm(t('Revoke the {provider} credential for {name}?', { provider, name: user.name }))) return;
+                          revokeStoreCredential.mutate({ userId: user.id, provider }, {
+                            onSuccess: () => setBanner({ ok: true, text: t('Credential revoked.') }),
+                            onError: (err) => setBanner({ ok: false, text: err instanceof ApiError ? err.message : t('Could not revoke credential.') }),
+                          });
+                        }}>
+                        <Trash2 size={14} aria-hidden="true" focusable={false} />
+                        {t('Revoke {provider}', { provider })}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </section>
           );
         })}
       </div>
 
       <AdminConfigForm />
+      <ExperimentalSettings />
+      {me?.features?.store_discover === true && <StoreApprovalQueue />}
       <MailConfigForm />
       <SecurityConfigForm />
 
@@ -269,6 +299,139 @@ export function Admin() {
         })}
       </div>
     </main>
+  );
+}
+
+function ExperimentalSettings() {
+  const t = useT();
+  const features = useExperimentalFeatures(true);
+  const update = useSetExperimentalFeature();
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  return (
+    <section className={styles.experimental} aria-labelledby="experimental-settings-heading">
+      <div className={styles.settingsHead}>
+        <FlaskConical size={18} className={styles.headerIcon} aria-hidden="true" focusable={false} />
+        <h2 id="experimental-settings-heading" className={styles.settingsTitle}>{t('Experimental')}</h2>
+      </div>
+      <p className={styles.settingsHint}>
+        {t('Early features stay hidden until you enable them here. They may change or require additional services.')}
+      </p>
+      <span className={message ? (message.ok ? styles.msgOk : styles.msgErr) : undefined}
+        role={message?.ok === false ? 'alert' : 'status'}>{message?.text}</span>
+      {features.isLoading ? <SpinnerCentered size={28} /> : features.error ? (
+        <EmptyState message={features.error instanceof Error ? features.error.message : t('Could not load experimental features.')} />
+      ) : (
+        <div className={styles.experimentalList}>
+          {(features.data?.items ?? []).map((feature) => (
+            <label key={feature.key} className={styles.experimentalItem}>
+              <input type="checkbox" checked={feature.enabled} disabled={update.isPending}
+                onChange={(event) => {
+                  setMessage(null);
+                  update.mutate({ key: feature.key, enabled: event.target.checked }, {
+                    onSuccess: () => setMessage({ ok: true, text: t('Experimental settings saved.') }),
+                    onError: (error) => setMessage({
+                      ok: false,
+                      text: error instanceof ApiError ? error.message : t('Could not save experimental settings.'),
+                    }),
+                  });
+                }} />
+              <span className={styles.experimentalCopy}>
+                <strong>{t(feature.name)}</strong>
+                <span>{t(feature.description)}</span>
+              </span>
+              {feature.dev_only && <small>{t('Developer preview')}</small>}
+            </label>
+          ))}
+          {features.data?.items.length === 0 && <p className={styles.settingsHint}>{t('No experimental features are registered.')}</p>}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function adminRequestsOf(value: StoreRequest[] | { items?: StoreRequest[]; requests?: StoreRequest[] } | undefined): StoreRequest[] {
+  if (Array.isArray(value)) return value;
+  return value?.items ?? value?.requests ?? [];
+}
+
+function approvalTitle(request: StoreRequest): string {
+  return request.release?.title || request.work?.title || request.title || '';
+}
+
+function requesterName(request: StoreRequest): string {
+  const requester = request.requester ?? request.user;
+  if (typeof requester === 'string') return requester;
+  return requester?.name || '';
+}
+
+function StoreApprovalQueue() {
+  const t = useT();
+  // Admin review is feature-gated but intentionally does not require the admin's
+  // personal Store-access role. Reviewing and acquiring are separate powers.
+  const queue = useStoreAdminRequests(true);
+  const action = useStoreAdminRequestAction();
+  const [pendingId, setPendingId] = useState<string | number | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const items = adminRequestsOf(queue.data);
+
+  const run = (request: StoreRequest, next: 'fulfil' | 'reject') => {
+    setPendingId(request.id);
+    setMessage(null);
+    action.mutate({ id: request.id, action: next }, {
+      onSuccess: () => {
+        setPendingId(null);
+        setMessage({ ok: true, text: next === 'fulfil' ? t('Request approved.') : t('Request rejected.') });
+      },
+      onError: (error) => {
+        setPendingId(null);
+        setMessage({ ok: false, text: error instanceof ApiError ? error.message : t('Could not update the request.') });
+      },
+    });
+  };
+
+  return (
+    <section className={styles.approvals} aria-labelledby="store-approval-heading">
+      <div className={styles.settingsHead}>
+        <StoreIcon size={18} className={styles.headerIcon} aria-hidden="true" focusable={false} />
+        <h2 id="store-approval-heading" className={styles.settingsTitle}>{t('Store requests')}</h2>
+      </div>
+      <p className={styles.settingsHint}>{t('Review the exact work and edition each user selected.')}</p>
+      <span className={message ? (message.ok ? styles.msgOk : styles.msgErr) : undefined}
+        role={message?.ok === false ? 'alert' : 'status'}>{message?.text}</span>
+      {queue.isLoading ? <SpinnerCentered size={28} /> : queue.error ? (
+        <EmptyState message={queue.error instanceof Error ? queue.error.message : t('Could not load Store requests.')} />
+      ) : items.length === 0 ? (
+        <EmptyState message={t('No Store requests are waiting.')} />
+      ) : (
+        <ul className={styles.approvalList} role="list">
+          {items.map((request) => {
+            const release = request.release;
+            const metadata = [release?.format, release?.size, release?.language, release?.source].filter(Boolean).join(' · ');
+            const busy = pendingId === request.id && action.isPending;
+            return (
+              <li key={String(request.id)}>
+                <div className={styles.approvalInfo}>
+                  <strong>{approvalTitle(request) || t('Untitled request')}</strong>
+                  <span>{t('Requested by {name}', { name: requesterName(request) || t('Unknown user') })}</span>
+                  {metadata && <small>{metadata}</small>}
+                </div>
+                <div className={styles.approvalActions}>
+                  <button type="button" className={styles.approveBtn} disabled={busy}
+                    onClick={() => run(request, 'fulfil')}>
+                    <Check size={15} aria-hidden="true" focusable={false} /> {busy ? t('Working…') : t('Approve')}
+                  </button>
+                  <button type="button" className={styles.rejectBtn} disabled={busy}
+                    onClick={() => run(request, 'reject')}>
+                    <X size={15} aria-hidden="true" focusable={false} /> {t('Reject')}
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
 

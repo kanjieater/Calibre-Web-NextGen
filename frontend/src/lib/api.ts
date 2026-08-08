@@ -51,6 +51,9 @@ export interface ServerFeatures {
    *  servers → treat as ON, matching the server's column default (the other
    *  flags here are opt-in features and default off; this one is not). */
   uploading?: boolean;
+  /** Experimental Store / Discover acquisition surface. This is deliberately
+   *  fail-closed: absent on an older server means OFF. */
+  store_discover?: boolean;
 }
 
 export interface Me {
@@ -355,6 +358,89 @@ export interface AdminUser {
   default_language: string;
   is_guest: boolean;
   roles: Record<string, boolean>;
+  /** Provider names only; admins may revoke but never receive credential values
+   *  or last-four metadata for another user. */
+  store_credential_providers?: string[];
+}
+
+export interface ExperimentalFeature {
+  key: string;
+  name: string;
+  description: string;
+  default: boolean;
+  dev_only: boolean;
+  enabled: boolean;
+}
+
+export interface StoreBootstrap {
+  enabled: true;
+  auto_approve: boolean;
+  credential_providers: { key: string; label: string }[];
+}
+
+export interface StoreWork {
+  provider: string;
+  provider_id: string;
+  title: string;
+  authors?: string[] | string;
+  isbn_13?: string | null;
+  publisher?: string | null;
+  publish_year?: string | number | null;
+  cover_url?: string | null;
+  language?: string | null;
+  [key: string]: unknown;
+}
+
+export interface StoreSource {
+  name: string;
+  display_name: string;
+  enabled: boolean;
+  supported_content_types?: string[];
+}
+
+export interface StoreRelease {
+  source: string;
+  source_id: string;
+  title: string;
+  format?: string | null;
+  size?: string | number | null;
+  language?: string | null;
+  publisher?: string | null;
+  publish_year?: string | number | null;
+  cover_url?: string | null;
+  extra?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export interface StoreDownload {
+  book_id?: string | number;
+  id?: string | number;
+  title?: string;
+  status?: string;
+  progress?: number | string | null;
+  format?: string | null;
+  source?: string | null;
+  [key: string]: unknown;
+}
+
+export interface StoreRequest {
+  id: string | number;
+  status?: string;
+  title?: string;
+  requester?: { id?: number; name?: string } | string;
+  user?: { id?: number; name?: string } | string;
+  work?: Partial<StoreWork>;
+  release?: Partial<StoreRelease>;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface StoreCredentialStatus {
+  provider: string;
+  configured: true;
+  last4: string | null;
+  updated_at: string | null;
 }
 
 export interface OAuthProvider {

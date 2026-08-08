@@ -16,6 +16,19 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Added
+
+- **An experimental Store brings Shelfmark-backed book discovery into the
+  NextGen interface.** Administrators can enable it explicitly, grant Store
+  access separately from approval bypass, and review readers' exact work and
+  edition requests. Readers choose a work and then a specific release—nothing
+  silently takes the first search result—and can compare every enabled source,
+  see their own live download progress, and treat duplicate queue submissions
+  as the harmless “already queued” state they are. Paid provider credentials
+  are encrypted per user and are write-only: administrators can revoke them
+  but cannot reveal them. The feature and both permissions remain off by
+  default; deployments that do not enable it see no Store surface.
+
 ### Fixed
 
 - **Installing outside Docker failed on the first setup script.** If you install

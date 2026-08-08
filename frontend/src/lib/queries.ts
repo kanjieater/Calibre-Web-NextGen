@@ -11,6 +11,8 @@ import type {
   Me, Book, BooksPage, BookDetail, EntityList, Shelf, ShelfDetail,
   SearchOptions, AdvancedSearchParams, AdvSearchResult, Account, ProfileUpdate,
   BookMetadata, MetadataUpdate, UploadResult, AdminUser, AboutInfo, TaskItem, AuthConfig,
+  ExperimentalFeature, StoreBootstrap, StoreWork, StoreSource, StoreRelease,
+  StoreDownload, StoreRequest, StoreCredentialStatus,
 } from './api';
 
 /** Entity kinds the catalog can be filtered by. Singular here; the browse-list
@@ -624,6 +626,180 @@ export function useUpdateAdminUser() {
       return apiPost<AdminUser>(`/api/v1/admin/users/${id}`, body);
     },
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['admin-users'] }),
+  });
+}
+
+export function useExperimentalFeatures(enabled = true) {
+  return useQuery<{ items: ExperimentalFeature[] }>({
+    queryKey: ['admin-experimental'],
+    queryFn: () => apiGet<{ items: ExperimentalFeature[] }>('/api/v1/admin/experimental'),
+    enabled,
+  });
+}
+
+export function useSetExperimentalFeature() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ key, enabled }: { key: string; enabled: boolean }) =>
+      apiPost<ExperimentalFeature | { key: string; enabled: boolean }>(
+        `/api/v1/admin/experimental/${encodeURIComponent(key)}`, { enabled }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin-experimental'] });
+      void qc.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+}
+
+export function useAdminRevokeStoreCredential() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, provider }: { userId: number; provider: string }) =>
+      apiDelete<void>(`/api/v1/admin/store/credentials/${userId}/${encodeURIComponent(provider)}`),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['admin-users'] }),
+  });
+}
+
+type StoreRequestsResponse = StoreRequest[] | { items?: StoreRequest[]; requests?: StoreRequest[] };
+
+export function useStoreBootstrap(enabled: boolean) {
+  return useQuery<StoreBootstrap>({
+    queryKey: ['store', 'bootstrap'],
+    queryFn: () => apiGet<StoreBootstrap>('/api/v1/store'),
+    enabled,
+    retry: false,
+  });
+}
+
+export function useStoreSources(enabled: boolean) {
+  return useQuery<StoreSource[]>({
+    queryKey: ['store', 'sources'],
+    queryFn: () => apiGet<StoreSource[]>('/api/v1/store/sources'),
+    enabled,
+    staleTime: 60000,
+  });
+}
+
+export function useStoreSearch() {
+  return useMutation({
+    mutationFn: (query: string) => apiGet<{ books: StoreWork[] }>(
+      `/api/v1/store/search?query=${encodeURIComponent(query)}`),
+  });
+}
+
+export function useStoreReleases(
+  work: Pick<StoreWork, 'provider' | 'provider_id'> | null,
+  source: string,
+) {
+  const params = new URLSearchParams();
+  if (work) {
+    params.set('provider', work.provider);
+    params.set('book_id', work.provider_id);
+  }
+  if (source) params.set('source', source);
+  return useQuery<{ releases: StoreRelease[]; sources_searched?: string[] }>({
+    queryKey: ['store', 'releases', work?.provider ?? '', work?.provider_id ?? '', source],
+    queryFn: () => apiGet(`/api/v1/store/releases?${params.toString()}`),
+    enabled: Boolean(work),
+    retry: false,
+  });
+}
+
+export interface StoreAcquireInput {
+  work: { provider: string; provider_id: string };
+  release: {
+    provider: string;
+    book_id: string;
+    source: string;
+    source_id: string;
+    title: string;
+    format: string | null;
+    size: string | number | null;
+    extra: Record<string, unknown>;
+  };
+}
+
+export interface StoreAcquireResult {
+  status?: string;
+  mode: 'download' | 'request';
+  already_queued?: boolean;
+  [key: string]: unknown;
+}
+
+export function useStoreAcquire() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: StoreAcquireInput) =>
+      apiPost<StoreAcquireResult>('/api/v1/store/acquire', input),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['store', 'active'] });
+      void qc.invalidateQueries({ queryKey: ['store', 'requests'] });
+      void qc.invalidateQueries({ queryKey: ['store', 'admin-requests'] });
+    },
+  });
+}
+
+export function useStoreActive(enabled: boolean) {
+  return useQuery<StoreDownload[] | { items?: StoreDownload[]; downloads?: StoreDownload[] }>({
+    queryKey: ['store', 'active'],
+    queryFn: () => apiGet('/api/v1/store/active'),
+    enabled,
+    refetchInterval: 4000,
+  });
+}
+
+export function useStoreDownloadAction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ bookId, action }: { bookId: string | number; action: 'cancel' | 'retry' }) =>
+      apiPost(`/api/v1/store/downloads/${encodeURIComponent(String(bookId))}/${action}`),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['store', 'active'] }),
+  });
+}
+
+export function useStoreRequests(enabled: boolean) {
+  return useQuery<StoreRequestsResponse>({
+    queryKey: ['store', 'requests'],
+    queryFn: () => apiGet<StoreRequestsResponse>('/api/v1/store/requests'),
+    enabled,
+    refetchInterval: 6000,
+  });
+}
+
+export function useStoreAdminRequests(enabled: boolean) {
+  return useQuery<StoreRequestsResponse>({
+    queryKey: ['store', 'admin-requests'],
+    queryFn: () => apiGet<StoreRequestsResponse>('/api/v1/store/admin/requests'),
+    enabled,
+    refetchInterval: 6000,
+  });
+}
+
+export function useStoreAdminRequestAction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, action }: { id: string | number; action: 'fulfil' | 'reject' }) =>
+      apiPost(`/api/v1/store/admin/requests/${encodeURIComponent(String(id))}/${action}`),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['store', 'admin-requests'] });
+      void qc.invalidateQueries({ queryKey: ['store', 'active'] });
+    },
+  });
+}
+
+export function useStoreCredentials(enabled: boolean) {
+  return useQuery<{ items: StoreCredentialStatus[] }>({
+    queryKey: ['store', 'credentials'],
+    queryFn: () => apiGet('/api/v1/store/credentials'),
+    enabled,
+  });
+}
+
+export function useRevokeStoreCredential() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (provider: string) =>
+      apiDelete<void>(`/api/v1/store/credentials/${encodeURIComponent(provider)}`),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['store', 'credentials'] }),
   });
 }
 

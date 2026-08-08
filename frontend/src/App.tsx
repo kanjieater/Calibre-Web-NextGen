@@ -28,7 +28,9 @@ import { WhatsNew } from './pages/WhatsNew';
 import { MagicShelf } from './pages/MagicShelf';
 import { MagicShelfView } from './pages/MagicShelfView';
 import { AppShell } from './components/AppShell';
+import { Store } from './pages/Store';
 import { RoutedErrorBoundary } from './components/ErrorBoundary';
+import { canUseStore } from './lib/permissions';
 import { SpinnerCentered } from './components/Spinner';
 import { I18nProvider } from './lib/i18n';
 import { usePostAuthRedirect } from './lib/authRedirect';
@@ -231,6 +233,10 @@ export function App() {
 
           {/* Advanced search */}
           <Route path={SPA_ROUTES.search}>{() => <AdvancedSearch />}</Route>
+
+          {/* Experimental acquisition Store. Omit the route itself unless both
+              deployment and per-user gates are on, so a direct URL is dark too. */}
+          {canUseStore(me) && <Route path={SPA_ROUTES.store}>{() => <Store />}</Route>}
 
           {/* Account / settings */}
           <Route path={SPA_ROUTES.account}>{() => <Account />}</Route>

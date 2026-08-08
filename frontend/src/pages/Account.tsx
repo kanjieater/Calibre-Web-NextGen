@@ -18,12 +18,15 @@ const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin', upload: 'Upload', edit: 'Edit metadata', download: 'Download',
   delete_books: 'Delete books', edit_shelfs: 'Edit public shelves', viewer: 'Viewer',
   passwd: 'Change password',
+  store_access: 'Store access',
+  store_auto_approve: 'Store downloads without approval',
 };
 
 export function Account() {
   const t = useT();
   const { data: account, isLoading, error } = useAccount();
-  const avatar = useMe().data?.avatar;
+  const me = useMe().data;
+  const avatar = me?.avatar;
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
   const createAppPw = useCreateAppPassword();
@@ -154,7 +157,9 @@ export function Account() {
     );
   };
 
-  const activeRoles = Object.entries(account.role).filter(([, v]) => v);
+  const activeRoles = Object.entries(account.role).filter(([key, value]) => (
+    value && (me?.features?.store_discover === true || !key.startsWith('store_'))
+  ));
   const selectedTheme = THEMES.find((o) => o.slug === theme);
 
   return (

@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
-  Library, BookCopy,
+  Library, BookCopy, Store,
   Info, ListChecks, Table2, Wand2, Files, SlidersHorizontal, Check, RotateCcw, X,
 } from 'lucide-react';
 import { useShelves, useMe, useMagicShelves, useUpdateSidebar } from '../lib/queries';
@@ -14,6 +14,7 @@ import {
 } from '../lib/sidebarEntries';
 import { SidebarEditList } from './SidebarEditList';
 import styles from './Sidebar.module.css';
+import { canUseStore } from '../lib/permissions';
 
 // Lower-frequency info pages (pinned; not customizable).
 const SYSTEM = [
@@ -74,6 +75,7 @@ export function Sidebar({ open, onClose, onNavigate }: SidebarProps) {
   const canUpload = !!me?.role?.upload;
   const isAdmin = !!me?.role?.admin;
   const isAuthed = !!me?.id;
+  const showStore = canUseStore(me);
 
   const sidebarVis = me?.sidebar;
   const isVisible = (v?: string) => !v || sidebarVis?.[v] !== false;
@@ -249,6 +251,19 @@ export function Sidebar({ open, onClose, onNavigate }: SidebarProps) {
                   <span>{t('Library')}</span>
                 </Link>
               </li>
+              {showStore && (
+                <li>
+                  <Link
+                    href="/store"
+                    className={isActive(location, '/store', true) ? styles.itemActive : styles.item}
+                    aria-current={isActive(location, '/store', true) ? 'page' : undefined}
+                    onClick={onNavigate}
+                  >
+                    <Store size={18} className={styles.icon} aria-hidden="true" focusable={false} />
+                    <span>{t('Store')}</span>
+                  </Link>
+                </li>
+              )}
             </ul>
 
             {/* Customizable region (browse-by + discovery + Shelves), in saved order. */}
