@@ -12,7 +12,29 @@ import re
 from datetime import datetime
 
 from tabulate import tabulate
+
+import app_paths
 from library_paths import connect_calibre_metadata_db
+
+
+def default_db_dir() -> str:
+    """Directory holding ``cwa.db``, with a trailing separator.
+
+    ``CWA_DB_PATH`` is an explicit override and still wins — parallel pytest
+    workers depend on it for isolation. Everything else defers to
+    :func:`app_paths.config_dir`, the same resolver ``app.db`` and ``dirs.json``
+    use since #1462, so a source install keeps all three together.
+
+    This used to be the literal ``"/config/"``. In the image that is still the
+    answer — the Dockerfile sets ``CALIBRE_DBPATH=/config`` — but off Docker it
+    reproduced #1462 one file over: ``cwa.db`` was seeded into a ``/config``
+    created at the filesystem root while the app read its config from the
+    install directory, or the open failed outright. See #1474.
+    """
+    raw = os.environ.get("CWA_DB_PATH")
+    if raw is None or not raw.strip():
+        raw = str(app_paths.config_dir())
+    return raw if raw.endswith("/") else raw + "/"
 
 
 # Settings whose stored int value is a real number, not a boolean flag.
@@ -59,15 +81,12 @@ class CWA_DB:
         self.verbose = verbose
 
         self.db_file = "cwa.db"
-        # Honor CWA_DB_PATH for test isolation. In production this env var is
-        # not set, so we fall back to the canonical /config/ location that
-        # matches the Docker volume mount. The trailing slash is significant
+        # Resolved by default_db_dir(): CWA_DB_PATH for test isolation, else the
+        # shared app_paths.config_dir() SSOT. The trailing slash is significant
         # because connect_to_db() does string concatenation against db_file.
-        self.db_path = os.environ.get("CWA_DB_PATH", "/config/")
-        if self.db_path and not self.db_path.endswith("/"):
-            self.db_path = self.db_path + "/"
+        self.db_path = default_db_dir()
         # Ensure the parent dir exists so sqlite3 can create the file.
-        # In production /config/ always exists (Docker volume mount); the
+        # In production the config dir always exists (Docker volume mount); the
         # makedirs is defense-in-depth and the path that test isolation
         # relies on (CWA_DB_PATH may point at a fresh tmp_path subdir).
         try:
@@ -108,7 +127,11 @@ class CWA_DB:
             con = sqlite3.connect(self.db_path + self.db_file, timeout=30)
         except sqlError as e:
             print(f"[cwa-db]: The following error occurred while trying to connect to the CWA Enforcement DB: {e}")
-            sys.exit(0)
+            print(f"[cwa-db]: tried {self.db_path}{self.db_file} — set CALIBRE_DBPATH to the directory holding app.db if that is wrong", flush=True)
+            # Exit NONZERO. This was exit 0, which made an unopenable database
+            # indistinguishable from a clean run: the ingest processor died
+            # mid-import and its supervisor saw success. See #1474.
+            sys.exit(1)
         if con:
             cur = con.cursor()
             if self.verbose:
@@ -433,10 +456,19 @@ class CWA_DB:
                     if command.startswith('--') or not command:
                         continue
                     command = command.replace(',', ';')
-                    with open('/config/.cwa_db_debug', 'a') as f:
-                        f.write(command)
-                    self.cur.execute(f"ALTER TABLE cwa_settings ADD {command}")  
+                    # The schema change comes FIRST and the breadcrumb is
+                    # best-effort. They used to share one try/except with the
+                    # write in front, against a hardcoded /config — so on any
+                    # install without a writable /config the open raised and
+                    # the ALTER TABLE never ran, silently skipping a settings
+                    # migration on exactly the source installs #1462 was for.
+                    self.cur.execute(f"ALTER TABLE cwa_settings ADD {command}")
                     self.con.commit()
+                    try:
+                        with open(os.path.join(self.db_path, '.cwa_db_debug'), 'a') as f:
+                            f.write(command)
+                    except OSError as e:
+                        print(f"[cwa-db]: could not record the schema change breadcrumb: {e}", flush=True)
                     return True
                 except Exception as e:
                     print(f"[cwa-db] The following error occurred when trying to add {setting} to cwa.db:\n{e}")
