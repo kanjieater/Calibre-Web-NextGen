@@ -475,6 +475,18 @@
           <input type="checkbox" name="edit_shelf_role" id="edit_shelf_role" {% if content.role_edit_shelfs() %}checked{% endif %} style="accent-color: var(--color-secondary);">
           <label for="edit_shelf_role">{{_('Allow Editing Public Shelves')}}</label>
         </div>
+
+        {% if experimental_feature_enabled('store_discover') %}
+          <div>
+            <input type="checkbox" name="store_access_role" id="store_access_role" {% if content.role_store_access() %}checked{% endif %} style="accent-color: var(--color-secondary);">
+            <label for="store_access_role">{{_('Allow Store / Discover')}}</label>
+          </div>
+
+          <div>
+            <input type="checkbox" name="store_auto_approve_role" id="store_auto_approve_role" {% if content.role_store_auto_approve() %}checked{% endif %} style="accent-color: var(--color-secondary);">
+            <label for="store_auto_approve_role">{{_('Allow Store Downloads Without Approval')}}</label>
+          </div>
+        {% endif %}
         {% endif %}
       </div>
     </div>

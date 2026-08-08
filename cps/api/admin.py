@@ -45,6 +45,8 @@ ROLE_BITS = {
     "edit_shelfs": constants.ROLE_EDIT_SHELFS,
     "delete_books": constants.ROLE_DELETE_BOOKS,
     "viewer": constants.ROLE_VIEWER,
+    "store_access": constants.ROLE_STORE_ACCESS,
+    "store_auto_approve": constants.ROLE_STORE_AUTO_APPROVE,
 }
 
 
@@ -61,6 +63,13 @@ def _require_admin():
 
 
 def _serialize_user(u):
+    try:
+        credential_providers = [row[0] for row in (
+            ub.session.query(ub.StoreCredential.provider)
+            .filter(ub.StoreCredential.user_id == u.id)
+            .order_by(ub.StoreCredential.provider.asc()).all())]
+    except Exception:
+        credential_providers = []
     return {
         "id": u.id,
         "name": u.name,
@@ -70,6 +79,9 @@ def _serialize_user(u):
         "default_language": u.default_language,
         "is_guest": u.name == "Guest",
         "roles": {key: bool(u.role & bit) for key, bit in ROLE_BITS.items()},
+        # Provider identifiers are enough to offer revoke controls. Admins are
+        # never given last4, ciphertext, nonce, or plaintext.
+        "store_credential_providers": credential_providers,
     }
 
 

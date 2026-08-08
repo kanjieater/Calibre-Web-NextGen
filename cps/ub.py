@@ -33,7 +33,7 @@ except ImportError as e:
         oauth_support = False
 from sqlalchemy import create_engine, exc, exists, event, text
 from sqlalchemy import Column, ForeignKey, Index, UniqueConstraint
-from sqlalchemy import String, Integer, SmallInteger, Boolean, DateTime, Float, JSON, Text
+from sqlalchemy import String, Integer, SmallInteger, Boolean, DateTime, Float, JSON, Text, LargeBinary
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.expression import func
 try:
@@ -193,6 +193,12 @@ class UserBase:
 
     def role_viewer(self):
         return self._has_role(constants.ROLE_VIEWER)
+
+    def role_store_access(self):
+        return self._has_role(constants.ROLE_STORE_ACCESS)
+
+    def role_store_auto_approve(self):
+        return self._has_role(constants.ROLE_STORE_AUTO_APPROVE)
 
     @property
     def is_active(self):
@@ -462,6 +468,58 @@ class UserAppPassword(Base):
                         default=lambda: datetime.now(timezone.utc))
     last_used_at = Column(DateTime)
     revoked = Column(Boolean, nullable=False, default=False)
+
+
+class StoreCredential(Base):
+    """Encrypted, per-user third-party Store provider credential.
+
+    Plaintext is accepted only by the write API and is never represented by
+    this model.  ``key_version`` and authenticated encryption context allow a
+    future key rotation without changing the table shape.
+    """
+    __tablename__ = 'store_credentials'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    provider = Column(String, nullable=False)
+    ciphertext = Column(LargeBinary, nullable=False)
+    nonce = Column(LargeBinary, nullable=False)
+    key_version = Column(Integer, nullable=False, default=1)
+    last4 = Column(String(4))
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+                        onupdate=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'provider', name='uq_store_credentials_user_provider'),
+    )
+
+
+class StoreRequestMapping(Base):
+    """Ownership/audit mapping for requests held by the external engine."""
+    __tablename__ = 'store_request_mappings'
+
+    id = Column(Integer, primary_key=True)
+    shelfmark_request_id = Column(String, nullable=False, unique=True, index=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False, index=True)
+    work = Column(JSON, nullable=False)
+    release = Column(JSON, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+
+class StoreDownloadMapping(Base):
+    """Local ownership proof for global Shelfmark download rows/actions."""
+    __tablename__ = 'store_download_mappings'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False, index=True)
+    source = Column(String, nullable=False, index=True)
+    source_id = Column(String, nullable=False, index=True)
+    upstream_book_id = Column(String, index=True)
+    title = Column(String, nullable=False)
+    format = Column(String, nullable=False)
+    size = Column(String)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
 
 # Baseclass representing Shelfs in calibre-web in app.db

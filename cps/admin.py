@@ -47,6 +47,7 @@ from .ui_themes import config_theme_code
 from .cw_babel import get_available_translations, get_available_locale, get_user_locale_language
 from . import debug_info
 from .string_helper import strip_whitespaces
+from .experimental_features import STORE_DISCOVER, feature_enabled
 
 log = logger.create()
 
@@ -99,6 +100,15 @@ def _selected_generic_oauth_default_role(to_save):
         if form_name in to_save:
             role |= role_flag
     return role
+
+
+def _selected_user_edit_role(to_save, current_role):
+    """Preserve dark experimental bits that are intentionally absent in HTML."""
+    selected_role = constants.selected_roles(to_save)
+    if not feature_enabled(STORE_DISCOVER.key):
+        selected_role |= current_role & (
+            constants.ROLE_STORE_ACCESS | constants.ROLE_STORE_AUTO_APPROVE)
+    return selected_role
 
 
 def admin_required(f):
@@ -910,7 +920,7 @@ def edit_list_user(param):
                       [constants.ROLE_ADMIN, constants.ROLE_PASSWD, constants.ROLE_EDIT_SHELFS]:
                         raise Exception(_("Guest can't have this role"))
                     # check for valid value, last on checks for power of 2 value
-                    if value > 0 and value <= constants.ROLE_VIEWER and (value & value - 1 == 0 or value == 1):
+                    if value in constants.ALL_ROLES.values():
                         if vals['value'] == 'true':
                             user.role |= value
                         elif vals['value'] == 'false':
@@ -2966,6 +2976,9 @@ def _delete_user(content):
             ub.session.query(ub.User).filter(ub.User.id == content.id).delete()
             ub.session.query(ub.RemoteAuthToken).filter(ub.RemoteAuthToken.user_id == content.id).delete()
             ub.session.query(ub.User_Sessions).filter(ub.User_Sessions.user_id == content.id).delete()
+            ub.session.query(ub.StoreCredential).filter(ub.StoreCredential.user_id == content.id).delete()
+            ub.session.query(ub.StoreRequestMapping).filter(ub.StoreRequestMapping.user_id == content.id).delete()
+            ub.session.query(ub.StoreDownloadMapping).filter(ub.StoreDownloadMapping.user_id == content.id).delete()
             ub.session_commit()
             log.info("User {} deleted".format(content.name))
             return _("User '%(nick)s' deleted", nick=content.name)
@@ -3148,7 +3161,9 @@ def _handle_edit_user(to_save, content, languages, translations, kobo_support):
         content.locale = to_save["locale"]
     try:
         anonymous = content.is_anonymous
-        content.role = constants.selected_roles(to_save)
+        # Hidden experimental controls are absent while Store is disabled;
+        # editing an unrelated field must not silently revoke retained bits.
+        content.role = _selected_user_edit_role(to_save, content.role)
         if anonymous:
             content.role |= constants.ROLE_ANONYMOUS
         else:

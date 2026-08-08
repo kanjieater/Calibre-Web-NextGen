@@ -76,6 +76,8 @@ ROLE_ANONYMOUS          = 1 << 5
 ROLE_EDIT_SHELFS        = 1 << 6
 ROLE_DELETE_BOOKS       = 1 << 7
 ROLE_VIEWER             = 1 << 8
+ROLE_STORE_ACCESS        = 1 << 9
+ROLE_STORE_AUTO_APPROVE  = 1 << 10
 
 ALL_ROLES = {
                 "admin_role": ROLE_ADMIN,
@@ -86,6 +88,8 @@ ALL_ROLES = {
                 "edit_shelf_role": ROLE_EDIT_SHELFS,
                 "delete_role": ROLE_DELETE_BOOKS,
                 "viewer_role": ROLE_VIEWER,
+                "store_access_role": ROLE_STORE_ACCESS,
+                "store_auto_approve_role": ROLE_STORE_AUTO_APPROVE,
             }
 
 DETAIL_RANDOM           = 1 <<  0
@@ -131,7 +135,8 @@ sidebar_settings = {
             }
 
 
-ADMIN_USER_ROLES        = sum(r for r in ALL_ROLES.values()) & ~ROLE_ANONYMOUS
+ADMIN_USER_ROLES        = (sum(r for r in ALL_ROLES.values()) & ~ROLE_ANONYMOUS
+                           & ~ROLE_STORE_ACCESS & ~ROLE_STORE_AUTO_APPROVE)
 ADMIN_USER_SIDEBAR      = (SIDEBAR_FAVORITES << 1) - 1
 
 UPDATE_STABLE       = 0 << 0

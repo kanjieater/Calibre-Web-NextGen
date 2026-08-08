@@ -771,6 +771,9 @@ def set_cwa_settings():
         # Retired as runtime input by #900. It remains in cwa.db only as a
         # rollback mirror of app.db's config_hardcover_sync.
         'hardcover_auto_fetch_enabled',
+        # Owned by the general Experimental-feature registry/API. An unrelated
+        # legacy CWA settings submission must never reset an unseen flag.
+        'experimental_store_discover',
     ]
     
     for setting in cwa_default_settings:

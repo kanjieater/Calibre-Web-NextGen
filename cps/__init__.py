@@ -73,6 +73,15 @@ mimetypes.add_type('application/zip', '.kfx-zip')
 log = logger.create()
 
 app = Flask(__name__)
+
+
+@app.context_processor
+def _experimental_feature_template_context():
+    """Expose the general registry gate without importing it in templates."""
+    from .experimental_features import feature_enabled
+    return {"experimental_feature_enabled": feature_enabled}
+
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SECURE=os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true',
@@ -150,11 +159,22 @@ def _log_magic_shelf_counts(user_id, total_shelves, visible_shelves,
         log.debug(msg)
 
 
+def _initialize_store_key(config_dir):
+    # Initialize the Store encryption root at boot, before accepting any
+    # credential writes. Invalid explicit key configuration fails closed.
+    from .services.store_credentials import load_master_key
+    return load_master_key(config_dir)
+
+
 def create_app():
     if csrf:
         csrf.init_app(app)
 
     cli_param.init()
+
+    # The settings path can be overridden at runtime. Generate/read the Store
+    # key beside that real database, not in the compile-time default directory.
+    _initialize_store_key(os.path.dirname(cli_param.settings_path))
 
     ub.init_db(cli_param.settings_path)
     # pylint: disable=no-member

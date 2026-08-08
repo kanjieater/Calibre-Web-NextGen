@@ -9,6 +9,9 @@ import os
 import sys
 import inspect
 import logging
+import re
+import threading
+from contextlib import contextmanager
 from logging import Formatter, StreamHandler
 from logging.handlers import RotatingFileHandler
 
@@ -27,6 +30,77 @@ LOG_TO_STDOUT       = '/dev/stdout'
 
 logging.addLevelName(logging.WARNING, "WARN")
 logging.addLevelName(logging.CRITICAL, "CRIT")
+
+_SENSITIVE_VALUES = {}
+_SENSITIVE_LOCK = threading.Lock()
+_SENSITIVE_FIELD_RE = re.compile(
+    r"(?i)(['\"]?(?:credential|api[_-]?key|access[_-]?token|secret|password)['\"]?\s*[:=]\s*)"
+    r"(['\"])(.*?)\2"
+)
+
+
+def register_sensitive_value(value):
+    """Register an in-process secret so every logging handler redacts it.
+
+    The bounded registry intentionally stores only live-process values and is
+    never serialized. Longest-first replacement prevents a short token prefix
+    from leaving the rest of a longer credential visible.
+    """
+    if not isinstance(value, str) or len(value) < 4:
+        return
+    with _SENSITIVE_LOCK:
+        _SENSITIVE_VALUES[value] = _SENSITIVE_VALUES.get(value, 0) + 1
+
+
+def unregister_sensitive_value(value):
+    """Remove one scoped registration without disturbing another caller."""
+    if not isinstance(value, str) or len(value) < 4:
+        return
+    with _SENSITIVE_LOCK:
+        remaining = _SENSITIVE_VALUES.get(value, 0) - 1
+        if remaining > 0:
+            _SENSITIVE_VALUES[value] = remaining
+        else:
+            _SENSITIVE_VALUES.pop(value, None)
+
+
+@contextmanager
+def sensitive_value_scope(value):
+    """Redact a secret only for the small operation that holds plaintext."""
+    register_sensitive_value(value)
+    try:
+        yield
+    finally:
+        unregister_sensitive_value(value)
+
+
+def redact_sensitive(value):
+    text = str(value)
+    with _SENSITIVE_LOCK:
+        values = tuple(sorted(_SENSITIVE_VALUES, key=len, reverse=True)[:256])
+    for secret in values:
+        text = text.replace(secret, "***REDACTED***")
+    return _SENSITIVE_FIELD_RE.sub(r"\1\2***REDACTED***\2", text)
+
+
+class SensitiveDataFilter(logging.Filter):
+    """Last-line redaction for accidental string formatting and ``repr`` logs."""
+
+    def filter(self, record):
+        try:
+            record.msg = redact_sensitive(record.getMessage())
+            record.args = ()
+            if record.stack_info:
+                record.stack_info = redact_sensitive(record.stack_info)
+            if record.exc_info and record.exc_info[1] is not None:
+                exc_type, exc_value, traceback = record.exc_info
+                safe_value = RuntimeError(redact_sensitive(exc_value))
+                record.exc_info = (type(safe_value), safe_value, traceback)
+                record.exc_text = None
+        except Exception:
+            record.msg = "Logging redaction error"
+            record.args = ()
+        return True
 
 
 class _Logger(logging.Logger):
@@ -193,6 +267,7 @@ def setup(log_file, log_level=None):
 
     for h in new_handlers:
         h.setFormatter(FORMATTER)
+        h.addFilter(SensitiveDataFilter())
 
     # Replace root handlers atomically.
     for h in list(r.handlers):
@@ -228,6 +303,7 @@ def create_access_log(log_file, log_name, formatter):
     )
 
     file_handler.setFormatter(formatter)
+    file_handler.addFilter(SensitiveDataFilter())
     access_log.addHandler(file_handler)
     return access_log, used_path if used_path else ""
 

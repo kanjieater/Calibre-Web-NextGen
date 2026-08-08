@@ -117,6 +117,13 @@ def _server_features():
         mail_ok = bool(config.get_mail_server_configured())
     except Exception:
         mail_ok = False
+    try:
+        from ..experimental_features import STORE_DISCOVER, feature_enabled
+        store_discover = feature_enabled(STORE_DISCOVER.key)
+    except (Exception, SystemExit):
+        # Feature discovery must fail closed; /me itself remains usable if the
+        # auxiliary cwa.db is temporarily unavailable.
+        store_discover = False
     return {
         "hide_books": bool(getattr(config, "config_user_hide_enabled", False)),
         "mail_configured": mail_ok,
@@ -135,6 +142,7 @@ def _server_features():
         # Reports exactly what the enforcement gate will do — same predicate,
         # so the UI can never advertise an upload the endpoints would refuse.
         "uploading": uploads_enabled(config),
+        "store_discover": bool(store_discover),
     }
 
 

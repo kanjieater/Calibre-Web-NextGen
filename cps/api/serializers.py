@@ -91,6 +91,11 @@ def serialize_user(user):
             "viewer": user.role_viewer(),
             "passwd": user.role_passwd(),
             "anonymous": user.role_anonymous(),
+            # getattr defaults preserve compatibility with minimal/legacy user
+            # doubles and rolling-upgrade Guest objects; both roles fail closed.
+            "store_access": bool(getattr(user, "role_store_access", lambda: False)()),
+            "store_auto_approve": bool(getattr(
+                user, "role_store_auto_approve", lambda: False)()),
         },
         # Fork #585: which sidebar entries the admin/user has enabled.
         "sidebar": serialize_sidebar_visibility(user),
