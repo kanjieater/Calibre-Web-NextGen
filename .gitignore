@@ -250,3 +250,16 @@ cps/static/app/
 # Local output from the no-argument wiki generator. The published wiki is
 # rendered into a temporary clone by scripts/sync-wiki.sh.
 wiki-generated/
+
+# Secrets and local instance state — MUST never reach this public repo.
+# `.key` (44-char base64 = Fernet/AES-256) appeared untracked and UNIGNORED on
+# 2026-08-08, one `git add -A` from being published. The Store/Discover feature
+# adds server-side encryption keys, so this stays broad on purpose.
+.key
+*.key
+!*.pub.key
+secret.key
+app.db
+app.db-shm
+app.db-wal
+cwa.db
