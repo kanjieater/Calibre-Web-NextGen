@@ -1,11 +1,8 @@
 /* Cool teal heads-up banner — intentionally off-palette from the amber accent so
    it reads as a distinct, friendly notice. Sits directly under the top bar. */
 .banner {
-  --hb-edge: #3a8f86;
-  --hb-text: #d7f1ed;
-  --hb-icon: #6fd8cb;
   position: relative;
-  background: linear-gradient(90deg, #173842 0%, #18484a 60%, #1a4f49 100%);
+  background: linear-gradient(90deg, var(--hb-bg-start) 0%, var(--hb-bg-mid) 60%, var(--hb-bg-end) 100%);
   border-bottom: 1px solid var(--hb-edge);
   box-shadow: inset 3px 0 0 var(--hb-icon);
   color: var(--hb-text);
@@ -33,7 +30,7 @@
 }
 
 .clickableSurface:focus-visible {
-  outline: 2px solid #dff7ff;
+  outline: 2px solid var(--hb-focus);
   outline-offset: -3px;
 }
 
@@ -49,10 +46,18 @@
 }
 
 .supportBanner {
-  --hb-text: #e9f9ff;
-  --hb-icon: #13c3ff;
-  background: linear-gradient(90deg, #07384d 0%, #08465e 58%, #06445e 100%);
+  --hb-bg-start: var(--hb-support-bg-start);
+  --hb-bg-mid: var(--hb-support-bg-mid);
+  --hb-bg-end: var(--hb-support-bg-end);
+  --hb-edge: var(--hb-support-edge);
+  --hb-text: var(--hb-support-text);
+  --hb-strong: var(--hb-support-strong);
+  --hb-icon: var(--hb-support-icon);
+  --hb-link-hover: var(--hb-support-link-hover);
+  background: linear-gradient(90deg, var(--hb-bg-start) 0%, var(--hb-bg-mid) 58%, var(--hb-bg-end) 100%);
   border-bottom: none;
+  outline: 1px solid var(--hb-edge);
+  outline-offset: -1px;
   box-shadow: none;
 }
 
@@ -75,7 +80,7 @@
 }
 
 .text strong {
-  color: #ffffff;
+  color: var(--hb-strong);
   font-weight: var(--fw-semi);
 }
 
@@ -107,7 +112,7 @@
 }
 
 .supportLink:hover {
-  color: #a5ecff;
+  color: var(--hb-link-hover);
   text-decoration-color: currentColor;
 }
 
@@ -144,8 +149,14 @@
 }
 
 .close:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--hb-close-hover);
   opacity: 1;
+}
+
+.close::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 
 @media (max-width: 600px) {
