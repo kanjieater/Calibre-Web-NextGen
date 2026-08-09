@@ -23,8 +23,13 @@
   display: none;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  flex: none;
+  box-sizing: border-box;
   color: var(--text-muted);
-  padding: var(--sp-1);
+  padding: 0;
   border-radius: var(--r-sm);
   transition: color var(--dur-fast) var(--ease);
 }
