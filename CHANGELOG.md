@@ -18,6 +18,17 @@ is for things you can see or feel when running the app.
 
 ### Added
 
+- **You can now write a note on a highlight while reading in the browser.**
+  Highlighting text in the new UI's reader only ever saved the colour — there
+  was nowhere to record *why* you highlighted it, even though notes made on a
+  Kobo or in KOReader have always shown up on the book's Highlights page. Select
+  a passage and the popup now offers **Add note** alongside the colours; tap a
+  highlight you have already made and you can add, edit or remove its note.
+  Highlights carrying a note are drawn with a dashed outline so you can pick
+  them out at a glance, and tapping one shows the note without opening the
+  editor. Notes sync into the same place as everything else, so they appear on
+  the Highlights page and in Markdown/CSV/JSON exports (#325).
+
 - **Two new cover fill styles that fill the e-reader frame instead of adding a
   border.** Every existing style pads the cover out to your device's shape,
   which leaves a mirrored, blurred or coloured band down the sides. If you would
