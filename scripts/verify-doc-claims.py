@@ -69,6 +69,19 @@ def known_routes(repo):
     return routes
 
 
+def spa_routes(repo):
+    """Every path the new UI serves, from frontend/src/lib/routes.ts.
+
+    Returns None when the file cannot be read, which suppresses the
+    classic-only note rather than emitting a wrong one.
+    """
+    p = os.path.join(repo, "frontend", "src", "lib", "routes.ts")
+    if not os.path.isfile(p):
+        return None
+    with open(p, encoding="utf-8") as fh:
+        return set(re.findall(r"""['"](/[^'"]*)['"]""", fh.read()))
+
+
 def released_versions(repo):
     out = sh(["git", "tag", "--list", "v*"], repo)
     return {t.strip().lstrip("v") for t in out.stdout.splitlines() if t.strip()}
@@ -87,20 +100,30 @@ def compose_containers(repo):
     return names
 
 
-def check(doc, repo, routes, versions, containers):
-    """Return a list of (kind, claim, detail) failures."""
+def check(doc, repo, routes, versions, containers, spa=None):
+    """Return (failures, notes) — notes never fail the run."""
     with open(doc, encoding="utf-8") as fh:
         text = fh.read()
     bad = []
+    notes = []
 
     for claim in sorted(set(ROUTE_RE.findall(text))):
         if claim in ROUTE_ALLOW or any(claim.startswith(a) for a in ROUTE_ALLOW):
             continue
         # A route matches if it is declared exactly, or is the static prefix of
         # a parameterised rule (/book/<id> covers a claimed /book).
-        if claim in routes:
-            continue
-        if any(r.startswith(claim.rstrip("/") + "/<") for r in routes):
+        if claim in routes or any(r.startswith(claim.rstrip("/") + "/<") for r in routes):
+            # The route is real. Is it reachable from the NEW UI, though?
+            # A page that says "go to /x" without saying /x is classic-only
+            # sends an SPA user hunting for something that isn't there — the
+            # parity failure mode, and indistinguishable from a wrong route
+            # to the person reading. Advisory, not a failure: documenting a
+            # classic-only path is often exactly the right thing to do, as
+            # long as the page says so.
+            if spa is not None and claim not in spa and "classic" not in text.lower():
+                notes.append(("classic-only", claim,
+                              "served by cps/ but absent from SPA_ROUTES, and this page "
+                              "never says 'classic' — an SPA user will not find it"))
             continue
         near = sorted(r for r in routes if claim.strip("/").split("/")[0] in r)[:3]
         bad.append(("route", claim,
@@ -121,7 +144,7 @@ def check(doc, repo, routes, versions, containers):
             if claim not in containers:
                 bad.append(("container", claim,
                             f"compose creates {', '.join(sorted(containers))}"))
-    return bad
+    return bad, notes
 
 
 def main():
@@ -132,6 +155,7 @@ def main():
 
     repo = args.repo or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     routes, versions, containers = known_routes(repo), released_versions(repo), compose_containers(repo)
+    spa = spa_routes(repo)
     if not routes:
         print("verify-doc-claims: could not read any Flask routes — refusing to "
               "report a clean pass on an empty corpus", file=sys.stderr)
@@ -139,7 +163,9 @@ def main():
 
     failures = 0
     for doc in args.docs:
-        bad = check(doc, repo, routes, versions, containers)
+        bad, notes = check(doc, repo, routes, versions, containers, spa)
+        for kind, claim, detail in notes:
+            print(f"{doc}: NOTE [{kind}] {claim} — {detail}")
         if bad:
             failures += len(bad)
             print(f"{doc}: {len(bad)} unanchored claim(s)")
