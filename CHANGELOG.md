@@ -52,6 +52,15 @@ is for things you can see or feel when running the app.
 
 ### Added
 
+- **Your highlights and notes are now listed inside the reader, and you can jump
+  straight back to one.** Seeing what you had marked up meant leaving the book
+  for the Highlights page and losing your place — the classic reader has had an
+  in-reader panel for this all along. The new UI's reader now has a highlighter
+  button in the top bar, with a count, opening a drawer that lists every
+  highlight in the book with its note. Picking one takes you to that passage.
+  Highlights that came from a Kobo or KOReader are listed and labelled too,
+  though a few of those have no saved position to jump to (#325).
+
 - **You can now write a note on a highlight while reading in the browser.**
   Highlighting text in the new UI's reader only ever saved the colour — there
   was nowhere to record *why* you highlighted it, even though notes made on a

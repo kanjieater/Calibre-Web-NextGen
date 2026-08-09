@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import ePub from 'epubjs';
 import {
   ChevronLeft, ChevronRight, X, List, Sun, Moon, Coffee, Loader2, Trash2,
-  SlidersHorizontal, StickyNote,
+  SlidersHorizontal, StickyNote, Highlighter,
 } from 'lucide-react';
 import {
   type ReaderSettings, isWorthResending, useBook, useBookmark, useReaderSettings,
@@ -33,6 +33,18 @@ type ReaderTheme = 'light' | 'sepia' | 'dark';
 interface TocItem {
   label: string;
   href: string;
+}
+
+/** A saved highlight as the reader needs it: enough to list, jump to and edit. */
+interface AnnRow {
+  annotation_id: string;
+  cfi_range: string | null;
+  highlighted_text: string | null;
+  note_text: string | null;
+  highlight_color: string | null;
+  /** 'webreader' | 'kobo' | 'koreader' | null — shown so a device highlight is
+   *  identifiable, and because only some origins carry a usable CFI. */
+  source: string | null;
 }
 
 // epub.js ships loose types; the rendition/book objects are treated as `any`
@@ -120,6 +132,9 @@ export function Reader({ id }: { id: string }) {
   // Note composer (#325). A third overlay with its own trap, mutually exclusive
   // with the two popovers above.
   const notePopRef = useRef<HTMLDivElement>(null);
+  // Highlights & notes drawer (#325) — the in-reader counterpart to the
+  // standalone Highlights page, which until now you had to leave the book for.
+  const annRef = useRef<HTMLElement>(null);
   const noteFieldRef = useRef<HTMLTextAreaElement>(null);
   // annotation_id -> note_text for every highlight in this book. Seeded from
   // data.json on mount so a tapped highlight can show its note without a
@@ -152,6 +167,10 @@ export function Reader({ id }: { id: string }) {
   const [rtl, setRtl] = useState(false);
   const [toc, setToc] = useState<TocItem[]>([]);
   const [tocOpen, setTocOpen] = useState(false);
+  const [annOpen, setAnnOpen] = useState(false);
+  // Every saved highlight for this book, kept in step locally on each write so
+  // the drawer never needs a refetch to look right.
+  const [annList, setAnnList] = useState<AnnRow[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [theme, setTheme] = useState<ReaderTheme>(loadTheme);
   const [fontPct, setFontPct] = useState(loadFont);
@@ -186,6 +205,7 @@ export function Reader({ id }: { id: string }) {
   useFocusTrap(popRef, { onClose: () => setPendingSel(null), active: !!pendingSel });
   useFocusTrap(hlPopRef, { onClose: () => setActiveHl(null), active: !!activeHl });
   useFocusTrap(notePopRef, { onClose: () => setComposer(null), active: !!composer });
+  useFocusTrap(annRef, { onClose: () => setAnnOpen(false), active: annOpen });
 
   // Open the edit/remove popover for a highlight the reader was tapped on (#782).
   // Closes the create-color popover so the two never show at once.
@@ -252,6 +272,10 @@ export function Reader({ id }: { id: string }) {
       });
       const newId = created?.annotation_id ?? '';
       if (note && newId) notesRef.current.set(newId, note);
+      setAnnList((rows) => [...rows, {
+        annotation_id: newId, cfi_range: cfiRange, highlighted_text: text,
+        note_text: note || null, highlight_color: color, source: 'webreader',
+      }]);
       paintHighlight(cfiRange, color, newId, !!note);
     } catch { /* surfaced as no-op; user can retry */ }
     try {
@@ -307,10 +331,34 @@ export function Reader({ id }: { id: string }) {
       await apiPatch(`/annotations/${id}/${c.annotationId}`, { note_text: note });
       if (note) notesRef.current.set(c.annotationId, note);
       else notesRef.current.delete(c.annotationId);
+      setAnnList((rows) => rows.map((r) =>
+        r.annotation_id === c.annotationId ? { ...r, note_text: note || null } : r));
       repaintHighlight(c.cfiRange, c.color, c.annotationId, !!note);
       announce(note ? t('Note saved') : t('Note removed'));
     } catch { /* silent: server keeps the previous note */ }
   }, [id, persistHighlight, repaintHighlight, announce, t]);
+
+  /*
+   * Jump the book to a saved highlight.
+   *
+   * Only web-origin rows are guaranteed a portable CFI. Device rows carry
+   * Kobo-native anchors and get a CFI derived server-side only when the kepub is
+   * on disk, and a re-generated kepub can shift the KoboSpan ids those were
+   * computed from — so a stale or absent CFI is expected here, not exceptional.
+   * epub.js throws on one; the row stays listed and readable either way, which
+   * is better than hiding a highlight because we cannot navigate to it.
+   */
+  const goToAnnotation = useCallback((row: AnnRow) => {
+    if (!row.cfi_range) return;
+    setAnnOpen(false);
+    try {
+      Promise.resolve(renditionRef.current?.display(row.cfi_range)).catch(() => {
+        announce(t('Could not open that highlight.'));
+      });
+    } catch {
+      announce(t('Could not open that highlight.'));
+    }
+  }, [announce, t]);
 
   const saveNote = useCallback(() => {
     if (composer) void commitNote(composer, composer.note);
@@ -330,6 +378,7 @@ export function Reader({ id }: { id: string }) {
     try {
       await apiDelete(`/annotations/${id}/${hl.id}`);
       notesRef.current.delete(hl.id);
+      setAnnList((rows) => rows.filter((r) => r.annotation_id !== hl.id));
       try { renditionRef.current?.annotations?.remove(hl.cfiRange, 'highlight'); } catch { /* noop */ }
     } catch { /* silent: keep the highlight painted */ }
   }, [activeHl, id]);
@@ -345,6 +394,8 @@ export function Reader({ id }: { id: string }) {
     if (hl.color === color) return;
     try {
       await apiPatch(`/annotations/${id}/${hl.id}`, { highlight_color: color });
+      setAnnList((rows) => rows.map((r) =>
+        r.annotation_id === hl.id ? { ...r, highlight_color: color } : r));
       // Recolouring must not silently drop the note marker.
       repaintHighlight(hl.cfiRange, color, hl.id, !!notesRef.current.get(hl.id));
     } catch { /* silent: keep the highlight in its original color */ }
@@ -634,6 +685,7 @@ export function Reader({ id }: { id: string }) {
           .then((d) => {
             if (cancelled || !d) return;
             notesRef.current.clear();
+            setAnnList((d.annotations || []) as AnnRow[]);
             (d.annotations || []).forEach((a: any) => {
               const note = (a.note_text || '').trim();
               if (note && a.annotation_id) notesRef.current.set(a.annotation_id, note);
@@ -779,6 +831,13 @@ export function Reader({ id }: { id: string }) {
             aria-label={t('Table of contents')} aria-expanded={tocOpen} title={t('Contents')}>
             <List size={19} aria-hidden="true" focusable={false} />
           </button>
+          <button className={styles.iconBtn} onClick={() => { setTocOpen(false); setAnnOpen((o) => !o); }}
+            aria-label={t('Highlights and notes')} aria-expanded={annOpen} title={t('Highlights and notes')}>
+            <Highlighter size={19} aria-hidden="true" focusable={false} />
+            {annList.length > 0 && (
+              <span className={styles.annCount} aria-hidden="true">{annList.length}</span>
+            )}
+          </button>
           <button className={styles.iconBtn} onClick={() => setSettingsOpen((o) => !o)}
             aria-label={t('Reading appearance')} aria-expanded={settingsOpen} title={t('Reading appearance')}>
             <SlidersHorizontal size={19} aria-hidden="true" focusable={false} />
@@ -806,6 +865,62 @@ export function Reader({ id }: { id: string }) {
                     <button className={styles.tocItem} onClick={() => goToc(tocItem.href)}>{tocItem.label || t('Untitled')}</button>
                   </li>
                 ))}
+              </ul>
+            )}
+          </nav>
+        </>
+      )}
+
+      {/* Highlights & notes drawer (#325). Mirrors the TOC drawer's shape so the
+          two read as siblings; jumping closes it, as picking a chapter does. */}
+      {annOpen && (
+        <>
+          <div className={styles.tocScrim} onClick={() => setAnnOpen(false)} aria-hidden="true" />
+          <nav ref={annRef} className={styles.toc} aria-label={t('Highlights and notes')} tabIndex={-1}>
+            <div className={styles.panelHeading}>
+              <p className={styles.tocHeading}>{t('Highlights and notes')}</p>
+              <button className={styles.iconBtn} onClick={() => setAnnOpen(false)} aria-label={t('Close')}>
+                <X size={18} aria-hidden="true" focusable={false} />
+              </button>
+            </div>
+            {annList.length === 0 ? (
+              <p className={styles.tocEmpty}>
+                {t('No highlights yet. Select text in the book to make one.')}
+              </p>
+            ) : (
+              <ul role="list">
+                {annList.map((row) => {
+                  const colour = HILITE_FILL[row.highlight_color || 'yellow'] || HILITE_FILL.yellow;
+                  const jumpable = !!row.cfi_range;
+                  return (
+                    <li key={row.annotation_id} className={styles.annItem}>
+                      <button
+                        className={styles.annJump}
+                        onClick={() => goToAnnotation(row)}
+                        disabled={!jumpable}
+                        title={jumpable ? t('Go to this highlight') : t('This highlight has no saved position')}
+                      >
+                        <span className={styles.annBar} style={{ background: colour }} aria-hidden="true" />
+                        <span className={styles.annBody}>
+                          <span className={styles.annQuote}>
+                            {row.highlighted_text || t('(no text captured)')}
+                          </span>
+                          {row.note_text && (
+                            <span className={styles.annNote}>
+                              <StickyNote size={12} aria-hidden="true" focusable={false} />
+                              {row.note_text}
+                            </span>
+                          )}
+                          {/* Origin matters to a reader who syncs a device: it
+                              explains why some rows cannot be jumped to. */}
+                          {row.source && row.source !== 'webreader' && (
+                            <span className={styles.annSource}>{row.source}</span>
+                          )}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </nav>
