@@ -62,14 +62,25 @@ test('book-card actions keep a shared baseline for touch, mouse, and keyboard', 
       await expect(quickEdit).toHaveCount(1);
       await expectRevealed(quickEdit, true, `${theme}: the adjacent quick-edit action is touch-reachable`);
     } else {
+      // Pointer devices: the actions have a VISIBLE RESTING STATE — hover
+      // intensifies the quiet accent-tint container to the solid primary fill,
+      // it no longer introduces the control from opacity:0. (Operator: the
+      // appear-from-nowhere actions "look not part of the thing".)
+      const bgOf = (node: HTMLElement) => getComputedStyle(node).backgroundColor;
       await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
       await page.mouse.move(0, 0);
-      await expectRevealed(firstRead, false, `${theme}: desktop starts with the clean hover treatment`);
-      await firstCard.hover();
-      await expectRevealed(firstRead, true, `${theme}: mouse hover reveals Read now`);
+      await expectRevealed(firstRead, true, `${theme}: Read now is present at rest, not hover-only`);
+      const restBg = await firstRead.evaluate(bgOf);
+
+      await firstRead.hover();
+      await expect.poll(() => firstRead.evaluate(bgOf),
+        { message: `${theme}: hover intensifies the resting container` }).not.toBe(restBg);
+
       await page.mouse.move(0, 0);
       await firstRead.focus();
-      await expectRevealed(firstRead, true, `${theme}: keyboard focus reveals Read now`);
+      await expectRevealed(firstRead, true, `${theme}: keyboard focus keeps Read now visible`);
+      await expect.poll(() => firstRead.evaluate(bgOf),
+        { message: `${theme}: focus intensifies the resting container` }).not.toBe(restBg);
     }
   }
 });
