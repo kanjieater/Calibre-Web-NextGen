@@ -1,0 +1,11 @@
+{
+  "area": "kobo",
+  "body": "Found 2026-08-09 while answering the SPA web-reader rebuild's data-model questions. Full context:\nworkspace `notes/KOBO-ANNOTATIONS-WRITEBACK-INVESTIGATION-2026-08-09.md`.\n\nThe Kobo device sends `clientLastModifiedUtc` on every annotation in its PATCH body. We DECLARE it\n(`cps/readingservices.py:335`, in the `KoboAnnotation` TypedDict) and never read it.\n`_upsert_annotation` stamps `last_synced` with server receipt time instead\n(`cps/services/annotation_sync/__init__.py:191-193`).\n\nConsequence: **two devices editing the same annotation are ordered by whichever happened to sync\nsecond, not by when the user actually made the edit.** Last-write-wins conflict resolution cannot\nbe implemented from what we persist. A device that was offline for a week and syncs after a device\nthat edited yesterday wins.\n\nThis is squarely at odds with the stated goal for the annotation subsystem — \"so that we have\nsource of truth and sync correctly\" — and it matters more now that the SPA web reader is being\nrebuilt around highlights/notes, giving a second authoring surface whose edits must be ordered\nagainst the device's.\n\nAlso declared-but-dropped in the same TypedDict, lower stakes: `type` (note vs highlight) and\n`location.span.chapterTitle`.\n\n**This is an INGEST bug, not a schema bug.** No migration is implied — the fix is to read the field\nand store it, which needs a column decision (reuse vs add) that should go through the sessions\nowning `ub.py`. Deliberately not fixed here: the investigation that found it was research-only and\ngated against touching the schema or the Kobo sync path.\n\nRelated: `annotation_portable.py` already carries `last_synced` in the portable payload, so the\nKOReader plugin's diff logic inherits the same ordering weakness.",
+  "created": "2026-08-09",
+  "id": "F-0a69bc",
+  "refs": [],
+  "severity": "correctness",
+  "source": "audit",
+  "status": "open",
+  "title": "Device clientLastModifiedUtc dropped on ingest — cross-device conflict resolution not implementable"
+}

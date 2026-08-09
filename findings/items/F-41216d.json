@@ -1,0 +1,11 @@
+{
+  "area": "kobo",
+  "body": "Found 2026-08-09 during the annotation write-back investigation. Full context: workspace\n`notes/KOBO-ANNOTATIONS-WRITEBACK-INVESTIGATION-2026-08-09.md`.\n\n`ub.Annotation.content_id` is populated with two mutually unintelligible string formats depending\nonly on how the annotation reached us:\n\n- **Device PATCH path** synthesizes `f\"{uuid}!!{chapter_filename}\"`\n  (`cps/services/annotation_sync/__init__.py:177-180`) — e.g. `b3d1b38b-...!!chapter6.html`.\n- **Uploaded `KoboReader.sqlite` path** stores the device's raw `ContentID` verbatim\n  (`cps/annotations.py:216`, from `cps/services/kobo_import.py`) — e.g.\n  `file:///mnt/onboard/Author/Title.epub#(6)OEBPS/cha01.xhtml`.\n\nSame book, same chapter, same user, two unrelated strings. Nothing normalizes between them.\n\nImpact: any keying, grouping, dedupe, or chapter-level query on `content_id` is silently wrong\nacross the two populations. A user who both syncs a Kobo AND imports their `KoboReader.sqlite`\n(which we actively invite — it's the documented recovery path, and we recommended it publicly on\njaneczku/calibre-web#2610) gets two disjoint sets of annotations for the same chapters with no\nindication they're related. It will present as \"my highlights are duplicated / don't match\" long\nafter anyone remembers why.\n\nAlso relevant to the SPA web-reader rebuild now in progress, which consumes this column.\n\nNOT established: whether any current code path actually joins on `content_id` in a way that\nproduces a user-visible bug today — the grouping in the annotations view orders by\n`chapter_progress`, not `content_id`. So this may currently be latent. It is still a real\ncorrectness hazard for anything built on the column, which is why it is filed rather than fixed.\n\nFix direction (not applied — the investigation was research-only and gated against schema/sync-path\nchanges): normalize at ingest to one canonical shape, and decide whether the raw device form needs\npreserving separately for round-trip. Note `device_origin_id` already exists for device-side\nidentity, which may be the right home for the raw form.",
+  "created": "2026-08-09",
+  "id": "F-41216d",
+  "refs": [],
+  "severity": "data-integrity",
+  "source": "audit",
+  "status": "open",
+  "title": "content_id holds two incompatible shapes depending on ingest path"
+}
