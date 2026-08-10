@@ -11,7 +11,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://github.com/crocodilestick/Calibre-Web-Automated\n"
 "POT-Creation-Date: 2026-07-17 21:21-0400\n"
 "PO-Revision-Date: 2026-04-26 13:31+0200\n"
-"Last-Translator: Michiel Cornelissen <michiel.cornelissen+gitbhun at proton.me>\n"
+"Last-Translator: Michiel Cornelissen <michiel.cornelissen+gitbhun at proton."
+"me>\n"
 "Language-Team: ed.driesen@telenet.be\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -2000,8 +2001,8 @@ msgstr "Gedownloade boeken"
 msgid "The latest Books"
 msgstr "Nieuwe boeken"
 
-#: cps/opds.py
-msgid "Random Books"
+#: cps/opds.py cps/render_template.py cps/spa_strings.py
+msgid "Discover"
 msgstr "Willekeurige boeken"
 
 #: cps/opds.py cps/render_template.py cps/templates/user_table.html
@@ -2175,10 +2176,6 @@ msgstr "Gelezen/Ongelezen boeken tonen"
 #: cps/render_template.py
 msgid "Show unread"
 msgstr "Ongelezen boeken tonen"
-
-#: cps/render_template.py cps/spa_strings.py
-msgid "Discover"
-msgstr "Willekeurige boeken"
 
 #: cps/render_template.py cps/templates/user_table.html
 #, fuzzy
@@ -12116,6 +12113,9 @@ msgstr "Synchroniseer geselecteerde boekenplanken met Kobo"
 msgid "Show Read/Unread Section"
 msgstr "Toon gelezen/niet gelezen selectie"
 
+#~ msgid "Random Books"
+#~ msgstr "Willekeurige boeken"
+
 #, fuzzy
 #~ msgid "Enable Hardcover Auto-Fetch"
 #~ msgstr "Zet Kobo sync aan"
@@ -12277,11 +12277,11 @@ msgstr "Toon gelezen/niet gelezen selectie"
 #~ "        library, use the <b>Separate Book Files from Library Option below and there, enter the path to the rest of the library</b>"
 #~ msgstr ""
 #~ "Deze paden zijn alleen intern voor CWA, je kunt aan de linkerkant naar "
-#~ "hartenlust wijzigen waar ze aan gekoppeld zijn, maar er is geen reden om de "
-#~ "paden aan de rechterkant te wijzigen.<br><br>Als je je "
-#~ "<code>metadata.db</code> bestand op een andere locatie wilt dan de rest van "
-#~ "je bibliotheek, gebruik dan de <b>Scheid Boekbestanden van Bibliotheek Optie"
-#~ " hieronder en voer daar het pad naar de rest van de bibliotheek in</b>"
+#~ "hartenlust wijzigen waar ze aan gekoppeld zijn, maar er is geen reden om "
+#~ "de paden aan de rechterkant te wijzigen.<br><br>Als je je <code>metadata."
+#~ "db</code> bestand op een andere locatie wilt dan de rest van je "
+#~ "bibliotheek, gebruik dan de <b>Scheid Boekbestanden van Bibliotheek Optie "
+#~ "hieronder en voer daar het pad naar de rest van de bibliotheek in</b>"
 
 #~ msgid "Enable CWA Auto-Convert"
 #~ msgstr "Schakel CWA Auto-Conversie in"
