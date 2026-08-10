@@ -16,6 +16,18 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+### Added
+
+- **Two new cover fill styles that fill the e-reader frame instead of adding a
+  border.** Every existing style pads the cover out to your device's shape,
+  which leaves a mirrored, blurred or coloured band down the sides. If you would
+  rather see the artwork itself edge to edge, there are now two more options in
+  the fill-style dropdown: **Stretch to fill**, which scales the cover to the
+  frame and accepts a little distortion, and **Crop to fill**, which keeps the
+  proportions honest and trims a strip off the two long edges instead. The six
+  original styles are untouched and Edge mirror is still the default, so nothing
+  changes unless you pick one. Requested by @mgrimace (#1280).
+
 ### Fixed
 
 - **Kindle books get their high-resolution cover now, not just print editions.**
@@ -42,8 +54,6 @@ is for things you can see or feel when running the app.
   each searched for it as plain text and came back with nothing — Goodreads in
   particular looked broken because of it. The editions lookup now asks only the
   source that understands it. Reported by @briffaantoine (#303).
-
-
 - **"Reload metadata from disk" no longer wipes out details you edited without
   asking first.** It sits in the same row as the download buttons on a book's
   page, so reaching for a download and landing one button over rewrote the
@@ -54,21 +64,6 @@ is for things you can see or feel when running the app.
   above: the revoke buttons render as a column of identical trash icons, and a
   misclick cut off whichever device still used that password with no way to get
   it back. It now names the password you are about to revoke.
-
-### Added
-
-- **Two new cover fill styles that fill the e-reader frame instead of adding a
-  border.** Every existing style pads the cover out to your device's shape,
-  which leaves a mirrored, blurred or coloured band down the sides. If you would
-  rather see the artwork itself edge to edge, there are now two more options in
-  the fill-style dropdown: **Stretch to fill**, which scales the cover to the
-  frame and accepts a little distortion, and **Crop to fill**, which keeps the
-  proportions honest and trims a strip off the two long edges instead. The six
-  original styles are untouched and Edge mirror is still the default, so nothing
-  changes unless you pick one. Requested by @mgrimace (#1280).
-
-### Fixed
-
 - **The reading app's catalog now calls "Discover" by the same name the website
   does — and shows it in your language.** In an OPDS reader the entry was
   labelled "Random Books", while the sidebar, the new interface and the link
