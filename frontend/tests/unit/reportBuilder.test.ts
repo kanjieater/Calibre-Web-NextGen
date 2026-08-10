@@ -29,6 +29,7 @@ import {
   buildTitle,
   githubIssueUrl,
   reportTarget,
+  collectContext,
   type ReportContext,
 } from '../../src/lib/reportBuilder.ts';
 
@@ -400,5 +401,113 @@ describe('markdown injection via library-controlled text', () => {
   test('ordinary errors still use a plain three-backtick fence', () => {
     const body = buildBody('bug', { ...CTX, errorMessage: 'Cannot read x of undefined' }, 'x');
     assert.ok(body.includes('```\nCannot read x of undefined\n```'));
+  });
+});
+
+/* ── collectContext: runs on the crash path ───────────────────────────────── */
+
+/**
+ * Install a minimal global shim; returns a restore fn. No jsdom (new dep).
+ *
+ * Uses defineProperty rather than assignment: Node ships a real, GETTER-ONLY
+ * `navigator` global, so `globalThis.navigator = x` throws outright.
+ */
+function withGlobals(g: Record<string, unknown>): () => void {
+  const keys = ['window', 'navigator', 'document'];
+  const saved = keys.map((k) => [k, Object.getOwnPropertyDescriptor(globalThis, k)] as const);
+  for (const k of keys) {
+    Object.defineProperty(globalThis, k, { value: g[k], configurable: true, writable: true });
+  }
+  return () => {
+    for (const [k, desc] of saved) {
+      if (desc) Object.defineProperty(globalThis, k, desc);
+      else delete (globalThis as never as Record<string, unknown>)[k];
+    }
+  };
+}
+
+describe('collectContext', () => {
+  // This runs INSIDE the ErrorBoundary, i.e. after the app has already crashed
+  // once. A throw here replaces the recovery UI with the blank screen the
+  // boundary exists to prevent, so every read is individually guarded — and
+  // that guarding is what these tests exercise.
+  test('reads the allowlisted fields when everything is present', () => {
+    const restore = withGlobals({
+      window: { __CWNG_VERSION__: 'v4.1.31', location: { pathname: '/app/book/12' }, innerWidth: 390 },
+      navigator: { userAgent: 'Mozilla/5.0 (iPhone) AppleWebKit Safari/605' },
+      document: { documentElement: { getAttribute: () => 'dark' } },
+    });
+    try {
+      const ctx = collectContext();
+      assert.equal(ctx.version, 'v4.1.31');
+      assert.equal(ctx.routePattern, '/app/book/:id');
+      assert.equal(ctx.browser, 'Safari on iOS');
+      assert.equal(ctx.theme, 'dark');
+      assert.equal(ctx.viewport, 'narrow (<600px)');
+    } finally {
+      restore();
+    }
+  });
+
+  test('an older server that injects no version degrades to "unknown"', () => {
+    const restore = withGlobals({
+      window: { location: { pathname: '/app' }, innerWidth: 1440 },
+      navigator: { userAgent: 'Firefox/121.0' },
+      document: { documentElement: { getAttribute: () => null } },
+    });
+    try {
+      assert.equal(collectContext().version, 'unknown');
+    } finally {
+      restore();
+    }
+  });
+
+  test('hostile getters cannot throw out of collectContext', () => {
+    // Each read is guarded separately, so one bad global must not take the
+    // whole report — and must never surface as a second crash.
+    const boom = () => { throw new Error('nope'); };
+    const restore = withGlobals({
+      window: {
+        get __CWNG_VERSION__() { return boom(); },
+        get location() { return boom(); },
+        get innerWidth() { return boom(); },
+      },
+      navigator: { get userAgent() { return boom(); } },
+      document: { get documentElement() { return boom(); } },
+    });
+    try {
+      const ctx = collectContext();
+      assert.equal(ctx.version, 'unknown');
+      assert.equal(ctx.routePattern, '/');
+      assert.equal(ctx.browser, 'Unknown browser');
+      assert.equal(ctx.theme, undefined);
+    } finally {
+      restore();
+    }
+  });
+
+  test('overrides win, so the boundary can supply the error it is holding', () => {
+    const restore = withGlobals({
+      window: { location: { pathname: '/app' }, innerWidth: 800 },
+      navigator: { userAgent: 'Safari/605' },
+      document: { documentElement: { getAttribute: () => null } },
+    });
+    try {
+      const ctx = collectContext({ errorMessage: 'boom', componentStack: 'at X' });
+      assert.equal(ctx.errorMessage, 'boom');
+      assert.equal(ctx.componentStack, 'at X');
+    } finally {
+      restore();
+    }
+  });
+
+  test('the full path from a crash to a URL never throws', () => {
+    const restore = withGlobals({ window: undefined, navigator: undefined, document: undefined });
+    try {
+      const url = reportTarget('bug', collectContext({ errorMessage: 'x' }), '').url;
+      assert.ok(url.startsWith('https://github.com/'));
+    } finally {
+      restore();
+    }
   });
 });
