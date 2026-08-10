@@ -11226,7 +11226,7 @@ msgstr "Tekstindeling automatisch aanpassen als het zijpaneel geopend is."
 
 #: cps/templates/read.html:189
 msgid "Note"
-msgstr ""
+msgstr "Notitie"
 
 #: cps/templates/read.html:190
 msgid "Add a note (optional)"
@@ -12249,6 +12249,30 @@ msgstr "Synchroniseer geselecteerde boekenplanken met Kobo"
 #, fuzzy
 msgid "Show Read/Unread Section"
 msgstr "Toon gelezen/niet gelezen selectie"
+
+msgid "Add note"
+msgstr "Notitie toevoegen"
+
+msgid "Edit note"
+msgstr "Notitie bewerken"
+
+msgid "Highlight saved"
+msgstr "Markering opgeslagen"
+
+msgid "Note removed"
+msgstr "Notitie verwijderd"
+
+msgid "Note saved"
+msgstr "Notitie opgeslagen"
+
+msgid "Remove note"
+msgstr "Notitie verwijderen"
+
+msgid "Save note"
+msgstr "Notitie opslaan"
+
+msgid "Write a note…"
+msgstr "Schrijf een notitie…"
 
 #, fuzzy
 #~ msgid "Enable Hardcover Auto-Fetch"

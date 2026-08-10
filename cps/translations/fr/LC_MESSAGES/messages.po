@@ -11525,9 +11525,8 @@ msgstr ""
 "ouverts."
 
 #: cps/templates/read.html:189
-#, fuzzy
 msgid "Note"
-msgstr "Note :"
+msgstr "Note"
 
 #: cps/templates/read.html:190
 msgid "Add a note (optional)"
@@ -12576,6 +12575,30 @@ msgstr "Synchroniser les étagères sélectionnées avec Kobo"
 #: cps/templates/user_table.html:158
 msgid "Show Read/Unread Section"
 msgstr "Afficher la section Lu / Non lu"
+
+msgid "Add note"
+msgstr "Ajouter une note"
+
+msgid "Edit note"
+msgstr "Modifier la note"
+
+msgid "Highlight saved"
+msgstr "Surlignage enregistré"
+
+msgid "Note removed"
+msgstr "Note supprimée"
+
+msgid "Note saved"
+msgstr "Note enregistrée"
+
+msgid "Remove note"
+msgstr "Supprimer la note"
+
+msgid "Save note"
+msgstr "Enregistrer la note"
+
+msgid "Write a note…"
+msgstr "Écrire une note…"
 
 #~ msgid "Sync Kobo read progress to Hardcover (Requires API key per user)"
 #~ msgstr ""
