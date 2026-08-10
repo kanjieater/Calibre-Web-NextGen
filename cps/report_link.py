@@ -59,6 +59,14 @@ def build_issue_url(error_code, error_name=""):
     ``error_code``/``error_name`` are OUR OWN strings (``"500 Internal Server
     Error"`` and werkzeug's static description), not user data — which is why
     they are safe to include verbatim.
+
+    ⚠️ **That is the precondition for the body having no code fence.** If a
+    future caller passes anything user- or library-derived (the obvious
+    candidate is ``error_stack``), it needs the fence-escalation treatment the
+    TypeScript side uses: a plain ```` ``` ```` fence CLOSES at the first
+    ```` ``` ```` inside it, and the remainder then renders as live Markdown —
+    headings, links and images — in a PUBLIC issue. Escaping is not optional
+    there; pick a fence longer than any backtick run in the content.
     """
     route = _route_pattern()
     body = (

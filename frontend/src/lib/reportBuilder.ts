@@ -227,6 +227,27 @@ export function scrubFreeText(text: string | undefined): string {
 
 /* ── Composition ──────────────────────────────────────────────────────────── */
 
+/**
+ * A code fence long enough to contain `content` verbatim.
+ *
+ * Markdown injection guard, and it is not theoretical: an error message can
+ * quote library-controlled text (a book title, a filename), and a plain
+ * three-backtick fence CLOSES at the first ``` inside it. Everything after that
+ * renders as live Markdown in a PUBLIC issue — headings, links, and images,
+ * which GitHub will fetch. Scrubbing does not help: the payload need not
+ * contain a URL to break the structure.
+ *
+ * CommonMark allows a fence of N backticks to contain any run of fewer than N,
+ * so measure the longest run and go one better.
+ */
+function fenceFor(content: string): string {
+  let longest = 0;
+  for (const run of content.match(/`+/g) || []) {
+    if (run.length > longest) longest = run.length;
+  }
+  return '`'.repeat(Math.max(3, longest + 1));
+}
+
 const KIND_LABEL: Record<ReportKind, string> = {
   bug: 'Bug report',
   feature: 'Feature request',
@@ -253,10 +274,11 @@ export function buildBody(
   if (ctx.errorMessage) {
     const scrubbed = scrubFreeText(ctx.errorMessage);
     if (scrubbed) {
+      const fence = fenceFor(scrubbed);
       lines.push('### Error');
-      lines.push('```');
+      lines.push(fence);
       lines.push(scrubbed);
-      lines.push('```');
+      lines.push(fence);
       lines.push('');
     }
   }
@@ -264,11 +286,12 @@ export function buildBody(
   if (ctx.componentStack) {
     const stack = ctx.componentStack.trim().split('\n').slice(0, 12).join('\n');
     if (stack) {
+      const fence = fenceFor(stack);
       lines.push('<details><summary>Component stack</summary>');
       lines.push('');
-      lines.push('```');
+      lines.push(fence);
       lines.push(stack);
-      lines.push('```');
+      lines.push(fence);
       lines.push('');
       lines.push('</details>');
       lines.push('');

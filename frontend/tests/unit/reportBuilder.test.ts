@@ -351,3 +351,54 @@ describe('scrubFreeText: initial-laden author directories (regression)', () => {
     assert.ok(!out.includes('Private Author'));
   });
 });
+
+/* ── Markdown injection ───────────────────────────────────────────────────── */
+
+/** The longest run of backticks anywhere in `s`. */
+function longestRun(s: string): number {
+  return (s.match(/`+/g) || []).reduce((m, r) => Math.max(m, r.length), 0);
+}
+
+/** The opening fence of the first fenced block in a body. */
+function openingFence(body: string): string {
+  const m = body.match(/^`{3,}$/m);
+  assert.ok(m, 'no fenced block found');
+  return m![0];
+}
+
+describe('markdown injection via library-controlled text', () => {
+  // An error message can quote a book title or filename. A plain ``` fence
+  // closes at the first ``` inside it, and everything after renders as live
+  // Markdown in a PUBLIC issue — headings, links, and images GitHub will fetch.
+  // Scrubbing is no help: breaking the structure needs no URL.
+  //
+  // The correctness property is CommonMark's own: a fence of N backticks
+  // contains any run of fewer than N. So assert the fence is strictly longer
+  // than the longest run in the payload — not that fences "balance", since a
+  // naive count also matches the payload's own backticks.
+  test('a backtick fence in the error cannot break out of the code block', () => {
+    const hostile = 'Failed to open ```\n## Injected heading\n```';
+    const body = buildBody('bug', { ...CTX, errorMessage: hostile }, 'x');
+    assert.ok(
+      openingFence(body).length > longestRun(hostile),
+      `fence ${openingFence(body).length} must exceed payload run ${longestRun(hostile)}`,
+    );
+  });
+
+  test('a backtick fence in the component stack cannot break out either', () => {
+    const stack = 'at Foo\n```\n### injected\n';
+    const body = buildBody('bug', { ...CTX, componentStack: stack }, 'x');
+    assert.ok(openingFence(body).length > longestRun(stack));
+  });
+
+  test('longer backtick runs escalate the fence further', () => {
+    const hostile = 'x ````` y';
+    const body = buildBody('bug', { ...CTX, errorMessage: hostile }, 'x');
+    assert.ok(openingFence(body).length >= 6, `got ${openingFence(body).length}`);
+  });
+
+  test('ordinary errors still use a plain three-backtick fence', () => {
+    const body = buildBody('bug', { ...CTX, errorMessage: 'Cannot read x of undefined' }, 'x');
+    assert.ok(body.includes('```\nCannot read x of undefined\n```'));
+  });
+});
