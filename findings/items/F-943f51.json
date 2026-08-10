@@ -4,8 +4,14 @@
   "created": "2026-08-10",
   "id": "F-943f51",
   "refs": [],
+  "resolution": {
+    "commit": "d239befa3",
+    "date": "2026-08-10",
+    "note": "Root-caused and fixed by CWNG READER in #1509 (d239befa3), two causes: a fixed 5s sleep after page.reload() replaced with a condition-based wait on the same budget as the first open, and a stride partition (i % SPEC_SLOTS === offset) that selected nothing for higher offsets when only 3 EPUBs clear the size floor — replaced with rotation. Residual, not claimed closed: fullyParallel spreads 6 spec-project combos over 3 books, so two specs can still share one and clear each other's fixtures; the tell is a note read back with another run's timestamp.",
+    "release": ""
+  },
   "severity": "test",
   "source": "audit",
-  "status": "open",
+  "status": "resolved",
   "title": "reader-notes repaint-after-reload is flaky and reds unrelated PRs"
 }
