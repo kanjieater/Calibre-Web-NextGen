@@ -636,6 +636,14 @@ def create_annotation(payload, *, user_id, book, session, commit):
     # invented. A Kobo cannot represent this row at all, and that is fine — it is
     # a CWNG-native concept, marked so it can be excluded by predicate rather
     # than guessed at.
+    #
+    # NOTE FOR ANYONE ADDING A FIELD TO WEB-READER ROWS: this is the THIRD
+    # ub.Annotation(...) constructor in this function, alongside the CFI-only
+    # branch below and the KoboSpan one after it. A field added to the other two
+    # and missed here produces a row that is valid, merges without conflict, and
+    # is silently missing that field for every standalone note. Add it in all
+    # three or none.
+    #
     if (payload.get("position_type") or "").strip() == "unanchored":
         note = (payload.get("note_text") or "").strip()
         if not note:
