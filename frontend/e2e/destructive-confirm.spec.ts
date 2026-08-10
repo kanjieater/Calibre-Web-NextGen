@@ -108,7 +108,11 @@ test('accepting the confirm still reloads metadata from disk (#1496)', async ({ 
     reload.click(),
   ]);
   expect(req.method()).toBe('POST');
-  expect(reloadCalls()).toBe(1);
+  // waitForRequest resolves when the request is ISSUED, but the counter lives
+  // in the route handler, which Playwright invokes afterwards — reading it once
+  // here races the handler and reports 0 even though the call was made. The
+  // dismiss specs only survive this because of their settle delay.
+  await expect.poll(reloadCalls, { timeout: 5_000 }).toBe(1);
 });
 
 // ── App-password revoke: same defect class, found by auditing around #1496 ────
@@ -173,5 +177,6 @@ test('accepting the confirm still revokes the app password (#1496)', async ({ pa
     revoke.click(),
   ]);
   expect(req.method()).toBe('POST');
-  expect(revokeCalls()).toBe(1);
+  // Same issue-vs-handle race as the reload accept spec above.
+  await expect.poll(revokeCalls, { timeout: 5_000 }).toBe(1);
 });
