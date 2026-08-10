@@ -28,6 +28,17 @@ is for things you can see or feel when running the app.
   original styles are untouched and Edge mirror is still the default, so nothing
   changes unless you pick one. Requested by @mgrimace (#1280).
 
+### Changed
+
+- **The "Read now" and edit buttons under each cover look like buttons now, and
+  stop appearing out of nowhere.** With a mouse or trackpad the two controls
+  were invisible until you pointed at a book, and what appeared was bare amber
+  text beside a small dark circle — two different shapes that looked like they
+  belonged neither to the card nor to each other. They now sit there quietly all
+  the time, share one height and one corner shape, and simply grow stronger when
+  you hover instead of arriving from nothing. Touchscreens are unchanged; the
+  buttons were already always visible there.
+
 ## [v4.1.33] - 2026-08-08
 
 ### Changed
