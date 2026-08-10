@@ -28,6 +28,16 @@ is for things you can see or feel when running the app.
   original styles are untouched and Edge mirror is still the default, so nothing
   changes unless you pick one. Requested by @mgrimace (#1280).
 
+### Fixed
+
+- **The notice bar across the top of the page follows your theme.** It was one
+  fixed dark-teal band whichever theme you picked, so on **Light** and **Sepia**
+  it sat on the page as a near-black slab, and on **High contrast** it ignored
+  that theme's stronger borders entirely. It keeps its own teal identity — it is
+  meant to look distinct from the rest of the UI — but now comes in a version
+  made for each theme. The Ko-fi bar gets the same treatment, and the × that
+  dismisses either one is easier to hit.
+
 ## [v4.1.33] - 2026-08-08
 
 ### Changed
