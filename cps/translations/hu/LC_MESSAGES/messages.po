@@ -3781,6 +3781,10 @@ msgid "≥"
 msgstr ""
 
 #: cps/spa_strings.py
+msgid "(no text captured)"
+msgstr ""
+
+#: cps/spa_strings.py
 msgid "(replace cover)"
 msgstr ""
 
@@ -4173,6 +4177,10 @@ msgstr ""
 #: cps/spa_strings.py
 msgid "Could not load users."
 msgstr "Nem sikerült betölteni a felhasználókat."
+
+#: cps/spa_strings.py
+msgid "Could not open that highlight."
+msgstr ""
 
 #: cps/spa_strings.py
 msgid "Could not read this comic archive."
@@ -4625,6 +4633,10 @@ msgid "Give your smart shelf a name."
 msgstr "Adjon nevet az intelligens polcnak."
 
 #: cps/spa_strings.py
+msgid "Go to this highlight"
+msgstr ""
+
+#: cps/spa_strings.py
 msgid "Go to your library"
 msgstr ""
 
@@ -4695,6 +4707,10 @@ msgstr ""
 
 #: cps/spa_strings.py
 msgid "Highlights"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Highlights and notes"
 msgstr ""
 
 #: cps/spa_strings.py
@@ -5021,6 +5037,10 @@ msgid ""
 msgstr ""
 
 #: cps/spa_strings.py
+msgid "No highlights yet. Select text in the book to make one."
+msgstr ""
+
+#: cps/spa_strings.py
 #, python-brace-format
 msgid "No matching {items} for \"{query}\"."
 msgstr "Nincs találat itt: {items}, erre: „{query}”."
@@ -5238,6 +5258,14 @@ msgstr ""
 msgid "Reload"
 msgstr ""
 
+#: cps/spa_strings.py
+#, python-brace-format
+msgid ""
+"Reload metadata for \"{title}\" from the file on disk? Any title, author or "
+"series you edited here is replaced by what the file contains. This cannot be "
+"undone."
+msgstr ""
+
 #: cps/spa_strings.py cps/templates/detail.html
 msgid "Reload metadata from disk"
 msgstr ""
@@ -5316,6 +5344,13 @@ msgstr ""
 
 #: cps/spa_strings.py
 msgid "Reverse-proxy header login"
+msgstr ""
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid ""
+"Revoke the app password \"{label}\"? Any device still using it loses access "
+"immediately, and the password cannot be recovered."
 msgstr ""
 
 #: cps/spa_strings.py
@@ -5667,6 +5702,10 @@ msgstr ""
 
 #: cps/spa_strings.py
 msgid "This format opens in the full-screen reader."
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "This highlight has no saved position"
 msgstr ""
 
 #: cps/spa_strings.py
