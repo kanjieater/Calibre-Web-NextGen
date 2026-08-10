@@ -99,6 +99,7 @@
 }
 
 .iconBtn, .themeActive {
+  position: relative; /* containing block for .annCount */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -351,3 +352,120 @@
   transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 .hiliteRemove:hover { background: var(--danger-soft); color: var(--danger); }
+
+/* #325 — highlights & notes drawer. Reuses .toc for the shell so it and the
+ * table of contents stay visibly the same kind of thing.
+ *
+ * These use the APP tokens (--text, --surface-2, --border) rather than the
+ * --reader-chrome-* palette, because the drawer sits on --surface-1 like the
+ * TOC does. The two palettes are independent: the reading page theme is chosen
+ * separately from the app theme, so a light app with a dark page theme would
+ * put near-white --reader-chrome-text on a near-white drawer. Match .tocItem. */
+.annCount {
+  position: absolute; transform: translate(12px, -11px);
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 999px; background: var(--accent); color: var(--on-accent);
+  font-size: 10px; font-weight: 700; line-height: 16px; text-align: center;
+}
+.annItem { margin-bottom: var(--sp-1); }
+.annJump {
+  display: flex; gap: var(--sp-2); width: 100%; text-align: left;
+  padding: var(--sp-2); border-radius: var(--r-sm); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+}
+.annJump:hover:not(:disabled) { background: var(--surface-2); }
+/* A device highlight with no resolvable position stays listed and readable —
+ * only its navigation is unavailable. */
+.annJump:disabled { cursor: default; opacity: 0.75; }
+.annBar { flex: 0 0 4px; border-radius: 2px; align-self: stretch; }
+.annBody { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.annQuote {
+  color: var(--text); font-size: var(--fs-sm); line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;
+}
+.annNote {
+  display: flex; align-items: flex-start; gap: 4px;
+  color: var(--text-muted); font-size: var(--fs-sm); line-height: 1.4;
+  font-style: italic; overflow-wrap: anywhere;
+}
+.annNote svg { flex: 0 0 auto; margin-top: 2px; }
+.annSource {
+  align-self: flex-start; padding: 1px 6px; border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .annJump { transition: none; }
+}
+
+/* #325 — note affordance in both popovers. Neutral (non-destructive) sibling of
+ * .hiliteRemove; icon + text so it never depends on the glyph alone. */
+.hiliteNote {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-left: 6px; padding: 5px 11px;
+  color: var(--reader-chrome-text); font-size: 13px; line-height: 1; white-space: nowrap;
+  border-radius: 999px; cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.hiliteNote:hover { background: var(--reader-chrome-border); }
+
+/* When the tapped highlight carries a note the popover stops being a single
+ * pill row and stacks the note underneath, so the pill radius has to relax. */
+.hilitePopStack { flex-wrap: wrap; border-radius: 16px; row-gap: 6px; }
+.hiliteNoteText {
+  flex-basis: 100%; margin: 0; padding-top: 2px;
+  color: var(--reader-chrome-text); font-size: 13px; line-height: 1.45;
+  max-width: 44ch; overflow-wrap: anywhere;
+  border-top: 1px solid var(--reader-chrome-border);
+}
+
+/* #325 — note composer. A panel rather than a pill: it holds a textarea, and on
+ * a phone it is the full width of the screen above the keyboard. */
+.notePop {
+  position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%);
+  display: flex; flex-direction: column; gap: 8px; z-index: 51;
+  width: min(480px, calc(100vw - 24px));
+  background: var(--reader-chrome); border: 1px solid var(--reader-chrome-border);
+  border-radius: 16px; padding: 12px 14px; box-shadow: var(--elev-3);
+}
+.noteHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* The passage being annotated, so the user can see what they are noting. */
+.noteQuote {
+  margin: 0; padding-left: 8px;
+  border-left: 3px solid var(--reader-chrome-border);
+  color: var(--reader-chrome-muted); font-size: 13px; line-height: 1.45;
+  max-height: 4.4em; overflow: hidden; overflow-wrap: anywhere;
+}
+.noteColors { display: flex; align-items: center; gap: 10px; }
+.noteInput {
+  width: 100%; box-sizing: border-box; resize: vertical; min-height: 88px;
+  padding: 8px 10px; border-radius: 10px;
+  border: 1px solid var(--reader-chrome-border);
+  background: var(--reader-chrome); color: var(--reader-chrome-text);
+  font: inherit; font-size: 15px; line-height: 1.5;
+}
+.noteInput:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.noteActions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+/* Colour/hover come from the shared Button primitive (variant="primary", which
+ * pairs --accent with --on-accent); this only lifts the 38px primitive to the
+ * 44px target size the reader wants under a thumb. */
+.noteSave { min-height: 44px; height: auto; }
+/* Keep the destructive action a comfortable target inside the composer. */
+.noteActions .hiliteRemove { min-height: 44px; margin-left: 0; padding: 0 14px; }
+
+@media (max-width: 600px) {
+  /* Above the on-screen keyboard, edge to edge, clear of the home indicator. */
+  .notePop {
+    left: 8px; right: 8px; transform: none;
+    width: auto; max-width: none;
+    bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  }
+  .noteInput { font-size: 16px; } /* iOS zooms a focused field below 16px */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hiliteNote, .noteSave { transition: none; }
+}
