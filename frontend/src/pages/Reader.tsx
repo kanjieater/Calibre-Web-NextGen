@@ -200,12 +200,65 @@ export function Reader({ id }: { id: string }) {
 
   // C10: the TOC drawer and highlight popovers are overlays — trap focus while
   // open, restore on close, Escape closes (hooks run unconditionally every render).
-  useFocusTrap(tocRef, { onClose: () => setTocOpen(false), active: tocOpen });
-  useFocusTrap(settingsRef, { onClose: () => setSettingsOpen(false), active: settingsOpen });
-  useFocusTrap(popRef, { onClose: () => setPendingSel(null), active: !!pendingSel });
-  useFocusTrap(hlPopRef, { onClose: () => setActiveHl(null), active: !!activeHl });
-  useFocusTrap(notePopRef, { onClose: () => setComposer(null), active: !!composer });
-  useFocusTrap(annRef, { onClose: () => setAnnOpen(false), active: annOpen });
+  /*
+   * Stable close handlers, one per overlay.
+   *
+   * NOT a tidiness change. useFocusTrap lists `onClose` in its effect's
+   * dependencies, so an inline arrow — a new function identity on every render —
+   * makes the trap re-run on EVERY RENDER of this component, not just when the
+   * overlay opens. Each re-run re-focuses the dialog's first focusable and the
+   * cleanup restores focus to the previous element.
+   *
+   * The visible symptom was in the note composer, whose first focusable is the
+   * Cancel button in its header: the caret would leave the textarea and land on
+   * Cancel whenever anything re-rendered the reader — a saved highlight arriving,
+   * an annotation refresh, a keystroke in the controlled field. Measured as
+   *     focusin TEXTAREA[Note] -> focusout TEXTAREA[Note] -> focusin BUTTON[Cancel]
+   * It read as intermittent because it depended on whether a re-render happened
+   * to follow the open.
+   *
+   * All six overlays had it; only the composer had a first focusable destructive
+   * enough for anyone to notice.
+   */
+  const closeToc = useCallback(() => setTocOpen(false), []);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
+  const closePendingSel = useCallback(() => setPendingSel(null), []);
+  const closeActiveHl = useCallback(() => setActiveHl(null), []);
+  const closeComposer = useCallback(() => setComposer(null), []);
+  const closeAnnDrawer = useCallback(() => setAnnOpen(false), []);
+
+  useFocusTrap(tocRef, { onClose: closeToc, active: tocOpen });
+  useFocusTrap(settingsRef, { onClose: closeSettings, active: settingsOpen });
+  useFocusTrap(popRef, { onClose: closePendingSel, active: !!pendingSel });
+  useFocusTrap(hlPopRef, { onClose: closeActiveHl, active: !!activeHl });
+  useFocusTrap(notePopRef, { onClose: closeComposer, active: !!composer });
+  useFocusTrap(annRef, { onClose: closeAnnDrawer, active: annOpen });
+
+  /*
+   * Land the caret in the note field when the composer opens, so a phone user
+   * can type immediately instead of hunting for the textarea.
+   *
+   * Declared AFTER useFocusTrap(notePopRef, …) on purpose, and it has to stay
+   * there: React runs effects in declaration order, and the trap focuses the
+   * dialog's first focusable — which is the Cancel button in the header, since
+   * in create mode the colour swatches also precede the field. Running after it
+   * is what puts the caret in the right place.
+   *
+   * A callback ref cannot do this job: refs attach BEFORE any effect runs, so
+   * the trap would simply overwrite it. Verified by a focus trace when it was
+   * briefly written that way.
+   *
+   * The dependency list is the composer's identity rather than the object, so
+   * closing (all three become undefined) and reopening on the same highlight
+   * still re-runs this.
+   */
+  useEffect(() => {
+    if (!composer) return;
+    const field = noteFieldRef.current;
+    if (!field) return;
+    field.focus();
+    field.setSelectionRange(field.value.length, field.value.length);
+  }, [composer?.mode, composer?.annotationId, composer?.cfiRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Open the edit/remove popover for a highlight the reader was tapped on (#782).
   // Closes the create-color popover so the two never show at once.
@@ -412,16 +465,6 @@ export function Reader({ id }: { id: string }) {
       repaintHighlight(hl.cfiRange, color, hl.id, !!notesRef.current.get(hl.id));
     } catch { /* silent: keep the highlight in its original color */ }
   }, [activeHl, id, repaintHighlight]);
-
-  // Land the caret in the note field when the composer opens, so a phone user
-  // can type immediately instead of hunting for the textarea.
-  useEffect(() => {
-    if (!composer) return;
-    const field = noteFieldRef.current;
-    if (!field) return;
-    field.focus();
-    field.setSelectionRange(field.value.length, field.value.length);
-  }, [composer?.mode, composer?.annotationId, composer?.cfiRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     savedCfiRef.current = savedBookmark?.bookmark ?? savedCfiRef.current;

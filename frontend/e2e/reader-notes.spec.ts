@@ -70,7 +70,10 @@ async function openReaderOnEpub(page: Page, offset: number): Promise<number | nu
    * fixtures that have no prose to select.
    */
   const MIN_BYTES = 60_000;
-  const POOL = 10;
+  // Wide enough that each of the SPEC_SLOTS lanes below still has more than one
+  // candidate to fall back to, but still a bounded number of detail requests
+  // (~16, against the ~100 that used to cause the very timeouts this avoids).
+  const POOL = 16;
   const res = await page.request.get('/api/v1/books?page=1&per_page=100&sort=new');
   const books = await res.json();
   const epubIds = [...(books.items || books.books || [])]
@@ -89,26 +92,53 @@ async function openReaderOnEpub(page: Page, offset: number): Promise<number | nu
   }
   sized.sort((a, b) => a.size - b.size || a.id - b.id);
 
-  const chosen = sized[offset];
-  if (!chosen) return null;
-  // Arrange the known state before the first render, not after it. A previous
-  // run that died before cleanup leaves highlights behind, and then "the first
-  // noted highlight on the page" is someone else's — which is exactly how this
-  // spec once tapped a stale highlight and read its older note.
-  await clearAnnotationsViaApi(page, chosen.id);
   /*
-   * Retry the SAME book rather than sliding to the next one. The first reader
-   * render in a fresh context pays for the epub.js chunk and the book download
-   * at once and can miss a cold timeout; falling through to another book is
-   * what makes two tests collide on one fixture.
+   * Give each spec a DIFFERENT first choice, and every book as fallback.
+   *
+   * Two properties have to hold at once, and a stride filter (i % SLOTS ===
+   * offset) satisfied only the first:
+   *
+   *   - two specs must not START on the same book, because each clears the
+   *     other's annotations and then asserts on fixtures that just vanished;
+   *   - a spec must always have somewhere to fall back to, because one cold
+   *     render can miss even a generous timeout when workers share a container.
+   *
+   * The stride version selected NOTHING for the higher offsets whenever the
+   * seeded library was small — `i % 4 === 3` over three eligible books is empty
+   * — so mobile returned null before opening anything, deterministically, and
+   * all three CI retries failed identically. That reads exactly like "the reader
+   * cannot render an EPUB" while being purely an arithmetic bug here.
+   *
+   * Rotating the list instead is total: distinct starting points while there are
+   * at least as many books as offsets, and the full list available after that.
    */
-  for (let attempt = 0; attempt < 2; attempt++) {
-    await page.goto(`/app/read/${chosen.id}`);
-    const rendered = await page.locator('iframe')
-      .waitFor({ state: 'visible', timeout: 40_000 })
-      .then(() => true).catch(() => false);
-    if (rendered) return chosen.id;
+  if (!sized.length) {
+    // Nothing cleared the size floor. Better to try the small fixtures than to
+    // report "no EPUB renders", which sends the reader on a hunt for a bug that
+    // is really an empty candidate list.
+    console.warn(`[reader-notes] no EPUB >= ${MIN_BYTES}B; falling back to all EPUBs`);
+    for (const id of epubIds) sized.push({ id, size: 0 });
   }
+  const start = offset % sized.length;
+  const candidates = [...sized.slice(start), ...sized.slice(0, start)];
+
+  for (const candidate of candidates) {
+    // Arrange the known state before the first render, not after it. A previous
+    // run that died before cleanup leaves highlights behind, and then "the first
+    // noted highlight on the page" is someone else's — which is exactly how this
+    // spec once tapped a stale highlight and read its older note.
+    await clearAnnotationsViaApi(page, candidate.id);
+    // Retry the same book once before moving on: the first reader render in a
+    // fresh context pays for the epub.js chunk and the book download at once.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await page.goto(`/app/read/${candidate.id}`);
+      const rendered = await page.locator('iframe')
+        .waitFor({ state: 'visible', timeout: 40_000 })
+        .then(() => true).catch(() => false);
+      if (rendered) return candidate.id;
+    }
+  }
+  console.warn(`[reader-notes] none of ${candidates.length} candidate EPUB(s) rendered`);
   return null;
 }
 
@@ -258,6 +288,20 @@ async function pageUntilNotedPainted(page: Page, expected: number): Promise<numb
   return (await paintCounts(page)).noted;
 }
 
+/*
+ * Wait for the reader to render after a reload.
+ *
+ * Same budget as the first open in openReaderOnEpub, deliberately: a reload may
+ * reuse the cached epub.js chunk but still re-downloads and re-parses the book,
+ * so it is not the cheap operation a shorter timeout assumes. A 25s budget here
+ * was the real cause of a "the noted highlight is repainted after a reload"
+ * failure on mobile — the iframe never appeared, so the paint assertion below it
+ * never ran, and the report named the repaint rather than the render.
+ */
+async function waitForReaderRender(page: Page): Promise<void> {
+  await page.locator('iframe').waitFor({ state: 'visible', timeout: 40_000 });
+}
+
 test.describe('reader notes (#325)', () => {
   test.describe.configure({ mode: 'serial' });
 
@@ -289,7 +333,7 @@ test.describe('reader notes (#325)', () => {
 
     // --- survives a reload ---
     await page.reload();
-    await page.locator('iframe').waitFor({ state: 'visible', timeout: 25_000 });
+    await waitForReaderRender(page);
     await expect(page.getByRole('button', { name: 'Highlights and notes' })).toBeVisible();
     expect(
       await pageUntilNotedPainted(page, before.noted + 1),
@@ -386,7 +430,7 @@ test.describe('reader highlights & notes drawer (#325)', () => {
 
     // Survives a reload — the drawer is populated from the server, not memory.
     await page.reload();
-    await page.locator('iframe').waitFor({ state: 'visible', timeout: 25_000 });
+    await waitForReaderRender(page);
     await expect(page.getByRole('button', { name: 'Highlights and notes' })).toBeVisible();
     await page.getByRole('button', { name: 'Highlights and notes' }).click();
     await expect(drawer(page)).toContainText(NOTE);
