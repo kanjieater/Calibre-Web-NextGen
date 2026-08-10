@@ -5122,6 +5122,10 @@ msgid "OpenLDAP server"
 msgstr "OpenLDAP server"
 
 #: cps/spa_strings.py
+msgid "Opens a prefilled report on GitHub. Nothing is sent until you post it, and you can edit it first."
+msgstr "Opent een vooraf ingevuld rapport op GitHub. Er wordt niets verzonden totdat u het plaatst, en u kunt het eerst bewerken."
+
+#: cps/spa_strings.py
 msgid "Opens in classic view"
 msgstr "Opent in klassieke weergave"
 
@@ -5304,6 +5308,10 @@ msgstr "Probleem melden op Discord"
 #: cps/spa_strings.py
 msgid "Report Issue on GitHub"
 msgstr "Probleem melden op GitHub"
+
+#: cps/spa_strings.py
+msgid "Report this problem"
+msgstr "Dit probleem melden"
 
 #: cps/spa_strings.py
 msgid "Require group membership"
