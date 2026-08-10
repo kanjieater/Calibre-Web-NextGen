@@ -266,15 +266,27 @@ export function Reader({ id }: { id: string }) {
     cfiRange: string, text: string, color: string, note: string,
   ) => {
     try {
-      const created = await apiPost<{ annotation_id?: string }>(`/annotations/${id}`, {
+      // The create route answers with the stored row (`_data_json_row`), so the
+      // listed row is built from what the SERVER recorded, falling back to what
+      // we sent only where a field is absent. Two reasons. It keeps `source`
+      // (and later the device fields) from being a client-side constant that
+      // has to match the backend byte-for-byte to stay true. And it degrades
+      // the safe way: absent-or-correct, never confidently wrong — so the
+      // drawer cannot disagree with the Highlights page about a row both just
+      // read from the same write.
+      const created = await apiPost<Partial<AnnRow>>(`/annotations/${id}`, {
         cfi_range: cfiRange, highlighted_text: text, highlight_color: color,
         ...(note ? { note_text: note } : {}),
       });
       const newId = created?.annotation_id ?? '';
       if (note && newId) notesRef.current.set(newId, note);
       setAnnList((rows) => [...rows, {
-        annotation_id: newId, cfi_range: cfiRange, highlighted_text: text,
-        note_text: note || null, highlight_color: color, source: 'webreader',
+        annotation_id: newId,
+        cfi_range: created?.cfi_range ?? cfiRange,
+        highlighted_text: created?.highlighted_text ?? text,
+        note_text: created?.note_text ?? (note || null),
+        highlight_color: created?.highlight_color ?? color,
+        source: created?.source ?? 'webreader',
       }]);
       paintHighlight(cfiRange, color, newId, !!note);
     } catch { /* surfaced as no-op; user can retry */ }
