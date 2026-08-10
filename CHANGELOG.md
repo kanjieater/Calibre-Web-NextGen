@@ -17,6 +17,12 @@ is for things you can see or feel when running the app.
 ## [Unreleased]
 
 ### Fixed
+- **Typing in the reader no longer loses your place in the box.** Opening a
+  panel in the new UI's reader — the contents list, the appearance controls, the
+  highlight popover or the note box — put the cursor back at the top of that
+  panel every time anything else on the page updated. In the note box the top is
+  the close button, so a note you were part-way through writing could quietly
+  stop receiving what you typed. The cursor now stays where you put it (#325).
 
 - **Kindle books get their high-resolution cover now, not just print editions.**
   The high-resolution Amazon cover lookup was keyed only on a book's ISBN, and a
@@ -49,6 +55,16 @@ is for things you can see or feel when running the app.
   one entry stayed in English while everything around it was translated, because
   the old wording had never been signed off by a translator. It now reads
   Discover, translated, in all 28 languages. Reported by @chloeroform (#1097).
+- **"Reload metadata from disk" no longer wipes out details you edited without
+  asking first.** It sits in the same row as the download buttons on a book's
+  page, so reaching for a download and landing one button over rewrote the
+  book's title, author and series from whatever the file itself said — with no
+  undo and no warning. It now asks first, naming the book, and does nothing if
+  you say no. Reported by @JamesHACS (#1496).
+- **Revoking an app password now asks first too.** Found while fixing the
+  above: the revoke buttons render as a column of identical trash icons, and a
+  misclick cut off whichever device still used that password with no way to get
+  it back. It now names the password you are about to revoke.
 
 - **The notice bar across the top of the page follows your theme.** It was one
   fixed dark-teal band whichever theme you picked, so on **Light** and **Sepia**
@@ -59,6 +75,15 @@ is for things you can see or feel when running the app.
   dismisses either one is easier to hit.
 
 ### Added
+
+- **Your highlights and notes are now listed inside the reader, and you can jump
+  straight back to one.** Seeing what you had marked up meant leaving the book
+  for the Highlights page and losing your place — the classic reader has had an
+  in-reader panel for this all along. The new UI's reader now has a highlighter
+  button in the top bar, with a count, opening a drawer that lists every
+  highlight in the book with its note. Picking one takes you to that passage.
+  Highlights that came from a Kobo or KOReader are listed and labelled too,
+  though a few of those have no saved position to jump to (#325).
 
 - **You can now write a note on a highlight while reading in the browser.**
   Highlighting text in the new UI's reader only ever saved the colour — there
