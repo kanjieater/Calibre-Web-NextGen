@@ -144,6 +144,27 @@ const tapHighlight = (page: Page, selector: string) => page.evaluate((sel) => {
     g.dispatchEvent(new MouseEvent(type, { bubbles: true, clientX: box.x + box.width / 2, clientY: box.y + box.height / 2 }));
 }, selector);
 
+/*
+ * Page forward until the noted highlight is actually on screen.
+ *
+ * epub.js only paints an annotation into a view it has rendered, and the reader
+ * restores a saved position — so "is it repainted after a reload" cannot be
+ * asked of whatever page happens to be showing. At 375px the book repaginates
+ * and the highlight lands on a different page than it does on desktop, so this
+ * failed on mobile ONLY, while the feature worked correctly. The claim under
+ * test is that the highlight comes back, not that it comes back on the page the
+ * reader happened to open.
+ */
+async function pageUntilNotedPainted(page: Page, expected: number): Promise<number> {
+  for (let i = 0; i < 12; i++) {
+    const { noted } = await paintCounts(page);
+    if (noted >= expected) return noted;
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(900);
+  }
+  return (await paintCounts(page)).noted;
+}
+
 test.describe('reader notes (#325)', () => {
   test.describe.configure({ mode: 'serial' });
 
@@ -172,9 +193,10 @@ test.describe('reader notes (#325)', () => {
     // --- survives a reload ---
     await page.reload();
     await page.waitForTimeout(5000);
-    await expect.poll(async () => (await paintCounts(page)).noted, {
-      message: 'the noted highlight is repainted after a reload',
-    }).toBe(before.noted + 1);
+    expect(
+      await pageUntilNotedPainted(page, before.noted + 1),
+      'the noted highlight is repainted after a reload',
+    ).toBe(before.noted + 1);
     expect(await notesOnServer(page, bookId!)).toContain(NOTE);
 
     // Tapping the highlight reveals the note without opening the composer.
