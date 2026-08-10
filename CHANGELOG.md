@@ -28,6 +28,16 @@ is for things you can see or feel when running the app.
   original styles are untouched and Edge mirror is still the default, so nothing
   changes unless you pick one. Requested by @mgrimace (#1280).
 
+### Fixed
+
+- **Four small controls are easier to hit**, most noticeably the ☰ menu button
+  on phones — the main way you open navigation there, and narrower than the
+  minimum size accessibility guidance asks for. They all look exactly the same;
+  the area that responds to your finger or pointer around them is bigger. The
+  others are **Delete format** on the edit-book page, **Revoke** on an app
+  password, and the Kobo/OPDS shelf checkboxes, where the whole row now responds
+  rather than just the small square.
+
 ## [v4.1.33] - 2026-08-08
 
 ### Changed
