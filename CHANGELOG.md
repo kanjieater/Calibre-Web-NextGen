@@ -28,6 +28,19 @@ is for things you can see or feel when running the app.
   original styles are untouched and Edge mirror is still the default, so nothing
   changes unless you pick one. Requested by @mgrimace (#1280).
 
+### Fixed
+
+- **"Reload metadata from disk" no longer wipes out details you edited without
+  asking first.** It sits in the same row as the download buttons on a book's
+  page, so reaching for a download and landing one button over rewrote the
+  book's title, author and series from whatever the file itself said — with no
+  undo and no warning. It now asks first, naming the book, and does nothing if
+  you say no. Reported by @JamesHACS (#1496).
+- **Revoking an app password now asks first too.** Found while fixing the
+  above: the revoke buttons render as a column of identical trash icons, and a
+  misclick cut off whichever device still used that password with no way to get
+  it back. It now names the password you are about to revoke.
+
 ## [v4.1.33] - 2026-08-08
 
 ### Changed
