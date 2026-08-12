@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import ePub from 'epubjs';
 import {
   ChevronLeft, ChevronRight, X, List, Sun, Moon, Coffee, Loader2, Trash2,
-  SlidersHorizontal, StickyNote, Highlighter,
+  SlidersHorizontal, StickyNote, Highlighter, MoonStar, Maximize, Minimize,
 } from 'lucide-react';
 import {
   type ReaderSettings, isWorthResending, useBook, useBookmark, useReaderSettings,
@@ -28,7 +28,7 @@ const HILITE_FILL: Record<string, string> = {
   yellow: '#e6c34a', red: '#d9534f', green: '#5cb85c', blue: '#5b9bd5',
 };
 
-type ReaderTheme = 'light' | 'sepia' | 'dark';
+type ReaderTheme = 'light' | 'sepia' | 'dark' | 'black';
 
 interface TocItem {
   label: string;
@@ -45,6 +45,11 @@ interface AnnRow {
   /** 'webreader' | 'kobo' | 'koreader' | null — shown so a device highlight is
    *  identifiable, and because only some origins carry a usable CFI. */
   source: string | null;
+  /** 'cfi' | 'pdf_quad' | 'comic_page' | 'koreader_xpointer' | 'unanchored' |
+   *  null. Only 'unanchored' concerns this list: such a row is a note ABOUT the
+   *  book with no passage attached, so it must not be drawn as a highlight that
+   *  has lost its anchor. NULL means legacy EPUB CFI. */
+  position_type: string | null;
 }
 
 // epub.js ships loose types; the rendition/book objects are treated as `any`
@@ -58,6 +63,23 @@ const THEMES: Record<ReaderTheme, { body: Record<string, string> }> = {
   light: { body: { background: '#fbf7ee !important', color: '#2a2a2a !important' } },
   sepia: { body: { background: '#f2e6cf !important', color: '#43381f !important' } },
   dark: { body: { background: '#15110c !important', color: '#cdc6bb !important' } },
+  /*
+   * A FOURTH theme, and not a duplicate of dark: the ground is pure black so an
+   * OLED screen switches those pixels off, which is the whole point of a black
+   * theme at night. `dark` is a warm near-black (#15110c) and still lights every
+   * pixel.
+   *
+   * The classic reader has had this for years and stores it as `blackTheme`;
+   * this reader mapped that value onto `dark`, so anyone who chose Black got the
+   * brown-black instead and could not get back — the same shape as the column
+   * preference that was being saved and ignored.
+   *
+   * Ink is the dark theme's #cdc6bb rather than pure white: 12.39:1 on black,
+   * comfortably past the 4.5:1 AA floor, and it keeps the two dark themes
+   * consistent so only the ground changes. Pure white measures 21:1 but haloes
+   * badly on OLED in the dark, which is exactly when this theme gets used.
+   */
+  black: { body: { background: '#000000 !important', color: '#cdc6bb !important' } },
 };
 
 // #1303: Japanese and Traditional Chinese books progress right-to-left, which
@@ -77,6 +99,38 @@ function isRtlBook(book: any): boolean {
   }
 }
 
+/*
+ * Fullscreen, with the vendor fallback that still matters and the feature test
+ * that matters more.
+ *
+ * Safari only gained unprefixed Element.requestFullscreen in 16.4, so the webkit
+ * spelling is still load-bearing for this project — the household reads on
+ * Safari daily, and an unprefixed-only call would silently do nothing there.
+ * moz/ms are not included: Firefox and Edge have shipped the standard names for
+ * years, and the classic reader's copies of them are dead weight.
+ *
+ * The test is the important half. iOS Safari on iPhone has NO element
+ * fullscreen at all (only video), so the control is hidden there rather than
+ * rendered as a button that does nothing.
+ */
+interface FsDoc extends Document {
+  webkitFullscreenEnabled?: boolean;
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => void;
+}
+interface FsElement extends HTMLElement {
+  webkitRequestFullscreen?: () => void;
+}
+
+function fullscreenSupported(): boolean {
+  const d = document as FsDoc;
+  return !!(d.fullscreenEnabled || d.webkitFullscreenEnabled);
+}
+function fullscreenElement(): Element | null {
+  const d = document as FsDoc;
+  return d.fullscreenElement ?? d.webkitFullscreenElement ?? null;
+}
+
 const FONT_MIN = 75;
 const FONT_MAX = 200;
 // #1318: how many times a failed position save is re-sent before the reader is
@@ -87,10 +141,10 @@ const LS_THEME = 'cwng.reader.theme';
 const LS_FONT = 'cwng.reader.font';
 
 const THEME_TO_READER: Record<ReaderSettings['theme'], ReaderTheme> = {
-  lightTheme: 'light', sepiaTheme: 'sepia', darkTheme: 'dark', blackTheme: 'dark',
+  lightTheme: 'light', sepiaTheme: 'sepia', darkTheme: 'dark', blackTheme: 'black',
 };
 const READER_TO_THEME: Record<ReaderTheme, ReaderSettings['theme']> = {
-  light: 'lightTheme', sepia: 'sepiaTheme', dark: 'darkTheme',
+  light: 'lightTheme', sepia: 'sepiaTheme', dark: 'darkTheme', black: 'blackTheme',
 };
 const FONT_FAMILY: Record<ReaderSettings['font'], string> = {
   default: '', Yahei: 'Microsoft YaHei, sans-serif', SimSun: 'SimSun, serif',
@@ -99,7 +153,7 @@ const FONT_FAMILY: Record<ReaderSettings['font'], string> = {
 
 function loadTheme(): ReaderTheme {
   const v = localStorage.getItem(LS_THEME);
-  if (v === 'light' || v === 'sepia' || v === 'dark') return v;
+  if (v === 'light' || v === 'sepia' || v === 'dark' || v === 'black') return v;
   // First reader visit follows the already-resolved per-user app palette.
   // Thereafter the reader's explicit page-theme choice remains independent.
   const appTheme = document.documentElement.getAttribute('data-theme');
@@ -135,6 +189,9 @@ export function Reader({ id }: { id: string }) {
   // Highlights & notes drawer (#325) — the in-reader counterpart to the
   // standalone Highlights page, which until now you had to leave the book for.
   const annRef = useRef<HTMLElement>(null);
+  // The element that goes fullscreen: the whole reader, not just the book, so
+  // the top bar and page-turn zones come with it.
+  const shellRef = useRef<HTMLDivElement>(null);
   const noteFieldRef = useRef<HTMLTextAreaElement>(null);
   // annotation_id -> note_text for every highlight in this book. Seeded from
   // data.json on mount so a tapped highlight can show its note without a
@@ -168,6 +225,9 @@ export function Reader({ id }: { id: string }) {
   const [toc, setToc] = useState<TocItem[]>([]);
   const [tocOpen, setTocOpen] = useState(false);
   const [annOpen, setAnnOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  // Resolved once: whether this browser can do element fullscreen at all.
+  const [canFullscreen] = useState(fullscreenSupported);
   // Every saved highlight for this book, kept in step locally on each write so
   // the drawer never needs a refetch to look right.
   const [annList, setAnnList] = useState<AnnRow[]>([]);
@@ -177,6 +237,20 @@ export function Reader({ id }: { id: string }) {
   const [fontFamily, setFontFamily] = useState<ReaderSettings['font']>('default');
   const [margin, setMargin] = useState(16);
   const [lineHeight, setLineHeight] = useState(150);
+  /*
+   * One column or two, persisted per user (#325).
+   *
+   * The value was ALREADY being stored — `spread` is part of ReaderSettings and
+   * the classic reader has written it for years — but this reader hardcoded
+   * epub.js's `spread: 'auto'` and never read it back. So a reader who chose
+   * "One column" in the classic view had that preference silently ignored here.
+   * This is less "add a control" than "stop discarding an answer we already had".
+   *
+   * 'nonespread' maps to epub.js 'none' (never two up); 'spread' maps to 'auto',
+   * which is two-up only when the viewport is wide enough — so the setting stays
+   * sane on a phone instead of forcing columns onto a 320px screen.
+   */
+  const [spread, setSpread] = useState<ReaderSettings['spread']>('spread');
   const [settingsHydrated, setSettingsHydrated] = useState(false);
   const [progress, setProgress] = useState(0);
   // Pending text selection awaiting a highlight-color choice.
@@ -188,7 +262,10 @@ export function Reader({ id }: { id: string }) {
   // Open note composer (#325). 'create' writes the highlight and its note in a
   // single POST; 'edit' PATCHes note_text on a highlight that already exists.
   const [composer, setComposer] = useState<{
-    mode: 'create' | 'edit';
+    /* 'standalone' is a note ABOUT the book with no passage: no CFI, no colour,
+     * nothing to paint. It shares the composer because the writing experience is
+     * the same; only what it commits to differs. */
+    mode: 'create' | 'edit' | 'standalone';
     cfiRange: string;
     text: string;
     annotationId?: string;
@@ -340,6 +417,10 @@ export function Reader({ id }: { id: string }) {
         note_text: created?.note_text ?? (note || null),
         highlight_color: created?.highlight_color ?? color,
         source: created?.source ?? 'webreader',
+        // Prefer what the server stored. A selection-made highlight is 'cfi';
+        // taking the response rather than assuming keeps this row identical to
+        // the one a reload would fetch.
+        position_type: created?.position_type ?? 'cfi',
       }]);
       paintHighlight(cfiRange, color, newId, !!note);
     } catch { /* surfaced as no-op; user can retry */ }
@@ -364,6 +445,16 @@ export function Reader({ id }: { id: string }) {
     setComposer({ mode: 'create', cfiRange: sel.cfiRange, text: sel.text, color: 'yellow', note: '' });
   }, [pendingSel]);
 
+  /* Start a note that is not attached to anything. Opened from the drawer,
+   * because that is where a reader's notes already live — asking them to select
+   * text first would defeat the point. */
+  const startStandaloneNote = useCallback(() => {
+    setPendingSel(null);
+    setActiveHl(null);
+    setAnnOpen(false);
+    setComposer({ mode: 'standalone', cfiRange: '', text: '', color: 'yellow', note: '' });
+  }, []);
+
   // "Note" on an existing highlight — prefill from what we already hold.
   const startNoteForHighlight = useCallback(() => {
     const hl = activeHl;
@@ -386,6 +477,28 @@ export function Reader({ id }: { id: string }) {
   ) => {
     const note = rawNote.trim();
     setComposer(null);
+    if (c.mode === 'standalone') {
+      // An empty standalone note is nothing at all — the backend rejects it, and
+      // silently discarding is kinder than an error for a field the reader
+      // simply left blank.
+      if (!note) return;
+      try {
+        const created = await apiPost<Partial<AnnRow>>(`/annotations/${id}`, {
+          position_type: 'unanchored', note_text: note,
+        });
+        setAnnList((rows) => [...rows, {
+          annotation_id: created?.annotation_id ?? '',
+          cfi_range: null,
+          highlighted_text: null,
+          note_text: created?.note_text ?? note,
+          highlight_color: null,
+          source: created?.source ?? 'webreader',
+          position_type: created?.position_type ?? 'unanchored',
+        }]);
+        announce(t('Note saved'));
+      } catch { announce(t('Could not save that note.'), { assertive: true }); }
+      return;
+    }
     if (c.mode === 'create') {
       await persistHighlight(c.cfiRange, c.text, c.color, note);
       announce(note ? t('Note saved') : t('Highlight saved'));
@@ -424,6 +537,37 @@ export function Reader({ id }: { id: string }) {
       announce(t('Could not open that highlight.'));
     }
   }, [announce, t]);
+
+  const toggleFullscreen = useCallback(() => {
+    const d = document as FsDoc;
+    if (fullscreenElement()) {
+      (d.exitFullscreen ? d.exitFullscreen() : d.webkitExitFullscreen?.());
+      return;
+    }
+    const el = shellRef.current as FsElement | null;
+    if (!el) return;
+    // Rejected promises are normal here (a user gesture requirement, or an
+    // embedder policy); the button simply does nothing rather than throwing.
+    try {
+      const req = el.requestFullscreen?.bind(el) || el.webkitRequestFullscreen?.bind(el);
+      const r = req?.();
+      if (r && typeof (r as Promise<void>).catch === 'function') (r as Promise<void>).catch(() => {});
+    } catch { /* unsupported or refused — leave the reader as it is */ }
+  }, []);
+
+  // The browser owns this state: Escape and the system chrome can leave
+  // fullscreen without touching our button, so follow the event rather than
+  // assuming our own toggle is the only way out.
+  useEffect(() => {
+    const sync = () => setIsFullscreen(!!fullscreenElement());
+    document.addEventListener('fullscreenchange', sync);
+    document.addEventListener('webkitfullscreenchange', sync);
+    sync();
+    return () => {
+      document.removeEventListener('fullscreenchange', sync);
+      document.removeEventListener('webkitfullscreenchange', sync);
+    };
+  }, []);
 
   const saveNote = useCallback(() => {
     if (composer) void commitNote(composer, composer.note);
@@ -485,6 +629,7 @@ export function Reader({ id }: { id: string }) {
       setFontFamily(settings.font);
       setMargin(settings.margin);
       setLineHeight(settings.lineHeight);
+      if (settings.spread) setSpread(settings.spread);
     }
     // Start epub.js only on the next render, after this server snapshot has
     // become the state captured by the rendition callbacks.
@@ -673,7 +818,7 @@ export function Reader({ id }: { id: string }) {
           width: '100%',
           height: '100%',
           flow: 'paginated',
-          spread: 'auto',
+          spread: spread === 'nonespread' ? 'none' : 'auto',
         });
         renditionRef.current = rendition;
 
@@ -872,7 +1017,7 @@ export function Reader({ id }: { id: string }) {
   }
 
   return (
-    <div className={`${styles.reader} ${styles[`bg_${theme}`]}`}>
+    <div ref={shellRef} className={`${styles.reader} ${styles[`bg_${theme}`]}`}>
       {/* Top bar */}
       <header className={styles.bar}>
         {/* Page heading for the reader view (SC 1.3.1), visually the bar title. */}
@@ -893,6 +1038,16 @@ export function Reader({ id }: { id: string }) {
               <span className={styles.annCount} aria-hidden="true">{annList.length}</span>
             )}
           </button>
+          {canFullscreen && (
+            <button className={styles.iconBtn} onClick={toggleFullscreen}
+              aria-label={isFullscreen ? t('Exit full screen') : t('Full screen')}
+              aria-pressed={isFullscreen}
+              title={isFullscreen ? t('Exit full screen') : t('Full screen')}>
+              {isFullscreen
+                ? <Minimize size={19} aria-hidden="true" focusable={false} />
+                : <Maximize size={19} aria-hidden="true" focusable={false} />}
+            </button>
+          )}
           <button className={styles.iconBtn} onClick={() => setSettingsOpen((o) => !o)}
             aria-label={t('Reading appearance')} aria-expanded={settingsOpen} title={t('Reading appearance')}>
             <SlidersHorizontal size={19} aria-hidden="true" focusable={false} />
@@ -938,6 +1093,12 @@ export function Reader({ id }: { id: string }) {
                 <X size={18} aria-hidden="true" focusable={false} />
               </button>
             </div>
+            {/* A note about the book needs no selection, so the way in belongs
+                here rather than behind a text selection the reader has not made. */}
+            <button className={styles.annNewNote} onClick={startStandaloneNote}>
+              <StickyNote size={14} aria-hidden="true" focusable={false} />
+              {t('Write a note')}
+            </button>
             {annList.length === 0 ? (
               <p className={styles.tocEmpty}>
                 {t('No highlights yet. Select text in the book to make one.')}
@@ -946,20 +1107,39 @@ export function Reader({ id }: { id: string }) {
               <ul role="list">
                 {annList.map((row) => {
                   const colour = HILITE_FILL[row.highlight_color || 'yellow'] || HILITE_FILL.yellow;
-                  const jumpable = !!row.cfi_range;
+                  /*
+                   * A standalone note is a note ABOUT the book, with no passage
+                   * attached — a deliberate state, not a broken highlight.
+                   * Without this it renders as a defective one: the jump greyed
+                   * out with "This highlight has no saved position", and
+                   * "(no text captured)" where the quote goes. Both sentences
+                   * are true of a highlight whose anchor was destroyed and
+                   * false of a note that never had one, and the reader cannot
+                   * tell the difference from the row.
+                   */
+                  const unanchored = row.position_type === 'unanchored';
+                  const jumpable = !unanchored && !!row.cfi_range;
                   return (
                     <li key={row.annotation_id} className={styles.annItem}>
                       <button
                         className={styles.annJump}
                         onClick={() => goToAnnotation(row)}
                         disabled={!jumpable}
-                        title={jumpable ? t('Go to this highlight') : t('This highlight has no saved position')}
+                        title={jumpable ? t('Go to this highlight')
+                          : unanchored ? t('A note about the book, not tied to a passage')
+                          : t('This highlight has no saved position')}
                       >
-                        <span className={styles.annBar} style={{ background: colour }} aria-hidden="true" />
+                        {/* No colour bar on an unanchored note: there is no
+                            highlighted passage for a colour to refer to. */}
+                        {!unanchored && (
+                          <span className={styles.annBar} style={{ background: colour }} aria-hidden="true" />
+                        )}
                         <span className={styles.annBody}>
-                          <span className={styles.annQuote}>
-                            {row.highlighted_text || t('(no text captured)')}
-                          </span>
+                          {!unanchored && (
+                            <span className={styles.annQuote}>
+                              {row.highlighted_text || t('(no text captured)')}
+                            </span>
+                          )}
                           {row.note_text && (
                             <span className={styles.annNote}>
                               <StickyNote size={12} aria-hidden="true" focusable={false} />
@@ -997,13 +1177,39 @@ export function Reader({ id }: { id: string }) {
               <legend>{t('Page theme')}</legend>
               <div className={styles.themeChoices}>
                 {([
-                  ['light', Sun, t('Light')], ['sepia', Coffee, t('Sepia')], ['dark', Moon, t('Dark')],
+                  ['light', Sun, t('Light')], ['sepia', Coffee, t('Sepia')],
+                  ['dark', Moon, t('Dark')], ['black', MoonStar, t('Black')],
                 ] as const).map(([value, Icon, label]) => (
                   <button key={value} className={theme === value ? styles.choiceActive : styles.choice}
                     aria-pressed={theme === value} onClick={() => {
                       setTheme(value); persistSetting('theme', READER_TO_THEME[value]);
                     }}>
                     <Icon size={17} aria-hidden="true" focusable={false} /> {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className={styles.settingGroup}>
+              <legend>{t('Columns')}</legend>
+              <div className={styles.themeChoices}>
+                {([
+                  ['nonespread', t('One column')],
+                  ['spread', t('Two columns')],
+                ] as const).map(([value, label]) => (
+                  <button key={value}
+                    className={spread === value ? styles.choiceActive : styles.choice}
+                    aria-pressed={spread === value}
+                    onClick={() => {
+                      setSpread(value);
+                      persistSetting('spread', value);
+                      // Re-layout the open book immediately rather than on the
+                      // next load — epub.js recalculates its columns in place,
+                      // so the reader sees the change while looking at it.
+                      try {
+                        renditionRef.current?.spread(value === 'nonespread' ? 'none' : 'auto');
+                      } catch { /* older epub.js builds ignore a live change */ }
+                    }}>
+                    {label}
                   </button>
                 ))}
               </div>
@@ -1112,10 +1318,12 @@ export function Reader({ id }: { id: string }) {
       {/* Note composer — create (highlight + note in one write) or edit (#325). */}
       {composer && (
         <div ref={notePopRef} className={styles.notePop} role="dialog" aria-modal="true"
-          aria-label={composer.mode === 'create' ? t('Add note') : t('Edit note')} tabIndex={-1}>
+          aria-label={composer.mode === 'standalone' ? t('Write a note')
+            : composer.mode === 'create' ? t('Add note') : t('Edit note')} tabIndex={-1}>
           <div className={styles.noteHead}>
             <span className={styles.hiliteLabel}>
-              {composer.mode === 'create' ? t('Add note') : t('Edit note')}
+              {composer.mode === 'standalone' ? t('Write a note')
+                : composer.mode === 'create' ? t('Add note') : t('Edit note')}
             </span>
             <button className={styles.hiliteCancel} onClick={() => setComposer(null)} aria-label={t('Cancel')}>
               <X size={16} aria-hidden="true" focusable={false} />
