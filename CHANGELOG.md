@@ -17,6 +17,15 @@ is for things you can see or feel when running the app.
 ## [Unreleased]
 
 ### Fixed
+- **Opening one of your highlights no longer loses your place — or marks the book
+  finished.** Tapping a highlight in the "Highlights and notes" list jumped the
+  book to that passage and then saved *that* as your reading position, so closing
+  the book afterwards reopened at the highlight instead of where you had actually
+  read to. Worse, the same save reports how far through the book you are, and the
+  server treats 99% as finished — so glancing at a highlight near the end of a
+  book could mark the whole book read and pass that on to a connected Kobo or
+  Hardcover account. Jumping to a highlight is now treated as looking, not
+  reading: your place stays put until you turn a page yourself.
 - **More of the interface reads in German.** Coverage went from 1,891 to 2,071
   translated phrases: 121 phrases that had no German at all now have it, and 59
   entries that gettext had guessed and marked provisional — provisional entries
@@ -98,6 +107,13 @@ is for things you can see or feel when running the app.
   misclick cut off whichever device still used that password with no way to get
   it back. It now names the password you are about to revoke.
 
+- **Four small controls are easier to hit**, most noticeably the ☰ menu button
+  on phones — the main way you open navigation there, and narrower than the
+  minimum size accessibility guidance asks for. They all look exactly the same;
+  the area that responds to your finger or pointer around them is bigger. The
+  others are **Delete format** on the edit-book page, **Revoke** on an app
+  password, and the Kobo/OPDS shelf checkboxes, where the whole row now responds
+  rather than just the small square.
 - **The notice bar across the top of the page follows your theme.** It was one
   fixed dark-teal band whichever theme you picked, so on **Light** and **Sepia**
   it sat on the page as a near-black slab, and on **High contrast** it ignored
