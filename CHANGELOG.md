@@ -17,6 +17,23 @@ is for things you can see or feel when running the app.
 ## [Unreleased]
 
 ### Fixed
+- **The reader's Black page theme is back, and it is actually black.** The
+  classic reader has four page themes; the new UI's reader only ever showed
+  three, and anyone who had chosen **Black** was quietly given the dark theme
+  instead — a warm near-black — with no way to get back to it. Black is now its
+  own choice with a true black page, which is what an OLED screen wants at
+  night (#325).
+- **The reader remembers whether you want one column or two.** The new UI's
+  reader always laid pages out in two columns on a wide screen, even if you had
+  chosen a single column in the classic view — the preference was being saved
+  and then ignored. Reading appearance now offers **One column** and **Two
+  columns**, the page re-flows as soon as you pick, and the choice follows you
+  to your next book and your next device (#325).
+- **The reader's buttons are big enough to hit on a phone.** Close, contents,
+  appearance, highlights and full screen were 34 pixels square in the new UI's
+  reader — reachable with a mouse, fiddly with a thumb while turning pages. They
+  are now 44, the size Apple and Google both recommend, and the book title
+  shortens to make room instead of the buttons shrinking (#325).
 - **Typing in the reader no longer loses your place in the box.** Opening a
   panel in the new UI's reader — the contents list, the appearance controls, the
   highlight popover or the note box — put the cursor back at the top of that
@@ -67,6 +84,19 @@ is for things you can see or feel when running the app.
   it back. It now names the password you are about to revoke.
 
 ### Added
+- **You can now write a note about a book without highlighting anything first.**
+  Notes could only ever be attached to a passage, so there was nowhere to put a
+  thought about the book as a whole — "the argument in chapter 3 never lands"
+  had to be pinned to a sentence that was not really the point. **Write a note**
+  at the top of the reader's Highlights and notes panel opens a blank note, and
+  it appears alongside your highlights on the book's Highlights page (#325).
+
+- **The new UI's reader can go full screen.** The classic reader has always had
+  a full-screen button; the new one didn't, so on a laptop or tablet you read
+  with the browser's chrome eating the top of the page. There's now a
+  full-screen control in the reader's top bar. It's hidden on devices that
+  can't do it (an iPhone can only full-screen video, not a page) rather than
+  shown as a button that does nothing (#325).
 
 - **Your highlights and notes are now listed inside the reader, and you can jump
   straight back to one.** Seeing what you had marked up meant leaving the book
@@ -76,6 +106,16 @@ is for things you can see or feel when running the app.
   highlight in the book with its note. Picking one takes you to that passage.
   Highlights that came from a Kobo or KOReader are listed and labelled too,
   though a few of those have no saved position to jump to (#325).
+- **Reporting a problem now fills the report in for you.** Reporting a bug meant
+  landing on a blank GitHub form that asked you to type out your version, your
+  browser and which page you were on — and if the app had just crashed, the
+  error message was gone from the screen by the time you got there. The "Report
+  Issue on GitHub" item in the Help menu, and the link on an error page, now
+  open a report that already has all of that filled in, including the error
+  itself when there is one. Nothing is sent by your library: it writes the
+  report in your browser and hands you a link, so you see the whole thing and
+  can edit or delete any of it before deciding whether to post it. Your address,
+  your library's name, your file paths and your book titles are never included.
 
 - **You can now write a note on a highlight while reading in the browser.**
   Highlighting text in the new UI's reader only ever saved the colour — there
