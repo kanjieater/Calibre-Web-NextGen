@@ -805,6 +805,19 @@ jobs:
       # Running the overlay on a main push too makes the SPA under test the head
       # commit's, which is the same contract a PR already gets.
       #
+      # The `dev` leg has the SAME defect and is arguably worse:
+      # docker-image-build-dev.yml triggers on `push: branches: [main]`, so
+      # `:dev` is built from MAIN. A push to `dev` therefore pulled an image
+      # built from a DIFFERENT BRANCH and ran dev's specs against it. Covered
+      # here too.
+      #
+      # After this, the overlay pins artifact identity on every ref that resolves
+      # to `:dev` — PR, main push, dev push. Tags are the only case that skips
+      # it, and correctly so: there the image IS the tag, which is already
+      # pinned. That makes "did the overlay run" a usable second instrument
+      # alongside step count — steps prove the suite RAN, the overlay proves
+      # WHAT it ran against.
+      #
       # ⚠️ Stated rather than glossed: the API in the container is still `:dev`,
       # i.e. one merge behind. This leg is an SPA gate, not a full-stack one (it
       # says so above), so a backend regression on main is still invisible until
@@ -814,7 +827,8 @@ jobs:
       - name: Overlay the SPA bundle under test into the container
         if: >-
           github.event_name == 'pull_request' ||
-          (github.event_name == 'push' && github.ref == 'refs/heads/main')
+          (github.event_name == 'push' &&
+           (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'))
         working-directory: frontend
         run: |
           npm ci
