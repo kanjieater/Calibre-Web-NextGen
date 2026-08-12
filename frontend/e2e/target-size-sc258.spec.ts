@@ -1,9 +1,23 @@
-import { expect, test, type Locator } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 type HitExtent = {
   visual: [number, number];
   effective: [number, number];
 };
+
+type BookList = {
+  items: Array<{ id: number }>;
+};
+
+type BookDetail = {
+  id: number;
+  formats: Array<{ format: string }>;
+};
+
+const APP_PASSWORD_LABEL = `SC 2.5.8 target probe ${Date.now()}`;
+const TEMP_FORMAT = 'TXT';
+const TEMP_FORMAT_FILE = new URL('../../tests/fixtures/sample_books/alice_in_wonderland.txt', import.meta.url);
 
 async function measureEffectiveHitExtent(control: Locator): Promise<HitExtent> {
   // elementFromPoint() uses viewport coordinates. Keeping the control in view
@@ -78,6 +92,35 @@ async function expectSc258Target(label: string, control: Locator) {
   expect.soft(measured.effective[1], `${label} effective clickable height`).toBeGreaterThanOrEqual(24);
 }
 
+async function csrfHeaders(page: Page) {
+  const response = await page.request.get('/api/v1/auth/csrf');
+  await expect(response).toBeOK();
+  const { csrf_token } = await response.json() as { csrf_token: string };
+  return { 'X-CSRFToken': csrf_token };
+}
+
+async function findBookWithoutTxt(page: Page) {
+  const listResponse = await page.request.get('/api/v1/books?per_page=100');
+  await expect(listResponse).toBeOK();
+  const list = await listResponse.json() as BookList;
+
+  for (const { id } of list.items) {
+    const detailResponse = await page.request.get(`/api/v1/books/${id}`);
+    await expect(detailResponse).toBeOK();
+    const detail = await detailResponse.json() as BookDetail;
+    if (!detail.formats.some(({ format }) => format.toUpperCase() === TEMP_FORMAT)) return detail.id;
+  }
+
+  throw new Error('The fixture has no book that can receive the temporary TXT format');
+}
+
+async function bookHasFormat(page: Page, bookId: number, format: string) {
+  const response = await page.request.get(`/api/v1/books/${bookId}`);
+  if (!response.ok()) return false;
+  const detail = await response.json() as BookDetail;
+  return detail.formats.some(({ format: current }) => current.toUpperCase() === format);
+}
+
 test('compact controls expose at least a 24x24 effective clickable target', async ({ page }) => {
   // Keep the desktop browser context (fine pointer) while exercising the
   // responsive menu. Mobile emulation would activate the unrelated 44px
@@ -86,10 +129,70 @@ test('compact controls expose at least a 24x24 effective clickable target', asyn
   await page.goto('/app/');
   await expectSc258Target('TopBar menu button', page.getByRole('button', { name: 'Open navigation' }));
 
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/app/account');
-  await expectSc258Target('Account revoke button', page.locator('[class*="revokeBtn"]').first());
+  let appPasswordId: number | undefined;
+  let formatBookId: number | undefined;
+  let formatQueued = false;
+  let mutationHeaders: Record<string, string> | undefined;
 
-  await page.goto('/app/book/191/edit');
-  await expectSc258Target('EditBook format delete button', page.locator('[class*="formatDelete"]').first());
+  try {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/app/account');
+
+    const created = page.waitForResponse((response) =>
+      response.url().includes('/api/v1/account/app-passwords')
+        && response.request().method() === 'POST'
+        && response.status() === 201);
+    await page.getByLabel('App password label').fill(APP_PASSWORD_LABEL);
+    await page.getByRole('button', { name: 'Generate' }).click();
+    const createdPayload = await (await created).json() as { id: number };
+    appPasswordId = createdPayload.id;
+
+    const revokeButton = page.getByRole('button', { name: `Revoke ${APP_PASSWORD_LABEL}` });
+    await expectSc258Target('Account revoke button', revokeButton);
+
+    mutationHeaders = await csrfHeaders(page);
+    formatBookId = await findBookWithoutTxt(page);
+    const uploadResponse = await page.request.post(`/api/v1/books/${formatBookId}/formats`, {
+      headers: mutationHeaders,
+      multipart: {
+        file: {
+          name: 'sc258-target-precondition.txt',
+          mimeType: 'text/plain',
+          buffer: await readFile(TEMP_FORMAT_FILE),
+        },
+      },
+    });
+    await expect(uploadResponse).toBeOK();
+    expect(uploadResponse.status()).toBe(202);
+    formatQueued = true;
+
+    await expect.poll(
+      () => bookHasFormat(page, formatBookId!, TEMP_FORMAT),
+      { message: `temporary ${TEMP_FORMAT} format was not attached by ingest`, timeout: 30_000 },
+    ).toBe(true);
+
+    await page.goto(`/app/book/${formatBookId}/edit`);
+    const deleteButton = page.getByRole('button', { name: `Delete ${TEMP_FORMAT}` });
+    await expectSc258Target('EditBook format delete button', deleteButton);
+  } finally {
+    if (formatQueued && formatBookId !== undefined) {
+      const deleted = await page.request.post(
+        `/api/v1/books/${formatBookId}/formats/${TEMP_FORMAT}/delete`,
+        { headers: mutationHeaders ?? await csrfHeaders(page) },
+      );
+      expect(deleted.status(), 'temporary format cleanup').toBe(204);
+      await expect.poll(
+        () => bookHasFormat(page, formatBookId!, TEMP_FORMAT),
+        { message: `temporary ${TEMP_FORMAT} format was not cleaned up` },
+      ).toBe(false);
+    }
+
+    if (appPasswordId !== undefined) {
+      const revoked = await page.request.post(
+        `/api/v1/account/app-passwords/${appPasswordId}/delete`,
+        { headers: mutationHeaders ?? await csrfHeaders(page) },
+      );
+      expect(revoked.status(), 'temporary app-password cleanup').toBe(204);
+    }
+  }
 });
