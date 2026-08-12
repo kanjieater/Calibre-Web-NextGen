@@ -983,9 +983,18 @@ test.describe('reader search inside the book', () => {
     });
     expect(query.length, 'a distinctive query can be taken from the book').toBeGreaterThanOrEqual(2);
 
+    /*
+     * Distinguish "no bookmark" from "the request failed".
+     *
+     * Collapsing both to `null` makes a transport hiccup indistinguishable from
+     * a cleared reading position, and the assertion below then reports the
+     * feature as broken when the instrument was. Fail loudly on a bad response
+     * instead.
+     */
     const bookmark = async () => {
       const response = await page.request.get(`/api/v1/books/${bookId}/bookmark?format=epub`);
-      return response.ok() ? ((await response.json()).bookmark as string | null) : null;
+      if (!response.ok()) throw new Error(`bookmark read failed: HTTP ${response.status()}`);
+      return (await response.json()).bookmark as string | null;
     };
     // Move away from the passage before searching for it. The saved bookmark is
     // the observable CFI, so the assertion below proves navigation rather than

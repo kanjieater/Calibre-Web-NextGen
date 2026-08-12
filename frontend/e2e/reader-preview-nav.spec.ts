@@ -205,7 +205,20 @@ test.describe('reader: a jump is not a reading position', () => {
       testInfo.project.name !== 'desktop',
       'arranges per-(user,book) server state; concurrent projects would clobber it',
     );
-    const bookId = await pickEpub(page, 0);
+    /*
+     * Lane 2, not lane 0, and this is load-bearing.
+     *
+     * This spec CLEARS the book's bookmark to arrange its state, and
+     * `reader-notes.spec.ts` opens lane 0 via `openReaderOnEpub(page, 0)`. The
+     * suite is `fullyParallel` with two workers in CI, so on lane 0 the two
+     * files race on one book: this one wipes the bookmark that the other is
+     * asserting on, and the victim sees `null` where it expected a CFI. It
+     * reads exactly like the feature under test failing, and it cannot
+     * reproduce single-worker locally.
+     *
+     * Destructive arrangement needs a lane nobody else opens.
+     */
+    const bookId = await pickEpub(page, 2);
     test.skip(!bookId, 'no EPUB with enough prose in this library');
 
     // Start from a known-clean position so a previous run cannot supply the
