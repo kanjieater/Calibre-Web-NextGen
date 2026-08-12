@@ -686,11 +686,26 @@ export function Reader({ id }: { id: string }) {
 
   const goToSearchResult = useCallback((cfi: string) => {
     closeSearch();
+    /*
+     * A search hit is a preview, exactly like a highlight jump, and arms the
+     * same flag -- see previewingRef.
+     *
+     * This is the composition that does NOT come for free. The two changes
+     * merged with no conflict: the preview flag landed on `goToAnnotation`, and
+     * search arrived as its own `display()` caller that the flag had never heard
+     * of. Nothing was overwritten and nothing was reported, so search would have
+     * shipped the same defect the flag exists to prevent -- looking up a word
+     * near the end of a book would move the reader's place there and, past 99%,
+     * mark the book finished.
+     */
+    previewingRef.current = true;
     try {
       Promise.resolve(renditionRef.current?.display(cfi)).catch(() => {
+        previewingRef.current = false;
         announce(t('Could not open that search result.'));
       });
     } catch {
+      previewingRef.current = false;
       announce(t('Could not open that search result.'));
     }
   }, [announce, closeSearch, t]);

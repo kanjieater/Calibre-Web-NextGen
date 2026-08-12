@@ -1011,6 +1011,31 @@ test.describe('reader search inside the book', () => {
     await results.first().getByRole('button').click();
     await expect(searchDrawer).toBeHidden();
 
-    await expect.poll(bookmark, { timeout: 20_000 }).not.toBe(before);
+    /*
+     * Navigation is proved by the passage being ON SCREEN, not by the bookmark
+     * moving.
+     *
+     * Using the saved bookmark as the proof of navigation was the obvious choice
+     * and it encodes a bug: a search hit is a preview, and a preview must NOT
+     * move the reader's saved place (#1566 -- past 99% it also marks the book
+     * finished). Asserting the visible text is both independent of persistence
+     * and a stronger claim: it says we landed on the passage, where "the
+     * bookmark changed" only ever said we moved somewhere.
+     */
+    await expect.poll(async () => {
+      const frame = page.frames().find((f) => f !== page.mainFrame());
+      const text = await frame?.evaluate(
+        () => (document.body?.innerText || '').replace(/\s+/g, ' '),
+      ).catch(() => '');
+      return (text || '').includes(query);
+    }, { timeout: 20_000 }).toBe(true);
+
+    // And the reading position stayed where the reader actually was. Well past
+    // the 800ms save debounce and its round-trip.
+    await page.waitForTimeout(3_000);
+    expect(
+      await bookmark(),
+      'a search hit is a preview: it must not become the saved reading position',
+    ).toBe(before);
   });
 });
