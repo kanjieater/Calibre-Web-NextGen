@@ -25,7 +25,72 @@ jobs:
         run: |
           git config user.name 'new-usemame'
           git config user.email '248195428+new-usemame@users.noreply.github.com'
+
+      # This job's whole premise is "Test Suite failed on a push to main, so the
+      # head commit broke it." That is only sound for a failure the head commit
+      # could plausibly have caused.
+      #
+      # It stopped being sound the moment the SPA e2e suite began running on main
+      # (#1557). e2e is slow, environment-sensitive, and its breakages are
+      # routinely PRE-EXISTING — a spec that is already red fails on every
+      # subsequent push regardless of what that push contained. Auto-reverting on
+      # it produces a loop: revert an innocent commit, main is still red because
+      # the spec is still broken, revert the next innocent commit, and so on.
+      #
+      # OBSERVED 2026-08-12, within minutes of #1557 landing: four already-broken
+      # specs (tag-merge-delete ×2, reader-rtl, sp2-display-options) failed the
+      # main-push suite, and this job opened a revert of "Correct a finding: the
+      # flake is load, not test order" — a docs commit that could not have
+      # touched any of them.
+      #
+      # So: revert only when something OTHER than the e2e lane failed.
+      # `Test Suite Summary` is excluded too, because it fails as a CONSEQUENCE of
+      # e2e failing; treating it as an independent signal would re-admit exactly
+      # the case being excluded.
+      - name: Decide whether this failure is revert-worthy
+        id: triage
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          # No `| head`/`| tail` here: a pipeline returns the LAST command's
+          # status, so piping would mask a failed `gh` call as success.
+          if ! jobs_json=$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json jobs); then
+            echo "::warning::could not read run $RUN_ID; not reverting"
+            echo "revert=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          failed=$(jq -r '[.jobs[] | select(.conclusion=="failure") | .name] | join("|")' <<<"$jobs_json")
+          echo "failed jobs: ${failed:-<none>}"
+
+          # Fail CLOSED on reverting. A missed revert leaves main red, which is
+          # loud and visible; a wrong revert silently destroys someone's correct
+          # work. When the signal is unreadable, prefer the loud failure.
+          if [ -z "$failed" ]; then
+            echo "::warning::Test Suite reported failure but no job did; not reverting"
+            echo "revert=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          other=$(jq -r '
+            [.jobs[]
+             | select(.conclusion=="failure")
+             | select(.name != "E2E Tests (SPA)" and .name != "Test Suite Summary")
+             | .name] | join("|")' <<<"$jobs_json")
+
+          if [ -n "$other" ]; then
+            echo "revert-worthy failure(s): $other"
+            echo "revert=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Only the SPA e2e lane failed. Not reverting — an e2e breakage is"
+            echo "usually pre-existing and would revert an innocent commit while"
+            echo "leaving main just as red. Fix the spec instead."
+            echo "revert=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Open revert PR for the head commit
+        if: steps.triage.outputs.revert == 'true'
         env:
           # NOT secrets.GITHUB_TOKEN. "Allow GitHub Actions to create and approve
           # pull requests" is off at the repo level, so the default token cannot
@@ -39,9 +104,16 @@ jobs:
           # workflow opening and self-approving a PR -- so it stays off. Scoping the
           # capability to this one workflow via the PAT is the narrower fix.
           GH_TOKEN: ${{ secrets.GH_PAT }}
+          # Passed via env rather than interpolated straight into the shell.
+          # head_sha is GitHub-generated hex so this is not exploitable today,
+          # but `${{ }}` inside `run:` is the workflow-injection shape, and the
+          # next field someone adds here may not be hex.
+          BAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
         run: |
-          BAD_SHA=${{ github.event.workflow_run.head_sha }}
-          BAD_TITLE=$(git log -1 --format='%s' $BAD_SHA)
+          # BAD_TITLE is a commit message — attacker-influencable text. It is only
+          # ever used as a quoted shell variable, never re-interpolated.
+          BAD_TITLE=$(git log -1 --format='%s' "$BAD_SHA")
           BRANCH="auto-revert/${BAD_SHA:0:7}"
           git checkout -b "$BRANCH" main
           # Allow empty in case the commit was already reverted
@@ -52,5 +124,5 @@ jobs:
           gh pr create \
             --base main --head "$BRANCH" \
             --title "revert: $BAD_TITLE [auto-revert]" \
-            --body "Automatic revert of ${BAD_SHA:0:7} after CI failure on main. See run ${{ github.event.workflow_run.html_url }}." \
+            --body "Automatic revert of ${BAD_SHA:0:7} after CI failure on main. See run ${RUN_URL}." \
             --label "safe-tier-1"
