@@ -10439,9 +10439,8 @@ msgid "Keep Largest File Size - Keep book with largest total file size"
 msgstr ""
 
 #: cps/templates/duplicates.html
-#, fuzzy
 msgid "Preview"
-msgstr "មុន"
+msgstr ""
 
 #: cps/templates/duplicates.html
 msgid "Execute Resolution"
