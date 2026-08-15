@@ -160,6 +160,57 @@ class TestProcessWait(unittest.TestCase):
         self.assertEqual(match.group(1), '7.16.0')
 
 
+class TestOpfProbeErrorReporting(unittest.TestCase):
+    """The --as-opf probe runs with newlines=False, so its lines are bytes."""
+
+    def test_failure_lines_are_decoded_before_being_matched(self):
+        """`b'...'.startswith('Traceback')` raises TypeError, not False.
+
+        The failure branch compared raw bytes against str literals, so a
+        failed metadata export blew up on the line meant to explain why it
+        failed. Pin the decode-then-compare order.
+        """
+        source = TestConvertSourceInvariants._convert_source()
+        tree = ast.parse(source)
+
+        target = None
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == '_convert_calibre':
+                target = node
+                break
+        self.assertIsNotNone(target, '_convert_calibre not found')
+
+        for node in ast.walk(target):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            if isinstance(func, ast.Attribute) and func.attr == 'startswith':
+                # the receiver must be a plain name that was decoded first,
+                # never a subscript/attribute straight off the byte stream
+                self.assertIsInstance(
+                    func.value, ast.Name,
+                    'startswith called on a non-decoded expression')
+
+        # and the decode must actually be present in that branch
+        self.assertIn("ele.decode('utf-8', errors=\"ignore\")", source)
+
+    def test_decoding_a_calibre_traceback_does_not_raise(self):
+        """Behavioural mirror of the branch, on the shape it really sees."""
+        calibre_traceback = [
+            b'Traceback (most recent call last):\n',
+            b'  File "site-packages/calibre/db.py", line 1, in <module>\n',
+            b'DatabaseError: no such column: foo\n',
+        ]
+        error_message = ""
+        for ele in calibre_traceback:
+            if isinstance(ele, bytes):
+                ele = ele.decode('utf-8', errors="ignore")
+            ele = ele.strip('\r\n')
+            if ele and not ele.startswith('Traceback') and not ele.startswith('  File'):
+                error_message = ele
+        self.assertEqual(error_message, 'DatabaseError: no such column: foo')
+
+
 class TestConvertSourceInvariants(unittest.TestCase):
     """Source pins: this is exactly the shape that regressed once."""
 

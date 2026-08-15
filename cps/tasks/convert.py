@@ -326,9 +326,15 @@ class TaskConvert(CalibreTask):
                     with open(path_tmp_opf, 'wb') as fd:
                         fd.write(b''.join(lines))
                 else:
+                    # The probe runs with newlines=False, so these are bytes.
+                    # Comparing them against str silently raised TypeError here
+                    # and buried the real reason the metadata export failed.
                     error_message = ""
                     for ele in calibre_traceback:
-                        if not ele.startswith('Traceback') and not ele.startswith('  File'):
+                        if isinstance(ele, bytes):
+                            ele = ele.decode('utf-8', errors="ignore")
+                        ele = ele.strip('\r\n')
+                        if ele and not ele.startswith('Traceback') and not ele.startswith('  File'):
                             error_message = N_("Calibre failed with error: %(error)s", error=ele)
                     return check, error_message
             quotes = [1, 2]
