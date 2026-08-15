@@ -24,6 +24,7 @@ from cps import logger, config
 from cps.subproc_wrapper import process_open, stream_process_output
 from flask_babel import gettext as _
 from cps.file_helper import get_temp_dir
+from cps.services.kepub_package_normalizer import normalize_kepub_package
 
 from cps.tasks.mail import TaskEmail
 from cps import gdriveutils, helper
@@ -274,6 +275,8 @@ class TaskConvert(CalibreTask):
                 os.close(temp_fd)
                 try:
                     copyfile(converted_file[0], temp_destination)
+                    if normalize_kepub_package(temp_destination) is None:
+                        return 1, N_("Kepubify output package normalization failed")
                     if not _valid_archive(temp_destination, format_new_ext[1:]):
                         return 1, N_("Kepubify produced an invalid KEPUB archive")
                     os.replace(temp_destination, destination)
