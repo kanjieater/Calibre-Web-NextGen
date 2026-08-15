@@ -189,7 +189,44 @@ def test_corrupt_input_is_preserved_and_only_logs_a_warning(tmp_path, caplog):
 
 
 @pytest.mark.unit
-def test_conversion_normalization_failure_does_not_replace_existing_kepub(tmp_path, monkeypatch):
+def test_conversion_continues_when_normalization_cannot_process_the_package(tmp_path, monkeypatch):
+    """A normalizer that cannot handle a package must not withhold the KEPUB.
+
+    An un-normalized KEPUB is exactly what we shipped before this feature existed.
+    Failing the conversion instead drops the user back to EPUB delivery, where a
+    Kobo cannot save highlights at all (upstream calibre-web #1484) -- strictly
+    worse than the problem normalization is trying to prevent. A genuinely corrupt
+    archive is still rejected, but by `_valid_archive`, which is its job.
+    """
+    from types import SimpleNamespace
+
+    import cps.helper  # noqa: F401 - establish the application's normal import order
+    from cps.tasks import convert
+
+    book_path = tmp_path / "book"
+    (tmp_path / "book.epub").write_bytes(b"source")
+    # a VALID archive that the normalizer simply declines to process
+    _write_package(tmp_path / "src.kepub.epub")
+    (tmp_path / "book.kepub.epub").write_bytes((tmp_path / "src.kepub.epub").read_bytes())
+    destination = tmp_path / "book.kepub"
+    process = SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(convert.config, "config_embed_metadata", False, raising=False)
+    monkeypatch.setattr(convert.config, "config_binariesdir", "", raising=False)
+    monkeypatch.setattr(convert.config, "config_kepubifypath", "/bin/kepubify", raising=False)
+    monkeypatch.setattr(convert, "process_open", lambda *_args, **_kwargs: process)
+    monkeypatch.setattr(convert, "stream_process_output", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(convert, "normalize_kepub_package", lambda _path: None)
+    task = convert.TaskConvert(str(book_path), 1, "convert", {}, None)
+
+    check, error = task._convert_kepubify(str(book_path), ".epub", ".kepub")
+
+    assert check == 0, f"conversion should still succeed, got error: {error}"
+    assert destination.exists(), "the un-normalized KEPUB must still be delivered"
+
+
+@pytest.mark.unit
+def test_conversion_corrupt_archive_still_does_not_replace_existing_kepub(tmp_path, monkeypatch):
     from types import SimpleNamespace
 
     import cps.helper  # noqa: F401 - establish the application's normal import order
@@ -213,5 +250,5 @@ def test_conversion_normalization_failure_does_not_replace_existing_kepub(tmp_pa
     check, error = task._convert_kepubify(str(book_path), ".epub", ".kepub")
 
     assert check == 1
-    assert "normalization failed" in str(error).lower()
+    assert "invalid kepub archive" in str(error).lower()
     assert destination.read_bytes() == b"existing valid kepub"
