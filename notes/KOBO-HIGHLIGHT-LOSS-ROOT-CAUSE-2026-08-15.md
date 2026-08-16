@@ -47,10 +47,55 @@ select b.VolumeID, count(*) n,
 from Bookmark b group by b.VolumeID;
 ```
 
-907 of 3016 were orphaned. Two distinct reasons: this bug (Flatland 88, All Quiet 9), and
-*book no longer on the device* (Iliad 584, King in Yellow 220, Republic 6 — those have **no**
-`ContentType=9` rows at all and are not repairable by rewriting; they'd render again if the book
-returned to the same path).
+907 of 3016 were orphaned.
+
+🚨 **CORRECTED 2026-08-16 — the original reading of 810 of those was WRONG, and the error is
+instructive.** This note first said Iliad (584), King in Yellow (220) and Republic (6) had *no*
+`ContentType=9` rows because the book had been removed from the device, and were therefore not
+repairable. **All 810 are repairable**, and the books were never gone.
+
+The mistake was the probe: chapter rows were looked for with `ContentID LIKE VolumeID || '%'`, which
+returns zero for a `file:///mnt/onboard/...` volume **regardless of whether the book is present** —
+because those volumes' chapter ids are not prefixed by the volume path. "No rows found" was read as
+"book removed" when it meant "this query cannot see this volume shape".
+
+**The control that settles it: the Odyssey.** Same `file:///` volume shape, 400 bookmarks,
+**400/400 rendering**, and zero fragments. A "book is gone" explanation cannot survive it.
+
+The real second cause is a **fragment-anchored TOC** — see below. Verified on the same backup:
+
+| volume | bookmarks | anchored | carry `#` |
+|---|---|---|---|
+| Iliad | 608 | 24 | **584** |
+| King in Yellow | 221 | 1 | **220** |
+| Odyssey | 400 | **400** | 0 |
+| three others | 873 | 873 | 0 |
+
+```
+fragmented: 810     repairable (exact ContentType=9 match after stripping '#'): 810
+```
+
+**Generalises:** a negative from a query is only as good as a positive control run through the same
+query. The `LIKE VolumeID || '%'` probe was never validated against a volume known to work.
+
+---
+
+## Cause 1b — a fragment-anchored TOC (wider than the `../` case)
+
+Nickel takes the chapter identity from the TOC entry **including the fragment**; the `ContentType=9`
+row has none, so the exact match fails:
+
+```
+Bookmark.ContentID     <uuid>!OEBPS!..._541-h-0.htm.xhtml#pgepubid00005
+content ContentType=9  <uuid>!OEBPS!..._541-h-0.htm.xhtml
+```
+
+Measured on a Clara BW / 4.42, both books converted by current `main`: **1984** — 6 highlights, 6
+anchored, TOC carries 0 fragments. **The Age of Innocence** — 3 highlights, **0 anchored**, all 42
+TOC links carry a fragment. Both OPF manifests are clean.
+
+⚠️ **The defect is entirely in the NCX, so #1637 does not touch it, and we ship these today.**
+**92 of 216 books (42.6%)** have a fragment-anchored TOC — against #1637's 5 of 216.
 
 **Library scan:** 5 of 216 books (2.3%) carry an escaping OPF href, every one `../nav.xhtml`.
 Perfect correlation on the instance: every book with one has **zero** stored annotations ever;
