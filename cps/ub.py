@@ -33,7 +33,7 @@ except ImportError as e:
         oauth_support = False
 from sqlalchemy import create_engine, exc, exists, event, text
 from sqlalchemy import CheckConstraint, Column, ForeignKey, Index, UniqueConstraint
-from sqlalchemy import String, Integer, SmallInteger, Boolean, DateTime, Float, JSON, Text
+from sqlalchemy import String, Integer, SmallInteger, Boolean, DateTime, Float, JSON, Text, BLOB
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.expression import func
 try:
@@ -282,6 +282,11 @@ class User(UserBase, Base):
     view_settings = Column(JSON, default={})
     kobo_only_shelves_sync = Column(Integer, default=0)
     opds_only_shelves_sync = Column(Integer, default=0)
+    # Stage 0 Kobo two-way annotation opt-in.  No route consumes this flag
+    # until a later rollout stage; existing and new users are safely off.
+    kobo_two_way_annotation_sync = Column(
+        Boolean, nullable=False, default=False, server_default=text("0"),
+    )
     hardcover_token = Column(String, default=None)
     # New per-user theme (0=default/light, 1=caliBlur) replacing global-only behavior
     theme = Column(Integer, default=1)
@@ -346,6 +351,7 @@ class Anonymous(AnonymousUserMixin, UserBase):
         self.hardcover_token = None
         self.kobo_only_shelves_sync = None
         self.opds_only_shelves_sync = None
+        self.kobo_two_way_annotation_sync = False
         self.view_settings = {}
         self.allowed_column_value = None
         self.allowed_tags = None
@@ -379,6 +385,7 @@ class Anonymous(AnonymousUserMixin, UserBase):
         self.view_settings = data.view_settings
         self.kobo_only_shelves_sync = data.kobo_only_shelves_sync
         self.opds_only_shelves_sync = data.opds_only_shelves_sync
+        self.kobo_two_way_annotation_sync = data.kobo_two_way_annotation_sync
         self.hardcover_token = data.hardcover_token
         self.auto_send_enabled = data.auto_send_enabled
         # Presentation columns live on User, not on the shared UserBase mixin,
@@ -1108,6 +1115,14 @@ class Annotation(Base):
     origin_device_id = Column(Integer, ForeignKey('device.id', ondelete='SET NULL'), nullable=True)
     assigned_device_id = Column(Integer, ForeignKey('device.id', ondelete='SET NULL'), nullable=True)
     routing_revision = Column(Integer, nullable=False, default=1)
+    # Stage 0 two-way-sync metadata.  Existing parsed position/content columns
+    # remain the web reader's representation; these fields are additive.
+    annotation_type = Column(String(32), nullable=True)
+    content_revision = Column(Integer, nullable=False, default=1)
+    server_modified_at = Column(DateTime, nullable=True)
+    last_editor_device_id = Column(
+        Integer, ForeignKey('device.id', ondelete='SET NULL'), nullable=True,
+    )
     last_synced = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -1168,6 +1183,193 @@ class Annotation(Base):
 
     def __repr__(self):
         return f'<Annotation annotation_id={self.annotation_id} book_id={self.book_id}>'
+
+
+class KoboAnnotationMaterialization(Base):
+    """Byte-exact Kobo replay evidence for one generic annotation row."""
+    __tablename__ = 'kobo_annotation_materialization'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    annotation_id = Column(
+        Integer, ForeignKey('annotation.id', ondelete='CASCADE'),
+        nullable=False, unique=True,
+    )
+    raw_annotation_json = Column(BLOB, nullable=False)
+    raw_location_json = Column(BLOB, nullable=False)
+    raw_client_modified_utc = Column(Text, nullable=False)
+    payload_sha256 = Column(String(64), nullable=False)
+    materialization_revision = Column(Integer, nullable=False, default=1)
+    provenance = Column(String(24), nullable=False)
+    attachments_state = Column(String(16), nullable=False)
+    serveable = Column(Boolean, nullable=False, default=False)
+    quarantine_reason = Column(String(64), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+                        onupdate=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        CheckConstraint(
+            "provenance IN ('kobo_cloud_seed', 'kobo_patch', 'cwng_authored')",
+            name='ck_kam_provenance',
+        ),
+        CheckConstraint(
+            "attachments_state IN ('missing', 'empty', 'nonempty', 'invalid')",
+            name='ck_kam_attachments_state',
+        ),
+        Index('ix_kam_serveable', 'annotation_id', 'serveable'),
+    )
+
+
+class KoboAnnotationBookState(Base):
+    """Completeness and authoring-safety state for one user's Kobo book."""
+    __tablename__ = 'kobo_annotation_book_state'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    book_id = Column(Integer, nullable=False)
+    content_id = Column(String(64), nullable=False)
+    authority_status = Column(String(24), nullable=False, default='unseeded')
+    authority_revision = Column(Integer, nullable=False, default=0)
+    generation_id = Column(String(36), nullable=False, default=lambda: str(uuid.uuid4()))
+    set_digest = Column(String(64), nullable=True)
+    current_etag = Column(Text, nullable=True)
+    etag_kind = Column(String(24), nullable=True)
+    upstream_seed_etag = Column(Text, nullable=True)
+    opaque_content_status = Column(String(16), nullable=False, default='unknown')
+    opaque_content_source = Column(String(32), nullable=True)
+    opaque_content_checked_at = Column(DateTime, nullable=True)
+    seeded_at = Column(DateTime, nullable=True)
+    last_mutation_at = Column(DateTime, nullable=True)
+    quarantine_reason = Column(String(64), nullable=True)
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+                        onupdate=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'book_id', name='uq_kabs_user_book'),
+        UniqueConstraint('user_id', 'content_id', name='uq_kabs_user_content'),
+        CheckConstraint(
+            "authority_status IN ('unseeded', 'seeding', 'authoritative', "
+            "'quarantined', 'disabled')", name='ck_kabs_authority_status',
+        ),
+        CheckConstraint(
+            "etag_kind IS NULL OR etag_kind IN ('kobo_manifest', 'cwng_revision')",
+            name='ck_kabs_etag_kind',
+        ),
+        CheckConstraint(
+            "opaque_content_status IN ('unknown', 'absent', 'present')",
+            name='ck_kabs_opaque_content_status',
+        ),
+        CheckConstraint(
+            "opaque_content_source IS NULL OR opaque_content_source IN "
+            "('device_db_audit', 'wire_attachments', 'wire_attachments_verified')",
+            name='ck_kabs_opaque_content_source',
+        ),
+        Index('ix_kabs_user_content', 'user_id', 'content_id'),
+        Index('ix_kabs_authority', 'user_id', 'authority_status'),
+    )
+
+
+class KoboDeviceBookAnnotationState(Base):
+    """Per-device delivery and later ETag-acknowledgment evidence."""
+    __tablename__ = 'kobo_device_book_annotation_state'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    device_id = Column(Integer, ForeignKey('device.id', ondelete='CASCADE'), nullable=False)
+    book_state_id = Column(
+        Integer, ForeignKey('kobo_annotation_book_state.id', ondelete='CASCADE'), nullable=False,
+    )
+    last_declared_etag = Column(Text, nullable=True)
+    last_declared_at = Column(DateTime, nullable=True)
+    last_served_revision = Column(Integer, nullable=True)
+    last_served_etag = Column(Text, nullable=True)
+    last_ack_revision = Column(Integer, nullable=True)
+    last_ack_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint('device_id', 'book_state_id', name='uq_kdbas_device_book'),
+        Index('ix_kdbas_book_ack', 'book_state_id', 'last_ack_revision'),
+    )
+
+
+class KoboAnnotationSeedCapture(Base):
+    __tablename__ = 'kobo_annotation_seed_capture'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    book_state_id = Column(
+        Integer, ForeignKey('kobo_annotation_book_state.id', ondelete='CASCADE'), nullable=False,
+    )
+    device_id = Column(Integer, ForeignKey('device.id', ondelete='SET NULL'), nullable=True)
+    started_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    completed_at = Column(DateTime, nullable=True)
+    device_etag = Column(Text, nullable=True)
+    upstream_etag = Column(Text, nullable=True)
+    response_sha256 = Column(String(64), nullable=True)
+    annotation_count = Column(Integer, nullable=True)
+    page_count = Column(Integer, nullable=True)
+    result = Column(String(24), nullable=False, default='pending')
+    failure_reason = Column(String(64), nullable=True)
+
+    __table_args__ = (
+        CheckConstraint("result IN ('pending', 'accepted', 'rejected', 'failed')",
+                        name='ck_kasc_result'),
+        Index('ix_kasc_book_time', 'book_state_id', 'started_at'),
+    )
+
+
+class KoboAnnotationSeedCapturePage(Base):
+    __tablename__ = 'kobo_annotation_seed_capture_page'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    seed_capture_id = Column(
+        Integer, ForeignKey('kobo_annotation_seed_capture.id', ondelete='CASCADE'), nullable=False,
+    )
+    page_number = Column(Integer, nullable=False)
+    request_offset_token = Column(Text, nullable=True)
+    response_body_gzip = Column(BLOB, nullable=False)
+    response_sha256 = Column(String(64), nullable=False)
+    response_etag = Column(Text, nullable=True)
+    next_offset_token = Column(Text, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint('seed_capture_id', 'page_number', name='uq_kascp_capture_page'),
+        Index('ix_kascp_capture', 'seed_capture_id', 'page_number'),
+    )
+
+
+class KoboAnnotationPageSnapshot(Base):
+    __tablename__ = 'kobo_annotation_page_snapshot'
+
+    snapshot_id = Column(String(64), primary_key=True)
+    book_state_id = Column(
+        Integer, ForeignKey('kobo_annotation_book_state.id', ondelete='CASCADE'), nullable=False,
+    )
+    device_id = Column(Integer, ForeignKey('device.id', ondelete='CASCADE'), nullable=True)
+    authority_revision = Column(Integer, nullable=False)
+    etag = Column(Text, nullable=False)
+    ordered_payload_gzip = Column(BLOB, nullable=False)
+    annotation_count = Column(Integer, nullable=False)
+    page_size = Column(Integer, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    expires_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (Index('ix_kaps_expiry', 'expires_at'),)
+
+
+class KoboAnnotationPageCursor(Base):
+    __tablename__ = 'kobo_annotation_page_cursor'
+
+    token = Column(String(64), primary_key=True)
+    snapshot_id = Column(
+        String(64), ForeignKey('kobo_annotation_page_snapshot.snapshot_id', ondelete='CASCADE'),
+        nullable=False,
+    )
+    page_offset = Column(Integer, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint('snapshot_id', 'page_offset', name='uq_kapc_snapshot_offset'),
+        Index('ix_kapc_snapshot', 'snapshot_id'),
+    )
 
 
 class AnnotationDeviceState(Base):
@@ -1684,6 +1886,7 @@ def migrate_user_hardcover_token_constraint(engine):
 
 
 def migrate_user_table(engine, _session):
+    _ensure_kobo_two_way_gate_columns(engine)
     try:
         _session.query(exists().where(User.hardcover_token)).scalar()
         _session.commit()
@@ -1915,6 +2118,7 @@ def migrate_oauth_provider_table(engine, _session):
 
 def migrate_config_table(engine, _session):
     """Migrate configuration table to add new authentication columns"""
+    _ensure_kobo_two_way_gate_columns(engine)
     if not engine or not _session:
             _safe_session_rollback(_session, "settings.config_reverse_proxy_auto_create_users")
             _run_ddl_with_retry(
@@ -2994,6 +3198,204 @@ def migrate_device_management_slice(engine, _session):
         ))
 
 
+_KOBO_TWO_WAY_TABLES = (
+    KoboAnnotationMaterialization.__table__,
+    KoboAnnotationBookState.__table__,
+    KoboDeviceBookAnnotationState.__table__,
+    KoboAnnotationSeedCapture.__table__,
+    KoboAnnotationSeedCapturePage.__table__,
+    KoboAnnotationPageSnapshot.__table__,
+    KoboAnnotationPageCursor.__table__,
+)
+
+
+def _table_columns(engine, table_name):
+    with engine.connect() as conn:
+        if not conn.execute(text(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=:name"
+        ), {"name": table_name}).first():
+            return None
+        return {row[1] for row in conn.execute(text(f"PRAGMA table_info({table_name})"))}
+
+
+def _add_column_if_missing(engine, table_name, column_name, ddl):
+    """PRAGMA-guarded additive DDL with duplicate-column race recovery."""
+    columns = _table_columns(engine, table_name)
+    if columns is None or column_name in columns:
+        return False
+    try:
+        _run_ddl_with_retry(engine, f"ALTER TABLE {table_name} ADD COLUMN {ddl}")
+    except exc.OperationalError as error:
+        if "duplicate column" not in str(error).lower():
+            raise
+        log.info(
+            "[kobo-two-way-stage0] %s.%s appeared during migration; treating as idempotent",
+            table_name, column_name,
+        )
+    return True
+
+
+def _ensure_kobo_two_way_gate_columns(engine):
+    """Install both persisted opt-ins without assuming either table exists."""
+    if engine is None:
+        return
+    _add_column_if_missing(
+        engine, "user", "kobo_two_way_annotation_sync",
+        "kobo_two_way_annotation_sync BOOLEAN NOT NULL DEFAULT 0",
+    )
+    _add_column_if_missing(
+        engine, "settings", "config_kobo_two_way_annotation_sync",
+        "config_kobo_two_way_annotation_sync BOOLEAN NOT NULL DEFAULT 0",
+    )
+    has_user = _table_columns(engine, "user") is not None
+    has_settings = _table_columns(engine, "settings") is not None
+    with engine.begin() as conn:
+        if has_user:
+            conn.execute(text(
+                "UPDATE user SET kobo_two_way_annotation_sync=0 "
+                "WHERE kobo_two_way_annotation_sync IS NULL"
+            ))
+        if has_settings:
+            conn.execute(text(
+                "UPDATE settings SET config_kobo_two_way_annotation_sync=0 "
+                "WHERE config_kobo_two_way_annotation_sync IS NULL"
+            ))
+
+
+def migrate_kobo_two_way_annotation_sync(engine, _session):
+    """Stage 0 additive schema and conservative legacy-state backfill.
+
+    This migration never updates a pre-existing annotation column.  The only
+    annotation backfills target newly-added columns, and every legacy book is
+    represented as unseeded/unknown rather than being promoted to authority.
+    """
+    _ensure_kobo_two_way_gate_columns(engine)
+
+    Base.metadata.create_all(engine, tables=list(_KOBO_TWO_WAY_TABLES), checkfirst=True)
+
+    annotation_columns = _table_columns(engine, "annotation")
+    if annotation_columns is not None:
+        additions = (
+            ("annotation_type", "annotation_type VARCHAR(32)"),
+            ("content_revision", "content_revision INTEGER NOT NULL DEFAULT 1"),
+            ("server_modified_at", "server_modified_at DATETIME"),
+            (
+                "last_editor_device_id",
+                "last_editor_device_id INTEGER REFERENCES device(id) ON DELETE SET NULL",
+            ),
+        )
+        for column_name, ddl in additions:
+            _add_column_if_missing(engine, "annotation", column_name, ddl)
+
+        with engine.begin() as conn:
+            row_count_before = conn.execute(text("SELECT COUNT(*) FROM annotation")).scalar_one()
+            conn.execute(text(
+                "UPDATE annotation SET content_revision=1 WHERE content_revision IS NULL"
+            ))
+            conn.execute(text(
+                "UPDATE annotation SET server_modified_at=COALESCE(last_synced, created_at) "
+                "WHERE server_modified_at IS NULL"
+            ))
+
+            existing_states = {
+                (row[0], row[1]): row[2]
+                for row in conn.execute(text(
+                    "SELECT user_id, book_id, content_id FROM kobo_annotation_book_state"
+                ))
+            }
+            used_content_ids = {
+                (row[0], row[1]) for row in conn.execute(text(
+                    "SELECT user_id, content_id FROM kobo_annotation_book_state"
+                ))
+            }
+            groups = conn.execute(text(
+                "SELECT user_id, book_id, MIN(content_id) AS content_id "
+                "FROM annotation GROUP BY user_id, book_id"
+            )).fetchall()
+            for user_id, book_id, content_id in groups:
+                if (user_id, book_id) in existing_states:
+                    continue
+                candidate = content_id or f"legacy-book:{book_id}"
+                if (user_id, candidate) in used_content_ids:
+                    candidate = f"legacy-book:{book_id}"
+                # Keep the schema's bounded content-id contract even for a
+                # non-protocol placeholder.  It remains unseeded and is never
+                # emitted to a Kobo device.
+                candidate = str(candidate)[:64]
+                suffix = 1
+                base = candidate
+                while (user_id, candidate) in used_content_ids:
+                    tail = f":{suffix}"
+                    candidate = base[:64 - len(tail)] + tail
+                    suffix += 1
+                conn.execute(text(
+                    "INSERT INTO kobo_annotation_book_state "
+                    "(user_id, book_id, content_id, authority_status, authority_revision, "
+                    "generation_id, opaque_content_status, updated_at) VALUES "
+                    "(:user_id, :book_id, :content_id, 'unseeded', 0, :generation_id, "
+                    "'unknown', :updated_at)"
+                ), {
+                    "user_id": user_id,
+                    "book_id": book_id,
+                    "content_id": candidate,
+                    "generation_id": str(uuid.uuid4()),
+                    "updated_at": datetime.now(timezone.utc),
+                })
+                used_content_ids.add((user_id, candidate))
+
+            row_count_after = conn.execute(text("SELECT COUNT(*) FROM annotation")).scalar_one()
+            if row_count_after != row_count_before:
+                raise RuntimeError(
+                    "Kobo Stage 0 migration changed the annotation row count "
+                    f"({row_count_before} -> {row_count_after})"
+                )
+            missing_states = conn.execute(text(
+                "SELECT COUNT(*) FROM ("
+                "SELECT a.user_id, a.book_id FROM annotation a "
+                "LEFT JOIN kobo_annotation_book_state s "
+                "ON s.user_id=a.user_id AND s.book_id=a.book_id "
+                "GROUP BY a.user_id, a.book_id HAVING COUNT(DISTINCT s.id) <> 1)"
+            )).scalar_one()
+            if missing_states:
+                raise RuntimeError(
+                    "Kobo Stage 0 migration did not create exactly one state row "
+                    f"for {missing_states} legacy annotation book(s)"
+                )
+            unsafe_legacy_state = conn.execute(text(
+                "SELECT COUNT(*) FROM kobo_annotation_book_state s "
+                "JOIN (SELECT DISTINCT user_id, book_id FROM annotation) a "
+                "ON a.user_id=s.user_id AND a.book_id=s.book_id "
+                "WHERE s.authority_status <> 'unseeded' "
+                "OR s.opaque_content_status <> 'unknown'"
+            )).scalar_one()
+            if unsafe_legacy_state:
+                raise RuntimeError(
+                    "Kobo Stage 0 migration found a legacy book promoted beyond "
+                    "unseeded/unknown"
+                )
+            foreign_key_errors = conn.execute(text("PRAGMA foreign_key_check")).fetchall()
+            if foreign_key_errors:
+                raise RuntimeError(
+                    "Kobo Stage 0 migration foreign-key check failed "
+                    f"for {len(foreign_key_errors)} row(s)"
+                )
+
+    # SQLite CHECK constraints cannot express OLD-vs-NEW stickiness.  Enforce
+    # the one-way transition at the database boundary so raw SQL cannot
+    # silently downgrade known opaque content.
+    _run_ddl_with_retry(engine, """
+        CREATE TRIGGER IF NOT EXISTS trg_kabs_opaque_present_sticky
+        BEFORE UPDATE OF opaque_content_status ON kobo_annotation_book_state
+        WHEN OLD.opaque_content_status = 'present'
+             AND NEW.opaque_content_status <> 'present'
+        BEGIN
+          SELECT RAISE(ABORT, 'opaque_content_status present is sticky');
+        END
+    """)
+
+    log.info("[kobo-two-way-stage0] additive schema ready; runtime ownership unchanged")
+
+
 def downgrade_device_management_slice(engine):
     """Manual rollback for the additive, NULL-backfilled management schema."""
     with engine.begin() as conn:
@@ -3242,6 +3644,7 @@ def migrate_Database(_session):
     migrate_annotation_koreader_identity(engine, _session)
     migrate_multi_device_annotation_safe_slice(engine, _session)
     migrate_device_management_slice(engine, _session)
+    migrate_kobo_two_way_annotation_sync(engine, _session)
     migrate_book_cover_preview_table(engine, _session)
     migrate_notice_tables(engine, _session)
     migrate_dismissed_duplicate_groups_table(engine, _session)
