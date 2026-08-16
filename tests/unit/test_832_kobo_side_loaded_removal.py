@@ -39,7 +39,7 @@ def test_discovered_sync_handler_emits_changed_not_deleted_entitlement():
     block is outside the store-proxy branch."""
     source = inspect.getsource(HandleSyncRequest)
     tombstone_block = source[source.index("pending_deletions"):source.index(
-        "# If there are MORE pending deletions")]
+        "# Likewise, never set local continuation")]
     assert '"ChangedEntitlement"' in tombstone_block
     assert "create_deleted_book_entitlement" in tombstone_block
     assert "create_deleted_book_metadata" in tombstone_block
@@ -66,7 +66,7 @@ def test_side_loaded_hard_delete_payload_is_removed_hidden_and_not_downloadable(
 
 def test_stock_store_proxy_results_remain_after_local_removal(monkeypatch):
     """Stock-Kobo invariant: local results are extended with store results,
-    never replaced, and only after local continuation has drained."""
+    never replaced, after the local page advances its persisted cursor."""
     handler_source = inspect.getsource(HandleSyncRequest)
     response_source = inspect.getsource(generate_sync_response)
     assert handler_source.index("pending_deletions") < handler_source.index(
