@@ -11,6 +11,14 @@ against the mounted volume fails with *unable to open database file*).
 
 ## Cause 1 — highlights never render: a `../` OPF href splits the chapter identity
 
+> **A second, much more common way to produce this same split is documented separately in
+> [`KOBO-HIGHLIGHT-LOSS-CAUSE-1B-FRAGMENTS-2026-08-15.md`](KOBO-HIGHLIGHT-LOSS-CAUSE-1B-FRAGMENTS-2026-08-15.md)**
+> — a TOC that anchors *into* a spine document (`chapter.xhtml#frag`). Measured at **92 of 216
+> books (42.6%)** of one library against 2.3% for the `../` case below, and it accounts for the
+> orphans this note originally attributed to "book no longer on the device". That companion also
+> shows the stored bookmark matches **neither** the `ContentType=9` row nor the `899` TOC row —
+> it is a third form — which applies to the `../` case here as well.
+
 Kobo identifies a chapter as `<book-uuid>!<opf-dir>!<href>`. A `Bookmark` renders only when
 `Bookmark.ContentID` **exactly equals** a `content` row with `ContentType=9`. No fuzzy matching.
 
