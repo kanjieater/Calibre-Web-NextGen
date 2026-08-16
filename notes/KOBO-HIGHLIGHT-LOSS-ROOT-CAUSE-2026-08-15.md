@@ -36,7 +36,8 @@ Both identities are visible side by side in `content`:
 | 9 (chapter, used for rendering) | `<uuid>!OPS!chapter-017.xml` |
 | 899 (TOC entry) | `<uuid>!OPS!../OPS/chapter-017.xml-2` |
 
-All 88 of the book's `Bookmark` rows carried the TOC-derived form → **0 matches** → nothing drawn.
+All 88 of the book's `Bookmark` rows carried a form matching neither table → **0 matches** →
+nothing drawn. (Not literally the `ContentType=899` value either — see Cause 1b below.)
 A control book returned `matching content row exists: 1`; this book returned `0`.
 
 **Census query — orphaned highlights, device-wide:**
@@ -82,8 +83,23 @@ query. The `LIKE VolumeID || '%'` probe was never validated against a volume kno
 
 ## Cause 1b — a fragment-anchored TOC (wider than the `../` case)
 
-Nickel takes the chapter identity from the TOC entry **including the fragment**; the `ContentType=9`
-row has none, so the exact match fails:
+The `Bookmark.ContentID` matches **neither** the chapter row **nor** the TOC row. It is a *third*
+form — the opf directory joined to the **raw TOC href**, without the `-N` disambiguator the
+`ContentType=899` rows carry:
+
+| what | ContentID |
+|---|---|
+| `ContentType=9` (what rendering looks up) | `…!OEBPS!…541-h-0.htm.xhtml` |
+| `ContentType=899` (the TOC entry) | `…!OEBPS!…541-h-0.htm.xhtml#pgepubid00005`**`-2`** |
+| **`Bookmark.ContentID`** | `…!OEBPS!…541-h-0.htm.xhtml#pgepubid00005` |
+
+`matches_899 = 0/3`, `matches_9 = 0/3`. **This also sharpens Cause 1 above:** those Flatland
+bookmarks were not carrying "the TOC-derived form" in the 899 sense either — the 899 row was
+`<uuid>!OPS!../OPS/chapter-017.xml-2` while the Bookmark was `OPS/../OPS/chapter-017.xml`. Both
+bugs are the same third form. **ASSUMED:** the exact derivation rule; the two observed cases differ
+in whether the `<uuid>!<opf-dir>!` prefix survives, and that is not established.
+
+The exact match against `ContentType=9` therefore fails:
 
 ```
 Bookmark.ContentID     <uuid>!OEBPS!..._541-h-0.htm.xhtml#pgepubid00005
@@ -96,6 +112,29 @@ TOC links carry a fragment. Both OPF manifests are clean.
 
 ⚠️ **The defect is entirely in the NCX, so #1637 does not touch it, and we ship these today.**
 **92 of 216 books (42.6%)** have a fragment-anchored TOC — against #1637's 5 of 216.
+
+### Two fixes that look obvious and are both wrong
+
+**Stripping fragments from the NCX is NOT a fix.** The fragment is load-bearing navigation:
+collapsing it would put Age of Innocence's 42 TOC targets onto 7 documents, and Dune's 1,780 onto a
+handful. That trades invisible highlights for a broken table of contents.
+
+**Normalising server-side does NOT fix rendering.** #1638 normalises the `content_id` *we* store,
+which is right for our records, but the row Nickel draws from lives on the device. No server-side
+change can make its exact match succeed.
+
+**Why 1984 works** is the clue to the real shape: it was already split into per-chapter files, so
+every TOC href targets a whole document and carries no fragment. The discriminator is not "the TOC
+has fragments" but **"the TOC targets a position inside a document rather than a document"**.
+
+So the candidate fix is splitting spine documents at TOC anchor targets during conversion — the
+shape already hardware-proven by 1984. ⚠️ **Not yet designed or shipped, deliberately:** regenerating
+a KEPUB shifts KoboSpan ids, so doing this to 92 of 216 books in a live library is a mass
+re-anchoring event that would invalidate highlights users already hold. Any such fix needs a story
+for books that already carry highlights, and probably applies to new conversions only.
+
+**The 810-highlight recovery is independent of all of this** and stands alone: stripping the
+fragment from `Bookmark.ContentID` re-anchors every one, with no conversion change.
 
 **Library scan:** 5 of 216 books (2.3%) carry an escaping OPF href, every one `../nav.xhtml`.
 Perfect correlation on the instance: every book with one has **zero** stored annotations ever;
