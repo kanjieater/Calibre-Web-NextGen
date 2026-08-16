@@ -1055,11 +1055,6 @@ $(function() {
         submitConfigForm($(this));
     });
 
-    $("#config_submit").click(function() {
-        this.blur();
-        $(this).closest("form").trigger("submit");
-    });
-
     $("#kobo_kepub_backfill").click(function() {
         this.blur();
         submitConfigForm($(this).closest("form"), this);

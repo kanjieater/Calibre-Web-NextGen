@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Regression coverage for the Basic Configuration form's AJAX submits.
+"""Structural regression coverage for Basic Configuration's AJAX submits.
 
-These tests run in the unit lane. They prove the markup cannot natively submit
-the backfill button, Enter is intercepted by the form submit handler, and the
-AJAX payload includes the clicked button's name/value. They do not execute a
-browser engine or jQuery itself.
+These unit tests pin the native Save control, the intercepted form submit
+event used by Save and Enter in single-line fields, and the backfill button's
+explicit payload append. They do not execute a browser engine or jQuery.
 """
 
 from html.parser import HTMLParser
@@ -26,13 +25,22 @@ class _ConfigForm(HTMLParser):
         super().__init__()
         self.form = None
         self.controls = []
+        self.form_depth = 0
 
     def handle_starttag(self, tag, attrs):
         attributes = dict(attrs)
-        if tag == "form" and self.form is None:
+        if tag == "form" and attributes.get("id") == "config_form":
+            assert self.form is None, "config_form must be unique"
             self.form = attributes
-        elif tag in {"button", "input"}:
+            self.form_depth = 1
+        elif tag == "form" and self.form_depth:
+            self.form_depth += 1
+        elif self.form_depth and tag in {"button", "input"}:
             self.controls.append((tag, attributes))
+
+    def handle_endtag(self, tag):
+        if tag == "form" and self.form_depth:
+            self.form_depth -= 1
 
 
 def _callback_body(source, selector, event):
@@ -56,20 +64,28 @@ def _callback_body(source, selector, event):
 
 
 @pytest.mark.unit
-def test_backfill_control_has_no_native_json_or_405_submission_path():
+def test_config_form_uses_save_as_its_only_native_submit_control():
     parser = _ConfigForm()
     parser.feed(TEMPLATE.read_text(encoding="utf-8"))
 
     assert parser.form is not None
     assert parser.form.get("id") == "config_form"
     assert "action" not in parser.form, (
-        "the JavaScript-owned config form must not natively navigate to an "
-        "HTML error or the AJAX endpoint's JSON response"
+        "the intercepted AJAX form must not point ordinary Save/Enter submits "
+        "at an HTML error or the AJAX endpoint's JSON response"
     )
+
+    csrf = [
+        attrs for tag, attrs in parser.controls
+        if tag == "input" and attrs.get("name") == "csrf_token"
+    ]
+    assert len(csrf) == 1
+    assert csrf[0].get("type") == "hidden"
+    assert "disabled" not in csrf[0]
 
     backfill = [
         attrs for _tag, attrs in parser.controls
-        if attrs.get("name") == "kobo_kepub_backfill"
+        if attrs.get("id") == "kobo_kepub_backfill"
     ]
     assert backfill == [{
         "class": "btn btn-default",
@@ -79,24 +95,38 @@ def test_backfill_control_has_no_native_json_or_405_submission_path():
         "value": "on",
     }]
 
+    save = [
+        attrs for _tag, attrs in parser.controls
+        if attrs.get("id") == "config_submit"
+    ]
+    assert save == [{
+        "type": "submit",
+        "name": "submit",
+        "id": "config_submit",
+        "class": "btn btn-default",
+    }]
+
     native_submits = [
         attrs for tag, attrs in parser.controls
-        if attrs.get("type", "submit") == "submit"
-        and not (tag == "input" and attrs.get("type") in {"hidden", "text"})
+        if (tag == "button" and attrs.get("type", "submit") == "submit")
+        or (tag == "input" and attrs.get("type", "text") in {"submit", "image"})
     ]
-    assert native_submits == []
+    assert native_submits == save
 
 
 @pytest.mark.unit
-def test_backfill_click_and_enter_use_ajax_with_the_required_payload():
+def test_native_form_submit_and_backfill_click_use_ajax_with_required_payload():
     source = MAIN_JS.read_text(encoding="utf-8")
 
     form_submit = _callback_body(source, "#config_form", "submit")
     assert "preventDefault()" in form_submit
     assert "submitConfigForm($(this))" in form_submit
+    assert form_submit.count("submitConfigForm(") == 1
 
     backfill_click = _callback_body(source, "#kobo_kepub_backfill", "click")
     assert "submitConfigForm($(this).closest(\"form\"), this)" in backfill_click
+    assert backfill_click.count("submitConfigForm(") == 1
+    assert 'trigger("submit")' not in backfill_click
 
     submit_function = re.search(
         r"function submitConfigForm\(\$form, submitter\)\s*\{(?P<body>.*?)\n    \}",
@@ -108,7 +138,12 @@ def test_backfill_click_and_enter_use_ajax_with_the_required_payload():
     assert "$form.serialize()" in body
     assert "submitter.name" in body
     assert "submitter.value" in body
-    assert "$.param" in body
+    assert re.search(
+        r'formData\s*\+=\s*'
+        r'\(formData\s*\?\s*"&"\s*:\s*""\)\s*\+\s*'
+        r'\$\.param\(submitterData\)\s*;',
+        body,
+    ), "the encoded submitter must be appended to the POST body"
     assert 'request_path = "/admin/ajaxconfig"' in body
     assert "$.post(getPath() + request_path" in body
 
