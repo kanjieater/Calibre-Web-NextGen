@@ -18,6 +18,17 @@ is for things you can see or feel when running the app.
 
 ### Added
 
+- **Your library now tells you when it has repaired a book, and which books were
+  affected.** Some KEPUB files were produced with a packaging defect that stops a
+  Kobo from holding highlights in them. The defect was fixed for new conversions
+  in the last release, but books converted before that stayed broken until
+  something happened to re-convert them. The server now repairs those files
+  itself and raises a notice naming the books, because there is one part it
+  cannot repair: highlights already made in an affected book are stored against
+  the broken structure on the device, and no server-side fix can put those back.
+  You should know that rather than discover it later. Dismissing a notice
+  dismisses that occurrence only — if the same book is affected again, you are
+  told again.
 - **Clear books off a Kobo that were deleted before the fix for it existed.**
   Hard-deleting a book now tells paired Kobos to archive their copy, but books
   deleted before that shipped are stranded on the device permanently — no amount
@@ -30,6 +41,51 @@ is for things you can see or feel when running the app.
   asks per book rather than deciding for you.
 
 ### Fixed
+
+- **Kobo highlights now stay on the device when it syncs — the v4.1.36 fix did
+  not work.** A Kobo first asks which books have changed; if that answer names a
+  book, the reader downloads its annotation list and replaces every local
+  highlight and note with exactly what came back. v4.1.36 refused that download,
+  but the Kobo treats a refusal just like an empty list and still deletes
+  everything. This release keeps books served by NextGen out of the earlier
+  changed-books answer, so the destructive download never starts. New highlights
+  and notes still upload normally.
+- **Uploading a Readium `.lcpl` licence file no longer fails with “File type
+  isn't allowed to be uploaded to this server”.** Installations that already
+  accept Adobe `.acsm` tickets inherit `lcpl` in their Upload Format Allowlist
+  once, without losing or reordering their current choices; an allowlist that
+  does not accept `.acsm` is left exactly as the administrator set it, and
+  removing `lcpl` afterward is respected. The ingest watcher now dispatches LCPL
+  files for processing without leaving upload sidecars behind. With Auto-Convert
+  disabled, ACSM tickets are no longer imported and checksummed as books; they
+  are preserved in `processed_books/failed` instead.
+- **Basic Configuration now saves when you press Enter in a single-line field,
+  and "Convert missing KEPUBs now" works again.** Both did the same thing: that
+  page was the one settings screen that refused the save it was trying to make,
+  so it answered `405 Method Not Allowed` and dropped you on an error page whose
+  only link is back to the home page — taking every unsaved edit on the page with
+  it. Pressing Enter in a single-line field was enough to trigger it; so was the
+  KEPUB button, which meant the conversion never ran. That is awkward on both
+  counts, because converting to KEPUB is the usual first suggestion when a Kobo
+  is not showing books or holding highlights properly. Both now save through the
+  same path as the rest of the page, so you stay on Settings and get the normal
+  confirmation.
+  Reported by @pahamrick and @roquemore92.
+- **The log now warns when a book cannot show highlights on a Kobo.** Some books
+  have a table of contents that points partway into a chapter file rather than at
+  the file itself. On a Kobo, every highlight made in such a book is stored
+  correctly and drawn nowhere — there is no error and nothing looks wrong, the
+  marks simply never appear. On one real library this affects 42% of books. After
+  a KEPUB is produced, the log now names the book and how many of its navigation
+  targets are affected, so the problem is at least visible. This does not fix the
+  rendering; that needs a conversion change with a migration story for highlights
+  people already hold.
+- **The delete warning no longer tells you the wrong thing about your Kobo.**
+  It said deleted books would stay on any paired Kobo and that you had to
+  archive and sync first. That stopped being true when deletions started sending
+  the device an instruction to archive its copy. The warning now describes what
+  actually happens, including the honest caveat: the device is told on its next
+  sync, and if that instruction cannot be recorded the book may still remain.
 
 - **Covers are now shaped for the Kobo that is actually asking.** The server-side
   cover padding had one aspect setting for the whole instance, so a household with
@@ -50,6 +106,34 @@ is for things you can see or feel when running the app.
   adding thousands of duplicate entitlements to the reader until the server
   failed. Each completed page now advances the device to the next one, so the
   library drains normally instead of flooding the Kobo.
+- **A new Kobo no longer arrives with most of its books unable to hold
+  highlights.** The library converts books to Kobo's own format in the
+  background, and it tracked that work with a single "done" flag. Pairing a
+  device is exactly what adds more books to convert, so the flag said finished
+  while the newly-synced books had never been converted at all. On one real
+  library, 216 books were synced to a newly-paired Clara and 182 of them had no
+  converted copy. Those convert while the device waits, and if a conversion
+  fails the Kobo gets a plain EPUB, which cannot reliably hold highlights — so
+  this reached people as "highlighting doesn't work on my new Kobo". The
+  progress marker now moves with the library instead of latching once.
+- **Clearing a series now clears it on the Kobo too.** Setting or changing a
+  series already updated both copies of the book; removing one updated only the
+  EPUB. The Kobo kept displaying a series you had deleted, with nothing anywhere
+  to explain it. (The obvious shortcut — sending Kobo files through the same
+  polishing step as EPUBs — is deliberately not used, because it would re-cut
+  the internal position markers and move every Kobo reader's saved place in the
+  book.)
+- **An edit to a highlight is no longer thrown away when the device sends a
+  malformed timestamp.** A highlight arriving with an unreadable clock was kept
+  if it was new, but an edit to one you already had was silently ignored — the
+  changed text, note, colour and location were all discarded with no error. A
+  timestamp that is present but unreadable is now treated differently from one
+  that is genuinely absent, and the change is applied.
+- **A KOReader client can now tell "this book is unknown here" apart from "this
+  book has no highlights".** The server answered both with an empty list, which
+  is the same ambiguity that has twice destroyed highlights in this project —
+  once in each direction. Our own plugin was never at risk, but any other client
+  reading that answer had no way to distinguish them.
 
 ## [v4.1.36] - 2026-08-15
 
@@ -64,6 +148,18 @@ is for things you can see or feel when running the app.
   menu updates the list straight away. Reported by @lguerard.
 
 ### Fixed
+
+- **Clearing a series now removes it from Kobo book files (#1372).** Deleting
+  a book's series in the library now removes the old series name and index from
+  its KEPUB too, including KEPUBs whose navigation document or another asset
+  sits above the package directory, where clearing previously failed silently,
+  so a Kobo no longer keeps displaying metadata that was cleared.
+
+- **Deleted tags no longer stay behind in the Kobo copy.** Removing one tag
+  from a book updated the EPUB, but the KEPUB merged the shorter list with its
+  old tags and kept every deleted value. Tags are now replaced from the library
+  metadata instead, and clearing a publisher, description or publication date
+  now reaches the KEPUB too.
 
 - **Arabic, Hebrew and Farsi titles now read the right way round.** Book titles,
   authors, series names, descriptions and custom column values written in a
