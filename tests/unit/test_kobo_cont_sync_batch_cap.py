@@ -114,6 +114,6 @@ def test_deletions_stay_page_capped_without_continuation_writer():
     assert "cont_sync = True" not in source
     assert "cont_sync |= " not in source
     assert (
-        "return generate_sync_response(sync_token, sync_results, cont_sync)"
+        "return generate_sync_response(sync_token, sync_results)"
         in source
     )

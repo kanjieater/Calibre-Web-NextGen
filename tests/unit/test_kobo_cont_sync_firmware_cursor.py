@@ -35,7 +35,14 @@ def _book_id(sync_item):
     return int(envelope["BookEntitlement"]["Id"])
 
 
-def test_full_library_sync_drains_when_firmware_pins_cursor_on_continue(monkeypatch):
+@pytest.mark.parametrize(
+    "proxy_enabled",
+    [False, True],
+    ids=["local-only", "proxy-store-continue"],
+)
+def test_full_library_sync_drains_when_firmware_pins_cursor_on_continue(
+    monkeypatch, proxy_enabled
+):
     """Every book arrives once across bounded firmware-shaped sync sessions."""
     from cps import db, kobo as kobo_module, kobo_sync_status, ub
 
@@ -95,7 +102,12 @@ def test_full_library_sync_drains_when_firmware_pins_cursor_on_continue(monkeypa
     monkeypatch.setattr(kobo_module, "current_user", user)
     monkeypatch.setattr(kobo_sync_status, "current_user", user)
     monkeypatch.setattr(kobo_module, "SYNC_ITEM_LIMIT", limit)
-    monkeypatch.setattr(kobo_module.config, "config_kobo_proxy", False, raising=False)
+    monkeypatch.setattr(
+        kobo_module.config,
+        "config_kobo_proxy",
+        proxy_enabled,
+        raising=False,
+    )
     monkeypatch.setattr(
         kobo_module.config,
         "config_kobo_sync_magic_shelves",
@@ -124,6 +136,23 @@ def test_full_library_sync_drains_when_firmware_pins_cursor_on_continue(monkeypa
         "get_metadata",
         lambda book: {"EntitlementId": str(book.id)},
     )
+    store_calls = []
+    if proxy_enabled:
+        store_response = SimpleNamespace(
+            json=lambda: [],
+            headers={
+                "x-kobo-sync": "continue",
+                "x-kobo-sync-mode": "test-mode",
+                "x-kobo-recent-reads": "test-recent-reads",
+                "x-kobo-synctoken": "test-store-token",
+            },
+        )
+
+        def store_sync(token):
+            store_calls.append(token)
+            return store_response
+
+        monkeypatch.setattr(kobo_module, "make_request_to_kobo_store", store_sync)
 
     app = Flask(__name__)
     app.wsgi_app = SimpleNamespace(is_proxied=True)
@@ -181,6 +210,7 @@ def test_full_library_sync_drains_when_firmware_pins_cursor_on_continue(monkeypa
             f"each seeded book must be delivered exactly once; got {deliveries}"
         )
         assert len(pages) <= ceil(total_books / limit)
+        assert len(store_calls) == (len(pages) if proxy_enabled else 0)
     finally:
         session.close()
         engine.dispose()
