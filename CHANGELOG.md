@@ -18,13 +18,33 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
-- **The "Convert missing KEPUBs now" button works again.** It returned
-  `405 Method Not Allowed` and the conversion never ran — awkward, because
+- **Basic Configuration no longer throws an error when you press Enter, and
+  "Convert missing KEPUBs now" works again.** Both did the same thing: that page
+  was the one settings screen that refused the save it was trying to make, so it
+  answered `405 Method Not Allowed` and dropped you on an error page whose only
+  link is back to the home page — taking every unsaved edit on the page with it.
+  Pressing Enter in any field was enough to trigger it; so was the KEPUB button,
+  which meant the conversion never ran. That is awkward on both counts, because
   converting to KEPUB is the usual first suggestion when a Kobo is not showing
-  books or holding highlights properly. The button now saves through the same
-  path as the rest of the page, so you stay on Settings and get the normal
-  confirmation instead of an error page. Pressing Enter in a field on that page
-  no longer throws an error either. Reported by @pahamrick and @roquemore92.
+  books or holding highlights properly. Both now save through the same path as
+  the rest of the page, so you stay on Settings and get the normal confirmation.
+  Reported by @pahamrick and @roquemore92.
+- **The log now warns when a book cannot show highlights on a Kobo.** Some books
+  have a table of contents that points partway into a chapter file rather than at
+  the file itself. On a Kobo, every highlight made in such a book is stored
+  correctly and drawn nowhere — there is no error and nothing looks wrong, the
+  marks simply never appear. On one real library this affects 42% of books. After
+  a KEPUB is produced, the log now names the book and how many of its navigation
+  targets are affected, so the problem is at least visible. This does not fix the
+  rendering; that needs a conversion change with a migration story for highlights
+  people already hold.
+- **The delete warning no longer tells you the wrong thing about your Kobo.**
+  It said deleted books would stay on any paired Kobo and that you had to
+  archive and sync first. That stopped being true when deletions started sending
+  the device an instruction to archive its copy. The warning now describes what
+  actually happens, including the honest caveat: the device is told on its next
+  sync, and if that instruction cannot be recorded the book may still remain.
+
 - **Covers are now shaped for the Kobo that is actually asking.** The server-side
   cover padding had one aspect setting for the whole instance, so a household with
   two different Kobos had to pick a winner — the other device got covers padded to
@@ -58,6 +78,18 @@ is for things you can see or feel when running the app.
   menu updates the list straight away. Reported by @lguerard.
 
 ### Fixed
+
+- **Clearing a series now removes it from Kobo book files (#1372).** Deleting
+  a book's series in the library now removes the old series name and index from
+  its KEPUB too, including KEPUBs whose navigation document or another asset
+  sits above the package directory, where clearing previously failed silently,
+  so a Kobo no longer keeps displaying metadata that was cleared.
+
+- **Deleted tags no longer stay behind in the Kobo copy.** Removing one tag
+  from a book updated the EPUB, but the KEPUB merged the shorter list with its
+  old tags and kept every deleted value. Tags are now replaced from the library
+  metadata instead, and clearing a publisher, description or publication date
+  now reaches the KEPUB too.
 
 - **Arabic, Hebrew and Farsi titles now read the right way round.** Book titles,
   authors, series names, descriptions and custom column values written in a
