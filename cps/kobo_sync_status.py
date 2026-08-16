@@ -131,9 +131,10 @@ def record_book_deletion(book_id, book_uuid, session=None):
     the device retains the book locally forever — calibre absence is
     not interpreted as deletion, only tombstones are.
 
-    Uses the UUID retained at delivery when the caller can no longer supply
-    one. Rows created before UUID retention remain a no-op if both sources
-    are empty.
+    The UUID retained at delivery wins whenever it is present, even if the
+    caller also supplies one: it is what that user's device was actually told
+    the book was, and the caller's value is only a fallback for rows written
+    before UUID retention existed. If both are empty the row is a no-op.
 
     Idempotent per (user_id, book_uuid): the existing-row check preserves the
     first tombstone timestamp, backed by the table's unique constraint.
