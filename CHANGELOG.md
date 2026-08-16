@@ -18,6 +18,13 @@ is for things you can see or feel when running the app.
 
 ### Fixed
 
+- **The "Convert missing KEPUBs now" button works again.** It returned
+  `405 Method Not Allowed` and the conversion never ran — awkward, because
+  converting to KEPUB is the usual first suggestion when a Kobo is not showing
+  books or holding highlights properly. The button now saves through the same
+  path as the rest of the page, so you stay on Settings and get the normal
+  confirmation instead of an error page. Pressing Enter in a field on that page
+  no longer throws an error either. Reported by @pahamrick and @roquemore92.
 - **Covers are now shaped for the Kobo that is actually asking.** The server-side
   cover padding had one aspect setting for the whole instance, so a household with
   two different Kobos had to pick a winner — the other device got covers padded to
