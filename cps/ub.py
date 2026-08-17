@@ -3208,6 +3208,8 @@ _KOBO_TWO_WAY_TABLES = (
     KoboAnnotationPageCursor.__table__,
 )
 
+_KOBO_TWO_WAY_TABLE_NAMES = tuple(table.name for table in _KOBO_TWO_WAY_TABLES)
+
 
 def _table_columns(engine, table_name):
     with engine.connect() as conn:
@@ -3262,6 +3264,42 @@ def _ensure_kobo_two_way_gate_columns(engine):
             ))
 
 
+def _kobo_stage0_foreign_key_errors(conn):
+    """Return only FK violations attributable to Stage 0-owned schema.
+
+    Long-lived app databases can contain unrelated historical orphans because
+    SQLite foreign-key enforcement is normally disabled.  Checking the whole
+    database here would make an additive migration responsible for data it did
+    not create.  Stage 0 owns its seven new tables and the nullable
+    ``annotation.last_editor_device_id`` reference; the annotation table's
+    older foreign keys are deliberately outside this check.
+    """
+    existing_tables = {
+        row[0] for row in conn.execute(text(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ))
+    }
+    errors = set()
+    for table_name in _KOBO_TWO_WAY_TABLE_NAMES:
+        if table_name not in existing_tables:
+            continue
+        for row in conn.execute(text(f"PRAGMA foreign_key_check({table_name})")):
+            errors.add((table_name, *tuple(row)))
+
+    annotation_columns = (
+        {row[1] for row in conn.execute(text("PRAGMA table_info(annotation)"))}
+        if "annotation" in existing_tables else set()
+    )
+    if "last_editor_device_id" in annotation_columns and "device" in existing_tables:
+        for row in conn.execute(text(
+            "SELECT a.id, a.last_editor_device_id FROM annotation a "
+            "LEFT JOIN device d ON d.id=a.last_editor_device_id "
+            "WHERE a.last_editor_device_id IS NOT NULL AND d.id IS NULL"
+        )):
+            errors.add(("annotation.last_editor_device_id", *tuple(row)))
+    return errors
+
+
 def migrate_kobo_two_way_annotation_sync(engine, _session):
     """Stage 0 additive schema and conservative legacy-state backfill.
 
@@ -3269,6 +3307,18 @@ def migrate_kobo_two_way_annotation_sync(engine, _session):
     annotation backfills target newly-added columns, and every legacy book is
     represented as unseeded/unknown rather than being promoted to authority.
     """
+    # Capture existing Stage 0-scoped violations so a repeated or partially
+    # completed migration never claims responsibility for historical data.
+    with engine.connect() as conn:
+        foreign_key_errors_before = _kobo_stage0_foreign_key_errors(conn)
+    if foreign_key_errors_before:
+        log.warning(
+            "[kobo-two-way-stage0] %d pre-existing foreign-key violation(s) "
+            "already exist in Stage 0-owned schema; continuing without "
+            "attributing them to this migration",
+            len(foreign_key_errors_before),
+        )
+
     _ensure_kobo_two_way_gate_columns(engine)
 
     Base.metadata.create_all(engine, tables=list(_KOBO_TWO_WAY_TABLES), checkfirst=True)
@@ -3308,10 +3358,24 @@ def migrate_kobo_two_way_annotation_sync(engine, _session):
                     "SELECT user_id, content_id FROM kobo_annotation_book_state"
                 ))
             }
+            all_group_count = conn.execute(text(
+                "SELECT COUNT(*) FROM ("
+                "SELECT user_id, book_id FROM annotation GROUP BY user_id, book_id)"
+            )).scalar_one()
             groups = conn.execute(text(
-                "SELECT user_id, book_id, MIN(content_id) AS content_id "
-                "FROM annotation GROUP BY user_id, book_id"
+                "SELECT a.user_id, a.book_id, MIN(a.content_id) AS content_id "
+                "FROM annotation a JOIN user u ON u.id=a.user_id "
+                "WHERE a.user_id IS NOT NULL AND a.book_id IS NOT NULL "
+                "GROUP BY a.user_id, a.book_id"
             )).fetchall()
+            skipped_group_count = all_group_count - len(groups)
+            if skipped_group_count:
+                log.warning(
+                    "[kobo-two-way-stage0] skipped %d legacy annotation book "
+                    "group(s) with a NULL key or no current user; rows unchanged",
+                    skipped_group_count,
+                )
+            inserted_state_ids = []
             for user_id, book_id, content_id in groups:
                 if (user_id, book_id) in existing_states:
                     continue
@@ -3328,7 +3392,7 @@ def migrate_kobo_two_way_annotation_sync(engine, _session):
                     tail = f":{suffix}"
                     candidate = base[:64 - len(tail)] + tail
                     suffix += 1
-                conn.execute(text(
+                result = conn.execute(text(
                     "INSERT INTO kobo_annotation_book_state "
                     "(user_id, book_id, content_id, authority_status, authority_revision, "
                     "generation_id, opaque_content_status, updated_at) VALUES "
@@ -3341,6 +3405,7 @@ def migrate_kobo_two_way_annotation_sync(engine, _session):
                     "generation_id": str(uuid.uuid4()),
                     "updated_at": datetime.now(timezone.utc),
                 })
+                inserted_state_ids.append(result.lastrowid)
                 used_content_ids.add((user_id, candidate))
 
             row_count_after = conn.execute(text("SELECT COUNT(*) FROM annotation")).scalar_one()
@@ -3352,32 +3417,57 @@ def migrate_kobo_two_way_annotation_sync(engine, _session):
             missing_states = conn.execute(text(
                 "SELECT COUNT(*) FROM ("
                 "SELECT a.user_id, a.book_id FROM annotation a "
+                "JOIN user u ON u.id=a.user_id "
                 "LEFT JOIN kobo_annotation_book_state s "
                 "ON s.user_id=a.user_id AND s.book_id=a.book_id "
+                "WHERE a.user_id IS NOT NULL AND a.book_id IS NOT NULL "
                 "GROUP BY a.user_id, a.book_id HAVING COUNT(DISTINCT s.id) <> 1)"
             )).scalar_one()
             if missing_states:
-                raise RuntimeError(
-                    "Kobo Stage 0 migration did not create exactly one state row "
-                    f"for {missing_states} legacy annotation book(s)"
+                # The INSERT path above either creates a row or raises.  A
+                # surviving non-one cardinality therefore came from a partial
+                # historical table that lacks the current unique constraint.
+                log.warning(
+                    "[kobo-two-way-stage0] %d eligible legacy annotation book "
+                    "group(s) have pre-existing non-canonical authority state; "
+                    "no state was promoted by this migration",
+                    missing_states,
                 )
-            unsafe_legacy_state = conn.execute(text(
-                "SELECT COUNT(*) FROM kobo_annotation_book_state s "
-                "JOIN (SELECT DISTINCT user_id, book_id FROM annotation) a "
-                "ON a.user_id=s.user_id AND a.book_id=s.book_id "
-                "WHERE s.authority_status <> 'unseeded' "
-                "OR s.opaque_content_status <> 'unknown'"
-            )).scalar_one()
+            unsafe_legacy_state = 0
+            if inserted_state_ids:
+                inserted_id_sql = ",".join(str(int(row_id)) for row_id in inserted_state_ids)
+                unsafe_legacy_state = conn.execute(text(
+                    "SELECT COUNT(*) FROM kobo_annotation_book_state "
+                    f"WHERE id IN ({inserted_id_sql}) AND ("
+                    "authority_status <> 'unseeded' "
+                    "OR opaque_content_status <> 'unknown')"
+                )).scalar_one()
             if unsafe_legacy_state:
                 raise RuntimeError(
-                    "Kobo Stage 0 migration found a legacy book promoted beyond "
-                    "unseeded/unknown"
+                    "Kobo Stage 0 migration created a legacy book state beyond "
+                    "unseeded/unknown; refusing an unsafe authority result"
                 )
-            foreign_key_errors = conn.execute(text("PRAGMA foreign_key_check")).fetchall()
-            if foreign_key_errors:
+            foreign_key_errors_after = _kobo_stage0_foreign_key_errors(conn)
+            new_foreign_key_errors = (
+                foreign_key_errors_after - foreign_key_errors_before
+            )
+            if new_foreign_key_errors:
                 raise RuntimeError(
-                    "Kobo Stage 0 migration foreign-key check failed "
-                    f"for {len(foreign_key_errors)} row(s)"
+                    "Kobo Stage 0 migration created foreign-key violation(s) "
+                    f"for {len(new_foreign_key_errors)} row(s)"
+                )
+            global_foreign_key_errors = conn.execute(
+                text("PRAGMA foreign_key_check")
+            ).fetchall()
+            unrelated_foreign_key_errors = [
+                row for row in global_foreign_key_errors
+                if row[0] not in _KOBO_TWO_WAY_TABLE_NAMES
+            ]
+            if unrelated_foreign_key_errors:
+                log.warning(
+                    "[kobo-two-way-stage0] %d pre-existing foreign-key "
+                    "violation(s) remain outside Stage 0-owned tables; continuing",
+                    len(unrelated_foreign_key_errors),
                 )
 
     # SQLite CHECK constraints cannot express OLD-vs-NEW stickiness.  Enforce

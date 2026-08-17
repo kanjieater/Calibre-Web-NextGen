@@ -201,6 +201,46 @@ def test_stage0_migration_is_idempotent_and_preserves_annotation_bytes(shape):
 
 
 @pytest.mark.unit
+def test_stage0_migration_ignores_preexisting_foreign_key_orphan(caplog):
+    """Historical orphans outside Stage 0 must not prevent app startup."""
+    from cps import ub
+
+    engine = create_engine("sqlite:///:memory:", future=True)
+    with engine.begin() as conn:
+        _create_gate_tables(conn)
+        _create_old_annotation_table(conn)
+        conn.execute(text("""
+            CREATE TABLE magic_shelf (
+              id INTEGER PRIMARY KEY,
+              user_id INTEGER NOT NULL REFERENCES user(id),
+              name VARCHAR(64)
+            )
+        """))
+        # SQLite permits this on the long-lived production configuration;
+        # PRAGMA foreign_key_check still reports it later.
+        conn.execute(text(
+            "INSERT INTO magic_shelf (id, user_id, name) "
+            "VALUES (1, 999, 'historical orphan')"
+        ))
+
+    with engine.connect() as conn:
+        before = conn.execute(text("PRAGMA foreign_key_check")).fetchall()
+    assert len(before) == 1
+    assert before[0][0] == "magic_shelf"
+
+    caplog.set_level(logging.WARNING)
+    ub.migrate_kobo_two_way_annotation_sync(engine, None)
+
+    with engine.connect() as conn:
+        after = conn.execute(text("PRAGMA foreign_key_check")).fetchall()
+        assert after == before
+        assert conn.execute(text(
+            "SELECT COUNT(*) FROM kobo_annotation_book_state"
+        )).scalar_one() == 1
+    assert "pre-existing foreign-key violation" in caplog.text
+
+
+@pytest.mark.unit
 def test_opaque_present_is_sticky_at_database_boundary():
     from cps import ub
 
