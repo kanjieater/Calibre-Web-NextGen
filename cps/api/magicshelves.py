@@ -99,11 +99,12 @@ def magic_shelf_books(shelf_id):
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", config.config_books_per_page, type=int)
     sort_param = request.args.get("sort", "new")
-    custom_sort = resolve_custom_column_sort(sort_param, config)
+    custom_columns = calibre_db.session.query(db.CustomColumns).all()
+    custom_sort = resolve_custom_column_sort(sort_param, config, custom_columns)
     order = custom_sort[1] if custom_sort is not None else book_sort_order(sort_param)
     custom_join = (custom_sort[0], db.Books.id == custom_sort[0].book) if custom_sort else ()
     custom_options = []
-    for column in sortable_columns(calibre_db.session.query(db.CustomColumns).all(), config):
+    for column in sortable_columns(custom_columns, config):
         custom_options.extend((
             {"value": f"cc-{column.id}-asc", "label": f"{column.name}, low to high"},
             {"value": f"cc-{column.id}-desc", "label": f"{column.name}, high to low"},
