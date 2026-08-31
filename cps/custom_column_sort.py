@@ -10,7 +10,7 @@ import re
 
 from sqlalchemy import case
 
-from . import db
+from . import db, calibre_db
 
 SORTABLE_DATATYPES = frozenset(("int", "float", "datetime"))
 _SORT_KEY = re.compile(r"^cc-(\d+)-(asc|desc)$")
@@ -32,17 +32,29 @@ def sortable_columns(columns, config):
             and not column.is_multiple and not column.mark_for_delete]
 
 
-def resolve(sort_param, config):
+def resolve(sort_param, config, columns=None):
     """Resolve a validated key into ``(column model, deterministic order)``.
 
-    ``None`` means the key was not an enabled custom-column sort.  No request
-    data is ever used as a table or SQL identifier.
+    The persisted allowlist can outlive a Calibre schema change, so the live
+    custom-column definition is revalidated on every resolution. ``columns``
+    lets callers that already loaded definitions avoid a second query.
+    ``None`` means the key was not an enabled, live custom-column sort. No
+    request data is ever used as a table or SQL identifier.
     """
     match = _SORT_KEY.fullmatch(sort_param or "")
     if not match:
         return None
     column_id, direction = int(match.group(1)), match.group(2)
     if column_id not in configured_column_ids(config):
+        return None
+    if columns is None:
+        try:
+            columns = calibre_db.session.query(db.CustomColumns).all()
+        except Exception:
+            return None
+    live_column = next((column for column in columns if column.id == column_id), None)
+    if live_column is None or live_column.datatype not in SORTABLE_DATATYPES \
+            or live_column.is_multiple or live_column.mark_for_delete:
         return None
     model = db.cc_classes.get(column_id)
     if model is None or not hasattr(model, "book"):
