@@ -34,9 +34,10 @@ def test_resolve_rejects_unknown_or_not_configured_keys(monkeypatch):
     config = SimpleNamespace(config_sortable_custom_columns="2")
     monkeypatch.setattr(custom_column_sort.db, "cc_classes", {})
 
-    assert custom_column_sort.resolve("cc-2-asc", config) is None
-    assert custom_column_sort.resolve("cc-3-desc", config) is None
-    assert custom_column_sort.resolve("cc-2-drop table", config) is None
+    columns = [ColumnConfig(2, "float")]
+    assert custom_column_sort.resolve("cc-2-asc", config, columns) is None
+    assert custom_column_sort.resolve("cc-3-desc", config, columns) is None
+    assert custom_column_sort.resolve("cc-2-drop table", config, columns) is None
 
 
 def test_resolve_returns_direct_model_and_deterministic_order(monkeypatch):
@@ -56,9 +57,21 @@ def test_resolve_returns_direct_model_and_deterministic_order(monkeypatch):
     monkeypatch.setattr(custom_column_sort.db, "cc_classes", {2: Difficulty})
     config = SimpleNamespace(config_sortable_custom_columns="2")
 
-    model, order = custom_column_sort.resolve("cc-2-desc", config)
+    model, order = custom_column_sort.resolve("cc-2-desc", config, [ColumnConfig(2, "float")])
 
     assert model is Difficulty
     assert len(order) == 3
     assert "custom_column_2.value DESC" in str(order[1])
     assert "books.id DESC" in str(order[2])
+
+
+@pytest.mark.parametrize("column", [
+    ColumnConfig(2, "text"),
+    ColumnConfig(2, "float", multiple=True),
+    ColumnConfig(2, "float", deleted=True),
+])
+def test_resolve_rejects_stale_or_unsupported_live_column(monkeypatch, column):
+    config = SimpleNamespace(config_sortable_custom_columns="2")
+    monkeypatch.setattr(custom_column_sort.db, "cc_classes", {2: object()})
+
+    assert custom_column_sort.resolve("cc-2-asc", config, [column]) is None
