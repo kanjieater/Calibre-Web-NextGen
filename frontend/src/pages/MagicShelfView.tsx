@@ -15,6 +15,19 @@ import { ApiError } from '../lib/api';
 import styles from './Shelf.module.css';
 import { useCardActionsHidden } from '../lib/useCardActionsHidden';
 
+function magicShelfSortKey(id: string) {
+  return `cwng:magic-shelf-sort:${id}`;
+}
+
+function savedMagicShelfSort(id: string) {
+  try {
+    const value = localStorage.getItem(magicShelfSortKey(id));
+    return value || 'new';
+  } catch {
+    return 'new';
+  }
+}
+
 function dedupAppend(prev: Book[], next: Book[]): Book[] {
   const seen = new Set(prev.map((b) => b.id));
   const fresh = next.filter((b) => !seen.has(b.id));
@@ -27,7 +40,7 @@ export function MagicShelfView({ id }: { id: string }) {
   const t = useT();
   const [, navigate] = useLocation();
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState('new');
+  const [sort, setSort] = useState(() => savedMagicShelfSort(id));
   const [books, setBooks] = useState<Book[]>([]);
   const accKey = useRef('');
   const { data, isLoading, isFetching, isPlaceholderData, error } = useMagicShelfBooks(id, page, sort);
@@ -42,8 +55,17 @@ export function MagicShelfView({ id }: { id: string }) {
   // Route reuse and a server-side sort change both replace, rather than append
   // to, the infinite-scroll accumulator.
   useEffect(() => {
+    setSort(savedMagicShelfSort(id));
     setPage(1);
+  }, [id]);
+
+  useEffect(() => {
+    try { localStorage.setItem(magicShelfSortKey(id), sort); } catch { /* storage can be disabled */ }
   }, [id, sort]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [sort]);
 
   // Skip placeholder data — accumulating the previous shelf's briefly-served
   // rows under the new id would mix both shelves' books (#612, see Shelf.tsx).
