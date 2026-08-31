@@ -1166,11 +1166,11 @@ export function useMagicShelves() {
   });
 }
 
-export function useMagicShelfBooks(id: string | number, page = 1) {
+export function useMagicShelfBooks(id: string | number, page = 1, sort = 'new') {
   return useQuery<{ id: number; name: string; icon: string; is_owner: boolean; is_system: boolean;
-    kobo_sync?: boolean } & BooksPage>({
-    queryKey: ['magicshelf', String(id), page],
-    queryFn: () => apiGet(`/api/v1/magicshelf/${id}?page=${page}`),
+    kobo_sync?: boolean; sort?: string; custom_sort_options?: { value: string; label: string }[] } & BooksPage>({
+    queryKey: ['magicshelf', String(id), page, sort],
+    queryFn: () => apiGet(`/api/v1/magicshelf/${id}?page=${page}&sort=${encodeURIComponent(sort)}`),
     enabled: String(id).length > 0,
     // Same-shelf paging only — see useShelf (#612).
     placeholderData: (prev, prevQuery) =>

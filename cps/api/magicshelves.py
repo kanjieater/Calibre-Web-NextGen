@@ -17,7 +17,8 @@ from . import api_v1
 from .books import _row_to_item
 from .. import ub, config, db, calibre_db, logger, magic_shelf
 from ..cw_login import current_user
-from ..sort_orders import BOOK_SORT_ORDERS
+from ..sort_orders import BOOK_SORT_ORDERS, book_sort_order
+from ..custom_column_sort import resolve as resolve_custom_column_sort, sortable_columns
 from ..usermanagement import login_required_if_no_ano, user_login_required
 
 log = logger.create()
@@ -92,6 +93,16 @@ def magic_shelf_books(shelf_id):
 
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", config.config_books_per_page, type=int)
+    sort_param = request.args.get("sort", "new")
+    custom_sort = resolve_custom_column_sort(sort_param, config)
+    order = custom_sort[1] if custom_sort is not None else book_sort_order(sort_param)
+    custom_join = (custom_sort[0], db.Books.id == custom_sort[0].book) if custom_sort else ()
+    custom_options = []
+    for column in sortable_columns(calibre_db.session.query(db.CustomColumns).all(), config):
+        custom_options.extend((
+            {"value": f"cc-{column.id}-asc", "label": f"{column.name}, low to high"},
+            {"value": f"cc-{column.id}-desc", "label": f"{column.name}, high to low"},
+        ))
 
     try:
         query_filter = magic_shelf.build_query_from_rules(shelf.rules, user_id=uid)
@@ -108,8 +119,8 @@ def magic_shelf_books(shelf_id):
 
     series_join = (db.books_series_link, db.Books.id == db.books_series_link.c.book, db.Series)
     entries, _random, pagination = calibre_db.fill_indexpage(
-        page, per_page, db.Books, query_filter, BOOK_SORT_ORDERS["new"],
-        True, config.config_read_column, *series_join)
+        page, per_page, db.Books, query_filter, order,
+        True, config.config_read_column, *series_join, *custom_join)
     return jsonify({
         "id": shelf.id, "name": display_name, "icon": shelf.icon or "🪄",
         "is_system": bool(getattr(shelf, "is_system", False)),
@@ -118,6 +129,7 @@ def magic_shelf_books(shelf_id):
         # rules included so the builder can load this shelf for editing
         "rules": shelf.rules or {"condition": "AND", "rules": []},
         "items": [_row_to_item(e) for e in entries],
+        "sort": sort_param, "custom_sort_options": custom_options,
         "page": pagination.page, "per_page": pagination.per_page, "total": pagination.total_count,
     })
 
