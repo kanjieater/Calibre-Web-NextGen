@@ -44,6 +44,7 @@ from .helper import check_valid_domain, check_email, check_username, \
     edit_book_read_status, valid_password, get_kosync_progress_display
 from .pagination import Pagination
 from .sort_orders import BOOK_SORT_ORDERS, book_sort_order
+from .custom_column_sort import resolve as resolve_custom_column_sort, sortable_columns
 from .redirect import get_redirect_location
 from .cw_babel import get_available_locale
 from .usermanagement import login_required_if_no_ano
@@ -506,6 +507,9 @@ def get_sort_function(sort_param, data):
         sort_param = current_user.get_view_property(data, 'stored')
     else:
         current_user.set_view_property(data, 'stored', sort_param)
+    custom_sort = resolve_custom_column_sort(sort_param, config)
+    if custom_sort is not None:
+        return custom_sort[1], sort_param
     if sort_param is None:
         if data == "series":
             # A series page reads in series order by default — matching the
@@ -1199,8 +1203,10 @@ def render_magic_shelf(shelf_id, sort_param, page):
                                  page="magicshelf",
                                  shelf=shelf,
                                  is_hidden_shelf=is_hidden,
-                                 id=shelf_id, 
-                                 order=order[1])
+                                 id=shelf_id,
+                                 order=order[1],
+                                 custom_sort_columns=sortable_columns(
+                                     calibre_db.session.query(db.CustomColumns).all(), config))
 
 
 # ################################### Health Check ##################################################################
