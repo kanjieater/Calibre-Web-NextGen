@@ -101,7 +101,8 @@ def magic_shelf_books(shelf_id):
     sort_param = request.args.get("sort", "new")
     custom_columns = calibre_db.session.query(db.CustomColumns).all()
     custom_sort = resolve_custom_column_sort(sort_param, config, custom_columns)
-    order = custom_sort[1] if custom_sort is not None else book_sort_order(sort_param)
+    effective_sort = sort_param if custom_sort is not None or sort_param in BOOK_SORT_ORDERS else "new"
+    order = custom_sort[1] if custom_sort is not None else book_sort_order(effective_sort)
     custom_join = (custom_sort[0], db.Books.id == custom_sort[0].book) if custom_sort else ()
     custom_options = []
     for column in sortable_columns(custom_columns, config):
@@ -129,7 +130,7 @@ def magic_shelf_books(shelf_id):
         # rules included so the builder can load this shelf for editing
         "rules": shelf.rules or {"condition": "AND", "rules": []},
         "items": _rows_to_items(entries),
-        "sort": sort_param, "custom_sort_options": custom_options,
+        "sort": effective_sort, "custom_sort_options": custom_options,
         "page": pagination.page, "per_page": pagination.per_page, "total": pagination.total_count,
     })
 
