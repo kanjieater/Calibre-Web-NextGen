@@ -67,6 +67,14 @@ export function MagicShelfView({ id }: { id: string }) {
     setPage(1);
   }, [sort]);
 
+  // The server validates configured custom columns against the live Calibre
+  // schema. If a saved local choice was removed by an administrator, adopt its
+  // returned fallback so the controlled select and localStorage stay valid.
+  useEffect(() => {
+    if (!data || isPlaceholderData || !data.sort || data.sort === sort) return;
+    setSort(data.sort);
+  }, [data, isPlaceholderData, sort]);
+
   // Skip placeholder data — accumulating the previous shelf's briefly-served
   // rows under the new id would mix both shelves' books (#612, see Shelf.tsx).
   useEffect(() => {
