@@ -5,6 +5,7 @@ from sqlalchemy import Column, Float, Integer
 from sqlalchemy.orm import declarative_base
 
 from cps import custom_column_sort
+from cps.api import magicshelves
 
 pytestmark = pytest.mark.unit
 
@@ -28,6 +29,12 @@ def test_sortable_columns_only_returns_enabled_scalar_columns():
     ]
 
     assert [column.id for column in custom_column_sort.sortable_columns(columns, config)] == [2, 3]
+
+
+def test_magic_shelf_builtin_sorts_exclude_download_only_sorts():
+    assert "hotasc" not in magicshelves._MAGIC_SHELF_BUILTIN_SORTS
+    assert "hotdesc" not in magicshelves._MAGIC_SHELF_BUILTIN_SORTS
+    assert "new" in magicshelves._MAGIC_SHELF_BUILTIN_SORTS
 
 
 def test_resolve_rejects_unknown_or_not_configured_keys(monkeypatch):
