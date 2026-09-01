@@ -17,11 +17,18 @@ from . import api_v1
 from .books import _rows_to_items
 from .. import ub, config, db, calibre_db, logger, magic_shelf
 from ..cw_login import current_user
-from ..sort_orders import BOOK_SORT_ORDERS, book_sort_order
+from ..sort_orders import book_sort_order
 from ..custom_column_sort import resolve as resolve_custom_column_sort, sortable_columns
 from ..usermanagement import login_required_if_no_ano, user_login_required
 
 log = logger.create()
+
+# ``hot*`` sorts require an app.db Downloads grouping and cannot run against a
+# Magic Shelf's Calibre Books query. Keep this list aligned with the sort menu.
+_MAGIC_SHELF_BUILTIN_SORTS = frozenset((
+    "new", "old", "abc", "zyx", "authaz", "authza", "pubnew", "pubold",
+    "seriesasc", "seriesdesc", "modifiednew", "modifiedold",
+))
 
 
 def _err(code, message, status):
@@ -101,7 +108,7 @@ def magic_shelf_books(shelf_id):
     sort_param = request.args.get("sort", "new")
     custom_columns = calibre_db.session.query(db.CustomColumns).all()
     custom_sort = resolve_custom_column_sort(sort_param, config, custom_columns)
-    effective_sort = sort_param if custom_sort is not None or sort_param in BOOK_SORT_ORDERS else "new"
+    effective_sort = sort_param if custom_sort is not None or sort_param in _MAGIC_SHELF_BUILTIN_SORTS else "new"
     order = custom_sort[1] if custom_sort is not None else book_sort_order(effective_sort)
     custom_join = (custom_sort[0], db.Books.id == custom_sort[0].book) if custom_sort else ()
     custom_options = []
