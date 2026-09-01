@@ -1,3 +1,4 @@
+import inspect
 from types import SimpleNamespace
 
 import pytest
@@ -6,6 +7,7 @@ from sqlalchemy.orm import declarative_base
 
 from cps import custom_column_sort
 from cps.api import books, magicshelves
+from cps import search
 
 pytestmark = pytest.mark.unit
 
@@ -88,3 +90,11 @@ def test_resolve_rejects_stale_or_unsupported_live_column(monkeypatch, column):
     monkeypatch.setattr(custom_column_sort.db, "cc_classes", {2: object()})
 
     assert custom_column_sort.resolve("cc-2-asc", config, [column]) is None
+
+
+def test_classic_searches_apply_the_resolved_custom_column_join_before_ordering():
+    simple_search_source = inspect.getsource(search.render_search_results)
+    advanced_search_source = inspect.getsource(search.render_adv_search_results)
+
+    assert "db.Series, *custom_join" in simple_search_source
+    assert "q = q.outerjoin(*custom_join)" in advanced_search_source
