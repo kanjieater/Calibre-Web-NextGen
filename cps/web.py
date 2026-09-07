@@ -48,6 +48,8 @@ from .sort_orders import BOOK_SORT_ORDERS, book_sort_order
 from .custom_column_sort import (
     load_configured_columns,
     resolve_magic_shelf_sort,
+    resolve as resolve_custom_column_sort,
+    sortable_columns,
 )
 from .redirect import get_redirect_location
 from .cw_babel import get_available_locale, get_available_translations, sanitize_locale_for_write

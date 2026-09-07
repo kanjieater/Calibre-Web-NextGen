@@ -83,8 +83,33 @@ _COMPATIBLE_BOOK_SORTS = frozenset(set(SORT_MAP) - {"hotasc", "hotdesc"})
 
 
 def _sort_context(requested_sort):
-    """Return validated metadata-db ordering and UI custom-sort options."""
-    columns = calibre_db.session.query(db.CustomColumns).all()
+    """Return validated metadata-db ordering and UI custom-sort options.
+
+    A list request is also valid while no Calibre library session exists (for
+    example, a fresh install). Do not turn that recoverable state into a 500.
+    """
+    effective = requested_sort if requested_sort in _COMPATIBLE_BOOK_SORTS else "new"
+    session = calibre_db.session
+    if session is None:
+        return {
+            "sort": effective,
+            "order": book_sort_order(effective),
+            "join": (),
+            "custom_sort_options": [],
+        }
+
+    # No configured custom sort can be selected, displayed, or resolved. Avoid
+    # a metadata query on the overwhelmingly common built-in-sort path.
+    configured = getattr(config, "config_sortable_custom_columns", "") or ""
+    if not configured:
+        return {
+            "sort": effective,
+            "order": book_sort_order(effective),
+            "join": (),
+            "custom_sort_options": [],
+        }
+
+    columns = session.query(db.CustomColumns).all()
     custom = resolve_custom_column_sort(requested_sort, config, columns)
     effective = requested_sort if custom is not None or requested_sort in _COMPATIBLE_BOOK_SORTS else "new"
     return {
