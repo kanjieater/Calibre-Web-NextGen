@@ -6,14 +6,13 @@ import { useBooks, useMe, useUpdateMetadata } from '../lib/queries';
 import { Spinner, SpinnerCentered } from '../components/Spinner';
 import { EmptyState } from '../components/EmptyState';
 import { useT } from '../lib/i18n';
-import type { Book } from '../lib/api';
+import type { Book, ListCustomColumnDefinition } from '../lib/api';
 import { formatAuthors } from '../lib/authors';
 import { resourceUrl } from '../lib/api';
 import styles from './Table.module.css';
 
 // Column key -> the API sort tokens for ascending / descending.
-type ColKey = 'title' | 'authors' | 'series' | 'tags' | 'formats' | 'date_added' | 'last_modified' | 'read';
-interface Col { key: ColKey; label: string; sortAsc?: string; sortDesc?: string; }
+interface Col { key: string; label: string; sortAsc?: string; sortDesc?: string; custom?: ListCustomColumnDefinition; }
 const COLUMNS: Col[] = [
   { key: 'title', label: 'Title', sortAsc: 'abc', sortDesc: 'zyx' },
   { key: 'authors', label: 'Authors', sortAsc: 'authaz', sortDesc: 'authza' },
@@ -25,6 +24,16 @@ const COLUMNS: Col[] = [
   { key: 'last_modified', label: 'Last modified', sortAsc: 'modifiedold', sortDesc: 'modifiednew' },
   { key: 'read', label: 'Read' },
 ];
+
+function formatCustomCell(book: Book, column: ListCustomColumnDefinition): string {
+  const value = book.custom_columns?.[String(column.id)]?.[0]?.value;
+  if (value === null || value === undefined || value === '') return '—';
+  if (column.datatype === 'datetime' && typeof value === 'string') return formatLibraryDate(value);
+  if ((column.datatype === 'int' || column.datatype === 'float') && typeof value === 'number') {
+    return new Intl.NumberFormat(undefined, { maximumFractionDigits: column.datatype === 'float' ? 2 : 0 }).format(value);
+  }
+  return String(value);
+}
 
 function formatLibraryDate(value: string | null | undefined): string {
   if (!value) return '—';
@@ -80,11 +89,12 @@ function dedupAppend(prev: Book[], next: Book[]): Book[] {
  *  visibility, infinite "load more". Replaces the legacy /table page. */
 export function Table() {
   const t = useT();
-  const canEdit = !!useMe().data?.role?.edit;
+  const me = useMe().data;
+  const canEdit = !!me?.role?.edit;
   const [sort, setSort] = useState('new');
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<Book[]>([]);
-  const [hidden, setHidden] = useState<Set<ColKey>>(new Set());
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [colMenu, setColMenu] = useState(false);
   const accSort = useRef('');
 
@@ -113,7 +123,18 @@ export function Table() {
     if (col.sortDesc === sort) return <ArrowDown size={13} />;
     return null;
   };
-  const visible = COLUMNS.filter((c) => !hidden.has(c.key));
+  const selectedCustomIds = me?.catalog?.custom_field_ids;
+  const customColumns: Col[] = (data?.custom_column_definitions ?? [])
+    .filter((column) => !Array.isArray(selectedCustomIds) || selectedCustomIds.includes(column.id))
+    .map((column) => ({
+    key: `custom-${column.id}`,
+    label: column.name,
+    sortAsc: `cc-${column.id}-asc`,
+    sortDesc: `cc-${column.id}-desc`,
+    custom: column,
+  }));
+  const allColumns = [...COLUMNS, ...customColumns];
+  const visible = allColumns.filter((c) => !hidden.has(c.key));
 
   if (isLoading && rows.length === 0) return <SpinnerCentered size={40} />;
   if (error) {
@@ -133,7 +154,7 @@ export function Table() {
           </button>
           {colMenu && (
             <div className={styles.colMenu}>
-              {COLUMNS.map((c) => (
+              {allColumns.map((c) => (
                 <label key={c.key} className={styles.colItem}>
                   <input type="checkbox" checked={!hidden.has(c.key)}
                     onChange={() => setHidden((h) => {
@@ -200,6 +221,7 @@ export function Table() {
                         {c.key === 'read' && (b.read
                           ? <Check size={15} className={styles.readYes} role="img" aria-label={t('Read')} />
                           : <span aria-label={t('Unread')} role="img">—</span>)}
+                        {c.custom && formatCustomCell(b, c.custom)}
                       </td>
                     ))}
                   </tr>
