@@ -21,7 +21,8 @@ from ..helper import edit_book_read_status, book_in_progress_ids, book_is_in_pro
     get_convert_options, get_kosync_progress_display, \
     SQLITE_IN_CHUNK_SIZE as _SQLITE_IN_CHUNK
 from ..sort_orders import BOOK_SORT_ORDERS, book_sort_order
-from ..custom_column_sort import resolve as resolve_custom_column_sort, sortable_columns
+from ..custom_column_sort import (resolve as resolve_custom_column_sort, sortable_columns,
+                                  load_configured_columns)
 from ..usermanagement import login_required_if_no_ano
 
 log = logger.create()
@@ -126,7 +127,11 @@ def _sort_context(requested_sort):
 
 
 def _with_sort(payload, context):
-    payload.update(sort=context["sort"], custom_sort_options=context["custom_sort_options"])
+    # Definitions belong to the page, not every book. Keep them alongside the
+    # sort metadata so every /books collection variant has the same contract.
+    definitions, _values = _list_custom_column_data([])
+    payload.update(sort=context["sort"], custom_sort_options=context["custom_sort_options"],
+                   custom_column_definitions=definitions)
     return payload
 
 
@@ -179,7 +184,44 @@ def _row_read_status(e):
     return getattr(e, "read_status", None)
 
 
-def _row_to_item(e, in_progress_ids, hidden_ids=None, cover_override=None):
+def _list_custom_column_data(entries):
+    """Return selected custom-field definitions and values for one list page.
+
+    Custom-sort configuration is the display allowlist: it contains only live,
+    scalar int/float/datetime fields. Query each selected column once for the
+    page rather than touching a relationship on every book (the latter becomes
+    an N+1 query on a large grid).
+    """
+    try:
+        columns = load_configured_columns(config) or []
+        book_ids = [int(getattr(entry, "Books", entry).id) for entry in entries]
+        values = {book_id: {} for book_id in book_ids}
+        for column in columns:
+            model = db.cc_classes.get(column.id)
+            if model is None or not book_ids:
+                continue
+            rows = (calibre_db.session.query(model)
+                    .filter(model.book.in_(book_ids)).all())
+            for row in rows:
+                value = getattr(row, "value", None)
+                if hasattr(value, "isoformat"):
+                    value = value.isoformat()
+                values.setdefault(int(row.book), {})[str(column.id)] = [{
+                    "value": value,
+                    "extra": getattr(row, "extra", None),
+                }]
+        definitions = [{
+            "id": column.id,
+            "name": column.name,
+            "datatype": column.datatype,
+        } for column in columns]
+        return definitions, values
+    except (SQLAlchemyError, AttributeError, KeyError, TypeError):
+        log.warning("Custom-column list data unavailable", exc_info=True)
+        return [], {}
+
+
+def _row_to_item(e, in_progress_ids, hidden_ids=None, cover_override=None, custom_columns=None):
     """Unwrap a SQLAlchemy Row (Books, is_archived, read_status) or plain Books object."""
     book = getattr(e, "Books", e)
     read_status = _row_read_status(e)
@@ -199,12 +241,15 @@ def _row_to_item(e, in_progress_ids, hidden_ids=None, cover_override=None):
         archived=archived,
         hidden=book.id in (hidden_ids or set()),
         cover_override=cover_override,
+        custom_columns=custom_columns,
     )
 
 
-def _rows_to_items(entries, hidden_ids=None):
+def _rows_to_items(entries, hidden_ids=None, custom_values=None):
     """Serialize one list page after resolving its in-progress ids in bulk."""
     entries = list(entries)
+    if custom_values is None:
+        _definitions, custom_values = _list_custom_column_data(entries)
     statuses = [
         (getattr(entry, "Books", entry).id, _row_read_status(entry))
         for entry in entries
@@ -218,6 +263,7 @@ def _rows_to_items(entries, hidden_ids=None):
         _row_to_item(
             entry, in_progress_ids, hidden_ids,
             cover_override=overrides.get(int(book.id)),
+            custom_columns=(custom_values or {}).get(int(book.id)),
         )
         for entry, book in zip(entries, books)
     ]

@@ -116,6 +116,8 @@ export interface Me {
   /** Per-user catalog landing preferences (#498), persisted server-side. */
   catalog?: {
     default_filter: AdvancedSearchParams | null;
+    /** Selected administrator-enabled Calibre fields for card/table display. */
+    custom_field_ids?: number[] | null;
   };
   /** Named My Library mode. Older servers omit it and therefore behave as the
    * whole-library mode that predates per-user selections. */
@@ -148,6 +150,15 @@ export interface Book {
   /** Global-library lists only. Absent means the server predates My Library and
    * the book is treated as part of the whole library. */
   in_my_library?: boolean;
+  /** Compact list-field values keyed by Calibre custom-column id. Definitions
+   * arrive once on the surrounding page response. */
+  custom_columns?: Record<string, CustomColumnValue[]>;
+}
+
+export interface ListCustomColumnDefinition {
+  id: number;
+  name: string;
+  datatype: 'int' | 'float' | 'datetime' | string;
 }
 
 export interface UserNotice {
@@ -283,6 +294,7 @@ export interface BooksPage {
   /** Effective server-validated sort and enabled scalar custom-column choices. */
   sort?: string;
   custom_sort_options?: { value: string; label: string }[];
+  custom_column_definitions?: ListCustomColumnDefinition[];
 }
 
 /** One row in an entity-browse list, with how many books reference it. */
@@ -347,6 +359,7 @@ export interface AdvSearchResult {
   criteria: string;
   sort?: string;
   custom_sort_options?: { value: string; label: string }[];
+  custom_column_definitions?: ListCustomColumnDefinition[];
 }
 
 export interface AppPassword {
