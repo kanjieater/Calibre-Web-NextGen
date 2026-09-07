@@ -295,7 +295,7 @@
 
 
 {# author.html book lists #}
-{% macro author_organizer(id, order, can_delete=false, can_edit_public_shelf=false, shelves=none) %}
+{% macro author_organizer(id, order, can_delete=false, can_edit_public_shelf=false, shelves=none, custom_sort_columns=none) %}
 {% set opts = [
   {'key': 'new', 'icons': ['glyphicon-book', 'glyphicon-calendar', 'glyphicon-sort-by-order'],
    'label': _('Date added, newest first'),
@@ -316,6 +316,18 @@
    'label': _('Published, oldest first'),
    'url': url_for('web.books_list', data='author', book_id=id, sort_param='pubold')},
 ] %}
+{% if custom_sort_columns %}
+  {% for column in custom_sort_columns %}
+    {% set opts = opts + [
+      {'key': 'cc-' ~ column.id ~ '-asc', 'icons': ['glyphicon-sort-by-order'],
+       'label': column.name ~ ', ' ~ _('low to high'),
+       'url': url_for('web.books_list', data='author', book_id=id, sort_param='cc-' ~ column.id ~ '-asc')},
+      {'key': 'cc-' ~ column.id ~ '-desc', 'icons': ['glyphicon-sort-by-order-alt'],
+       'label': column.name ~ ', ' ~ _('high to low'),
+       'url': url_for('web.books_list', data='author', book_id=id, sort_param='cc-' ~ column.id ~ '-desc')},
+    ] %}
+  {% endfor %}
+{% endif %}
 {{ organizer_bar(active_key=order, sort_options=opts,
                  can_delete=can_delete, can_edit_public_shelf=can_edit_public_shelf, shelves=shelves) }}
 {% endmacro %}

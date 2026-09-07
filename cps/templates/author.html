@@ -28,7 +28,8 @@
     {{ organizer.author_organizer(id, order,
                                    can_delete=current_user.role_delete_books(),
                                    can_edit_public_shelf=current_user.role_edit_shelfs(),
-                                   shelves=g.shelves_access) }}
+                                   shelves=g.shelves_access,
+                                   custom_sort_columns=custom_sort_columns) }}
   <div class="row display-flex">
     {% for entry in entries %}
     <div id="books" class="col-sm-3 col-lg-2 col-xs-6 book session">
