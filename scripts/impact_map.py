@@ -18,6 +18,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from collections import Counter, defaultdict, deque
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -115,13 +116,45 @@ def stable_json(data: Any) -> str:
     return json.dumps(data, indent=2, sort_keys=True, ensure_ascii=True) + "\n"
 
 
-def write_json(path: Path, data: Any, *, compact: bool = False) -> None:
+def reject_destination_aliases(path: Path, protected_paths: Iterable[Path], kind: str = "output") -> None:
+    destination = path.resolve()
+    for protected in protected_paths:
+        if destination == protected.resolve() or (
+            path.exists() and protected.exists() and path.samefile(protected)
+        ):
+            raise ValueError(f"{kind} destination aliases a protected input or generated output")
+
+
+def write_text_safely(
+    path: Path, rendered: str, *, protected_paths: Iterable[Path] = (), append: bool = False,
+    kind: str = "output",
+) -> None:
+    """Recheck at publication and replace a file without writing through its links."""
+    protected_paths = tuple(protected_paths)
+    reject_destination_aliases(path, protected_paths, kind)
     path.parent.mkdir(parents=True, exist_ok=True)
+    if append and path.exists():
+        rendered = path.read_text(encoding="utf-8") + rendered
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as stream:
+            temporary = Path(stream.name)
+            stream.write(rendered)
+        reject_destination_aliases(path, protected_paths, kind)
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def write_json(
+    path: Path, data: Any, *, compact: bool = False, protected_paths: Iterable[Path] = (),
+) -> None:
     if compact:
         rendered = json.dumps(data, sort_keys=True, ensure_ascii=True, separators=(",", ":")) + "\n"
     else:
         rendered = stable_json(data)
-    path.write_text(rendered, encoding="utf-8")
+    write_text_safely(path, rendered, protected_paths=protected_paths)
 
 
 def load_json(path: Path) -> Any:
@@ -1253,6 +1286,80 @@ def resolve_path(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
 
 
+def refresh_artifacts(repo_root: Path, output_dir: Path, summary_path: Path | None) -> dict[str, Any]:
+    """Publish fresh CI evidence; artifact drift is advisory, evaluation errors are not."""
+    output_dir = output_dir.resolve()
+    if output_dir == (repo_root / DEFAULT_MAP.parent).resolve():
+        raise ValueError("output directory would overwrite committed artifacts")
+    currency_path = output_dir / "impact-map-currency.json"
+    outputs = (output_dir / DEFAULT_MAP.name, output_dir / DEFAULT_RECALL.name, currency_path)
+    tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=repo_root).decode("utf-8")
+    inputs = [
+        *(repo_root / path for path in tracked.split("\0") if path),
+        *(repo_root / path for path in (DEFAULT_MAP, DEFAULT_RECALL, DEFAULT_ORACLE, DEFAULT_CASES)),
+        *iter_python_files(repo_root), Path(__file__),
+    ]
+    summary_protected = [*inputs, *outputs]
+    if summary_path is not None:
+        reject_destination_aliases(summary_path, summary_protected, "summary")
+    output_protected = {
+        output: [*inputs, *(peer for peer in outputs if peer != output),
+                 *([summary_path] if summary_path is not None else [])]
+        for output in outputs
+    }
+    # Validate every destination before invalidating any previous evidence.
+    # The writer repeats these checks when it actually publishes each file.
+    for output in outputs:
+        reject_destination_aliases(output, output_protected[output])
+    # A failed repeated refresh must not retain the previous success label.
+    # Diagnostic map/recall files may remain; currency is published last.
+    currency_path.unlink(missing_ok=True)
+    committed_map = load_json(repo_root / DEFAULT_MAP) if (repo_root / DEFAULT_MAP).exists() else {}
+    committed_recall = load_json(repo_root / DEFAULT_RECALL) if (repo_root / DEFAULT_RECALL).exists() else {}
+    data = build_map(repo_root, repo_root / DEFAULT_ORACLE)
+    report = evaluate_recall(data, load_json(repo_root / DEFAULT_CASES), repo_root)
+    write_json(outputs[0], data, compact=True, protected_paths=output_protected[outputs[0]])
+    write_json(outputs[1], report, protected_paths=output_protected[outputs[1]])
+    if not report["results"]:
+        raise ValueError("recall evidence unavailable: historical case set is empty")
+    if any(not result["commit_exists"] for result in report["results"]):
+        raise ValueError("recall evidence unavailable: historical commit missing; fetch full history")
+    # Current paths may differ from a frozen commit after a relocation/removal.
+    # That is an evaluated miss, already explained by the report, not missing history.
+    drift = {DEFAULT_MAP.name: committed_map != data, DEFAULT_RECALL.name: committed_recall != report}
+    currency = {
+        "schema_version": SCHEMA_VERSION,
+        "status": "stale" if any(drift.values()) else "current",
+        "checked_repo_sha": git_object_sha(repo_root, "HEAD"),
+        "current_cps_tree_sha": data["generated_from"]["cps_tree_sha"],
+        "committed_cps_tree_sha": committed_map.get("generated_from", {}).get("cps_tree_sha"),
+        "drift": drift,
+    }
+    summary = "\n".join([
+        "## Impact map currency",
+        "",
+        f"Committed artifacts: **{currency['status']}**. Fresh artifacts are attached to this CI run.",
+        "Staleness is advisory; contributors do not need to regenerate or commit these files.",
+        "",
+        f"Checked commit: `{currency['checked_repo_sha']}`",
+        f"Current cps tree: `{currency['current_cps_tree_sha']}`",
+        f"Committed map cps tree: `{currency['committed_cps_tree_sha']}`",
+        "",
+        *[f"- `{name}`: {'differs or missing' if differs else 'current'}" for name, differs in drift.items()],
+        "",
+        f"Curated recall: **{report['hits']}/{report['total']} ({report['hit_rate_percent']:.2f}%)**; "
+        f"misses={report['misses']}. This constructed case set is not an independent measurement.",
+        *[f"- Miss `{result['commit']}`: `{result['affected_site']}` → `{result['changed_symbol']}`: "
+          f"{result['miss_reason']}" for result in report["results"] if not result["hit"]],
+        "",
+    ])
+    if summary_path is not None:
+        write_text_safely(summary_path, summary, protected_paths=summary_protected, append=True, kind="summary")
+    write_json(currency_path, currency, protected_paths=output_protected[currency_path])
+    print(summary, end="")
+    return currency
+
+
 def parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[1])
@@ -1261,6 +1368,10 @@ def parser() -> argparse.ArgumentParser:
     build = sub.add_parser("build", help="generate impact-map.json from cps")
     build.add_argument("--oracle", type=Path, default=DEFAULT_ORACLE)
     build.add_argument("--output", type=Path, default=DEFAULT_MAP)
+
+    refresh = sub.add_parser("refresh", help="publish fresh map/recall and advisory currency evidence for CI")
+    refresh.add_argument("--output-dir", type=Path, required=True)
+    refresh.add_argument("--summary", type=Path, help="append a Markdown summary (for GITHUB_STEP_SUMMARY)")
 
     pin = sub.add_parser("pin-routes", help="copy validated route/reconciliation data into a portable oracle")
     pin.add_argument("--static-routes", type=Path, required=True)
@@ -1286,6 +1397,12 @@ def parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     repo_root = args.repo_root.resolve()
+    if args.command == "refresh":
+        refresh_artifacts(
+            repo_root, resolve_path(repo_root, args.output_dir),
+            resolve_path(repo_root, args.summary) if args.summary else None,
+        )
+        return 0
     if args.command == "pin-routes":
         data = pin_route_oracle(
             args.static_routes.resolve(), args.reconciliation.resolve(),

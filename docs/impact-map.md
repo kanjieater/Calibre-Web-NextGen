@@ -33,6 +33,86 @@ stable when a later tooling-only commit contains the generated file. The
 generator parses source with the standard-library AST and never imports or
 executes `cps`.
 
+## Currency is measured in CI
+
+The **Impact Map (regeneration + currency)** job in the Test Suite workflow
+rebuilds the map and re-evaluates recall on every PR, main/dev push (including
+merges), version tag, and manual run. It uses full Git history for the historical
+evidence check and only the Python standard library for regeneration.
+
+The job summary reports the checked commit, the current and committed `cps`
+tree fingerprints, whether each generated file differs, and the new recall
+number with every miss. Its `impact-map-<checked SHA>` download contains
+`impact-map.json`, `impact-map-recall.json`, and `impact-map-currency.json`.
+Artifacts are retained for 14 days; a manual Test Suite run produces another
+copy when needed. On PRs the checked SHA is the checkout's merge candidate,
+so use the summary's SHA when identifying the tree that was evaluated.
+
+**Staleness and evaluated recall misses return success.** A source addition,
+symbol rename, module relocation, or module removal can change the measurement
+without requiring a contributor to commit generated JSON. In particular, the
+current paths for a historical case may differ from the paths its frozen commit
+touched; that is a reported miss, not unavailable history. CI has read-only
+repository permission and publishes fresh
+outputs separately; it does not push commits or open update PRs. The committed
+files remain a snapshot, and their refresh is a maintainer's task. Download the
+fresh CI map (query with `--map`) or regenerate locally before using a stale
+snapshot. Generator errors, malformed inputs, empty case sets, and unavailable
+historical commits still fail the job;
+the required **Test Suite Summary** waits for this job and rejects every result
+other than success, including failure, cancellation, or a skipped job. There is
+no blanket `continue-on-error` hiding errors. Advisory staleness still passes
+that gate.
+
+The Impact Map job is excluded from automatic-revert decisions, along with its
+propagated summary failure. An unsuccessful measurement does not establish that
+the product commit caused a regression: unavailable history is infrastructure,
+and generator/input failures need investigation of the tooling or evidence.
+The required summary keeps these failures visible without automatically undoing
+an unrelated application change.
+
+To reproduce the job locally, use a separate output directory:
+
+```bash
+python3 scripts/impact_map.py refresh \
+  --output-dir "$TMPDIR/impact-map" --summary "$TMPDIR/impact-map-summary.md"
+```
+
+Summary and generated output destinations must be separate from tracked
+repository files (including the generator and tests), the committed map/recall,
+oracle, cases, parsed Python sources, and each other. Refresh checks all
+destinations before writing and checks again at publication. Resolved paths and
+same-file checks catch symbolic links, hard links, and missing-output aliases.
+The shared writer replaces individual files rather than writing through a link;
+this also protects linked targets used with the build/recall JSON writer.
+
+Repeated refreshes can reuse the output directory. After validating destination
+paths, refresh removes the previous currency file before reading or generating
+evidence and publishes a new currency file last, after successful validation and
+summary writing. A failed attempt may leave diagnostic map/recall files, but
+without `impact-map-currency.json` the directory is incomplete and must not be
+treated as validated evidence. Repair the error and rerun refresh. This is an
+invalidation protocol, not an atomic directory replacement; use separate output
+directories for concurrent refreshes.
+
+Currency compares the complete regenerated map and recall report, not only the
+`cps` SHA. Generator and route-oracle changes can therefore show drift even
+when `cps` is unchanged. Missing generated snapshots count as stale; missing
+historical commits are evaluation errors. Historical/current path mismatches
+remain miss results with `evidence_paths_present: false` and a reason. Like
+`build`, this command should run on a clean checkout: the source is read from
+disk while Git supplies its committed provenance.
+
+The unit suite separately builds a miniature graph to check call conservation
+and that guessed/coarse edges retain their blind records. This catches a
+generator regression while the committed JSON is still unchanged. The committed
+recall test checks reproducibility, complete case retention, historical evidence,
+and hit/miss accounting, with a one-sided floor of eight hits. A regenerated
+report cannot hide a collapsed committed graph, and an improvement to nine hits
+passes. This floor applies to the committed snapshot and case set, not the fresh
+measurement of a contributor's changed source tree. Re-evaluating that frozen
+snapshot does not require its node paths to match the current source layout.
+
 ## Graph and confidence
 
 Nodes represent `cps` modules, module-level functions/classes, and routes.
