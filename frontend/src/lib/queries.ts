@@ -129,6 +129,22 @@ export function useUpdateNamedPreferences() {
   });
 }
 
+/** Persist the selected scalar Calibre fields for catalog cards and table rows. */
+export function useUpdateCatalogCustomFields() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (custom_column_ids: number[]) => apiPost<{ custom_field_ids: number[] }>(
+      '/api/v1/account/catalog-custom-fields', { custom_column_ids }),
+    onSuccess: (data) => {
+      queryClient.setQueryData<Me | null>(['me'], (current) => current ? {
+        ...current,
+        catalog: { ...current.catalog, default_filter: current.catalog?.default_filter ?? null,
+          custom_field_ids: data.custom_field_ids },
+      } : current);
+    },
+  });
+}
+
 export function useLogin() {
   const queryClient = useQueryClient();
   return useMutation({

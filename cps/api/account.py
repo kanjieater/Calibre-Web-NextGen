@@ -24,6 +24,7 @@ from ..ui_themes import ALLOWED_THEME_SLUGS, theme_slug, theme_code
 from ..user_preferences import (NAMED_BOOLEAN_PREFERENCE_PATHS,
                                 serialize_named_preferences,
                                 set_named_preferences)
+from ..custom_column_sort import load_configured_columns
 from .serializers import (SIDEBAR_VISIBILITY_BITS, ORDERABLE_SIDEBAR_KEYS,
                           serialize_sidebar_visibility, serialize_sidebar_order)
 
@@ -433,3 +434,29 @@ def update_named_preferences():
         return _err("db_error", "Could not save preferences: %s" % ex, 500)
 
     return jsonify({"preferences": serialize_named_preferences(current_user)})
+
+
+@api_v1.route("/account/catalog-custom-fields", methods=["POST"])
+def update_catalog_custom_fields():
+    """Persist the signed-in reader's selected grid/table custom fields."""
+    guard = _require_real_user()
+    if guard:
+        return guard
+    data = request.get_json(silent=True) or {}
+    selected = data.get("custom_column_ids")
+    if (not isinstance(selected, list)
+            or any(type(column_id) is not int for column_id in selected)):
+        return _err("invalid_request", "custom_column_ids must be an array of integers", 400)
+    columns = load_configured_columns(config)
+    if columns is None:
+        return _err("unavailable", "Custom columns are currently unavailable", 503)
+    allowed = {column.id for column in columns}
+    if any(column_id not in allowed for column_id in selected):
+        return _err("invalid_request", "Unknown custom column", 400)
+    try:
+        current_user.set_view_property("catalog", "custom_field_ids", selected, commit=False)
+        ub.session.commit()
+    except Exception as ex:
+        ub.session.rollback()
+        return _err("db_error", "Could not save custom fields: %s" % ex, 500)
+    return jsonify({"custom_field_ids": selected})
