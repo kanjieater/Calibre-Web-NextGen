@@ -639,20 +639,31 @@ def get_sort_function(sort_param, data):
         sort_param = current_user.get_view_property(data, 'stored')
     else:
         current_user.set_view_property(data, 'stored', sort_param)
-    custom_sort = resolve_custom_column_sort(sort_param, config)
-    if custom_sort is not None:
-        model, order = custom_sort
-        return order, sort_param, (model, db.Books.id == model.book)
     if sort_param is None:
         if data == "series":
             # A series page reads in series order by default — matching the
             # OPDS series feed — not newest-first. An explicitly chosen sort
             # is stored above and honored on the next visit. (fork #334 audit)
-            return BOOK_SORT_ORDERS["seriesasc"], "seriesasc", ()
+            return BOOK_SORT_ORDERS["seriesasc"], "seriesasc"
         sort_param = "new"
     # The ORDER BY itself is shared with the new UI's /api/v1 lists so the two
     # cannot disagree, and so every sort keeps its unique tiebreaker (#1331).
-    return book_sort_order(sort_param), sort_param, ()
+    return book_sort_order(sort_param), sort_param
+
+
+def _sort_context(sort_param, data):
+    """Classic ordering plus the optional validated custom-column join.
+
+    ``get_sort_function`` is a longstanding two-value public helper. Keep that
+    contract for legacy callers while carrying custom join metadata only inside
+    the Classic list renderers that require it.
+    """
+    order, key = get_sort_function(sort_param, data)
+    custom_sort = resolve_custom_column_sort(key, config)
+    if custom_sort is None:
+        return order, key, ()
+    model, custom_order = custom_sort
+    return custom_order, key, (model, db.Books.id == model.book)
 
 
 def _sort_join(order):
@@ -720,11 +731,11 @@ def _favorites_first_order():
 
 
 def render_books_list(data, sort_param, book_id, page):
-    order = get_sort_function(sort_param, data)
+    order = _sort_context(sort_param, data)
     # Download history orders through app.db's user-specific download join;
     # retain that specialized shape rather than adding an ambiguous third join.
     if data == "download" and _sort_join(order):
-        order = get_sort_function("new", data)
+        order = _sort_context("new", data)
     if data == "rated":
         return render_rated_books(page, book_id, order=order)
     elif data == "discover":
@@ -1671,7 +1682,7 @@ def global_library(sort_param, page):
         abort(403, description=_("You don't have permission to browse the global library."))
     recent_missing = sort_param == "recent-missing"
     search_term = (request.args.get("search") or "").strip()
-    order = get_sort_function(
+    order = _sort_context(
         "new" if recent_missing else sort_param, "global_library"
     )
     filters = []
