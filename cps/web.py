@@ -47,6 +47,7 @@ from .pagination import Pagination
 from .sort_orders import BOOK_SORT_ORDERS, book_sort_order
 from .custom_column_sort import (
     load_configured_columns,
+    resolve as resolve_custom_column_sort,
     resolve_magic_shelf_sort,
     resolve as resolve_custom_column_sort,
     sortable_columns,
