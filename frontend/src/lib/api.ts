@@ -118,6 +118,8 @@ export interface Me {
     default_filter: AdvancedSearchParams | null;
     /** Selected administrator-enabled Calibre fields for card/table display. */
     custom_field_ids?: number[] | null;
+    /** Per-user display-label overrides keyed by Calibre custom-column id. */
+    custom_field_labels?: Record<string, string> | null;
   };
   /** Named My Library mode. Older servers omit it and therefore behave as the
    * whole-library mode that predates per-user selections. */
