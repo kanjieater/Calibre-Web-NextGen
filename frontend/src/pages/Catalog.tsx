@@ -331,15 +331,21 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
       return Array.isArray(parsed) && parsed.every((id) => Number.isInteger(id)) ? parsed : null;
     } catch { return null; }
   });
+  const [customFieldLabels, setCustomFieldLabels] = useState<Record<string, string>>({});
   useEffect(() => {
     // Scoped preference writes update /me after every serialized request. Do
-    // not let an intermediate, older server snapshot repaint the checkboxes
+    // not let an intermediate, older server snapshot repaint the controls
     // while a newer full-selection write is still queued.
-    if (!updateCatalogCustomFields.isPending
-        && Array.isArray(me?.catalog?.custom_field_ids)) {
-      setVisibleCustomColumnIds(me.catalog.custom_field_ids);
+    if (!updateCatalogCustomFields.isPending) {
+      if (Array.isArray(me?.catalog?.custom_field_ids)) {
+        setVisibleCustomColumnIds(me.catalog.custom_field_ids);
+      }
+      if (me?.catalog?.custom_field_labels) {
+        setCustomFieldLabels(me.catalog.custom_field_labels);
+      }
     }
-  }, [me?.catalog?.custom_field_ids, updateCatalogCustomFields.isPending]);
+  }, [me?.catalog?.custom_field_ids, me?.catalog?.custom_field_labels,
+      updateCatalogCustomFields.isPending]);
   const [density, setDensity] = usePersistentChoice(
     'cwng:catalog-density-v1', ['comfortable', 'compact', 'dense'] as const, 'compact');
   const [rowsChoice, setRowsChoice] = usePersistentChoice(
@@ -589,21 +595,35 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
   const customSortOptions = view === 'hot' || view === 'discover'
     ? [] : (data?.custom_sort_options ?? []);
   const activeSortOptions = [...sortOptions, ...customSortOptions];
-  const customColumnDefinitions = data?.custom_column_definitions ?? [];
+  const customColumnDefinitions = (data?.custom_column_definitions ?? []).map((column) => ({
+    ...column,
+    name: customFieldLabels[String(column.id)]?.trim() || column.name,
+  }));
   const visibleCustomColumns = visibleCustomColumnIds === null
     ? customColumnDefinitions
     : customColumnDefinitions.filter((column) => visibleCustomColumnIds.includes(column.id));
+  const saveCustomFields = (ids: number[], labels = customFieldLabels) => {
+    if (me && !me.role?.anonymous) updateCatalogCustomFields.mutate({
+      custom_column_ids: ids,
+      custom_column_labels: labels,
+    }, { onError: () => announce(t('Could not save.'), { assertive: true }) });
+  };
   const toggleCustomColumn = (id: number) => {
     setVisibleCustomColumnIds((current) => {
       const selected = new Set(current ?? customColumnDefinitions.map((column) => column.id));
       if (selected.has(id)) selected.delete(id); else selected.add(id);
       const next = [...selected];
       try { localStorage.setItem('cwng:catalog-custom-fields-v1', JSON.stringify(next)); } catch { /* unavailable */ }
-      if (me && !me.role?.anonymous) updateCatalogCustomFields.mutate(next, {
-        onError: () => announce(t('Could not save.'), { assertive: true }),
-      });
+      saveCustomFields(next);
       return next;
     });
+  };
+  const saveCustomFieldLabel = (id: number, value: string) => {
+    const next = { ...customFieldLabels, [String(id)]: value };
+    if (!value.trim()) delete next[String(id)];
+    setCustomFieldLabels(next);
+    const ids = visibleCustomColumnIds ?? customColumnDefinitions.map((column) => column.id);
+    saveCustomFields(ids, next);
   };
 
   // A saved custom sort can be removed by an administrator. Trust the server's
@@ -1010,11 +1030,23 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
                   <fieldset className={styles.densityField}>
                     <legend>{t('Custom fields on book cards')}</legend>
                     {customColumnDefinitions.map((column) => (
-                      <label key={column.id} className={styles.settingsItem}>
-                        <input type="checkbox" checked={visibleCustomColumns.some((item) => item.id === column.id)}
-                          onChange={() => toggleCustomColumn(column.id)} />
-                        <span>{column.name}</span>
-                      </label>
+                      <div key={column.id} className={styles.customFieldSetting}>
+                        <label className={styles.settingsItem}>
+                          <input type="checkbox" checked={visibleCustomColumns.some((item) => item.id === column.id)}
+                            onChange={() => toggleCustomColumn(column.id)} />
+                          <span>{column.name}</span>
+                        </label>
+                        <input
+                          type="text"
+                          className={styles.customFieldLabel}
+                          defaultValue={customFieldLabels[String(column.id)] ?? ''}
+                          key={`${column.id}:${customFieldLabels[String(column.id)] ?? ''}`}
+                          maxLength={80}
+                          placeholder={t('Custom display name')}
+                          aria-label={t('Display name for {name}', { name: column.name })}
+                          onBlur={(event) => saveCustomFieldLabel(column.id, event.target.value)}
+                        />
+                      </div>
                     ))}
                   </fieldset>
                 )}

@@ -129,7 +129,12 @@ export function useUpdateNamedPreferences() {
   });
 }
 
-/** Persist the selected scalar Calibre fields for catalog cards and table rows. */
+export interface CatalogCustomFieldsUpdate {
+  custom_column_ids: number[];
+  custom_column_labels: Record<string, string>;
+}
+
+/** Persist the selected scalar Calibre fields and their display labels. */
 export function useUpdateCatalogCustomFields() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -137,13 +142,15 @@ export function useUpdateCatalogCustomFields() {
     // serialized; otherwise an older snapshot may arrive last and erase a
     // newer checkbox choice.
     scope: { id: 'catalog-custom-fields' },
-    mutationFn: (custom_column_ids: number[]) => apiPost<{ custom_field_ids: number[] }>(
-      '/api/v1/account/catalog-custom-fields', { custom_column_ids }),
+    mutationFn: (update: CatalogCustomFieldsUpdate) => apiPost<{
+      custom_field_ids: number[]; custom_field_labels: Record<string, string>;
+    }>('/api/v1/account/catalog-custom-fields', update),
     onSuccess: (data) => {
       queryClient.setQueryData<Me | null>(['me'], (current) => current ? {
         ...current,
         catalog: { ...current.catalog, default_filter: current.catalog?.default_filter ?? null,
-          custom_field_ids: data.custom_field_ids },
+          custom_field_ids: data.custom_field_ids,
+          custom_field_labels: data.custom_field_labels },
       } : current);
     },
   });
