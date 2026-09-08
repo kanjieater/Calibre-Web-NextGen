@@ -321,6 +321,7 @@ export interface ShelfDetail extends Shelf {
   per_page: number;
   total: number;
   can_edit: boolean;
+  custom_column_definitions?: ListCustomColumnDefinition[];
 }
 
 export interface SearchOptions {
