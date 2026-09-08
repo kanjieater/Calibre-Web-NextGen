@@ -6354,6 +6354,16 @@ msgid ""
 msgstr ""
 
 #: cps/spa_strings.py
+#, python-brace-format
+msgid "Original device attribution restored for {n}."
+msgstr "已還原 {n} 筆資料的原始裝置歸屬。"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Original device attribution restored for {ok} of {total}."
+msgstr "已還原 {total} 筆資料中 {ok} 筆的原始裝置歸屬。"
+
+#: cps/spa_strings.py
 msgid "PDF reader"
 msgstr "PDF 閱讀器"
 
@@ -7382,6 +7392,15 @@ msgstr "此伺服器上您的帳戶不支援上傳。"
 #: cps/spa_strings.py
 msgid "Use my own cover"
 msgstr "使用我的封面"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Use original device: {name}"
+msgstr "使用原始裝置：{name}"
+
+#: cps/spa_strings.py
+msgid "Use original devices"
+msgstr "使用原始裝置"
 
 #: cps/spa_strings.py
 msgid "Use the library cover"
@@ -14312,22 +14331,3 @@ msgstr "顯示已讀/未讀選擇"
 #~ "Books must first be archived and the device synced before a book can "
 #~ "safely be deleted."
 #~ msgstr "必須先將書籍存檔並同步設備，然後才能安全地刪除書籍。"
-
-#: cps/spa_strings.py
-#, python-brace-format
-msgid "Original device attribution restored for {n}."
-msgstr "已還原 {n} 筆資料的原始裝置歸屬。"
-
-#: cps/spa_strings.py
-#, python-brace-format
-msgid "Use original device: {name}"
-msgstr "使用原始裝置：{name}"
-
-#: cps/spa_strings.py
-#, python-brace-format
-msgid "Original device attribution restored for {ok} of {total}."
-msgstr "已還原 {total} 筆資料中 {ok} 筆的原始裝置歸屬。"
-
-#: cps/spa_strings.py
-msgid "Use original devices"
-msgstr "使用原始裝置"
