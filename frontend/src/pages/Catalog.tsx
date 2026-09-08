@@ -332,10 +332,14 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     } catch { return null; }
   });
   useEffect(() => {
-    if (Array.isArray(me?.catalog?.custom_field_ids)) {
+    // Scoped preference writes update /me after every serialized request. Do
+    // not let an intermediate, older server snapshot repaint the checkboxes
+    // while a newer full-selection write is still queued.
+    if (!updateCatalogCustomFields.isPending
+        && Array.isArray(me?.catalog?.custom_field_ids)) {
       setVisibleCustomColumnIds(me.catalog.custom_field_ids);
     }
-  }, [me?.catalog?.custom_field_ids]);
+  }, [me?.catalog?.custom_field_ids, updateCatalogCustomFields.isPending]);
   const [density, setDensity] = usePersistentChoice(
     'cwng:catalog-density-v1', ['comfortable', 'compact', 'dense'] as const, 'compact');
   const [rowsChoice, setRowsChoice] = usePersistentChoice(
