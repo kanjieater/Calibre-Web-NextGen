@@ -762,6 +762,7 @@ The interface ships with the locales below. Completion is auto-refreshed on ever
 | Language | Completion | Strings | Fuzzy |
 |---|---|---:|---:|
 | English (source) | 100% | source | — |
+| Swedish (`sv`) | `████████████████████` 100% | 3130/3134 | 0 |
 | Italian (`it`) | `████████████████████` 100% | 3128/3134 | 0 |
 | Spanish (`es`) | `████████████████████` 99% | 3108/3134 | 0 |
 | Russian (`ru`) | `██████████████████░░` 90% | 2813/3134 | 0 |
@@ -781,7 +782,6 @@ The interface ships with the locales below. Completion is auto-refreshed on ever
 | Portuguese (`pt`) | `████░░░░░░░░░░░░░░░░` 22% | 696/3134 | 355 |
 | Indonesian (`id`) | `████░░░░░░░░░░░░░░░░` 22% | 673/3134 | 357 |
 | Galician (`gl`) | `████░░░░░░░░░░░░░░░░` 21% | 672/3134 | 356 |
-| Swedish (`sv`) | `████░░░░░░░░░░░░░░░░` 18% | 581/3134 | 383 |
 | Greek (`el`) | `███░░░░░░░░░░░░░░░░░` 16% | 504/3134 | 394 |
 | Czech (`cs`) | `███░░░░░░░░░░░░░░░░░` 15% | 475/3134 | 403 |
 | Ukrainian (`uk`) | `███░░░░░░░░░░░░░░░░░` 14% | 444/3134 | 368 |
