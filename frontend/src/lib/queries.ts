@@ -133,6 +133,10 @@ export function useUpdateNamedPreferences() {
 export function useUpdateCatalogCustomFields() {
   const queryClient = useQueryClient();
   return useMutation({
+    // Each request writes the complete selection, so concurrent clicks must be
+    // serialized; otherwise an older snapshot may arrive last and erase a
+    // newer checkbox choice.
+    scope: { id: 'catalog-custom-fields' },
     mutationFn: (custom_column_ids: number[]) => apiPost<{ custom_field_ids: number[] }>(
       '/api/v1/account/catalog-custom-fields', { custom_column_ids }),
     onSuccess: (data) => {
