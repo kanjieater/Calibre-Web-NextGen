@@ -9,6 +9,7 @@ import { useT } from '../lib/i18n';
 import type { Book, ListCustomColumnDefinition } from '../lib/api';
 import { formatAuthors } from '../lib/authors';
 import { resourceUrl } from '../lib/api';
+import { selectedCustomColumns } from '../lib/customColumnDisplay';
 import styles from './Table.module.css';
 
 // Column key -> the API sort tokens for ascending / descending.
@@ -123,9 +124,7 @@ export function Table() {
     if (col.sortDesc === sort) return <ArrowDown size={13} />;
     return null;
   };
-  const selectedCustomIds = me?.catalog?.custom_field_ids;
-  const customColumns: Col[] = (data?.custom_column_definitions ?? [])
-    .filter((column) => !Array.isArray(selectedCustomIds) || selectedCustomIds.includes(column.id))
+  const customColumns: Col[] = selectedCustomColumns(data?.custom_column_definitions, me)
     .map((column) => ({
     key: `custom-${column.id}`,
     label: column.name,

@@ -8,7 +8,12 @@ export function selectedCustomColumns(
 ): ListCustomColumnDefinition[] {
   const fields = definitions ?? [];
   const selected = me?.catalog?.custom_field_ids;
-  return Array.isArray(selected)
+  const labels = me?.catalog?.custom_field_labels ?? {};
+  const visible = Array.isArray(selected)
     ? fields.filter((field) => selected.includes(field.id))
     : fields;
+  return visible.map((field) => ({
+    ...field,
+    name: labels[String(field.id)]?.trim() || field.name,
+  }));
 }
