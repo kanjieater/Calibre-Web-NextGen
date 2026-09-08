@@ -25,7 +25,7 @@ from flask_babel import get_locale
 from .cw_login import login_user, logout_user, current_user
 from flask_limiter import RateLimitExceeded
 from flask_limiter.util import get_remote_address
-from sqlalchemy.exc import IntegrityError, InvalidRequestError, OperationalError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError, OperationalError, SQLAlchemyError
 from sqlalchemy.sql.expression import text, func, false, not_, and_, or_, case
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
@@ -679,7 +679,15 @@ def _category_order(order, *secondary):
 
 
 def _sortable_custom_columns():
-    return sortable_columns(calibre_db.session.query(db.CustomColumns).all(), config)
+    """Configured sort choices, if the Calibre metadata session is available."""
+    session = calibre_db.session
+    if session is None:
+        return []
+    try:
+        return sortable_columns(session.query(db.CustomColumns).all(), config)
+    except (SQLAlchemyError, AttributeError):
+        log.warning("Sortable custom-column definitions unavailable", exc_info=True)
+        return []
 
 
 def cwa_get_library_location() -> str:
