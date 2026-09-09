@@ -478,7 +478,15 @@ def _get_ingest_path(uploaded_file, prefix_parts=None):
 
     _ensure_ingest_dir_writable(ingest_dir)
 
-    base_name = secure_filename(uploaded_file.filename)
+    original_name = uploaded_file.filename or ""
+    base_name = secure_filename(original_name)
+    # ``secure_filename`` removes a non-ASCII basename completely.  For an
+    # EPUB such as ``とある飛空士への追憶.epub``, that leaves ``epub`` (the
+    # leading dot is stripped) and makes the asynchronous ingest worker reject
+    # it as extensionless. Preserve the validated source extension separately.
+    original_ext = os.path.splitext(original_name)[1]
+    if original_ext and not base_name.lower().endswith(original_ext.lower()):
+        base_name = (base_name or "upload") + original_ext.lower()
     # CWA change: use timestamp for more predictable sorting vs uuid
     unique = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
     prefix = "_".join([str(p) for p in (prefix_parts or []) if p])
