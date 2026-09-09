@@ -86,6 +86,17 @@ def test_get_ingest_path_long_filename_is_writable(tmp_path, monkeypatch):
 
 
 @pytest.mark.unit
+def test_get_ingest_path_preserves_extension_for_non_ascii_filename(tmp_path, monkeypatch):
+    """The ingest worker must receive an EPUB extension even without ASCII stem."""
+    from cps import editbooks
+    monkeypatch.setattr(editbooks, "get_ingest_dir", lambda: str(tmp_path))
+
+    final_path = editbooks._get_ingest_path(
+        SimpleNamespace(filename="とある飛空士への追憶.epub"), prefix_parts=["format", 29968]
+    )
+    assert os.path.basename(final_path).endswith(".epub")
+
+
 def test_get_ingest_path_normal_filename_unchanged(tmp_path, monkeypatch):
     """Normal-length uploads keep their full sanitized name — truncation only
     engages past NAME_MAX, so the common path is untouched."""
