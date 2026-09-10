@@ -339,6 +339,11 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     if (!updateCatalogCustomFields.isPending) {
       if (Array.isArray(me?.catalog?.custom_field_ids)) {
         setVisibleCustomColumnIds(me.catalog.custom_field_ids);
+      } else if (me && !me.role?.anonymous) {
+        // Signed-in accounts persist this choice server-side. Do not let an
+        // old browser-local empty list hide every newly enabled field after an
+        // upgrade; an unset account deliberately defaults to showing all.
+        setVisibleCustomColumnIds(null);
       }
       if (me?.catalog?.custom_field_labels) {
         setCustomFieldLabels(me.catalog.custom_field_labels);
