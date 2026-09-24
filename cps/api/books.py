@@ -20,7 +20,7 @@ from ..services import user_cover
 from ..helper import edit_book_read_status, book_in_progress_ids, book_is_in_progress, \
     get_convert_options, get_kosync_progress_display, \
     SQLITE_IN_CHUNK_SIZE as _SQLITE_IN_CHUNK
-from ..sort_orders import BOOK_SORT_ORDERS, book_sort_order, viewer_id
+from ..sort_orders import BOOK_SORT_ORDERS, RECENT_SORT, book_sort_order, viewer_id
 from ..custom_column_sort import (resolve as resolve_custom_column_sort, sortable_columns,
                                   load_configured_columns)
 from ..usermanagement import login_required_if_no_ano
@@ -80,7 +80,7 @@ def _original_filename(book_id):
 SORT_MAP = BOOK_SORT_ORDERS
 # Download-count ordering runs against app.db and is intentionally unavailable
 # to the metadata.db-backed generic list/filter queries below.
-_COMPATIBLE_BOOK_SORTS = frozenset(set(SORT_MAP) - {"hotasc", "hotdesc"})
+_COMPATIBLE_BOOK_SORTS = frozenset((set(SORT_MAP) - {"hotasc", "hotdesc"}) | {RECENT_SORT})
 
 
 def _sort_context(requested_sort):
