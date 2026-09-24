@@ -50,7 +50,6 @@ from .custom_column_sort import (
     load_configured_columns,
     resolve as resolve_custom_column_sort,
     resolve_magic_shelf_sort,
-    resolve as resolve_custom_column_sort,
     sortable_columns,
 )
 from .redirect import get_redirect_location
