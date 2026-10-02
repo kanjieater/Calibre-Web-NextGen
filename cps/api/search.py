@@ -14,7 +14,7 @@ from flask_babel import gettext as _
 from sqlalchemy import func
 
 from . import api_v1
-from .books import MAX_SELECT_ALL_BOOKS, SORT_MAP, _rows_to_items, _selection_response
+from .books import MAX_SELECT_ALL_BOOKS, SORT_MAP, _rows_to_items, _selection_response, _list_custom_column_data
 from .. import calibre_db, config, db
 from ..cw_login import current_user
 from ..usermanagement import login_required_if_no_ano
@@ -229,8 +229,10 @@ def advanced_search():
                     .replace("Read Status = 'False'", "Unread"))
     criteria_str = _humanize_bool_criteria(criteria_str, columns)
 
+    custom_column_definitions, _custom_column_values = _list_custom_column_data([])
     return jsonify({
         "items": _rows_to_items(rows),
+        "custom_column_definitions": custom_column_definitions,
         "page": page,
         "per_page": per_page,
         "total": total,

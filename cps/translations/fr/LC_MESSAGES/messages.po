@@ -19059,3 +19059,15 @@ msgstr "Afficher la section Lu / Non lu"
 #~ msgstr ""
 #~ "Les livres doivent d'abord être archivés et l'appareil synchronisé avant "
 #~ "qu'un livre puisse être supprimé en tout sécurité."
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr "Nom d’affichage personnalisé"
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr "Champs personnalisés sur les fiches de livres"
+
+#: cps/spa_strings.py
+msgid "Display name for {name}"
+msgstr "Nom d’affichage pour {name}"

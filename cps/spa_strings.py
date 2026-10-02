@@ -643,6 +643,11 @@ _("Keep the imported file name visible on book detail pages.")
 _("Shows the name a book had when it was imported.")
 
 
+# #2115 — custom-column display controls in the SPA catalog.
+_("Custom display name")
+_("Custom fields on book cards")
+_("Display name for {name}")
+
 # ==== BEGIN AUTOGEN (scripts/extract_spa_strings.py --write) ====
 # Auto-anchored SPA-only msgids — every t('literal') and static label
 # property in frontend/src that

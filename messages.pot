@@ -16583,3 +16583,15 @@ msgstr ""
 msgid "Show Read/Unread Section"
 msgstr ""
 
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Display name for {name}"
+msgstr ""
