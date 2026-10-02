@@ -306,6 +306,10 @@ def _exercise_real_custom_relationships():
     ub.searched_ids = {}
     app = flask.Flask(__name__)
     app.secret_key = "fixture"
+    # The signed export snapshot imports translated API/task labels, so this
+    # isolated app needs the same Babel initialization as the real Flask app.
+    from flask_babel import Babel
+    Babel(app)
     try:
         with app.test_request_context():
             for direction, low, high, expected in [

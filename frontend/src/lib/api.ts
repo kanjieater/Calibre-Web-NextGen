@@ -1104,6 +1104,7 @@ export async function apiPostDownload(
     classifiedFetch(path, {
       method: 'POST',
       credentials: 'include',
+      signal: options?.signal,
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     }, options);
