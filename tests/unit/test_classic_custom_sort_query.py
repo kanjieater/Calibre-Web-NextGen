@@ -104,22 +104,17 @@ def test_format_none_runs_custom_join_and_excludes_books_with_formats(classic_li
     assert result["pagination"].total_count == 5
 
 
-def test_hierarchical_category_runs_custom_join(classic_library, monkeypatch):
-    from cps import db, web
-    classic_library.session.execute(db.Tags.__table__.insert(), {"id": 9, "name": "Node"})
-    classic_library.session.execute(db.books_tags_link.insert(),
-        [{"book": i, "tag": 9} for i in [1, 3, 4, 5]])
-    classic_library.session.commit()
-    monkeypatch.setattr(web, "getattr", lambda obj, name, *default:
-        db.Books.tags if obj is db.Books and name == "custom_column_5" else getattr(obj, name, *default),
-        raising=False)
-    monkeypatch.setattr(web, "browsable_cc_column", lambda _id: ColumnDefinition(5, "text", name="Topics"))
-    monkeypatch.setattr(classic_library.library, "get_hierarchical_tree",
-        lambda _id: [{"name": "Node", "path": "Node", "children": []}])
-    monkeypatch.setattr(classic_library.library, "hierarchical_cc_filter", lambda *_: db.Tags.id == 9)
-    result = web.render_cc_category(1, 5, "Node", web._sort_context("cc-12-asc", "cc_5"))
-    assert [row.Books.id for row in result["entries"]] == [4, 1, 3, 5]
-    assert result["pagination"].total_count == 4
+def test_real_custom_relationship_filter_and_sort_sql():
+    # Production setup_db_cc_classes extends process-global Books mappings.
+    # Run that actual setup in an owned finite child so other tests keep theirs.
+    import subprocess
+    import sys
+    result = subprocess.run([sys.executable, "-c",
+        "from tests.unit.test_classic_custom_sort_query import _exercise_real_custom_relationships; "
+        "_exercise_real_custom_relationships()"], capture_output=True, text=True,
+        cwd=Path(__file__).resolve().parents[2], timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "real custom relationships: numeric ranges and hierarchy passed" in result.stdout
 
 
 def template_environment():
@@ -234,3 +229,105 @@ def test_global_menu_links_use_actual_global_route_and_preserve_search(recent_mi
         assert keys == ["recent-missing"]
     else:
         assert set(keys) == {"new", "old", "abc", "zyx", "authaz", "authza", "pubnew", "pubold", "cc-12-asc", "cc-12-desc"}
+
+
+def test_author_menu_offers_both_custom_directions_on_actual_author_route():
+    from urllib.parse import urlsplit
+    from cps import web
+    app = flask.Flask(__name__)
+    app.register_blueprint(web.web)
+    env = template_environment()
+    env.globals.update(url_for=flask.url_for,
+        classic_sort_columns=lambda: [ColumnDefinition(12, name="Difficulty")])
+    env.globals["current_user"].get_view_property = lambda *_: None
+    with app.test_request_context():
+        html = env.from_string("{% import '_book_organizer.html' as o with context %}"
+            "{{ o.author_organizer(37, 'cc-12-desc') }}").render()
+        links = MenuLinks()
+        links.feed(html)
+        adapter = app.url_map.bind("localhost")
+        choices = []
+        for url in links.urls:
+            if url.startswith("#"):
+                continue
+            endpoint, values = adapter.match(urlsplit(url).path)
+            assert endpoint == "web.books_list"
+            assert values["data"] == "author" and values["book_id"] == "37"
+            choices.append(values["sort_param"])
+    assert "cc-12-asc" in choices and "cc-12-desc" in choices
+    assert '<span class="book-organizer-label">Difficulty ↓</span>' in html.split('<ul class="dropdown-menu', 1)[0]
+
+
+def _exercise_real_custom_relationships():
+    from cps import db, web, search, ub, custom_column_sort
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    engine = create_engine("sqlite://")
+    with engine.begin() as connection:
+        connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS calibre")
+    columns = [ColumnDefinition(12, "int", name="Difficulty"), ColumnDefinition(5, "text", name="Topics")]
+    db.CalibreDB.setup_db_cc_classes(columns)
+    db.Base.metadata.create_all(engine)
+    ub.Base.metadata.create_all(engine)
+    with engine.begin() as connection:
+        connection.execute(db.Books.__table__.insert(), [
+            {"id": i, "title": f"Book {i}", "sort": f"Book {i}", "author_sort": "", "path": "."}
+            for i in range(1, 7)])
+        connection.execute(db.CustomColumns.__table__.insert(), [
+            {"id": column.id, "name": column.name, "datatype": column.datatype,
+             "is_multiple": False, "mark_for_delete": False} for column in columns])
+        difficulty = db.cc_classes[12]
+        connection.execute(difficulty.__table__.insert(), [
+            {"id": i, "book": i, "value": value} for i, value in [(1,20),(2,20),(3,None),(4,10),(6,20)]])
+        topics = db.cc_classes[5]
+        connection.execute(topics.__table__.insert(), [
+            {"id": 1, "value": "Node"}, {"id": 2, "value": "Node.Child"},
+            {"id": 3, "value": "NodeX"}, {"id": 4, "value": "Node.Child.Grand"}])
+        links = db.Base.metadata.tables["books_custom_column_5_link"]
+        connection.execute(links.insert(), [
+            {"book": book, "value": value} for book, value in [(1,1),(3,2),(4,4),(5,1),(6,3)]])
+    session = sessionmaker(bind=engine)()
+    library = db.CalibreDB()
+    library.session = session
+    library.config = config = SimpleNamespace(config_sortable_custom_columns="12",
+        config_books_per_page=20, config_read_column=0, config_columns_to_ignore="")
+    user = SimpleNamespace(id=7, is_anonymous=False, filter_language=lambda: "all",
+        show_detail_random=lambda: False, check_visibility=lambda *_: True,
+        get_view_property=lambda *_: None, set_view_property=lambda *_: None)
+    library.common_filters = lambda *args, **kwargs: true()
+    for module in [web, search, custom_column_sort]:
+        module.calibre_db = library
+        module.config = config
+    for module in [db, web, search, ub]:
+        module.current_user = user
+    for module in [web, search]:
+        module.render_title_template = lambda _template, **context: context
+        module._ = lambda message, **values: message % values if values else message
+    ub.searched_ids = {}
+    app = flask.Flask(__name__)
+    app.secret_key = "fixture"
+    try:
+        with app.test_request_context():
+            for direction, low, high, expected in [
+                    ("asc", 15, 25, [1,2,6]), ("desc", 15, 25, [6,2,1]),
+                    ("asc", 10, 10, [4]), ("desc", 10, 10, [4])]:
+                term = {"title": "Book", "read_status": "Any", "authors": "", "publisher": "",
+                    "custom_column_12_low": str(low), "custom_column_12_high": str(high)}
+                for element in ["tag", "serie", "shelf", "language", "extension"]:
+                    term["include_" + element] = []
+                    term["exclude_" + element] = []
+                result = search.render_adv_search_results(term, offset=0, limit=20,
+                    order=web._sort_context(f"cc-12-{direction}", "advsearch"))
+                assert [row.Books.id for row in result["entries"]] == expected
+                assert result["result_count"] == len(expected)
+                assert ub.searched_ids[7] == expected
+            # Real tree loading, custom text relationship.any(), and subtree filter.
+            for direction, expected in [("asc", [4,1,3,5]), ("desc", [1,4,5,3])]:
+                result = web.render_cc_category(1, 5, "Node",
+                    web._sort_context(f"cc-12-{direction}", "cc_5"))
+                assert [row.Books.id for row in result["entries"]] == expected
+                assert result["pagination"].total_count == 4
+        print("real custom relationships: numeric ranges and hierarchy passed")
+    finally:
+        session.close()
+        engine.dispose()

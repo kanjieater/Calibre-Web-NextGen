@@ -6,6 +6,8 @@ these columns in Calibre first. Text, enumeration and multiple-value columns
 are excluded because this feature needs one numeric or date value per book.
 No columns are enabled by default. The existing custom-column ignore expression
 takes precedence: hidden fields are excluded from sorting and list responses.
+Hiding a field does not erase the administrator's enabled selection; removing the
+ignore expression makes that enabled field available again.
 
 An enabled column adds ascending and descending choices to compatible library,
 search, category and global-library lists. The New UI also keeps those choices

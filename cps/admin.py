@@ -744,7 +744,8 @@ def view_configuration():
     restrict_columns = calibre_db.session.query(db.CustomColumns) \
         .filter(db.CustomColumns.datatype.in_(RESTRICTION_DATATYPES)) \
         .filter(db.CustomColumns.mark_for_delete == 0).all()
-    sortable_columns = load_eligible_columns(config) or []
+    # Display-ignore policy hides reader fields, not the administrator's choices.
+    sortable_columns = load_eligible_columns() or []
     languages = calibre_db.speaking_language()
     translations = get_available_locale()
     return render_title_template("config_view_edit.html", conf=config, readColumns=read_column,
@@ -1130,10 +1131,11 @@ def update_view_configuration():
 
     _config_string(to_save, "config_calibre_web_title")
     _config_string(to_save, "config_columns_to_ignore")
+    # Preserve valid choices across temporary hides and invalid ignore patterns.
     persist_configured_columns(
         config,
         request.form.getlist("config_sortable_custom_columns"),
-        load_eligible_columns(config),
+        load_eligible_columns(),
     )
     if _config_string(to_save, "config_title_regex"):
         # title_sort UDF reads ``CalibreDB.config.config_title_regex`` at

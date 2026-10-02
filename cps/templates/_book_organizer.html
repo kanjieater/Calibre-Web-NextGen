@@ -318,6 +318,18 @@
    'label': _('Published, oldest first'),
    'url': url_for('web.books_list', data='author', book_id=id, sort_param='pubold')},
 ] %}
+{% set custom_opts = namespace(items=[]) %}
+{% for column in (classic_sort_columns() if classic_sort_columns is defined else []) %}
+  {% for direction, arrow in [('asc', '↑'), ('desc', '↓')] %}
+    {% set key = 'cc-' ~ column.id ~ '-' ~ direction %}
+    {% set custom_opts.items = custom_opts.items + [
+      {'key': key, 'icons': ['glyphicon-sort-by-order' if direction == 'asc' else 'glyphicon-sort-by-order-alt'],
+       'label': column.name ~ ' ' ~ arrow,
+       'url': url_for('web.books_list', data='author', book_id=id, sort_param=key)},
+    ] %}
+  {% endfor %}
+{% endfor %}
+{% set opts = opts + custom_opts.items %}
 {{ organizer_bar(active_key=order, sort_options=opts,
                  can_delete=can_delete, can_edit_public_shelf=can_edit_public_shelf, shelves=shelves) }}
 {% endmacro %}
