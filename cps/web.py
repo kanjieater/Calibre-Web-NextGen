@@ -54,7 +54,6 @@ from .custom_column_sort import (
     load_configured_columns,
     resolve as resolve_custom_column_sort,
     resolve_magic_shelf_sort,
-    sortable_columns,
 )
 from .redirect import get_redirect_location
 from .cw_babel import get_available_locale, get_available_translations, sanitize_locale_for_write
@@ -714,7 +713,7 @@ def _sort_context(sort_param, data):
 
 def _sort_join(order):
     """The optional direct custom-column outer join from a sort context."""
-    return order[2]
+    return order[2] if order and len(order) > 2 else ()
 
 
 def _category_order(order, *secondary):
@@ -728,10 +727,16 @@ def _sortable_custom_columns():
     if session is None:
         return []
     try:
-        return sortable_columns(session.query(db.CustomColumns).all(), config)
+        return load_configured_columns(config) or []
     except (SQLAlchemyError, AttributeError):
         log.warning("Sortable custom-column definitions unavailable", exc_info=True)
         return []
+
+
+@web.app_context_processor
+def classic_sort_template_context():
+    # Resolve only when a compatible book organizer renders its menu.
+    return {"classic_sort_columns": _sortable_custom_columns}
 
 
 def cwa_get_library_location() -> str:
@@ -1103,7 +1108,7 @@ def render_series_books(page, book_id, order):
         entries, random, pagination = calibre_db.fill_indexpage(page, 0,
                                                                 db.Books,
                                                                 db.Series.name == None,
-                                                                list(order[0]) if _sort_join(order) else [order[0][0]],
+                                                                _category_order(order),
                                                                 True, config.config_read_column,
                                                                 db.books_series_link,
                                                                 db.Books.id == db.books_series_link.c.book,
@@ -1116,7 +1121,7 @@ def render_series_books(page, book_id, order):
             entries, random, pagination = calibre_db.fill_indexpage(page, 0,
                                                                     db.Books,
                                                                     db.Books.series.any(db.Series.id == book_id),
-                                                                    list(order[0]) if _sort_join(order) else [order[0][0]],
+                                                                    _category_order(order),
                                                                     True, config.config_read_column,
                                                                     *_sort_join(order))
             series_name = series_name.name
@@ -1132,7 +1137,7 @@ def render_ratings_books(page, book_id, order):
         entries, random, pagination = calibre_db.fill_indexpage(page, 0,
                                                                 db.Books,
                                                                 db_filter,
-                                                                list(order[0]) if _sort_join(order) else [order[0][0]],
+                                                                _category_order(order),
                                                                 True, config.config_read_column,
                                                                 db.books_ratings_link,
                                                                 db.Books.id == db.books_ratings_link.c.book,
@@ -1145,7 +1150,7 @@ def render_ratings_books(page, book_id, order):
             entries, random, pagination = calibre_db.fill_indexpage(page, 0,
                                                                     db.Books,
                                                                     db.Books.ratings.any(db.Ratings.id == book_id),
-                                                                    list(order[0]) if _sort_join(order) else [order[0][0]],
+                                                                    _category_order(order),
                                                                     True, config.config_read_column,
                                                                     *_sort_join(order))
             title = _("Rating: %(rating)s stars", rating=int(name.rating / 2))
@@ -1160,10 +1165,10 @@ def render_formats_books(page, book_id, order):
         name = _("None")
         entries, random, pagination = calibre_db.fill_indexpage(page, 0,
                                                                 db.Books,
-                                                                db.Data.format == None,
-                                                                list(order[0]) if _sort_join(order) else [order[0][0]],
+                                                                or_(~db.Books.data.any(),
+                                                                    db.Books.data.any(db.Data.format == None)),
+                                                                _category_order(order),
                                                                 True, config.config_read_column,
-                                                                db.Data,
                                                                 *_sort_join(order))
 
     else:
@@ -1174,7 +1179,7 @@ def render_formats_books(page, book_id, order):
                                                                     db.Books,
                                                                     db.Books.data.any(
                                                                         db.Data.format == book_id.upper()),
-                                                                    list(order[0]) if _sort_join(order) else [order[0][0]],
+                                                                    _category_order(order),
                                                                     True, config.config_read_column,
                                                                     *_sort_join(order))
         else:
@@ -1236,7 +1241,7 @@ def render_language_books(page, name, order):
         entries, random, pagination = calibre_db.fill_indexpage(page, 0,
                                                                 db.Books,
                                                                 db.Languages.lang_code == None,
-                                                                list(order[0]) if _sort_join(order) else [order[0][0]],
+                                                                _category_order(order),
                                                                 True, config.config_read_column,
                                                                 db.books_languages_link,
                                                                 db.Books.id == db.books_languages_link.c.book,
@@ -1246,7 +1251,7 @@ def render_language_books(page, name, order):
         entries, random, pagination = calibre_db.fill_indexpage(page, 0,
                                                                 db.Books,
                                                                 db.Books.languages.any(db.Languages.lang_code == name),
-                                                                list(order[0]) if _sort_join(order) else [order[0][0]],
+                                                                _category_order(order),
                                                                 True, config.config_read_column,
                                                                 *_sort_join(order))
     return render_title_template('index.html', random=random, entries=entries, pagination=pagination, id=name,
@@ -2644,7 +2649,7 @@ def cc_category_list(column_id, category_path):
     /custom_column/5/Computers           -> books under 'Computers' (+ descendants)
     /custom_column/5/Computers/DB        -> books under 'Computers.DB'
     """
-    order = get_sort_function(request.args.get('sort_param', 'stored'), 'cc_%d' % column_id)
+    order = _sort_context(request.args.get('sort_param', 'stored'), 'cc_%d' % column_id)
     return render_cc_category(request.args.get('page', 1), column_id,
                               category_path, order)
 
@@ -2695,7 +2700,8 @@ def render_cc_category(page, col_id, path, order):
             True, config.config_read_column,
             db.books_series_link,
             db.Books.id == db.books_series_link.c.book,
-            db.Series)
+            db.Series,
+            *_sort_join(order))
         # Prepend the column root as first crumb so every level can step back
         # up to /custom_column/<id>
         return render_title_template(

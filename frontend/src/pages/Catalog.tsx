@@ -1,3 +1,4 @@
+import { readGuestCustomFields, readGuestCustomLabels, customFieldsForSave, GUEST_CUSTOM_FIELDS_KEY, GUEST_CUSTOM_LABELS_KEY } from '../lib/customColumnDisplay';
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearch, useLocation } from 'wouter';
@@ -363,19 +364,12 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   // `null` means show every administrator-enabled field. Signed-in readers
   // follow their account; guest choices remain local to this browser.
-  const readGuestCustomFields = () => {
-    try {
-      const stored = localStorage.getItem('cwng:catalog-custom-fields-v1');
-      const parsed: unknown = stored ? JSON.parse(stored) : null;
-      return Array.isArray(parsed) && parsed.every((id) => Number.isInteger(id)) ? parsed as number[] : null;
-    } catch { return null; }
-  };
   const customFieldOwner = me && !me.role?.anonymous ? me.id : 'guest';
   const customFieldPreviousOwner = useRef(customFieldOwner);
   const [visibleCustomColumnIds, setVisibleCustomColumnIds] = useState<number[] | null>(
     () => customFieldOwner === 'guest' ? readGuestCustomFields() : me?.catalog?.custom_field_ids ?? null);
   const [customFieldLabels, setCustomFieldLabels] = useState<Record<string, string>>(
-    () => customFieldOwner === 'guest' ? {} : me?.catalog?.custom_field_labels ?? {});
+    () => customFieldOwner === 'guest' ? readGuestCustomLabels() : me?.catalog?.custom_field_labels ?? {});
   useEffect(() => {
     const ownerChanged = customFieldPreviousOwner.current !== customFieldOwner;
     customFieldPreviousOwner.current = customFieldOwner;
@@ -385,7 +379,7 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
       setVisibleCustomColumnIds(customFieldOwner === 'guest'
         ? readGuestCustomFields() : me?.catalog?.custom_field_ids ?? null);
       setCustomFieldLabels(customFieldOwner === 'guest'
-        ? {} : me?.catalog?.custom_field_labels ?? {});
+        ? readGuestCustomLabels() : me?.catalog?.custom_field_labels ?? {});
     }
   }, [customFieldOwner, me?.catalog?.custom_field_ids, me?.catalog?.custom_field_labels,
       updateCatalogCustomFields.isPending]);
@@ -685,10 +679,8 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     ? customColumnDefinitions
     : customColumnDefinitions.filter((column) => visibleCustomColumnIds.includes(column.id));
   const saveCustomFields = (ids: number[], labels = customFieldLabels) => {
-    if (me && !me.role?.anonymous) updateCatalogCustomFields.mutate({
-      custom_column_ids: ids,
-      custom_column_labels: labels,
-    }, { onError: () => announce(t('Could not save.'), { assertive: true }) });
+    if (me && !me.role?.anonymous) updateCatalogCustomFields.mutate(
+      customFieldsForSave(data?.custom_column_definitions ?? [], ids, labels), { onError: () => announce(t('Could not save.'), { assertive: true }) });
   };
   const toggleCustomColumn = (id: number) => {
     const selected = new Set(visibleCustomColumnIds ?? customColumnDefinitions.map((column) => column.id));
@@ -696,7 +688,7 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     const next = [...selected];
     setVisibleCustomColumnIds(next);
     if (customFieldOwner === 'guest') {
-      try { localStorage.setItem('cwng:catalog-custom-fields-v1', JSON.stringify(next)); } catch { /* unavailable */ }
+      try { localStorage.setItem(GUEST_CUSTOM_FIELDS_KEY, JSON.stringify(next)); } catch { /* unavailable */ }
     }
     saveCustomFields(next);
   };
@@ -704,6 +696,9 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     const next = { ...customFieldLabels, [String(id)]: value };
     if (!value.trim()) delete next[String(id)];
     setCustomFieldLabels(next);
+    if (customFieldOwner === 'guest') {
+      try { localStorage.setItem(GUEST_CUSTOM_LABELS_KEY, JSON.stringify(next)); } catch { /* unavailable */ }
+    }
     const ids = visibleCustomColumnIds ?? customColumnDefinitions.map((column) => column.id);
     saveCustomFields(ids, next);
   };

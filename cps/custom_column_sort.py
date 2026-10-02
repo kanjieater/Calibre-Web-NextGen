@@ -67,11 +67,23 @@ def eligible_columns(columns: Iterable[Any]) -> list[Any]:
     return [column for column in columns if _is_eligible(column)]
 
 
+def visible_columns(columns: Iterable[Any], config) -> list[Any]:
+    """Respect the existing administrator display-ignore policy before sorting."""
+    ignored = getattr(config, "config_columns_to_ignore", "") or ""
+    try:
+        pattern = re.compile(ignored) if ignored else None
+    except re.error:
+        log.warning("Invalid custom-column ignore pattern; refusing custom fields")
+        return []
+    return [column for column in columns
+            if not pattern or not pattern.match(getattr(column, "name", ""))]
+
+
 def configured_columns(columns: Iterable[Any], config) -> list[Any]:
     """Return eligible live definitions selected by the administrator."""
     configured = configured_column_ids(config)
     return [
-        column for column in eligible_columns(columns)
+        column for column in visible_columns(eligible_columns(columns), config)
         if getattr(column, "id", None) in configured
     ]
 
@@ -83,7 +95,7 @@ def _query_columns(query):
         return query.all()
 
 
-def load_eligible_columns() -> list[Any] | None:
+def load_eligible_columns(config=None) -> list[Any] | None:
     """Load selectable definitions, or ``None`` when the library is unavailable."""
     try:
         query = calibre_db.session.query(db.CustomColumns).filter(
@@ -91,7 +103,7 @@ def load_eligible_columns() -> list[Any] | None:
             db.CustomColumns.is_multiple.is_(False),
             db.CustomColumns.mark_for_delete.is_(False),
         ).order_by(db.CustomColumns.name, db.CustomColumns.id)
-        return eligible_columns(_query_columns(query))
+        return visible_columns(eligible_columns(_query_columns(query)), config)
     except (SQLAlchemyError, AttributeError):
         log.warning("Sortable custom-column definitions unavailable", exc_info=True)
         return None
@@ -183,7 +195,8 @@ def resolve_magic_shelf_sort(
         (column for column in columns if getattr(column, "id", None) == column_id),
         None,
     )
-    if live_column is None or not _is_eligible(live_column):
+    if (live_column is None or not _is_eligible(live_column)
+            or not visible_columns([live_column], config)):
         return _default_sort()
 
     model = db.cc_classes.get(column_id)

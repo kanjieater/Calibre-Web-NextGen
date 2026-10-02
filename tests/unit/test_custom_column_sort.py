@@ -524,3 +524,25 @@ def test_classic_route_persists_real_fallback_but_not_outage_fallback():
     assert outage_result["order"] == "new"
     assert persisted == [("magicshelf", "stored", "new")]
     assert invalid_result["order"] == "new"
+
+
+def test_ignored_configured_column_has_no_display_values_or_sort_options(sortable_library, monkeypatch):
+    from cps import calibre_db, custom_column_sort
+    from cps.api import books
+    engine, _difficulty, _decoy = sortable_library
+    definition = ColumnDefinition(12, name="Internal score")
+    config = SimpleNamespace(config_sortable_custom_columns="12", config_columns_to_ignore="")
+    with sessionmaker(bind=engine)() as session:
+        monkeypatch.setattr(calibre_db, "session", session)
+        monkeypatch.setattr(custom_column_sort, "_query_columns", lambda _query: [definition])
+        monkeypatch.setattr(books, "config", config)
+        definitions, values = books._list_custom_column_data([SimpleNamespace(id=1)])
+        assert definitions == [{"id": 12, "name": "Internal score", "datatype": "int"}]
+        assert values == {1: {"12": [{"value": 20, "extra": None}]}}
+        config.config_columns_to_ignore = "Internal.*"
+        assert custom_column_sort.configured_columns([definition], config) == []
+        assert custom_column_sort.custom_sort_options(config) == []
+        definitions, values = books._list_custom_column_data([SimpleNamespace(id=1)])
+        assert definitions == [] and values == {1: {}}
+        assert custom_column_sort.resolve_magic_shelf_sort("cc-12-asc", config).key == "new"
+        assert custom_column_sort.resolve_magic_shelf_sort("cc-12-asc", config, [definition]).key == "new"

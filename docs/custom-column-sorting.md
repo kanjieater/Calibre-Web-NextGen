@@ -4,7 +4,8 @@ Administrators can enable existing scalar integer, decimal and date custom
 columns under **Admin → UI Configuration → Custom columns → Sort by**. Create
 these columns in Calibre first. Text, enumeration and multiple-value columns
 are excluded because this feature needs one numeric or date value per book.
-No columns are enabled by default.
+No columns are enabled by default. The existing custom-column ignore expression
+takes precedence: hidden fields are excluded from sorting and list responses.
 
 An enabled column adds ascending and descending choices to compatible library,
 search, category and global-library lists. The New UI also keeps those choices
@@ -18,11 +19,12 @@ The New UI shows enabled fields on book cards and in its table. Open the library
 **View settings → Custom fields on book cards** to hide fields or give them a
 personal display name. An empty display name restores the administrator's name.
 Signed-in readers save these preferences to their own account; they apply to
-other New UI cards and table columns. Guest catalog selections stay in that
-browser. Display labels are plain text and limited to 80 characters.
+other New UI cards and table columns. Guest field selections and display labels stay in that
+browser and apply to compatible New UI cards and table columns. Display labels are plain text and limited to 80 characters.
 
 Removing or changing an enabled column makes a stale sort fall back to a built-in
-order. A temporary failure to read column definitions uses that safe order
+order. Removed fields are pruned from the next display-preference save, so a
+reader can keep changing the remaining fields. A temporary failure to read column definitions uses that safe order
 without erasing a reader's saved choice, so it can resume when the library is
 available again. This feature reads existing Calibre values; it does not change
 the column definitions or book metadata.

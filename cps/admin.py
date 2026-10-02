@@ -744,7 +744,7 @@ def view_configuration():
     restrict_columns = calibre_db.session.query(db.CustomColumns) \
         .filter(db.CustomColumns.datatype.in_(RESTRICTION_DATATYPES)) \
         .filter(db.CustomColumns.mark_for_delete == 0).all()
-    sortable_columns = load_eligible_columns() or []
+    sortable_columns = load_eligible_columns(config) or []
     languages = calibre_db.speaking_language()
     translations = get_available_locale()
     return render_title_template("config_view_edit.html", conf=config, readColumns=read_column,
@@ -1133,7 +1133,7 @@ def update_view_configuration():
     persist_configured_columns(
         config,
         request.form.getlist("config_sortable_custom_columns"),
-        load_eligible_columns(),
+        load_eligible_columns(config),
     )
     if _config_string(to_save, "config_title_regex"):
         # title_sort UDF reads ``CalibreDB.config.config_title_regex`` at
