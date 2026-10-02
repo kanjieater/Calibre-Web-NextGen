@@ -10642,6 +10642,108 @@ msgstr "Dit boek kon niet worden bijgewerkt. Probeer het opnieuw."
 msgid "Favorite"
 msgstr "Favoriet"
 
+# Uploaded reader fonts (#915).
+#: cps/spa_strings.py
+msgid ""
+"Choose fonts you are allowed to share with this server’s readers. Files stay "
+"in the configuration volume across upgrades."
+msgstr ""
+"Kies lettertypen die u met de lezers op deze server mag delen. De bestanden "
+"blijven bij updates op het configuratievolume staan."
+
+#: cps/spa_strings.py
+msgid "Could not load reader fonts."
+msgstr "De lettertypen voor de leesweergave konden niet worden geladen."
+
+#: cps/spa_strings.py
+msgid "Could not remove font."
+msgstr "Het lettertype kon niet worden verwijderd."
+
+#: cps/spa_strings.py
+msgid "Could not upload font."
+msgstr "Het lettertype kon niet worden geüpload."
+
+#: cps/spa_strings.py
+msgid "Display name (optional)"
+msgstr "Weergavenaam (optioneel)"
+
+#: cps/spa_strings.py
+msgid "Font file"
+msgstr "Lettertypebestand"
+
+#: cps/spa_strings.py
+msgid "Font file is too large."
+msgstr "Het lettertypebestand is te groot."
+
+#: cps/spa_strings.py
+msgid "Font is available in both EPUB readers."
+msgstr "Het lettertype is beschikbaar in beide EPUB-lezers."
+
+#: cps/spa_strings.py
+msgid "Font removed."
+msgstr "Lettertype verwijderd."
+
+#: cps/spa_strings.py
+msgid "No uploaded fonts yet."
+msgstr "Er zijn nog geen lettertypen geüpload."
+
+#: cps/spa_strings.py
+msgid "Reader fonts"
+msgstr "Lettertypen voor de leesweergave"
+
+#: cps/spa_strings.py
+msgid ""
+"Readers using this font return to Book default when they next open a book."
+msgstr ""
+"Lezers die dit lettertype gebruiken, krijgen weer het standaardlettertype "
+"van het boek wanneer ze een boek opnieuw openen."
+
+#: cps/spa_strings.py cps/templates/book_edit.html cps/templates/detail.html
+#: cps/templates/user_table.html
+msgid "Remove"
+msgstr "Verwijderen"
+
+#: cps/spa_strings.py
+msgid "Remove font"
+msgstr "Lettertype verwijderen"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "TTF, OTF, WOFF or WOFF2, up to {n} MiB per file."
+msgstr "TTF, OTF, WOFF of WOFF2, maximaal {n} MiB per bestand."
+
+#: cps/spa_strings.py
+msgid "Upload font"
+msgstr "Lettertype uploaden"
+
+#: cps/spa_strings.py
+msgid ""
+"Upload fonts once for everyone using the EPUB readers. Existing font choices "
+"stay available."
+msgstr ""
+"Upload lettertypen eenmalig voor iedereen die de EPUB-lezers gebruikt. De "
+"bestaande lettertypen blijven beschikbaar."
+
+#: cps/spa_strings.py
+msgid "Uploaded reader fonts"
+msgstr "Geüploade lettertypen voor de leesweergave"
+
+#: cps/spa_strings.py cps/templates/read.html
+msgid "Arial"
+msgstr "Arial"
+
+#: cps/spa_strings.py cps/templates/read.html
+msgid "KaiTi"
+msgstr "KaiTi"
+
+#: cps/spa_strings.py
+msgid "Microsoft YaHei"
+msgstr "Microsoft YaHei"
+
+#: cps/spa_strings.py cps/templates/read.html
+msgid "SimSun"
+msgstr "SimSun"
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "Wachten"
@@ -11643,6 +11745,10 @@ msgid "Edit Calibre Database Configuration"
 msgstr "Bewerk Calibre databaseconfiguratie"
 
 #: cps/templates/admin.html
+msgid "Manage reader fonts"
+msgstr ""
+
+#: cps/templates/admin.html
 #, fuzzy
 msgid "Scheduled Tasks&nbsp;&nbsp;⌛"
 msgstr "Geplande taken"
@@ -11994,11 +12100,6 @@ msgstr "Identificatie type"
 #: cps/templates/book_edit.html
 msgid "Identifier Value"
 msgstr "Identificatie waarde"
-
-#: cps/templates/book_edit.html cps/templates/detail.html
-#: cps/templates/user_table.html
-msgid "Remove"
-msgstr "Verwijderen"
 
 #: cps/templates/book_edit.html
 msgid "Add Identifier"
@@ -16152,18 +16253,6 @@ msgid "Yahei"
 msgstr "Yahei"
 
 #: cps/templates/read.html
-msgid "SimSun"
-msgstr "SimSun"
-
-#: cps/templates/read.html
-msgid "KaiTi"
-msgstr "KaiTi"
-
-#: cps/templates/read.html
-msgid "Arial"
-msgstr "Arial"
-
-#: cps/templates/read.html
 msgid "Spread"
 msgstr "Verspreiden"
 
@@ -18217,70 +18306,3 @@ msgstr "Toon gelezen/niet gelezen selectie"
 #~ msgstr ""
 #~ "Boeken moeten eerst worden gearchiveerd en het apparaat moet worden "
 #~ "gesynchroniseerd, voordat een boek veilig kan worden verwijderd."
-
-# Uploaded reader fonts (#915).
-msgid ""
-"Choose fonts you are allowed to share with this server’s readers. Files "
-"stay in the configuration volume across upgrades."
-msgstr ""
-"Kies lettertypen die u met de lezers op deze server mag delen. De "
-"bestanden blijven bij updates op het configuratievolume staan."
-
-msgid "Could not load reader fonts."
-msgstr "De lettertypen voor de leesweergave konden niet worden geladen."
-
-msgid "Could not remove font."
-msgstr "Het lettertype kon niet worden verwijderd."
-
-msgid "Could not upload font."
-msgstr "Het lettertype kon niet worden geüpload."
-
-msgid "Display name (optional)"
-msgstr "Weergavenaam (optioneel)"
-
-msgid "Font file"
-msgstr "Lettertypebestand"
-
-msgid "Font file is too large."
-msgstr "Het lettertypebestand is te groot."
-
-msgid "Font is available in both EPUB readers."
-msgstr "Het lettertype is beschikbaar in beide EPUB-lezers."
-
-msgid "Font removed."
-msgstr "Lettertype verwijderd."
-
-msgid "No uploaded fonts yet."
-msgstr "Er zijn nog geen lettertypen geüpload."
-
-msgid "Reader fonts"
-msgstr "Lettertypen voor de leesweergave"
-
-msgid "Readers using this font return to Book default when they next open a book."
-msgstr ""
-"Lezers die dit lettertype gebruiken, krijgen weer het standaardlettertype"
-" van het boek wanneer ze een boek opnieuw openen."
-
-msgid "Remove font"
-msgstr "Lettertype verwijderen"
-
-#, python-brace-format
-msgid "TTF, OTF, WOFF or WOFF2, up to {n} MiB per file."
-msgstr "TTF, OTF, WOFF of WOFF2, maximaal {n} MiB per bestand."
-
-msgid "Upload font"
-msgstr "Lettertype uploaden"
-
-msgid ""
-"Upload fonts once for everyone using the EPUB readers. Existing font "
-"choices stay available."
-msgstr ""
-"Upload lettertypen eenmalig voor iedereen die de EPUB-lezers gebruikt. De"
-" bestaande lettertypen blijven beschikbaar."
-
-msgid "Uploaded reader fonts"
-msgstr "Geüploade lettertypen voor de leesweergave"
-
-#: cps/spa_strings.py
-msgid "Microsoft YaHei"
-msgstr "Microsoft YaHei"
