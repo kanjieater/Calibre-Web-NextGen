@@ -22,7 +22,7 @@ from ..helper import edit_book_read_status, book_in_progress_ids, book_is_in_pro
     get_convert_options, get_kosync_progress_display, hot_books_page
 from ..sort_orders import BOOK_SORT_ORDERS, book_sort_order, viewer_id
 from ..sort_orders import RECENT_SORT
-from ..custom_column_sort import (resolve as resolve_custom_column_sort, sortable_columns,
+from ..custom_column_sort import (resolve_magic_shelf_sort, custom_sort_options,
                                   load_configured_columns)
 from ..usermanagement import login_required_if_no_ano
 
@@ -86,40 +86,15 @@ def _sort_context(requested_sort):
     A list request is also valid while no Calibre library session exists (for
     example, a fresh install). Do not turn that recoverable state into a 500.
     """
-    effective = requested_sort if requested_sort in _COMPATIBLE_BOOK_SORTS else "new"
-    session = calibre_db.session
-    if session is None:
-        return {
-            "sort": effective,
-            "order": _requested_order(effective),
-            "join": (),
-            "custom_sort_options": [],
-        }
-
-    # No configured custom sort can be selected, displayed, or resolved. Avoid
-    # a metadata query on the overwhelmingly common built-in-sort path.
-    configured = getattr(config, "config_sortable_custom_columns", "") or ""
-    if not configured:
-        return {
-            "sort": effective,
-            "order": _requested_order(effective),
-            "join": (),
-            "custom_sort_options": [],
-        }
-
-    columns = session.query(db.CustomColumns).all()
-    custom = resolve_custom_column_sort(requested_sort, config, columns)
-    effective = requested_sort if custom is not None or requested_sort in _COMPATIBLE_BOOK_SORTS else "new"
+    columns = load_configured_columns(config)
+    resolved = resolve_magic_shelf_sort(requested_sort, config, columns)
+    effective = requested_sort if requested_sort in _COMPATIBLE_BOOK_SORTS else resolved.key
     return {
         "sort": effective,
-        "order": custom[1] if custom is not None else _requested_order(effective),
-        "join": (custom[0], db.Books.id == custom[0].book) if custom else (),
-        "custom_sort_options": [
-            option for column in sortable_columns(columns, config) for option in (
-                {"value": f"cc-{column.id}-asc", "label": f"{column.name}, low to high"},
-                {"value": f"cc-{column.id}-desc", "label": f"{column.name}, high to low"},
-            )
-        ],
+        "order": list(resolved.order_by) if resolved.join else _requested_order(effective),
+        "join": resolved.join,
+        "sort_persistable": resolved.persistable,
+        "custom_sort_options": custom_sort_options(config, columns),
     }
 
 
@@ -127,7 +102,8 @@ def _with_sort(payload, context):
     # Definitions belong to the page, not every book. Keep them alongside the
     # sort metadata so every /books collection variant has the same contract.
     definitions, _values = _list_custom_column_data([])
-    payload.update(sort=context["sort"], custom_sort_options=context["custom_sort_options"],
+    payload.update(sort=context["sort"], sort_persistable=context["sort_persistable"],
+                   custom_sort_options=context["custom_sort_options"],
                    custom_column_definitions=definitions)
     return payload
 
@@ -437,7 +413,7 @@ def list_books():
         if select_all:
             query = calibre_db.search_query(
                 search, config, db.books_series_link,
-                db.Books.id == db.books_series_link.c.book, db.Series,
+                db.Books.id == db.books_series_link.c.book, db.Series, *custom_join,
                 allow_show_hidden=show_hidden,
             )
             id_query = query.with_entities(db.Books.id).distinct()

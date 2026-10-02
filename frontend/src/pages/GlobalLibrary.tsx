@@ -66,7 +66,8 @@ export function GlobalLibrary() {
   }, [listing.data, listing.isPlaceholderData, page]);
 
   useEffect(() => {
-    if (!listing.data || listing.isPlaceholderData || !listing.data.sort || listing.data.sort === sort) return;
+    if (!listing.data || listing.isPlaceholderData || listing.data.sort_persistable === false
+        || !listing.data.sort || listing.data.sort === sort) return;
     setSort(listing.data.sort);
   }, [listing.data, listing.isPlaceholderData, sort]);
 

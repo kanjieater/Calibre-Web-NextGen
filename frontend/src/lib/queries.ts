@@ -147,8 +147,9 @@ export function useUpdateCatalogCustomFields() {
     mutationFn: (update: CatalogCustomFieldsUpdate) => apiPost<{
       custom_field_ids: number[]; custom_field_labels: Record<string, string>;
     }>('/api/v1/account/catalog-custom-fields', update),
-    onSuccess: (data) => {
-      queryClient.setQueryData<Me | null>(['me'], (current) => current ? {
+    onMutate: () => ({ userId: queryClient.getQueryData<Me | null>(['me'])?.id }),
+    onSuccess: (data, _update, savedFor) => {
+      queryClient.setQueryData<Me | null>(['me'], (current) => current && current.id === savedFor?.userId ? {
         ...current,
         catalog: { ...current.catalog, default_filter: current.catalog?.default_filter ?? null,
           custom_field_ids: data.custom_field_ids,

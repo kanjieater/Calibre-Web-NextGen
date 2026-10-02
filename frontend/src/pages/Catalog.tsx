@@ -361,29 +361,33 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     = useShelfBadgesHidden({ onError: catalogPreferenceError });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
-  // `null` means a newly installed UI: show every administrator-enabled custom
-  // field until the reader chooses a smaller subset in View settings.
-  const [visibleCustomColumnIds, setVisibleCustomColumnIds] = useState<number[] | null>(() => {
+  // `null` means show every administrator-enabled field. Signed-in readers
+  // follow their account; guest choices remain local to this browser.
+  const readGuestCustomFields = () => {
     try {
       const stored = localStorage.getItem('cwng:catalog-custom-fields-v1');
       const parsed: unknown = stored ? JSON.parse(stored) : null;
-      return Array.isArray(parsed) && parsed.every((id) => Number.isInteger(id)) ? parsed : null;
+      return Array.isArray(parsed) && parsed.every((id) => Number.isInteger(id)) ? parsed as number[] : null;
     } catch { return null; }
-  });
-  const [customFieldLabels, setCustomFieldLabels] = useState<Record<string, string>>({});
+  };
+  const customFieldOwner = me && !me.role?.anonymous ? me.id : 'guest';
+  const customFieldPreviousOwner = useRef(customFieldOwner);
+  const [visibleCustomColumnIds, setVisibleCustomColumnIds] = useState<number[] | null>(
+    () => customFieldOwner === 'guest' ? readGuestCustomFields() : me?.catalog?.custom_field_ids ?? null);
+  const [customFieldLabels, setCustomFieldLabels] = useState<Record<string, string>>(
+    () => customFieldOwner === 'guest' ? {} : me?.catalog?.custom_field_labels ?? {});
   useEffect(() => {
-    // Scoped preference writes update /me after every serialized request. Do
-    // not let an intermediate, older server snapshot repaint the controls
-    // while a newer full-selection write is still queued.
-    if (!updateCatalogCustomFields.isPending) {
-      if (Array.isArray(me?.catalog?.custom_field_ids)) {
-        setVisibleCustomColumnIds(me.catalog.custom_field_ids);
-      }
-      if (me?.catalog?.custom_field_labels) {
-        setCustomFieldLabels(me.catalog.custom_field_labels);
-      }
+    const ownerChanged = customFieldPreviousOwner.current !== customFieldOwner;
+    customFieldPreviousOwner.current = customFieldOwner;
+    // Ignore intermediate save snapshots, but always clear the previous
+    // reader's state when the account changes, even during an in-flight save.
+    if (ownerChanged || !updateCatalogCustomFields.isPending) {
+      setVisibleCustomColumnIds(customFieldOwner === 'guest'
+        ? readGuestCustomFields() : me?.catalog?.custom_field_ids ?? null);
+      setCustomFieldLabels(customFieldOwner === 'guest'
+        ? {} : me?.catalog?.custom_field_labels ?? {});
     }
-  }, [me?.catalog?.custom_field_ids, me?.catalog?.custom_field_labels,
+  }, [customFieldOwner, me?.catalog?.custom_field_ids, me?.catalog?.custom_field_labels,
       updateCatalogCustomFields.isPending]);
   const [density, setDensity] = usePersistentChoice(
     'cwng:catalog-density-v1', ['comfortable', 'compact', 'dense'] as const, 'compact');
@@ -687,14 +691,14 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     }, { onError: () => announce(t('Could not save.'), { assertive: true }) });
   };
   const toggleCustomColumn = (id: number) => {
-    setVisibleCustomColumnIds((current) => {
-      const selected = new Set(current ?? customColumnDefinitions.map((column) => column.id));
-      if (selected.has(id)) selected.delete(id); else selected.add(id);
-      const next = [...selected];
+    const selected = new Set(visibleCustomColumnIds ?? customColumnDefinitions.map((column) => column.id));
+    if (selected.has(id)) selected.delete(id); else selected.add(id);
+    const next = [...selected];
+    setVisibleCustomColumnIds(next);
+    if (customFieldOwner === 'guest') {
       try { localStorage.setItem('cwng:catalog-custom-fields-v1', JSON.stringify(next)); } catch { /* unavailable */ }
-      saveCustomFields(next);
-      return next;
-    });
+    }
+    saveCustomFields(next);
   };
   const saveCustomFieldLabel = (id: number, value: string) => {
     const next = { ...customFieldLabels, [String(id)]: value };
@@ -707,7 +711,7 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
   // A saved custom sort can be removed by an administrator. Trust the server's
   // effective value so the controlled select never retains an absent option.
   useEffect(() => {
-    if (!data || isPlaceholderData || !data.sort || data.sort === sort) return;
+    if (!data || isPlaceholderData || data.sort_persistable === false || !data.sort || data.sort === sort) return;
     setSort(data.sort);
   }, [data, isPlaceholderData, sort]);
 

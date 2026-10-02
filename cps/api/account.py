@@ -431,7 +431,9 @@ def update_catalog_custom_fields():
     guard = _require_real_user()
     if guard:
         return guard
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return _err("invalid_request", "Custom fields must be an object", 400)
     selected = data.get("custom_column_ids")
     labels = data.get("custom_column_labels", {})
     if (not isinstance(selected, list)

@@ -365,6 +365,89 @@ def test_classic_sort_options_are_empty_without_a_calibre_session(monkeypatch):
     assert web._sortable_custom_columns() == []
 
 
+@pytest.mark.parametrize("requested,persistable", [("cc-12-asc", False), ("abc", True)])
+def test_catalog_metadata_outage_keeps_listing_sort_safe_and_reader_choice_retryable(
+        sortable_library, monkeypatch, requested, persistable):
+    """A real missing definition table must not 500 or erase a valid saved custom sort."""
+    from cps import db
+    from cps.api import books
+    engine, _difficulty, _decoy = sortable_library
+    session = sessionmaker(bind=engine)()
+    monkeypatch.setattr(books.calibre_db, "session", session)
+    monkeypatch.setattr(books, "config", SimpleNamespace(config_sortable_custom_columns="12"))
+    try:
+        context = books._sort_context(requested)
+        assert context["sort"] == ("new" if requested.startswith("cc-") else requested)
+        assert context["join"] == ()
+        assert context["custom_sort_options"] == []
+        assert context["sort_persistable"] is persistable
+        assert session.query(db.Books.id).count() == 6
+    finally:
+        session.close()
+
+
+def test_select_all_simple_search_uses_the_custom_sort_join(sortable_library, monkeypatch):
+    """Selecting custom-sorted search results must run valid SQL and keep missing values."""
+    from cps import db
+    from cps.api import books
+    engine, _difficulty, _decoy = sortable_library
+    session = sessionmaker(bind=engine)()
+    monkeypatch.setattr(books, "config", SimpleNamespace(
+        config_sortable_custom_columns="12", config_books_per_page=20))
+    monkeypatch.setattr(books, "load_configured_columns", lambda _config: [ColumnDefinition(12)])
+
+    def search_query(_term, _config, *_joins, **_kwargs):
+        query = session.query(db.Books).filter(db.Books.title.like("Book %"))
+        # The first three joins are the established Series search context;
+        # this seam exercises the SQL for the optional custom-column join.
+        if len(_joins) > 3:
+            query = query.outerjoin(*_joins[3:])
+        return query
+
+    monkeypatch.setattr(books.calibre_db, "search_query", search_query)
+    app = flask.Flask(__name__)
+    try:
+        with app.test_request_context("/api/v1/books?search=Book&sort=cc-12-asc&select_all=1"):
+            result = inspect.unwrap(books.list_books)().get_json()
+        assert result == {"ids": [4, 1, 2, 6, 3, 5], "total": 6}
+    finally:
+        session.close()
+
+
+@pytest.mark.parametrize("select_all", [False, True])
+def test_advanced_search_keeps_the_selected_custom_sort(
+        sortable_library, monkeypatch, select_all):
+    """Applying filters must preserve custom order in visible rows and Select all."""
+    from cps import db
+    from cps.api import books, search
+    engine, _difficulty, _decoy = sortable_library
+    session = sessionmaker(bind=engine)()
+    monkeypatch.setattr(books, "config", SimpleNamespace(
+        config_sortable_custom_columns="12", config_books_per_page=20))
+    monkeypatch.setattr(books, "load_configured_columns", lambda _config: [ColumnDefinition(12)])
+    monkeypatch.setattr(search, "config", SimpleNamespace(config_books_per_page=20))
+    monkeypatch.setattr(search.calibre_db, "get_cc_columns", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(search, "build_adv_search_query", lambda _term: (
+        session.query(db.Books.id).filter(db.Books.title.like("Book %")), "Title = Book"))
+    monkeypatch.setattr(search, "_rows_to_items", lambda rows: [{"id": row[0]} for row in rows])
+    monkeypatch.setattr(books, "_list_custom_column_data", lambda _rows: ([], {}))
+    app = flask.Flask(__name__)
+    try:
+        with app.test_request_context("/api/v1/search/advanced", method="POST", json={
+                "title": "Book", "sort": "cc-12-asc", "select_all": select_all}):
+            result = inspect.unwrap(search.advanced_search)().get_json()
+        if select_all:
+            assert result == {"ids": [4, 1, 2, 6, 3, 5], "total": 6}
+        else:
+            assert [item["id"] for item in result["items"]] == [4, 1, 2, 6, 3, 5]
+            assert result["sort"] == "cc-12-asc"
+            assert result["sort_persistable"] is True
+            assert [choice["value"] for choice in result["custom_sort_options"]] == [
+                "cc-12-asc", "cc-12-desc"]
+    finally:
+        session.close()
+
+
 def test_classic_route_persists_real_fallback_but_not_outage_fallback():
     from cps import web
     from flask_babel import Babel

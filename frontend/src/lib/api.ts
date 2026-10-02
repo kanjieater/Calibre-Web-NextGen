@@ -325,6 +325,7 @@ export interface BooksPage {
   total: number;
   /** Effective server-validated sort and enabled scalar custom-column choices. */
   sort?: string;
+  sort_persistable?: boolean;
   custom_sort_options?: { value: string; label: string }[];
   custom_column_definitions?: ListCustomColumnDefinition[];
 }
@@ -406,6 +407,7 @@ export interface AdvSearchResult {
   total: number;
   criteria: string;
   sort?: string;
+  sort_persistable?: boolean;
   custom_sort_options?: { value: string; label: string }[];
   custom_column_definitions?: ListCustomColumnDefinition[];
 }
