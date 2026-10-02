@@ -109,8 +109,12 @@ def load_eligible_columns(config=None) -> list[Any] | None:
         return None
 
 
-def load_configured_columns(config) -> list[Any] | None:
-    """Load configured definitions, or ``None`` when the library is unavailable."""
+def load_configured_columns(config, *, include_hidden=False) -> list[Any] | None:
+    """Load live configured definitions; hidden fields stay private by default.
+
+    Preference writes may include hidden definitions to retain existing choices
+    while the administrator temporarily suppresses their display.
+    """
     configured = configured_column_ids(config)
     if not configured:
         return []
@@ -118,7 +122,10 @@ def load_configured_columns(config) -> list[Any] | None:
         query = calibre_db.session.query(db.CustomColumns).filter(
             db.CustomColumns.id.in_(configured)
         ).order_by(db.CustomColumns.name, db.CustomColumns.id)
-        return configured_columns(_query_columns(query), config)
+        columns = _query_columns(query)
+        if include_hidden:
+            return eligible_columns(columns)
+        return configured_columns(columns, config)
     except (SQLAlchemyError, AttributeError):
         log.warning("Configured custom-column definitions unavailable", exc_info=True)
         return None

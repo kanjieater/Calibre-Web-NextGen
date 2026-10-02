@@ -132,6 +132,7 @@ export function useUpdateNamedPreferences() {
 }
 
 export interface CatalogCustomFieldsUpdate {
+  expected_user_id: number;
   custom_column_ids: number[];
   custom_column_labels: Record<string, string>;
 }
@@ -144,10 +145,16 @@ export function useUpdateCatalogCustomFields() {
     // serialized; otherwise an older snapshot may arrive last and erase a
     // newer checkbox choice.
     scope: { id: 'catalog-custom-fields' },
-    mutationFn: (update: CatalogCustomFieldsUpdate) => apiPost<{
-      custom_field_ids: number[]; custom_field_labels: Record<string, string>;
-    }>('/api/v1/account/catalog-custom-fields', update),
-    onMutate: () => ({ userId: queryClient.getQueryData<Me | null>(['me'])?.id }),
+    mutationFn: (update: CatalogCustomFieldsUpdate) => {
+      const currentId = queryClient.getQueryData<Me | null>(['me'])?.id;
+      if (currentId !== update.expected_user_id) {
+        throw new Error('Account changed before custom fields could be saved');
+      }
+      return apiPost<{
+        custom_field_ids: number[]; custom_field_labels: Record<string, string>;
+      }>('/api/v1/account/catalog-custom-fields', update);
+    },
+    onMutate: (update: CatalogCustomFieldsUpdate) => ({ userId: update.expected_user_id }),
     onSuccess: (data, _update, savedFor) => {
       queryClient.setQueryData<Me | null>(['me'], (current) => current && current.id === savedFor?.userId ? {
         ...current,

@@ -797,7 +797,7 @@ def render_books_list(data, sort_param, book_id, page):
     # Download history orders through app.db's user-specific download join;
     # retain that specialized shape rather than adding an ambiguous third join.
     if data == "download" and _sort_join(order):
-        order = _sort_context("new", data)
+        order = (BOOK_SORT_ORDERS["new"], "new", ())
     if data == "rated":
         return render_rated_books(page, book_id, order=order)
     elif data == "discover":

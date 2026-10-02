@@ -22,7 +22,7 @@ def preferences(monkeypatch, tmp_path):
                      ub.User(id=2, name="two", email="two@example.test", view_settings={})])
     session.commit()
     monkeypatch.setattr(ub, "session", session)
-    monkeypatch.setattr(account, "load_configured_columns", lambda _config: [SimpleNamespace(id=12)])
+    monkeypatch.setattr(account, "load_configured_columns", lambda _config, **_kwargs: [SimpleNamespace(id=12)])
     monkeypatch.setattr(account, "current_user", session.get(ub.User, 1))
     app = flask.Flask(__name__)
 
@@ -79,7 +79,7 @@ def test_custom_fields_commit_failure_rolls_back_both_choices(preferences, monke
 
 def test_guest_cannot_save_and_unavailable_columns_preserve_choices(preferences, monkeypatch):
     account, session, post = preferences
-    monkeypatch.setattr(account, "load_configured_columns", lambda _config: None)
+    monkeypatch.setattr(account, "load_configured_columns", lambda _config, **_kwargs: None)
     _body, status = post({"custom_column_ids": [12]})
     assert status == 503 and account.current_user.view_settings == {}
     monkeypatch.setattr(account, "current_user", SimpleNamespace(is_authenticated=True, is_anonymous=True))

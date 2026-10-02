@@ -363,6 +363,7 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     = useShelfBadgesHidden({ onError: catalogPreferenceError });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
+  const settingsTriggerRef = useRef<HTMLButtonElement>(null);
   // `null` means show every administrator-enabled field. Signed-in readers
   // follow their account; guest choices remain local to this browser.
   const customFieldOwner = me && !me.role?.anonymous ? me.id : 'guest';
@@ -519,7 +520,12 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     const onDoc = (e: MouseEvent) => {
       if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) setSettingsOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSettingsOpen(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSettingsOpen(false);
+        settingsTriggerRef.current?.focus();
+      }
+    };
     document.addEventListener('mousedown', onDoc);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -681,7 +687,7 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     : customColumnDefinitions.filter((column) => visibleCustomColumnIds.includes(column.id));
   const saveCustomFields = (ids: number[], labels = customFieldLabels) => {
     if (me && !me.role?.anonymous) updateCatalogCustomFields.mutate(
-      customFieldsForSave(data?.custom_column_definitions ?? [], ids, labels), { onError: () => announce(t('Could not save.'), { assertive: true }) });
+      { ...customFieldsForSave(data?.custom_column_definitions ?? [], ids, labels), expected_user_id: me.id }, { onError: () => announce(t('Could not save.'), { assertive: true }) });
   };
   const toggleCustomColumn = (id: number) => {
     const selected = new Set(visibleCustomColumnIds ?? customColumnDefinitions.map((column) => column.id));
@@ -1133,14 +1139,14 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
             <button
               type="button"
               data-testid="catalog-view-settings"
+              ref={settingsTriggerRef}
               className={settingsOpen ? styles.gearBtnActive : styles.gearBtn}
               onClick={() => setSettingsOpen((o) => !o)}
-              aria-haspopup="true"
               aria-expanded={settingsOpen}
               title={t('View settings')}
               aria-label={t('View settings')}
             >
-              <Settings size={15} />
+              <Settings size={15} aria-hidden="true" focusable={false} />
             </button>
             {settingsOpen && (
               <div ref={settingsMenuRef} className={styles.settingsMenu}

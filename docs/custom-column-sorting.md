@@ -33,3 +33,15 @@ the column definitions or book metadata.
 
 This extends [@kanjieater's contribution](https://github.com/new-usemame/Calibre-Web-NextGen/pull/2115)
 and the existing Magic Shelf custom-column resolver.
+
+Temporarily hiding an enabled field with the ignore expression also preserves a
+reader's existing display selection and label while other visible fields are
+edited. Hidden fields cannot be submitted as new selections. Removing or
+unconfiguring a field discards its saved choice. Once a reader has saved an
+explicit selection, newly enabled fields require that reader to select them;
+they do not appear automatically.
+
+Field saves are bound to the account that initiated the edit. A queued save is
+canceled when the app's account has changed, and the server rejects a request
+whose expected account differs from the authenticated session. This keeps an
+older edit from changing a later signed-in account.
