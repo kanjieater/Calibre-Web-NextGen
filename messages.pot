@@ -6868,6 +6868,10 @@ msgid ""
 "are never sent to trackers."
 msgstr ""
 
+#: cps/spa_strings.py cps/templates/read.html
+msgid "Literata"
+msgstr ""
+
 #: cps/spa_strings.py
 msgid "Load more"
 msgstr ""
@@ -16306,6 +16310,3 @@ msgstr ""
 msgid "Show Read/Unread Section"
 msgstr ""
 
-#: cps/spa_strings.py
-msgid "Literata"
-msgstr ""

@@ -6898,6 +6898,10 @@ msgid ""
 "never sent to trackers."
 msgstr ""
 
+#: cps/spa_strings.py cps/templates/read.html
+msgid "Literata"
+msgstr ""
+
 #: cps/spa_strings.py
 msgid "Load more"
 msgstr "載入更多"

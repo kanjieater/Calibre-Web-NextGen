@@ -7040,6 +7040,10 @@ msgstr ""
 "vesszővel elválasztva. Más trackert használó torrentek tiltva vannak. A "
 "forrás hitelesítő adatai soha nem kerülnek a trackerekhez."
 
+#: cps/spa_strings.py cps/templates/read.html
+msgid "Literata"
+msgstr ""
+
 #: cps/spa_strings.py
 msgid "Load more"
 msgstr "Továbbiak betöltése"

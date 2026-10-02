@@ -7231,6 +7231,10 @@ msgstr ""
 "gescheiden door komma’s. Torrents met andere trackers worden geblokkeerd. "
 "Inloggegevens van de bron worden nooit naar trackers gestuurd."
 
+#: cps/spa_strings.py cps/templates/read.html
+msgid "Literata"
+msgstr "Literata"
+
 #: cps/spa_strings.py
 msgid "Load more"
 msgstr "Meer laden"
@@ -18213,7 +18217,3 @@ msgstr "Toon gelezen/niet gelezen selectie"
 #~ msgstr ""
 #~ "Boeken moeten eerst worden gearchiveerd en het apparaat moet worden "
 #~ "gesynchroniseerd, voordat een boek veilig kan worden verwijderd."
-
-#: cps/spa_strings.py
-msgid "Literata"
-msgstr "Literata"

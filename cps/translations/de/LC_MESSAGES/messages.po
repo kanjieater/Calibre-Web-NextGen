@@ -7111,6 +7111,10 @@ msgstr ""
 "exakt und durch Kommas getrennt an. Torrents mit anderen Trackern werden "
 "blockiert. Zugangsdaten der Quelle werden nie an Tracker gesendet."
 
+#: cps/spa_strings.py cps/templates/read.html
+msgid "Literata"
+msgstr ""
+
 #: cps/spa_strings.py
 msgid "Load more"
 msgstr "Mehr laden"
