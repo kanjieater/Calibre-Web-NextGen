@@ -7,8 +7,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 
-from tests.unit.test_catalog_custom_fields import preferences
-from tests.unit.test_custom_column_sort import sortable_library
+from tests.unit.test_catalog_custom_fields import preferences as shared_preferences
+from tests.unit.test_custom_column_sort import sortable_library as shared_sortable_library
+
+preferences = shared_preferences
+sortable_library = shared_sortable_library
 
 pytestmark = pytest.mark.unit
 
@@ -141,7 +144,8 @@ def test_hidden_merge_failure_preserves_both_preferences(live_preferences, monke
     account, users, post, config, metadata = live_preferences
     original = seed(post)
     config.config_columns_to_ignore = "Difficulty"
-    error = lambda *_args, **_kwargs: (_ for _ in ()).throw(OperationalError("query", {}, RuntimeError("fixture")))
+    def error(*_args, **_kwargs):
+        raise OperationalError("query", {}, RuntimeError("fixture"))
     if failure == "commit":
         monkeypatch.setattr(users, "commit", error)
     else:
