@@ -18633,3 +18633,11 @@ msgstr "Toon gelezen/niet gelezen selectie"
 #~ msgstr ""
 #~ "Boeken moeten eerst worden gearchiveerd en het apparaat moet worden "
 #~ "gesynchroniseerd, voordat een boek veilig kan worden verwijderd."
+
+#: cps/editbooks.py
+msgid "Book is unavailable for conversion"
+msgstr "Boek is niet beschikbaar voor conversie"
+
+#: cps/editbooks.py
+msgid "The selected conversion formats are not supported for this book"
+msgstr "De geselecteerde conversieformaten worden niet ondersteund voor dit boek"

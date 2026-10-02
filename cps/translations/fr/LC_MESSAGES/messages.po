@@ -19177,3 +19177,11 @@ msgstr "Afficher la section Lu / Non lu"
 #~ msgstr ""
 #~ "Les livres doivent d'abord être archivés et l'appareil synchronisé avant "
 #~ "qu'un livre puisse être supprimé en tout sécurité."
+
+#: cps/editbooks.py
+msgid "Book is unavailable for conversion"
+msgstr "Le livre n'est pas disponible pour la conversion"
+
+#: cps/editbooks.py
+msgid "The selected conversion formats are not supported for this book"
+msgstr "Les formats de conversion sélectionnés ne sont pas pris en charge pour ce livre"

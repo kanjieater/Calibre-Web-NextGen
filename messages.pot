@@ -16694,3 +16694,10 @@ msgstr ""
 msgid "Show Read/Unread Section"
 msgstr ""
 
+#: cps/editbooks.py
+msgid "Book is unavailable for conversion"
+msgstr ""
+
+#: cps/editbooks.py
+msgid "The selected conversion formats are not supported for this book"
+msgstr ""
