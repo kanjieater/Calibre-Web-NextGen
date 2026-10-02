@@ -5608,15 +5608,16 @@ msgid "Can upload books"
 msgstr "Peut téléverser des livres"
 
 #: cps/spa_strings.py cps/templates/admin.html cps/templates/book_edit.html
-#: cps/templates/book_table.html cps/templates/config_db.html
-#: cps/templates/config_edit.html cps/templates/config_view_edit.html
-#: cps/templates/cover_picker.html cps/templates/cwa_convert_library.html
-#: cps/templates/cwa_cover_enforcer.html cps/templates/cwa_epub_fixer.html
-#: cps/templates/detail.html cps/templates/duplicates.html
-#: cps/templates/layout.html cps/templates/modal_dialogs.html
-#: cps/templates/read.html cps/templates/schedule_edit.html
-#: cps/templates/shelf.html cps/templates/shelf_edit.html
-#: cps/templates/tasks.html cps/templates/user_edit.html
+#: cps/templates/book_review.html cps/templates/book_table.html
+#: cps/templates/config_db.html cps/templates/config_edit.html
+#: cps/templates/config_view_edit.html cps/templates/cover_picker.html
+#: cps/templates/cwa_convert_library.html cps/templates/cwa_cover_enforcer.html
+#: cps/templates/cwa_epub_fixer.html cps/templates/detail.html
+#: cps/templates/duplicates.html cps/templates/layout.html
+#: cps/templates/modal_dialogs.html cps/templates/read.html
+#: cps/templates/schedule_edit.html cps/templates/shelf.html
+#: cps/templates/shelf_edit.html cps/templates/tasks.html
+#: cps/templates/user_edit.html
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -7412,7 +7413,8 @@ msgstr "Chargement des positions de lecture…"
 msgid "Loading reading positions…"
 msgstr "Chargement des positions de lecture…"
 
-#: cps/spa_strings.py cps/templates/cover_picker.html
+#: cps/spa_strings.py cps/templates/book_review.html
+#: cps/templates/cover_picker.html
 msgid "Loading…"
 msgstr "Chargement…"
 
@@ -8620,7 +8622,7 @@ msgstr ""
 msgid "Resume at {percent} from another device"
 msgstr "Reprendre à {percent} depuis un autre appareil"
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/book_review.html
 msgid "Retry"
 msgstr "Réessayer"
 
@@ -10912,6 +10914,77 @@ msgstr "Microsoft YaHei"
 #: cps/spa_strings.py cps/templates/read.html
 msgid "SimSun"
 msgstr "SimSun"
+
+# Private book reviews (#917).
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Your review"
+msgstr "Votre avis"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Private to your account. This does not change the shared Description."
+msgstr ""
+"Privé et réservé à votre compte. Cela ne modifie pas la Description partagée."
+
+#: cps/spa_strings.py
+msgid "Keep your thoughts about this book here."
+msgstr "Gardez ici vos impressions sur ce livre."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Review or note"
+msgstr "Avis ou note"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Add a review"
+msgstr "Ajouter un avis"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Edit review"
+msgstr "Modifier l’avis"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Save review"
+msgstr "Enregistrer l’avis"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Delete review"
+msgstr "Supprimer l’avis"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Delete your review?"
+msgstr "Supprimer votre avis ?"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "This removes your private review or note for this book."
+msgstr "Cela supprime votre avis ou note privé sur ce livre."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Review saved."
+msgstr "Avis enregistré."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Review deleted."
+msgstr "Avis supprimé."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Could not load your review."
+msgstr "Impossible de charger votre avis."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Could not save review."
+msgstr "Impossible d’enregistrer l’avis."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Could not delete review."
+msgstr "Impossible de supprimer l’avis."
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "{n} of {max} characters"
+msgstr "{n} caractères sur {max}"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Review text exceeds 10000 characters"
+msgstr "Le texte de l’avis dépasse 10000 caractères"
 
 #: cps/tasks_status.py
 msgid "Waiting"
@@ -18848,57 +18921,3 @@ msgstr "Afficher la section Lu / Non lu"
 #~ msgstr ""
 #~ "Les livres doivent d'abord être archivés et l'appareil synchronisé avant "
 #~ "qu'un livre puisse être supprimé en tout sécurité."
-
-# Private book reviews (#917).
-msgid "Your review"
-msgstr "Votre avis"
-
-msgid "Private to your account. This does not change the shared Description."
-msgstr ""
-"Privé et réservé à votre compte. Cela ne modifie pas la Description "
-"partagée."
-
-msgid "Keep your thoughts about this book here."
-msgstr "Gardez ici vos impressions sur ce livre."
-
-msgid "Review or note"
-msgstr "Avis ou note"
-
-msgid "Add a review"
-msgstr "Ajouter un avis"
-
-msgid "Edit review"
-msgstr "Modifier l’avis"
-
-msgid "Save review"
-msgstr "Enregistrer l’avis"
-
-msgid "Delete review"
-msgstr "Supprimer l’avis"
-
-msgid "Delete your review?"
-msgstr "Supprimer votre avis ?"
-
-msgid "This removes your private review or note for this book."
-msgstr "Cela supprime votre avis ou note privé sur ce livre."
-
-msgid "Review saved."
-msgstr "Avis enregistré."
-
-msgid "Review deleted."
-msgstr "Avis supprimé."
-
-msgid "Could not load your review."
-msgstr "Impossible de charger votre avis."
-
-msgid "Could not save review."
-msgstr "Impossible d’enregistrer l’avis."
-
-msgid "Could not delete review."
-msgstr "Impossible de supprimer l’avis."
-
-msgid "{n} of {max} characters"
-msgstr "{n} caractères sur {max}"
-
-msgid "Review text exceeds 10000 characters"
-msgstr "Le texte de l’avis dépasse 10000 caractères"

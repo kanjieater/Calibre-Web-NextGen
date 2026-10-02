@@ -5481,15 +5481,16 @@ msgid "Can upload books"
 msgstr "Kan boeken uploaden"
 
 #: cps/spa_strings.py cps/templates/admin.html cps/templates/book_edit.html
-#: cps/templates/book_table.html cps/templates/config_db.html
-#: cps/templates/config_edit.html cps/templates/config_view_edit.html
-#: cps/templates/cover_picker.html cps/templates/cwa_convert_library.html
-#: cps/templates/cwa_cover_enforcer.html cps/templates/cwa_epub_fixer.html
-#: cps/templates/detail.html cps/templates/duplicates.html
-#: cps/templates/layout.html cps/templates/modal_dialogs.html
-#: cps/templates/read.html cps/templates/schedule_edit.html
-#: cps/templates/shelf.html cps/templates/shelf_edit.html
-#: cps/templates/tasks.html cps/templates/user_edit.html
+#: cps/templates/book_review.html cps/templates/book_table.html
+#: cps/templates/config_db.html cps/templates/config_edit.html
+#: cps/templates/config_view_edit.html cps/templates/cover_picker.html
+#: cps/templates/cwa_convert_library.html cps/templates/cwa_cover_enforcer.html
+#: cps/templates/cwa_epub_fixer.html cps/templates/detail.html
+#: cps/templates/duplicates.html cps/templates/layout.html
+#: cps/templates/modal_dialogs.html cps/templates/read.html
+#: cps/templates/schedule_edit.html cps/templates/shelf.html
+#: cps/templates/shelf_edit.html cps/templates/tasks.html
+#: cps/templates/user_edit.html
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -7273,7 +7274,8 @@ msgstr "Leesposities laden…"
 msgid "Loading reading positions…"
 msgstr "Leesposities laden…"
 
-#: cps/spa_strings.py cps/templates/cover_picker.html
+#: cps/spa_strings.py cps/templates/book_review.html
+#: cps/templates/cover_picker.html
 msgid "Loading…"
 msgstr "Bezig met laden…"
 
@@ -8470,7 +8472,7 @@ msgstr ""
 msgid "Resume at {percent} from another device"
 msgstr "Verder lezen bij {percent} vanaf een ander apparaat"
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/book_review.html
 msgid "Retry"
 msgstr "Opnieuw proberen"
 
@@ -10743,6 +10745,76 @@ msgstr "Microsoft YaHei"
 #: cps/spa_strings.py cps/templates/read.html
 msgid "SimSun"
 msgstr "SimSun"
+
+# Private book reviews (#917).
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Your review"
+msgstr "Jouw recensie"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Private to your account. This does not change the shared Description."
+msgstr "Privé voor jouw account. Dit wijzigt de gedeelde Beschrijving niet."
+
+#: cps/spa_strings.py
+msgid "Keep your thoughts about this book here."
+msgstr "Bewaar hier je gedachten over dit boek."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Review or note"
+msgstr "Recensie of notitie"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Add a review"
+msgstr "Recensie toevoegen"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Edit review"
+msgstr "Recensie bewerken"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Save review"
+msgstr "Recensie opslaan"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Delete review"
+msgstr "Recensie verwijderen"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Delete your review?"
+msgstr "Jouw recensie verwijderen?"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "This removes your private review or note for this book."
+msgstr "Hiermee verwijder je jouw privérecensie of notitie voor dit boek."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Review saved."
+msgstr "Recensie opgeslagen."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Review deleted."
+msgstr "Recensie verwijderd."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Could not load your review."
+msgstr "Jouw recensie kon niet worden geladen."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Could not save review."
+msgstr "Recensie kon niet worden opgeslagen."
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Could not delete review."
+msgstr "Recensie kon niet worden verwijderd."
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "{n} of {max} characters"
+msgstr "{n} van {max} tekens"
+
+#: cps/spa_strings.py cps/templates/book_review.html
+msgid "Review text exceeds 10000 characters"
+msgstr "De recensie bevat meer dan 10000 tekens"
 
 #: cps/tasks_status.py
 msgid "Waiting"
@@ -18306,55 +18378,3 @@ msgstr "Toon gelezen/niet gelezen selectie"
 #~ msgstr ""
 #~ "Boeken moeten eerst worden gearchiveerd en het apparaat moet worden "
 #~ "gesynchroniseerd, voordat een boek veilig kan worden verwijderd."
-
-# Private book reviews (#917).
-msgid "Your review"
-msgstr "Jouw recensie"
-
-msgid "Private to your account. This does not change the shared Description."
-msgstr "Privé voor jouw account. Dit wijzigt de gedeelde Beschrijving niet."
-
-msgid "Keep your thoughts about this book here."
-msgstr "Bewaar hier je gedachten over dit boek."
-
-msgid "Review or note"
-msgstr "Recensie of notitie"
-
-msgid "Add a review"
-msgstr "Recensie toevoegen"
-
-msgid "Edit review"
-msgstr "Recensie bewerken"
-
-msgid "Save review"
-msgstr "Recensie opslaan"
-
-msgid "Delete review"
-msgstr "Recensie verwijderen"
-
-msgid "Delete your review?"
-msgstr "Jouw recensie verwijderen?"
-
-msgid "This removes your private review or note for this book."
-msgstr "Hiermee verwijder je jouw privérecensie of notitie voor dit boek."
-
-msgid "Review saved."
-msgstr "Recensie opgeslagen."
-
-msgid "Review deleted."
-msgstr "Recensie verwijderd."
-
-msgid "Could not load your review."
-msgstr "Jouw recensie kon niet worden geladen."
-
-msgid "Could not save review."
-msgstr "Recensie kon niet worden opgeslagen."
-
-msgid "Could not delete review."
-msgstr "Recensie kon niet worden verwijderd."
-
-msgid "{n} of {max} characters"
-msgstr "{n} van {max} tekens"
-
-msgid "Review text exceeds 10000 characters"
-msgstr "De recensie bevat meer dan 10000 tekens"
