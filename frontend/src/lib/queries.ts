@@ -1,4 +1,5 @@
 import type { ReaderBookmark } from "./readerResume";
+import type { ReaderFontCatalog } from './readerFonts';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient } from '@tanstack/react-query';
 import {
@@ -1314,7 +1315,8 @@ export function useSetCover(id: string | number) {
 
 export interface ReaderSettings {
   theme: 'lightTheme' | 'sepiaTheme' | 'darkTheme' | 'blackTheme';
-  font: 'default' | 'Yahei' | 'SimSun' | 'KaiTi' | 'Arial' | 'Literata';
+  /** Built-in IDs and server-validated custom:<uuid> catalog entries. */
+  font: string;
   fontSize: number;
   margin: number;
   lineHeight: number;
@@ -1344,6 +1346,15 @@ export function useReaderSettings() {
     queryKey: ['reader-settings'],
     queryFn: () => apiGet<{ reader: ReaderSettings }>('/api/v1/reader/settings'),
     staleTime: 60_000,
+    retry: retryUnlessUnauthorized,
+  });
+}
+
+export function useReaderFonts() {
+  return useQuery<ReaderFontCatalog>({
+    queryKey: ['reader-fonts'],
+    queryFn: () => apiGet<ReaderFontCatalog>('/api/v1/reader/fonts'),
+    staleTime: 0,
     retry: retryUnlessUnauthorized,
   });
 }

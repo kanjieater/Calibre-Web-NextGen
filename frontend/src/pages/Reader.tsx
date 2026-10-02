@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import {
   type ReaderSettings, isWorthResending, useBook, useBookmark, useReaderSettings,
-  useReadingSources, useSaveBookmark, useSaveReaderSettings, type ReadingSource,
+  useReadingSources, useSaveBookmark, useSaveReaderSettings, useReaderFonts, type ReadingSource,
 } from '../lib/queries';
 import { apiPost, apiDelete, apiPatch, apiUrl, resourceUrl } from '../lib/api';
 import { Button } from '../components/Button';
@@ -34,6 +34,7 @@ import {
   sanitizeNoteElement,
 } from '../lib/readerLinks';
 import { hasNativeAnchor, resolveNativeAnnotations } from '../lib/reader/nativeAnnotations';
+import { readerFontFaceCss, readerFontFamily, BUILTIN_READER_FONTS, type ReaderFont } from '../lib/readerFonts';
 import styles from './Reader.module.css';
 
 /*
@@ -218,13 +219,9 @@ const THEME_TO_READER: Record<ReaderSettings['theme'], ReaderTheme> = {
 const READER_TO_THEME: Record<ReaderTheme, ReaderSettings['theme']> = {
   light: 'lightTheme', sepia: 'sepiaTheme', dark: 'darkTheme', black: 'blackTheme',
 };
-const FONT_FAMILY: Record<ReaderSettings['font'], string> = {
-  default: '', Yahei: 'Microsoft YaHei, sans-serif', SimSun: 'SimSun, serif',
-  KaiTi: 'KaiTi, serif', Arial: 'Arial, sans-serif', Literata: "'Literata', serif",
-};
 
 // Bundled reading-optimised serif. Content only gets font-family applied via
-// CSS (FONT_FAMILY / rendition.themes.font) — without an actual @font-face
+// CSS (fontCssFamily / rendition.themes.font) — without an actual @font-face
 // declared inside each chapter iframe's own document, 'Literata' silently
 // falls back to a system font. resourceUrl() keeps this correct behind a
 // reverse-proxy mount prefix, same as every other server asset here.
@@ -271,12 +268,12 @@ function applyDocumentTheme(doc: Document, theme: ReaderTheme) {
 }
 
 function applyDocumentTypography(doc: Document, settings: {
-  fontPct: number; fontFamily: ReaderSettings['font']; margin: number; lineHeight: number;
+  fontPct: number; fontCssFamily: string; margin: number; lineHeight: number;
 }) {
   if (!doc.body) return;
   doc.body.style.setProperty('font-size', `${settings.fontPct}%`);
   doc.body.style.setProperty('font-family',
-    settings.fontFamily === 'default' ? 'initial' : FONT_FAMILY[settings.fontFamily], 'important');
+    settings.fontCssFamily, 'important');
   doc.body.style.setProperty('line-height', String(settings.lineHeight / 100), 'important');
 }
 
@@ -330,6 +327,7 @@ export function Reader({ id }: { id: string }) {
   const { data: book, isLoading, error } = useBook(id);
   const { data: savedBookmark, isFetched: isBookmarkFetched } = useBookmark(id, 'epub');
   const { data: settingsData, isFetched: isSettingsFetched } = useReaderSettings();
+  const { data: fontCatalog, isFetched: isFontsFetched, error: fontsError } = useReaderFonts();
   const saveBookmark = useSaveBookmark(id);
   const saveSettings = useSaveReaderSettings();
   const readingSources = useReadingSources(id, placesOpen);
@@ -513,8 +511,14 @@ export function Reader({ id }: { id: string }) {
   // every section rendered after that. It reads the reader's current choices
   // through this ref: a closure kept the values from when the book opened and
   // put them back at the next chapter (#2254).
-  const appearanceRef = useRef({ theme, fontPct, fontFamily, margin, lineHeight, spread });
-  appearanceRef.current = { theme, fontPct, fontFamily, margin, lineHeight, spread };
+  const fontChoices: ReaderFont[] = useMemo(() => fontCatalog?.items ?? BUILTIN_READER_FONTS, [fontCatalog]);
+  const fontCssFamily = readerFontFamily(fontChoices, fontFamily);
+  const fontFaceCss = useMemo(() => readerFontFaceCss(fontChoices, window.location.origin), [fontChoices]);
+  const appearanceRef = useRef({ theme, fontPct, fontFamily, fontCssFamily, fontFaceCss, margin, lineHeight, spread });
+  appearanceRef.current = { theme, fontPct, fontFamily, fontCssFamily, fontFaceCss, margin, lineHeight, spread };
+  useEffect(() => {
+    if (fontCatalog && !fontCatalog.items.some(font => font.id === fontFamily)) setFontFamily('default');
+  }, [fontCatalog, fontFamily]);
   const [settingsHydrated, setSettingsHydrated] = useState(false);
   const [progress, setProgress] = useState(0);
   // Pending text selection awaiting a highlight-color choice.
@@ -1314,12 +1318,11 @@ export function Reader({ id }: { id: string }) {
     // normal lifecycle, retaining the book, annotations and reading anchor.
     if (currentCfi) rendition.clear();
     rendition.themes.fontSize(`${fontPct}%`);
-    if (fontFamily === 'default') rendition.themes.font('initial');
-    else rendition.themes.font(FONT_FAMILY[fontFamily]);
+    rendition.themes.font(fontCssFamily);
     try {
       (rendition.getContents?.() || []).forEach((c: any) => {
         if (!c?.document?.body) return;
-        applyDocumentTypography(c.document, { fontPct, fontFamily, margin, lineHeight });
+        applyDocumentTypography(c.document, { fontPct, fontCssFamily, margin, lineHeight });
       });
     } catch { /* same-origin blob content; guard regardless */ }
     // Recalculate the paginator after all typography changes, then keep the
@@ -1331,7 +1334,7 @@ export function Reader({ id }: { id: string }) {
     if (currentCfi) {
       Promise.resolve(rendition.display(currentCfi)).catch(() => { /* disposed rendition */ });
     }
-  }, [fontPct, fontFamily, margin, lineHeight, spread, captureReadingAnchor]);
+  }, [fontPct, fontCssFamily, margin, lineHeight, spread, captureReadingAnchor]);
 
   // A page turn is the reader moving themselves, so it ends any preview: from
   // here on the relocations are theirs and the position saves again -- except
@@ -1591,7 +1594,7 @@ export function Reader({ id }: { id: string }) {
 
   // Build the rendition once the epub format + its download URL are known.
   useEffect(() => {
-    if (!epubFormat || !epubContentUrl || !viewerRef.current || !isBookmarkFetched || !isSettingsFetched || !settingsHydrated) return;
+    if (!epubFormat || !epubContentUrl || !viewerRef.current || !isBookmarkFetched || !isSettingsFetched || !isFontsFetched || !settingsHydrated) return;
     let cancelled = false;
     let stopSelectionObserver: (() => void) | undefined;
     setRendered(false);
@@ -1668,12 +1671,15 @@ export function Reader({ id }: { id: string }) {
           }
         });
 
+        rendition.hooks.content.register((contents: any) => {
+          contents.addStylesheetCss(appearanceRef.current.fontFaceCss, 'cwng-reader-fonts');
+        });
+
         Object.entries(THEMES).forEach(([name, t]) => rendition.themes.register(name, t));
         const initialAppearance = appearanceRef.current;
         rendition.themes.select(initialAppearance.theme);
         rendition.themes.fontSize(`${initialAppearance.fontPct}%`);
-        rendition.themes.font(initialAppearance.fontFamily === 'default'
-          ? 'initial' : FONT_FAMILY[initialAppearance.fontFamily]);
+        rendition.themes.font(initialAppearance.fontCssFamily);
 
         // This synchronous hook runs before the manager measures a display()
         // target. Late `rendered` styling reflowed a newly loaded chapter after
@@ -1908,7 +1914,7 @@ export function Reader({ id }: { id: string }) {
     };
     // Re-render only when the source changes; theme/font are applied imperatively.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [epubContentUrl, isBookmarkFetched, isSettingsFetched, settingsHydrated]);
+  }, [epubContentUrl, isBookmarkFetched, isSettingsFetched, isFontsFetched, settingsHydrated]);
 
   // Apply theme / font changes to a live rendition without rebuilding it, and
   // remember the preference across sessions.
@@ -2428,13 +2434,14 @@ export function Reader({ id }: { id: string }) {
             </fieldset>
             <label className={styles.settingField}>
               <span>{t('Font family')}</span>
+              {fontsError && <span role="status">{t('Could not load reader fonts.')}</span>}
               <select value={fontFamily} onChange={(e) => {
                 const value = e.target.value as ReaderSettings['font'];
                 setFontFamily(value); persistSetting('font', value);
               }}>
-                <option value="default">{t('Book default')}</option>
-                <option value="Arial">Arial</option><option value="Literata">{t('Literata')}</option><option value="Yahei">Microsoft YaHei</option>
-                <option value="SimSun">SimSun</option><option value="KaiTi">KaiTi</option>
+                {fontChoices.map(font => <option key={font.id} value={font.id}>
+                  {font.builtin ? t(font.label) : font.label}
+                </option>)}
               </select>
             </label>
             {([

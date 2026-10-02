@@ -75,6 +75,7 @@ from .reader_settings import (
     sanitize_reader_settings,
 )
 from .user_preferences import set_checkbox_preference_from_form
+from .services import reader_fonts
 
 # CWA Imports
 import shutil
@@ -3948,10 +3949,29 @@ def read_book(book_id, book_format):
         reader_settings = {}
         if current_user.is_authenticated:
             reader_settings = (getattr(current_user, "view_settings", None) or {}).get("reader", {}) or {}
+        font_choice = reader_settings.get("font") if isinstance(reader_settings, dict) else None
+        try:
+            reader_custom_ids = (reader_fonts.custom_font_ids()
+                                 if isinstance(font_choice, str) and font_choice.startswith("custom:")
+                                 else set())
+        except Exception:
+            log.warning("Could not read uploaded reader-font catalog while opening a book", exc_info=True)
+            reader_custom_ids = set()
+        reader_settings = sanitize_reader_settings(reader_settings, reader_custom_ids)
+        try:
+            reader_font_catalogue = reader_fonts.catalogue(
+                lambda font_uuid: url_for("api_v1.reader_font_file", font_uuid=font_uuid)
+            )
+        except Exception:
+            # Uploaded fonts are an optional enhancement; a broken catalog must
+            # not block the established EPUB reader or built-in font controls.
+            log.warning("Could not load uploaded reader-font options", exc_info=True)
+            reader_font_catalogue = {"items": list(reader_fonts.BUILTIN_FONTS)}
         return render_title_template('read.html', bookid=book_id, title=book.title,
                                      bookmark=bookmark, kosync_progress=kosync_progress,
                                      reader_settings=json.dumps(reader_settings),
                                      lookup_mode=lookup_mode,
+                                     reader_fonts=reader_font_catalogue["items"],
                                      book_format=book_format.lower())
     elif book_format.lower() == "pdf":
         log.debug("Start pdf reader for %d", book_id)
