@@ -415,6 +415,8 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 220px;
+  width: max-content;
+  max-width: calc(100vw - 16px);
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--r-md);

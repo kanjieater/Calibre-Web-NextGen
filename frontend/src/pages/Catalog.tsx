@@ -518,7 +518,11 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
   useEffect(() => {
     if (!settingsOpen) return;
     const onDoc = (e: MouseEvent) => {
-      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) setSettingsOpen(false);
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+        const focused = document.activeElement;
+        if (focused instanceof HTMLElement && settingsMenuRef.current?.contains(focused)) focused.blur();
+        setSettingsOpen(false);
+      }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -555,8 +559,15 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
       menu.style.maxHeight = `${Math.max(60, available)}px`;
     };
     constrainMenu();
+    const observer = new ResizeObserver(constrainMenu);
+    if (settingsMenuRef.current) observer.observe(settingsMenuRef.current);
+    const toolbar = settingsTriggerRef.current?.parentElement?.parentElement;
+    if (toolbar) observer.observe(toolbar);
     window.addEventListener('resize', constrainMenu);
-    return () => window.removeEventListener('resize', constrainMenu);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', constrainMenu);
+    };
   }, [settingsOpen]);
 
   // The saved default view is part of the filter identity: turning it on/off (or
@@ -708,6 +719,8 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     saveCustomFields(next);
   };
   const saveCustomFieldLabel = (id: number, value: string) => {
+    value = value.trim();
+    if (value === (customFieldLabels[String(id)] ?? '').trim()) return;
     const next = { ...customFieldLabels, [String(id)]: value };
     if (!value.trim()) delete next[String(id)];
     setCustomFieldLabels(next);
