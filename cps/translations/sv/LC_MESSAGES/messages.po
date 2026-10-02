@@ -10431,6 +10431,19 @@ msgid ""
 "library."
 msgstr ""
 
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Actions for {title}"
+msgstr "Åtgärder för {title}"
+
+#: cps/spa_strings.py
+msgid "Could not update this book. Try again."
+msgstr ""
+
+#: cps/spa_strings.py cps/templates/image.html
+msgid "Favorite"
+msgstr "Favorit"
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "Väntar"
@@ -15589,10 +15602,6 @@ msgstr "Tillbaka till hemmet"
 msgid "Logout User"
 msgstr "Logga ut användare"
 
-#: cps/templates/image.html
-msgid "Favorite"
-msgstr "Favorit"
-
 #: cps/templates/index.html
 msgid "Subcategories"
 msgstr ""
@@ -17403,10 +17412,6 @@ msgstr "Visa avsnittet Läst/oläst"
 #, python-brace-format
 #~ msgid "More actions for {title}"
 #~ msgstr "Fler åtgärder för {title}"
-
-#, python-brace-format
-#~ msgid "Actions for {title}"
-#~ msgstr "Åtgärder för {title}"
 
 #~ msgid "Only jpg/jpeg/png/webp/bmp files are supported as coverfile"
 #~ msgstr "Endast jpg/jpeg/png/webp/bmp-filer stöds som omslagsfil"

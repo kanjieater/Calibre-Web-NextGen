@@ -10793,6 +10793,19 @@ msgstr ""
 "synchronisation avec les liseuses. Décochez cette option pour synchroniser "
 "toute votre bibliothèque."
 
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Actions for {title}"
+msgstr "Actions pour {title}"
+
+#: cps/spa_strings.py
+msgid "Could not update this book. Try again."
+msgstr "Impossible de mettre à jour ce livre. Réessayez."
+
+#: cps/spa_strings.py cps/templates/image.html
+msgid "Favorite"
+msgstr "Favori"
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "En attente"
@@ -15882,10 +15895,6 @@ msgstr "Retour à l’accueil"
 msgid "Logout User"
 msgstr "Déconnecter l’utilisateur"
 
-#: cps/templates/image.html
-msgid "Favorite"
-msgstr "Favori"
-
 #: cps/templates/index.html
 msgid "Subcategories"
 msgstr ""
@@ -17839,11 +17848,6 @@ msgstr "Afficher la section Lu / Non lu"
 #~ msgid "More actions for {title}"
 #~ msgstr "Plus d’actions pour {title}"
 
-#, python-brace-format
-#: cps/spa_strings.py
-msgid "Actions for {title}"
-msgstr "Actions pour {title}"
-
 #~ msgid "Design"
 #~ msgstr "Modèle"
 
@@ -18750,7 +18754,3 @@ msgstr "Actions pour {title}"
 #~ msgstr ""
 #~ "Les livres doivent d'abord être archivés et l'appareil synchronisé avant "
 #~ "qu'un livre puisse être supprimé en tout sécurité."
-
-#: cps/spa_strings.py
-msgid "Could not update this book. Try again."
-msgstr "Impossible de mettre à jour ce livre. Réessayez."

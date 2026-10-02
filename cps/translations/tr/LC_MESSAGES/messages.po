@@ -10106,6 +10106,19 @@ msgid ""
 "library."
 msgstr ""
 
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Actions for {title}"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Could not update this book. Try again."
+msgstr ""
+
+#: cps/spa_strings.py cps/templates/image.html
+msgid "Favorite"
+msgstr ""
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "Bekleniyor"
@@ -14978,10 +14991,6 @@ msgstr ""
 #, fuzzy
 msgid "Logout User"
 msgstr "Çıkış"
-
-#: cps/templates/image.html
-msgid "Favorite"
-msgstr ""
 
 #: cps/templates/index.html
 msgid "Subcategories"

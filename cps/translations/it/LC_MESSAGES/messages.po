@@ -10513,6 +10513,19 @@ msgid ""
 "library."
 msgstr ""
 
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Actions for {title}"
+msgstr "Azioni per {title}"
+
+#: cps/spa_strings.py
+msgid "Could not update this book. Try again."
+msgstr ""
+
+#: cps/spa_strings.py cps/templates/image.html
+msgid "Favorite"
+msgstr "Preferito"
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "Attendi"
@@ -15787,10 +15800,6 @@ msgstr "Ritorna alla pagina principale"
 msgid "Logout User"
 msgstr "Disconnetti utente"
 
-#: cps/templates/image.html
-msgid "Favorite"
-msgstr "Preferito"
-
 #: cps/templates/index.html
 msgid "Subcategories"
 msgstr ""
@@ -17626,10 +17635,6 @@ msgstr "Mostra sezione Libri letti e Libri da leggere"
 #, python-brace-format
 #~ msgid "More actions for {title}"
 #~ msgstr "Altre azioni per {title}"
-
-#, python-brace-format
-#~ msgid "Actions for {title}"
-#~ msgstr "Azioni per {title}"
 
 #~ msgid "Only jpg/jpeg/png/webp/bmp files are supported as coverfile"
 #~ msgstr ""

@@ -10060,6 +10060,19 @@ msgid ""
 "library."
 msgstr ""
 
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Actions for {title}"
+msgstr "{title} 的操作"
+
+#: cps/spa_strings.py
+msgid "Could not update this book. Try again."
+msgstr ""
+
+#: cps/spa_strings.py cps/templates/image.html
+msgid "Favorite"
+msgstr "最愛"
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "等待中"
@@ -14867,10 +14880,6 @@ msgstr "回到首頁"
 msgid "Logout User"
 msgstr "登出賬號"
 
-#: cps/templates/image.html
-msgid "Favorite"
-msgstr "最愛"
-
 #: cps/templates/index.html
 msgid "Subcategories"
 msgstr ""
@@ -16553,10 +16562,6 @@ msgstr "顯示已讀/未讀選擇"
 #, python-brace-format
 #~ msgid "More actions for {title}"
 #~ msgstr "{title} 更多操作"
-
-#, python-brace-format
-#~ msgid "Actions for {title}"
-#~ msgstr "{title} 的操作"
 
 #~ msgid "Only jpg/jpeg/png/webp/bmp files are supported as coverfile"
 #~ msgstr "封面檔案只支援 jpg/jpeg/png/webp/bmp 格式"
