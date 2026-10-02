@@ -386,30 +386,49 @@ def test_catalog_metadata_outage_keeps_listing_sort_safe_and_reader_choice_retry
         session.close()
 
 
-def test_select_all_simple_search_uses_the_custom_sort_join(sortable_library, monkeypatch):
-    """Selecting custom-sorted search results must run valid SQL and keep missing values."""
-    from cps import db
+@pytest.mark.parametrize("select_all", [False, True])
+@pytest.mark.parametrize("direction,expected", [
+    ("asc", [4, 1, 2, 3, 5]),
+    ("desc", [2, 1, 4, 5, 3]),
+])
+def test_simple_search_custom_sort_uses_the_production_query(
+        sortable_library, monkeypatch, select_all, direction, expected):
+    """Visible search and exported IDs share real joins, ties, empties and filtering."""
+    from cps import db, ub
     from cps.api import books
     engine, _difficulty, _decoy = sortable_library
+    with engine.begin() as connection:
+        connection.execute(text("ATTACH DATABASE ':memory:' AS calibre"))
+    db.Base.metadata.create_all(engine)
+    ub.ReadBook.__table__.create(engine)
+    ub.ArchivedBook.__table__.create(engine)
+    with engine.begin() as connection:
+        connection.execute(text("UPDATE books SET title = 'Unrelated' WHERE id = 6"))
     session = sessionmaker(bind=engine)()
+    library = db.CalibreDB()
+    library.session = session
+    monkeypatch.setattr(library, "common_filters", lambda *_args, **_kwargs: True)
+    monkeypatch.setattr(db, "current_user", SimpleNamespace(id=7))
+    monkeypatch.setattr(ub, "current_user", SimpleNamespace(id=7))
+    monkeypatch.setattr(ub, "searched_ids", {})
+    monkeypatch.setattr(books, "calibre_db", library)
     monkeypatch.setattr(books, "config", SimpleNamespace(
-        config_sortable_custom_columns="12", config_books_per_page=20))
+        config_sortable_custom_columns="12", config_books_per_page=20,
+        config_read_column=0, config_columns_to_ignore=""))
     monkeypatch.setattr(books, "load_configured_columns", lambda _config: [ColumnDefinition(12)])
-
-    def search_query(_term, _config, *_joins, **_kwargs):
-        query = session.query(db.Books).filter(db.Books.title.like("Book %"))
-        # The first three joins are the established Series search context;
-        # this seam exercises the SQL for the optional custom-column join.
-        if len(_joins) > 3:
-            query = query.outerjoin(*_joins[3:])
-        return query
-
-    monkeypatch.setattr(books.calibre_db, "search_query", search_query)
+    monkeypatch.setattr(books, "_rows_to_items", lambda rows, *_args: [
+        {"id": row.Books.id} for row in rows
+    ])
+    monkeypatch.setattr(books, "_list_custom_column_data", lambda _rows: ([], {}))
     app = flask.Flask(__name__)
     try:
-        with app.test_request_context("/api/v1/books?search=Book&sort=cc-12-asc&select_all=1"):
+        with app.test_request_context(
+                f"/api/v1/books?search=Book&sort=cc-12-{direction}"
+                f"&select_all={int(select_all)}"):
             result = inspect.unwrap(books.list_books)().get_json()
-        assert result == {"ids": [4, 1, 2, 6, 3, 5], "total": 6}
+        actual = result["ids"] if select_all else [item["id"] for item in result["items"]]
+        assert actual == expected
+        assert result["total"] == len(expected)
     finally:
         session.close()
 
