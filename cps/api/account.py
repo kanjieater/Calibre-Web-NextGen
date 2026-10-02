@@ -441,18 +441,27 @@ def update_catalog_custom_fields():
             return _err("account_changed", "The signed-in account changed. Reload your preferences.", 409)
     selected = data.get("custom_column_ids")
     labels = data.get("custom_column_labels", {})
-    if not isinstance(selected, list):
+    if (not isinstance(selected, list)
+            or any(type(column_id) is not int for column_id in selected)):
         return _err("invalid_request", "custom_column_ids must be an array of integers", 400)
     if not isinstance(labels, dict):
         return _err("invalid_request", "custom_column_labels must be an object", 400)
+    known = data.get("known_custom_column_ids")
+    if "known_custom_column_ids" in data and (not isinstance(known, list)
+            or any(type(column_id) is not int for column_id in known)):
+        return _err("invalid_request", "known_custom_column_ids must be an array of integers", 400)
     columns = load_configured_columns(config, include_hidden=True)
     if columns is None:
         return _err("unavailable", "Custom columns are currently unavailable", 503)
     live_ids = {column.id for column in columns}
     allowed = {column.id for column in visible_columns(columns, config)}
+    if known is not None:
+        if len(known) > len(live_ids) or any(column_id not in live_ids for column_id in known):
+            return _err("invalid_request", "Unknown custom column snapshot", 400)
+        allowed.intersection_update(known)
     if len(selected) > len(live_ids) or len(labels) > len(allowed):
         return _err("invalid_request", "Too many custom fields", 400)
-    if any(type(column_id) is not int or column_id not in allowed for column_id in selected):
+    if any(column_id not in allowed for column_id in selected):
         return _err("invalid_request", "Unknown custom column", 400)
     selected = list(dict.fromkeys(selected))
     cleaned_labels = {}
@@ -469,21 +478,22 @@ def update_catalog_custom_fields():
             return _err("invalid_request", "Custom column labels may not exceed 80 characters", 400)
         if label:
             cleaned_labels[str(column_id)] = label
-    # Hidden fields cannot be submitted as new choices. Retain only this
-    # reader's existing preferences for definitions still live and configured.
-    hidden_ids = live_ids - allowed
+    # Only visible fields the client knew about can be changed. Preserve this
+    # reader's existing choices outside that scope, including fields unhidden
+    # since the page loaded. Hidden fields still cannot be submitted.
+    retained_scope = live_ids - allowed
     previous_ids = current_user.get_view_property("catalog", "custom_field_ids")
     previous_labels = current_user.get_view_property("catalog", "custom_field_labels")
+    # /me reports malformed selections as null, meaning default-all.
+    if not isinstance(previous_ids, list) or any(type(column_id) is not int for column_id in previous_ids):
+        previous_ids = None
     if previous_ids is None:
-        retained_ids = hidden_ids
-    elif isinstance(previous_ids, list):
-        retained_ids = {column_id for column_id in previous_ids
-                        if type(column_id) is int and column_id in hidden_ids}
+        retained_ids = retained_scope
     else:
-        retained_ids = set()
+        retained_ids = retained_scope.intersection(previous_ids)
     selected.extend(sorted(retained_ids))
     if isinstance(previous_labels, dict):
-        for column_id in hidden_ids:
+        for column_id in retained_scope:
             label = previous_labels.get(str(column_id))
             if isinstance(label, str) and label.strip() and len(label.strip()) <= 80:
                 cleaned_labels[str(column_id)] = label.strip()

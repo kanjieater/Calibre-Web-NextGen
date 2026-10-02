@@ -167,3 +167,84 @@ def test_download_custom_fallback_does_not_overwrite_stored_preference(live_pref
     assert result[1] == "new" and result[2] == ()
     users.expire_all()
     assert account.current_user.get_view_property("download", "stored") == "cc-12-desc"
+
+
+def test_stale_visible_snapshot_preserves_newly_unhidden_choice_and_label(live_preferences):
+    account, users, post, config, _metadata = live_preferences
+    seed(post)
+    config.config_columns_to_ignore = "Difficulty"
+    known = [column.id for column in account.load_configured_columns(config)]
+    assert known == [13]
+    config.config_columns_to_ignore = ""
+    result, status = post({"known_custom_column_ids": known, "custom_column_ids": [],
+        "custom_column_labels": {"13": "New score"}})
+    assert status == 200
+    users.expire_all()
+    assert result == {"custom_field_ids": [12],
+                      "custom_field_labels": {"12": "Effort", "13": "New score"}}
+    assert account.current_user.view_settings["catalog"] == result
+
+
+@pytest.mark.parametrize("stored", ["bad", {"12": True}, [12, "13"], [12, True]])
+def test_malformed_stored_selection_matches_me_default_all(live_preferences, monkeypatch, stored):
+    import flask
+    from cps.api import auth
+    from cps.services.acquisition import admission
+    account, users, post, config, _metadata = live_preferences
+    account.current_user.set_view_property("catalog", "custom_field_ids", stored)
+    monkeypatch.setattr(auth, "serialize_user", lambda _user: {})
+    monkeypatch.setattr(auth, "_server_features", lambda: {})
+    monkeypatch.setattr(auth, "_instance_name", lambda: "fixture")
+    monkeypatch.setattr(auth, "_user_avatar", lambda _name: None)
+    monkeypatch.setattr(admission, "instance_enabled", lambda _path: False)
+    with flask.Flask(__name__).test_request_context():
+        assert auth._me_payload(account.current_user)["catalog"]["custom_field_ids"] is None
+    config.config_columns_to_ignore = "Score"
+    result, status = post({"custom_column_ids": [], "known_custom_column_ids": [12]})
+    assert status == 200 and result["custom_field_ids"] == [13]
+    users.expire_all()
+    assert account.current_user.get_view_property("catalog", "custom_field_ids") == [13]
+
+
+@pytest.mark.parametrize("payload", [
+    {"custom_column_ids": [True]}, {"custom_column_ids": ["12"]},
+    {"custom_column_ids": [12], "known_custom_column_ids": [True]},
+    {"custom_column_ids": [12], "known_custom_column_ids": "12"},
+])
+def test_malformed_id_arrays_refuse_before_metadata_outage(live_preferences, monkeypatch, payload):
+    account, users, post, _config, metadata = live_preferences
+    calls = []
+    def unavailable(*_args, **_kwargs):
+        calls.append(True)
+        raise OperationalError("query", {}, RuntimeError("fixture outage"))
+    monkeypatch.setattr(metadata, "query", unavailable)
+    _result, status = post(payload)
+    assert status == 400 and calls == []
+    users.expire_all()
+    assert account.current_user.view_settings == {}
+
+
+@pytest.mark.parametrize("payload", [
+    {"custom_column_ids": [], "known_custom_column_ids": [999]},
+    {"custom_column_ids": [], "known_custom_column_ids": [12, 12, 12]},
+    {"custom_column_ids": [12], "known_custom_column_ids": [13]},
+    {"custom_column_ids": [13], "known_custom_column_ids": [13], "custom_column_labels": {"12": "Forged"}},
+])
+def test_invalid_or_outside_snapshot_input_is_refused(live_preferences, payload):
+    account, users, post, _config, _metadata = live_preferences
+    original = seed(post)
+    _result, status = post(payload)
+    assert status == 400
+    users.expire_all()
+    assert account.current_user.view_settings["catalog"] == original
+
+
+def test_new_definition_outside_snapshot_does_not_auto_select_after_explicit_save(live_preferences):
+    from cps import db
+    _account, _users, post, config, metadata = live_preferences
+    assert post({"custom_column_ids": [13]})[1] == 200
+    metadata.add(db.CustomColumns(id=14, name="Later", datatype="float", is_multiple=False, mark_for_delete=False))
+    metadata.commit()
+    config.config_sortable_custom_columns = "12,13,14"
+    result, status = post({"custom_column_ids": [], "known_custom_column_ids": [12, 13]})
+    assert status == 200 and result["custom_field_ids"] == []

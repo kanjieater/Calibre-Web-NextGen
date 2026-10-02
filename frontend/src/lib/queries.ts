@@ -133,6 +133,7 @@ export function useUpdateNamedPreferences() {
 
 export interface CatalogCustomFieldsUpdate {
   expected_user_id: number;
+  known_custom_column_ids: number[];
   custom_column_ids: number[];
   custom_column_labels: Record<string, string>;
 }
@@ -153,6 +154,14 @@ export function useUpdateCatalogCustomFields() {
       return apiPost<{
         custom_field_ids: number[]; custom_field_labels: Record<string, string>;
       }>('/api/v1/account/catalog-custom-fields', update);
+    },
+    onError: (error, update) => {
+      const ownerChanged = queryClient.getQueryData<Me | null>(['me'])?.id !== update.expected_user_id;
+      if (ownerChanged || (error instanceof ApiError && (error.status === 400 || error.status === 409))) {
+        void queryClient.invalidateQueries({ queryKey: ['me'] });
+        void queryClient.invalidateQueries({ queryKey: ['books'] });
+        void queryClient.invalidateQueries({ queryKey: ['adv-search'] });
+      }
     },
     onMutate: (update: CatalogCustomFieldsUpdate) => ({ userId: update.expected_user_id }),
     onSuccess: (data, _update, savedFor) => {

@@ -49,7 +49,7 @@ from .helper import check_valid_domain, check_email, check_username, \
     send_registration_mail, check_send_to_ereader, check_read_formats, tags_filters, reset_password, valid_email, \
     edit_book_read_status, valid_password, get_kosync_progress_display, get_sendable_book
 from .pagination import Pagination
-from .sort_orders import BOOK_SORT_ORDERS, book_sort_order, viewer_id
+from .sort_orders import BOOK_SORT_ORDERS, DEFAULT_SORT, book_sort_order, viewer_id
 from .custom_column_sort import (
     load_configured_columns,
     resolve as resolve_custom_column_sort,
@@ -797,7 +797,7 @@ def render_books_list(data, sort_param, book_id, page):
     # Download history orders through app.db's user-specific download join;
     # retain that specialized shape rather than adding an ambiguous third join.
     if data == "download" and _sort_join(order):
-        order = (BOOK_SORT_ORDERS["new"], "new", ())
+        order = (book_sort_order(DEFAULT_SORT), DEFAULT_SORT, ())
     if data == "rated":
         return render_rated_books(page, book_id, order=order)
     elif data == "discover":

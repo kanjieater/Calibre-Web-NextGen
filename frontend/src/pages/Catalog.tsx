@@ -522,8 +522,9 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        const focusInside = settingsMenuRef.current?.contains(document.activeElement);
         setSettingsOpen(false);
-        settingsTriggerRef.current?.focus();
+        if (focusInside) settingsTriggerRef.current?.focus();
       }
     };
     document.addEventListener('mousedown', onDoc);
@@ -543,8 +544,15 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     const constrainMenu = () => {
       const menu = settingsMenuRef.current;
       if (!menu) return;
-      const available = window.innerHeight - menu.getBoundingClientRect().top - 12;
-      menu.style.maxHeight = `${Math.max(160, available)}px`;
+      const trigger = settingsTriggerRef.current;
+      const anchor = menu.parentElement;
+      if (!trigger || !anchor) return;
+      const desiredLeft = trigger.getBoundingClientRect().right - menu.offsetWidth;
+      const left = Math.max(8, Math.min(desiredLeft, window.innerWidth - menu.offsetWidth - 8));
+      menu.style.left = `${left - anchor.getBoundingClientRect().left}px`;
+      menu.style.right = 'auto';
+      const available = window.innerHeight - trigger.getBoundingClientRect().bottom - 20;
+      menu.style.maxHeight = `${Math.max(60, available)}px`;
     };
     constrainMenu();
     window.addEventListener('resize', constrainMenu);
@@ -687,7 +695,7 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
     : customColumnDefinitions.filter((column) => visibleCustomColumnIds.includes(column.id));
   const saveCustomFields = (ids: number[], labels = customFieldLabels) => {
     if (me && !me.role?.anonymous) updateCatalogCustomFields.mutate(
-      { ...customFieldsForSave(data?.custom_column_definitions ?? [], ids, labels), expected_user_id: me.id }, { onError: () => announce(t('Could not save.'), { assertive: true }) });
+      { ...customFieldsForSave(data?.custom_column_definitions ?? [], ids, labels), expected_user_id: me.id, known_custom_column_ids: (data?.custom_column_definitions ?? []).map((column) => column.id) }, { onError: () => announce(t('Could not save.'), { assertive: true }) });
   };
   const toggleCustomColumn = (id: number) => {
     const selected = new Set(visibleCustomColumnIds ?? customColumnDefinitions.map((column) => column.id));

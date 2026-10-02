@@ -213,7 +213,6 @@
 
 /* Toolbar */
 .toolbar {
-  position: relative;
   display: flex;
   align-items: center;
   gap: var(--sp-4);
@@ -387,7 +386,7 @@
 
 /* ---- View-settings gear menu (library toolbar) ---------------------------- */
 .settingsWrap {
-  position: static;
+  position: relative;
   display: inline-flex;
 }
 .gearBtn, .gearBtnActive {
@@ -409,8 +408,7 @@
   border-color: var(--accent);
 }
 
-/* Export actions can wrap the gear to the left at any viewport width.
-   Anchor the panel to the whole toolbar so every control remains onscreen. */
+/* Measured viewport clamping keeps the panel near its gear after wrapping. */
 
 .settingsMenu {
   position: absolute;

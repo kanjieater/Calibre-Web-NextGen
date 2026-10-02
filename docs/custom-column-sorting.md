@@ -45,3 +45,5 @@ Field saves are bound to the account that initiated the edit. A queued save is
 canceled when the app's account has changed, and the server rejects a request
 whose expected account differs from the authenticated session. This keeps an
 older edit from changing a later signed-in account.
+
+Each signed-in save carries the visible field IDs that the page knew about. Changes apply within that scope; previously selected live fields outside it keep their labels and selection when an administrator restores them during an open page. A newly hidden or removed field can cause a stale save to be refused; the UI refreshes current definitions so the reader can retry. An account-change refusal refreshes the current account too. Label edits save when their input loses focus, including when closing the settings panel; Escape closes the panel and returns focus when focus was inside it. The panel stays near its button and is clamped within the viewport.

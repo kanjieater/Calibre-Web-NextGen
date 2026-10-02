@@ -10,6 +10,9 @@ export async function expectSettingsReachable(page: Page, width: number) {
   await expect.poll(async () => (await panel.boundingBox())!.x).toBeGreaterThanOrEqual(0);
   const box = (await panel.boundingBox())!;
   expect(box.x + box.width).toBeLessThanOrEqual(width);
+  const triggerBox = (await trigger.boundingBox())!;
+  expect(box.x).toBeLessThanOrEqual(triggerBox.x + triggerBox.width + 16);
+  expect(box.x + box.width).toBeGreaterThanOrEqual(triggerBox.x - 16);
   const last = panel.getByRole('radio').last();
   await last.focus();
   await expect(last).toBeInViewport();
