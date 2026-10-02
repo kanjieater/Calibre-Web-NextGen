@@ -704,11 +704,14 @@ def _sort_context(sort_param, data):
     the Classic list renderers that require it.
     """
     order, key = get_sort_function(sort_param, data)
-    custom_sort = resolve_custom_column_sort(key, config)
-    if custom_sort is None:
-        return order, key, ()
-    model, custom_order = custom_sort
-    return custom_order, key, (model, db.Books.id == model.book)
+    if isinstance(key, str) and key.startswith("cc-"):
+        resolved = resolve_magic_shelf_sort(key, config)
+        # Render the effective key without rewriting the stored preference.
+        # An unavailable definition query preserves the choice for retry;
+        # a live but rejected column renders/exports the default order.
+        effective_key = resolved.key if resolved.persistable else key
+        return list(resolved.order_by), effective_key, resolved.join
+    return order, key, ()
 
 
 def _sort_join(order):
