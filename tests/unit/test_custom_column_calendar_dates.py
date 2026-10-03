@@ -26,7 +26,7 @@ def test_real_sql_list_and_detail_emit_the_same_custom_calendar(stored, expected
         __tablename__ = "custom_column_31"
         id = Column(Integer, primary_key=True)
         book = Column(Integer)
-        value = Column(TIMESTAMP(timezone=True))
+        value = Column(TIMESTAMP)
 
     engine = create_engine("sqlite://")
     base.metadata.create_all(engine)
@@ -46,3 +46,29 @@ def test_real_sql_list_and_detail_emit_the_same_custom_calendar(stored, expected
         assert values[1]["31"][0]["value"] == expected
         assert detail[0]["values"][0]["value"] == expected
     engine.dispose()
+
+
+@pytest.mark.parametrize("stored,expected", [
+    (datetime(101, 1, 1), ""),
+    (datetime(2026, 1, 10, 23), "2026-01-10"),
+])
+def test_classic_table_encoder_uses_the_same_calendar_and_empty_date_policy(stored, expected):
+    import json
+    from sqlalchemy import ForeignKey
+    from sqlalchemy.orm import relationship
+    from cps.db import AlchemyEncoder
+    base = declarative_base()
+
+    class Book(base):
+        __tablename__ = "calendar_book"
+        id = Column(Integer, primary_key=True)
+        custom_column_31 = relationship("Deadline")
+
+    class Deadline(base):
+        __tablename__ = "calendar_deadline"
+        id = Column(Integer, primary_key=True)
+        book = Column(Integer, ForeignKey("calendar_book.id"))
+        value = Column(TIMESTAMP)
+
+    book = Book(id=1, custom_column_31=[Deadline(value=stored)])
+    assert json.loads(json.dumps(book, cls=AlchemyEncoder))["custom_column_31"] == expected

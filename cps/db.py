@@ -916,7 +916,7 @@ class AlchemyEncoder(json.JSONEncoder):
                         for ele in data:
                             if hasattr(ele, 'value'):       # converter for custom_column values
                                 if isinstance(ele.value, datetime):
-                                    el.append(ele.value.date().isoformat())
+                                    el.append(ele.value.date().isoformat() if ele.value.year > 101 else "")
                                 else:
                                     el.append(str(ele.value))
                             elif ele.get:
