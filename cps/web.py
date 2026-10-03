@@ -50,11 +50,14 @@ from .helper import check_valid_domain, check_email, check_username, \
     edit_book_read_status, valid_password, get_kosync_progress_display, get_sendable_book
 from .pagination import Pagination
 from .sort_orders import BOOK_SORT_ORDERS, DEFAULT_SORT, book_sort_order, viewer_id
+from .unicode_collation import locale_sort_key, locale_initial, unicode_sort_key
+from .cw_babel import get_collation_locale
 from .custom_column_sort import (
     load_configured_columns,
     resolve as resolve_custom_column_sort,
     resolve_magic_shelf_sort,
 )
+from .custom_column_visibility import retryable_column_reads, BROWSABLE_DATATYPES, browsable_columns, is_cc_visible, save_cc_visibility
 from .redirect import get_redirect_location
 from .cw_babel import get_available_locale, get_available_translations, sanitize_locale_for_write
 from .usermanagement import login_required_if_no_ano
@@ -412,6 +415,27 @@ def toggle_read(book_id):
         return message
 
 
+@web.route("/ajax/readstatus/<int:book_id>", methods=['POST'])
+@user_login_required
+def set_read_status(book_id):
+    status = request.form.get("status")
+    if helper.read_status_code(status) is None:
+        abort(400)
+    if not user_library.contains_book(current_user, book_id):
+        abort(403)
+    visible = calibre_db.get_filtered_book(
+        book_id, allow_show_archived=True, allow_show_hidden=True,
+        allow_show_global=bool(current_user.role_browse_global()),
+        allow_public_shelf_books=True,
+    )
+    if visible is None:
+        abort(404)
+    message = helper.set_explicit_book_read_status(book_id, status)
+    if message:
+        return jsonify({"error": str(message)}), 500
+    return jsonify({"status": status})
+
+
 @web.route("/ajax/togglearchived/<int:book_id>", methods=['POST'])
 @user_login_required
 def toggle_archived(book_id):
@@ -659,7 +683,7 @@ def get_matching_tags():
 def generate_char_list(entries): # data_colum, db_link):
     char_list = list()
     for entry in entries:
-        upper_char = db.unicode_initial(entry[0].name)
+        upper_char = db.unicode_initial(entry[0].name, get_collation_locale())
         if not upper_char:
             continue
         if upper_char not in char_list:
@@ -668,12 +692,11 @@ def generate_char_list(entries): # data_colum, db_link):
 
 
 def query_char_list(data_colum, db_link):
-    results = (calibre_db.session.query(func.ng_initial(data_colum).label('char'))
+    initial = locale_initial(data_colum)
+    results = (calibre_db.session.query(initial.label('char'))
             .join(db_link).join(db.Books).filter(calibre_db.common_filters())
-            .filter(func.ng_initial(data_colum).isnot(None))
-            .filter(func.ng_initial(data_colum) != '')
-            .group_by(func.ng_initial(data_colum))
-            .order_by(func.ng_sort_key(data_colum)).all())
+            .filter(initial.isnot(None)).filter(initial != '')
+            .group_by(initial).order_by(locale_sort_key(initial), initial).all())
     return results
 
 
@@ -687,7 +710,7 @@ def get_sort_function(sort_param, data):
             # A series page reads in series order by default — matching the
             # OPDS series feed — not newest-first. An explicitly chosen sort
             # is stored above and honored on the next visit. (fork #334 audit)
-            return BOOK_SORT_ORDERS["seriesasc"], "seriesasc"
+            return book_sort_order("seriesasc"), "seriesasc"
         sort_param = "new"
     # The ORDER BY itself is shared with the new UI's /api/v1 lists so the two
     # cannot disagree, and so every sort keeps its unique tiebreaker (#1331) —
@@ -806,6 +829,13 @@ def render_books_list(data, sort_param, book_id, page):
         return render_read_books(page, False, order=order)
     elif data == "read":
         return render_read_books(page, True, order=order)
+    elif data in ("in_progress", "did_not_finish", "on_hold"):
+        status = {
+            "in_progress": ub.ReadBook.STATUS_IN_PROGRESS,
+            "did_not_finish": ub.ReadBook.STATUS_DID_NOT_FINISH,
+            "on_hold": ub.ReadBook.STATUS_ON_HOLD,
+        }[data]
+        return render_personal_read_status_books(page, status, order=order)
     elif data == "hot":
         return render_hot_books(page, order)
     elif data == "download":
@@ -948,6 +978,9 @@ def save_discover_source():
 
 def render_discover_books(book_id):
     if current_user.check_visibility(constants.SIDEBAR_RANDOM):
+        paused_ids = helper.book_ids_with_read_status(
+            getattr(current_user, "id", None),
+            ub.ReadBook.STATUS_DID_NOT_FINISH, ub.ReadBook.STATUS_ON_HOLD)
         if not config.config_read_column:
             db_filter = coalesce(ub.ReadBook.read_status, 0) != ub.ReadBook.STATUS_FINISHED
         else:
@@ -963,6 +996,7 @@ def render_discover_books(book_id):
                 )
                 db_filter = True
 
+        db_filter = and_(db_filter, ~db.Books.id.in_(paused_ids))
         source_filter, source_available = discover_source_service.filter_for(current_user)
         entries, __, ___ = calibre_db.fill_indexpage(
             1, 0, db.Books, db_filter, [func.randomblob(2)],
@@ -1262,19 +1296,33 @@ def render_language_books(page, name, order):
 
 
 def render_read_books(page, are_read, as_xml=False, order=None, extra_filter=None):
+    paused_ids = helper.book_ids_with_read_status(
+        getattr(current_user, "id", None),
+        ub.ReadBook.STATUS_DID_NOT_FINISH,
+        ub.ReadBook.STATUS_ON_HOLD,
+    ) if current_user.is_authenticated else []
     sort_param = order[0] if order else []
     if not config.config_read_column:
         if are_read:
             db_filter = and_(ub.ReadBook.user_id == int(current_user.id),
                              ub.ReadBook.read_status == ub.ReadBook.STATUS_FINISHED)
         else:
-            db_filter = coalesce(ub.ReadBook.read_status, 0) != ub.ReadBook.STATUS_FINISHED
+            db_filter = and_(
+                coalesce(ub.ReadBook.read_status, 0) != ub.ReadBook.STATUS_FINISHED,
+                ~db.Books.id.in_(paused_ids),
+            )
     else:
         try:
             if are_read:
-                db_filter = db.cc_classes[config.config_read_column].value == True
+                db_filter = and_(
+                    db.cc_classes[config.config_read_column].value == True,
+                    ~db.Books.id.in_(paused_ids),
+                )
             else:
-                db_filter = coalesce(db.cc_classes[config.config_read_column].value, False) != True
+                db_filter = and_(
+                    coalesce(db.cc_classes[config.config_read_column].value, False) != True,
+                    ~db.Books.id.in_(paused_ids),
+                )
         except (KeyError, AttributeError, IndexError):
             log.error("Custom Column No.{} does not exist in calibre database".format(config.config_read_column))
             if not as_xml:
@@ -1306,6 +1354,45 @@ def render_read_books(page, are_read, as_xml=False, order=None, extra_filter=Non
             page_name = "unread"
         return render_title_template('index.html', random=random, entries=entries, pagination=pagination,
                                      title=name, page=page_name, order=order[1])
+
+
+def render_personal_read_status_books(page, status, order=None, as_xml=False,
+                                      extra_filter=None):
+    """List one exact personal status, including custom-column overlays."""
+    sort_param = order[0] if order else []
+    book_ids = helper.book_ids_with_read_status(
+        getattr(current_user, "id", None), status)
+    db_filter = db.Books.id.in_(book_ids)
+    if config.config_read_column and status == ub.ReadBook.STATUS_IN_PROGRESS:
+        try:
+            relationship = getattr(db.Books, "custom_column_{}".format(
+                config.config_read_column))
+            db_filter = and_(db_filter, ~relationship.any(
+                db.cc_classes[config.config_read_column].value == True))
+        except (KeyError, AttributeError):
+            log.error("Custom Column No.%s does not exist in calibre database",
+                      config.config_read_column)
+    entries, random, pagination = calibre_db.fill_indexpage(
+        page, 0, db.Books, db_filter, sort_param,
+        True, config.config_read_column,
+        db.books_series_link, db.Books.id == db.books_series_link.c.book,
+        db.Series, extra_filter=extra_filter)
+    if as_xml:
+        return entries, pagination
+    titles = {
+        ub.ReadBook.STATUS_IN_PROGRESS: _("Currently Reading"),
+        ub.ReadBook.STATUS_DID_NOT_FINISH: _("Did not finish"),
+        ub.ReadBook.STATUS_ON_HOLD: _("On hold"),
+    }
+    title = titles[status] + " (" + str(pagination.total_count) + ")"
+    page_name = {
+        ub.ReadBook.STATUS_IN_PROGRESS: "in_progress",
+        ub.ReadBook.STATUS_DID_NOT_FINISH: "did_not_finish",
+        ub.ReadBook.STATUS_ON_HOLD: "on_hold",
+    }[status]
+    return render_title_template('index.html', random=random, entries=entries,
+                                 pagination=pagination, title=title,
+                                 page=page_name, order=order[1] if order else "stored")
 
 
 def render_archived_books(page, sort_param):
@@ -2296,6 +2383,15 @@ def list_books():
     order = direction
     state = None
     join = tuple()
+    ascending = order == "asc"
+
+    def string_order(*columns):
+        # Retain ORM expressions so eager-load/LIMIT aliases remain valid.
+        # Raw text and the unique book id make primary-collation ties stable.
+        terms = [term for column in columns for term in (locale_sort_key(column), column)]
+        terms.append(db.Books.id)
+        return [term.asc() if ascending else term.desc() for term in terms]
+
 
     custom_column_match = re.fullmatch(r"custom_column_(\d+)", sort_param or "")
     custom_sort = resolve_custom_column_sort(
@@ -2307,21 +2403,22 @@ def list_books():
     elif sort_param == "state":
         state = json.loads(request.args.get("state", "[]"))
     elif sort_param == "tags":
-        order = [db.Tags.name.asc()] if order == "asc" else [db.Tags.name.desc()]
+        order = string_order(db.Tags.name)
         join = db.books_tags_link, db.Books.id == db.books_tags_link.c.book, db.Tags
     elif sort_param == "series":
-        order = [db.Series.name.asc()] if order == "asc" else [db.Series.name.desc()]
+        order = string_order(db.Series.name)
         join = db.books_series_link, db.Books.id == db.books_series_link.c.book, db.Series
     elif sort_param == "publishers":
-        order = [db.Publishers.name.asc()] if order == "asc" else [db.Publishers.name.desc()]
+        order = string_order(db.Publishers.name)
         join = db.books_publishers_link, db.Books.id == db.books_publishers_link.c.book, db.Publishers
     elif sort_param == "authors":
-        order = [db.Authors.name.asc(), db.Series.name, db.Books.series_index] if order == "asc" \
-            else [db.Authors.name.desc(), db.Series.name.desc(), db.Books.series_index.desc()]
+        order = string_order(db.Authors.name, db.Series.name)
+        direction = "asc" if ascending else "desc"
+        order.insert(-1, getattr(db.Books.series_index, direction)())
         join = db.books_authors_link, db.Books.id == db.books_authors_link.c.book, db.Authors, db.books_series_link, \
             db.Books.id == db.books_series_link.c.book, db.Series
     elif sort_param == "author_sort":
-        order = [db.Books.author_sort.asc()] if order == "asc" else [db.Books.author_sort.desc()]
+        order = string_order(db.Books.author_sort)
     elif sort_param == "languages":
         order = [db.Languages.lang_code.asc()] if order == "asc" else [db.Languages.lang_code.desc()]
         join = db.books_languages_link, db.Books.id == db.books_languages_link.c.book, db.Languages
@@ -2338,7 +2435,10 @@ def list_books():
         col_name = "author_sort" if sort_param == "authors_sort" else sort_param
         column = getattr(db.Books, col_name, None)
         if column is not None:
-            order = [column.asc() if order == "asc" else column.desc()]
+            if col_name == "series_index":
+                order = [column.asc(), db.Books.id.asc()] if order == "asc" else [column.desc(), db.Books.id.desc()]
+            else:
+                order = string_order(column)
         else:
             order = [db.Books.sort.asc()]
     elif not state:
@@ -2411,14 +2511,14 @@ def update_table_settings():
 def author_list():
     if current_user.check_visibility(constants.SIDEBAR_AUTHOR):
         if current_user.get_view_property('author', 'dir') == 'desc':
-            order = db.Authors.sort.desc()
+            order = [locale_sort_key(db.Authors.sort).desc(), db.Authors.sort.desc(), db.Authors.id.desc()]
             order_no = 0
         else:
-            order = db.Authors.sort.asc()
+            order = [locale_sort_key(db.Authors.sort).asc(), db.Authors.sort.asc(), db.Authors.id.asc()]
             order_no = 1
         entries = calibre_db.session.query(db.Authors, func.count('books_authors_link.book').label('count')) \
             .join(db.books_authors_link).join(db.Books).filter(calibre_db.common_filters()) \
-            .group_by(text('books_authors_link.author')).order_by(order).all()
+            .group_by(text('books_authors_link.author')).order_by(*order).all()
         char_list = query_char_list(db.Authors.sort, db.books_authors_link)
         return render_title_template('list.html', entries=entries, folder='web.books_list', charlist=char_list,
                                      title="Authors", page="authorlist", data='author', order=order_no)
@@ -2453,14 +2553,16 @@ def publisher_list():
     if current_user.check_visibility(constants.SIDEBAR_PUBLISHER):
         order_dir = current_user.get_view_property('publisher', 'dir')
         order_no = 1 if order_dir != 'desc' else 0
-        order = db.Publishers.name.desc() if order_dir == 'desc' else db.Publishers.name.asc()
+        order = [locale_sort_key(db.Publishers.name), db.Publishers.name, db.Publishers.id]
+        if order_dir == 'desc':
+            order = [term.desc() for term in order]
 
         entries_query = (calibre_db.session.query(db.Publishers, func.count(db.books_publishers_link.c.book).label('count'))
                          .join(db.books_publishers_link, db.Publishers.id == db.books_publishers_link.c.publisher)
                          .join(db.Books, db.books_publishers_link.c.book == db.Books.id)
                          .filter(calibre_db.common_filters())
                          .group_by(db.Publishers.id)
-                         .order_by(order))
+                         .order_by(*order))
 
         entries = entries_query.all()
 
@@ -2479,8 +2581,9 @@ def publisher_list():
             else: # descending
                 entries.append(none_publisher_entry)
 
-        char_list = [entry[0].name[0].upper() for entry in entries if entry[0].name]
-        char_list = sorted(list(set(char_list)))
+        language = get_collation_locale()
+        char_list = [(initial,) for initial in sorted(set(generate_char_list(entries)),
+                     key=lambda value: unicode_sort_key(value, language))]
 
         return render_title_template('list.html', entries=entries, folder='web.books_list', charlist=char_list,
                                      title=_("Publishers"), page="publisherlist", data="publisher", order=order_no)
@@ -2493,16 +2596,16 @@ def publisher_list():
 def series_list():
     if current_user.check_visibility(constants.SIDEBAR_SERIES):
         if current_user.get_view_property('series', 'dir') == 'desc':
-            order = db.Series.sort.desc()
+            order = [locale_sort_key(db.Series.sort).desc(), db.Series.sort.desc(), db.Series.id.desc()]
             order_no = 0
         else:
-            order = db.Series.sort.asc()
+            order = [locale_sort_key(db.Series.sort).asc(), db.Series.sort.asc(), db.Series.id.asc()]
             order_no = 1
         char_list = query_char_list(db.Series.sort, db.books_series_link)
         if current_user.get_view_property('series', 'series_view') == 'list':
             entries = calibre_db.session.query(db.Series, func.count('books_series_link.book').label('count')) \
                 .join(db.books_series_link).join(db.Books).filter(calibre_db.common_filters()) \
-                .group_by(text('books_series_link.series')).order_by(order).all()
+                .group_by(text('books_series_link.series')).order_by(*order).all()
             no_series_count = (calibre_db.session.query(db.Books)
                             .outerjoin(db.books_series_link).outerjoin(db.Series)
                             .filter(db.Series.name == None)
@@ -2510,7 +2613,7 @@ def series_list():
                             .count())
             if no_series_count:
                 entries.append([db.Category(_("None"), "-1"), no_series_count])
-            entries = sorted(entries, key=lambda x: x[0].name.lower(), reverse=not order_no)
+            entries = sorted(entries, key=lambda x: unicode_sort_key(getattr(x[0], 'sort', None) or x[0].name, get_collation_locale()), reverse=not order_no)
             return render_title_template('list.html',
                                          entries=entries,
                                          folder='web.books_list',
@@ -2524,7 +2627,7 @@ def series_list():
                        .join(db.books_series_link).join(db.Series).filter(calibre_db.common_filters())
                        .group_by(text('books_series_link.series'))
                        .having(or_(func.max(db.Books.series_index), db.Books.series_index==""))
-                       .order_by(order)
+                       .order_by(*order)
                        .all())
             return render_title_template('grid.html', entries=entries, folder='web.books_list', charlist=char_list,
                                          title=_("Series"), page="serieslist", data="series", bodyClass="grid-view",
@@ -2617,13 +2720,13 @@ def language_overview():
 def category_list():
     if current_user.check_visibility(constants.SIDEBAR_CATEGORY):
         if current_user.get_view_property('category', 'dir') == 'desc':
-            order = db.Tags.name.desc()
+            order = [locale_sort_key(db.Tags.name).desc(), db.Tags.name.desc(), db.Tags.id.desc()]
             order_no = 0
         else:
-            order = db.Tags.name.asc()
+            order = [locale_sort_key(db.Tags.name).asc(), db.Tags.name.asc(), db.Tags.id.asc()]
             order_no = 1
         entries = calibre_db.session.query(db.Tags, func.count('books_tags_link.book').label('count')) \
-            .join(db.books_tags_link).join(db.Books).order_by(order).filter(calibre_db.common_filters()) \
+            .join(db.books_tags_link).join(db.Books).order_by(*order).filter(calibre_db.common_filters()) \
             .group_by(db.Tags.id).all()
         no_tag_count = (calibre_db.session.query(db.Books)
                          .outerjoin(db.books_tags_link).outerjoin(db.Tags)
@@ -2632,7 +2735,7 @@ def category_list():
                          .count())
         if no_tag_count:
             entries.append([db.Category(_("None"), "-1"), no_tag_count])
-        entries = sorted(entries, key=lambda x: x[0].name.lower(), reverse=not order_no)
+        entries = sorted(entries, key=lambda x: unicode_sort_key(getattr(x[0], 'sort', None) or x[0].name, get_collation_locale()), reverse=not order_no)
         char_list = generate_char_list(entries)
         return render_title_template('list.html', entries=entries, folder='web.books_list', charlist=char_list,
                                      title=_("Categories"), page="catlist", data="category", order=order_no)
@@ -2645,12 +2748,14 @@ def category_list():
 @web.route("/custom_column/<int:column_id>/<path:category_path>",
            strict_slashes=False)
 @login_required_if_no_ano
+@retryable_column_reads
 def cc_category_list(column_id, category_path):
-    """Tree/list view for one hierarchical custom column.
+    """Tree or atomic-value list for one browsable custom column.
 
-    /custom_column/5                     -> top-level nodes of column #5
-    /custom_column/5/Computers           -> books under 'Computers' (+ descendants)
-    /custom_column/5/Computers/DB        -> books under 'Computers.DB'
+    /custom_column/5                     -> values/categories of column #5
+    /custom_column/5/Computers           -> books under 'Computers'
+    /custom_column/5/Computers.DB        -> books under 'Computers.DB'
+    A slash is part of the stored value, never a hierarchy separator.
     """
     order = _sort_context(request.args.get('sort_param', 'stored'), 'cc_%d' % column_id)
     return render_cc_category(request.args.get('page', 1), column_id,
@@ -2660,51 +2765,85 @@ def cc_category_list(column_id, category_path):
 def browsable_cc_column(col_id):
     """The tag-like custom column ``col_id`` if this library lets it be
     browsed: it exists, is text/enumeration, and is not hidden by the admin."""
-    for col in calibre_db.get_cc_columns(config):
-        if col.id == col_id and col.datatype in ('text', 'enumeration'):
+    for col in browsable_columns(calibre_db.get_cc_columns(config, fail_on_error=True)):
+        if col.id == col_id:
             return col
     return None
 
 
+@retryable_column_reads
 def render_cc_category(page, col_id, path, order):
-    """Render either the tree overview (no path) or the filtered book list
-    for one node of a hierarchical custom column."""
+    """Render one custom column's browse view: a tree, a flat list, or the
+    books under one node of either.
+
+    A browsable column is in exactly one of two modes, decided once by
+    ``CalibreDB.is_flat_cc_column``:
+
+    * **hierarchical** -- stored values form a real dotted hierarchy
+      ('Computers' and 'Computers.DB'). A node matches itself plus every
+      descendant.
+    * **flat** -- stored values only *contain* dots (Dewey '778.3', LCC
+      'QA76.76.C68'). Each value is an opaque atomic string that is never
+      split, so Dewey 778.3 is one entry rather than a 778 parent with a 3
+      child, and a node has no descendants.
+
+    The two modes share the node contract (path/name/value, children=[]) so
+    cc_list.html renders both without a template change.
+    """
     # Custom columns are part of the Categories section, and a column the
     # admin hid (config_columns_to_ignore) is not browsable by URL either.
     if not current_user.check_visibility(constants.SIDEBAR_CATEGORY):
         abort(404)
     col = browsable_cc_column(col_id)
-    if col is None:
+    if col is None or col_id not in db.cc_classes:
+        abort(404)
+    # ...and a column the user hid on their profile page is not reachable by
+    # URL either. The sidebar omits it, so honouring the toggle only in the
+    # navigation would let anyone who knows the URL keep browsing it. The SPA
+    # API already 404s here; this is the same contract for the classic route.
+    if not is_cc_visible(current_user, col_id, fail_on_error=True):
         abort(404)
 
-    # '/' is part of a value ("Sci-Fi/Fantasy"), never a separator.
-    path = hierarchy.join_path([path or ''])
+    is_hierarchical = not calibre_db.is_flat_cc_column(col_id, fail_on_error=True)
+
+    if is_hierarchical:
+        # '/' is part of a value ("Sci-Fi/Fantasy"), never a separator.
+        path = hierarchy.join_path([path or ''])
+    else:
+        # Flat values are opaque: a trailing dot, a doubled dot or a space
+        # around one is part of the stored string, so the path is used
+        # verbatim. Canonicalising here would turn Dewey '778.3' into
+        # something the stored rows never contained.
+        path = path or ''
 
     try:
         page = int(page)
     except (TypeError, ValueError):
         page = 1
 
-    if path:
+    cc_rel = getattr(db.Books, 'custom_column_' + str(col_id))
+    order_args = (
+        # The FULL shared ORDER BY, tiebreaker included (#1331). Slicing
+        # order[0][0] out of it dropped Books.id and made paging inside a
+        # node plan-dependent; series context is already inside the
+        # collated authaz/authza orders, so no call-site splice is needed.
+        order[0],
+        True, config.config_read_column,
+        db.books_series_link,
+        db.Books.id == db.books_series_link.c.book,
+        db.Series,
+        *_sort_join(order),
+    )
+
+    if path and is_hierarchical:
         node = hierarchy.get_node_by_path(
-            calibre_db.get_hierarchical_tree(col_id), path)
+            calibre_db.get_hierarchical_tree(col_id, fail_on_error=True), path)
         if node is None:
             abort(404)
-        cc_rel = getattr(db.Books, 'custom_column_' + str(col_id))
         entries, random, pagination = calibre_db.fill_indexpage(
-            page, 0,
-            db.Books,
+            page, 0, db.Books,
             cc_rel.any(calibre_db.hierarchical_cc_filter(col_id, node)),
-            # The FULL shared ORDER BY, tiebreaker included (#1331). Slicing
-            # order[0][0] out of it dropped Books.id and made paging inside a
-            # node plan-dependent; series context is already inside the
-            # collated authaz/authza orders, so no call-site splice is needed.
-            order[0],
-            True, config.config_read_column,
-            db.books_series_link,
-            db.Books.id == db.books_series_link.c.book,
-            db.Series,
-            *_sort_join(order))
+            *order_args)
         # Prepend the column root as first crumb so every level can step back
         # up to /custom_column/<id>
         return render_title_template(
@@ -2713,15 +2852,33 @@ def render_cc_category(page, col_id, path, order):
             # layout.html and index.html print title with |safe; a stored value
             # is text an edit-role user chose, so it is escaped here
             title=_("%(column)s: %(name)s", column=escape(col.name), name=escape(path)),
-            # Sort and paging links route back through books_list's cc_ branch
+            # Sort and paging retain this custom-column path, including slashes.
             page="cc_%d" % col_id, order=order[1],
             breadcrumbs=[[ (col.name, '') ] + hierarchy.breadcrumb_trail(path)],
             subcategories=node['children'], col_id=col_id)
 
-    # Root behaviour: the whole tree, each level with its distinct-book count
+    if path:
+        # A flat node is an exact-value match with no descendants, so it has
+        # no subcategories panel at all: passing none (rather than an empty
+        # list) is what makes index.html render nothing in that slot.
+        entries, random, pagination = calibre_db.fill_indexpage(
+            page, 0, db.Books,
+            cc_rel.any(calibre_db.flat_cc_filter(col_id, path)),
+            *order_args)
+        return render_title_template(
+            'index.html', random=random, entries=entries, pagination=pagination,
+            id=path,
+            title=_("%(column)s: %(name)s", column=escape(col.name), name=escape(path)),
+            page="cc_%d" % col_id, order=order[1],
+            breadcrumbs=[[(col.name, ''), (path, path)]], col_id=col_id)
+
+    # Root: a tree of nodes for a hierarchical column, a plain counted list
+    # of whole values for a flat one.
+    entries = (calibre_db.get_hierarchical_tree(col_id, fail_on_error=True) if is_hierarchical
+               else calibre_db.get_cc_flat_list(col_id, fail_on_error=True))
     return render_title_template(
-        'cc_list.html', entries=calibre_db.get_hierarchical_tree(col_id),
-        title=col.name, page="cclist", col_id=col_id)
+        'cc_list.html', entries=entries,
+        title=col.name, page="cclist", col_id=col_id, hierarchical=is_hierarchical)
 
 
 # ################################### Download/Send ##################################################################
@@ -3471,10 +3628,7 @@ def change_profile(kobo_support, hardcover_support, local_oauth_check, oauth_sta
         # Per-custom-column sidebar visibility (independent of the built-in
         # section bitflags); stored in User.view_settings as 'cc_sidebar'
         try:
-            for option in get_custom_column_visibility_options():
-                key = 'show_cc_%d' % option['id']
-                current_user.set_view_property('cc_sidebar', key,
-                                               to_save.get(key) == 'on', commit=False)
+            save_cc_visibility(current_user, get_custom_column_visibility_options(), to_save)
         except Exception:
             log.error("Could not save custom column sidebar visibility", exc_info=True)
         # A stored locale is returned verbatim by get_locale() on every later
@@ -4058,14 +4212,25 @@ def read_book(book_id, book_format):
                     read_status=ub.ReadBook.STATUS_IN_PROGRESS,
                     times_started_reading=1,
                     last_time_started_reading=now,
+                    read_status_choice_at=now,
                 )
                 ub.session.add(read_row)
             else:
                 prev_status = read_row.read_status or 0
+                can_resume = True
+                if (prev_status in (ub.ReadBook.STATUS_DID_NOT_FINISH,
+                                    ub.ReadBook.STATUS_ON_HOLD)
+                        and config.config_read_column):
+                    # Opening the ordinary reader is an explicit resume. A
+                    # prior shared finished marker must not mask that resume.
+                    can_resume = helper.set_custom_read_column_value(
+                        book_id, False, source="web reader resume")
                 if prev_status != ub.ReadBook.STATUS_IN_PROGRESS \
-                        and prev_status != ub.ReadBook.STATUS_FINISHED:
+                        and prev_status != ub.ReadBook.STATUS_FINISHED and can_resume:
                     read_row.times_started_reading = (read_row.times_started_reading or 0) + 1
                     read_row.read_status = ub.ReadBook.STATUS_IN_PROGRESS
+                if can_resume and prev_status != ub.ReadBook.STATUS_FINISHED:
+                    read_row.read_status_choice_at = now
                 read_row.last_time_started_reading = now
             ub.session_commit()
         except Exception as e:
@@ -4174,26 +4339,11 @@ def show_book(book_id):
         read_book = entries[1]
         archived_book = entries[2]
         entry = entries[0]
-        if config.config_read_column:
-            # read_book carries the custom column's boolean value here, which
-            # can never express the in-progress tri-state — KOReader/Kobo sync
-            # writes that only to ub.ReadBook, whatever column is configured.
-            # Overlay it so the currently-reading marker still renders for
-            # custom-read-column users (fork #634).
-            entry.read_status = bool(read_book)
-            entry.read_status_raw = (ub.ReadBook.STATUS_FINISHED if read_book
-                                     else ub.ReadBook.STATUS_UNREAD)
-            if not read_book and current_user.is_authenticated:
-                in_progress = ub.session.query(ub.ReadBook).filter(
-                    ub.ReadBook.user_id == int(current_user.id),
-                    ub.ReadBook.book_id == book_id,
-                    ub.ReadBook.read_status == ub.ReadBook.STATUS_IN_PROGRESS).first()
-                if in_progress:
-                    entry.read_status_raw = ub.ReadBook.STATUS_IN_PROGRESS
-        else:
-            entry.read_status = read_book == ub.ReadBook.STATUS_FINISHED
-            # Raw tri-state for the "currently reading" detail-page marker. fork #509.
-            entry.read_status_raw = read_book or ub.ReadBook.STATUS_UNREAD
+        entry.read_status_name = helper.read_statuses_for_books(
+            ((book_id, read_book),), config.config_read_column,
+            current_user).get(book_id, "unread")
+        entry.read_status_raw = helper.read_status_code(entry.read_status_name)
+        entry.read_status = entry.read_status_raw == ub.ReadBook.STATUS_FINISHED
         entry.is_archived = archived_book
         for lang_index in range(0, len(entry.languages)):
             entry.languages[lang_index].language_name = isoLanguages.get_language_name(get_locale(), entry.languages[
@@ -4294,6 +4444,9 @@ def show_book(book_id):
                                      show_original_filename=show_original_filename,
                                      cc=cc,
                                      hierarchical_cc_ids=calibre_db.get_hierarchical_column_ids(),
+                                     cc_browse_ids={c.id for c in browsable_columns(cc) if c.datatype in BROWSABLE_DATATYPES
+                                                    and current_user.check_visibility(constants.SIDEBAR_CATEGORY)
+                                                    and is_cc_visible(current_user, c.id)},
                                      is_xhr=request.headers.get('X-Requested-With') == 'XMLHttpRequest',
                                      title=entry.title,
                                      books_shelfs=book_in_shelves,

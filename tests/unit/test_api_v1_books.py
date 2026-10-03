@@ -76,34 +76,8 @@ def test_books_list_calls_fill_indexpage_with_join_archive_read_true():
     )
 
 
-@pytest.mark.unit
-def test_list_books_sort_abc():
-    """GET /api/v1/books?sort=abc passes SORT_MAP['abc'] as the order arg to fill_indexpage."""
-    from cps.api import books as books_mod
-    from cps.pagination import Pagination
-
-    inner = SimpleNamespace(id=1, title="A", series_index="1.0", has_cover=0,
-                            authors=[], series=[], data=[])
-    row = SimpleNamespace(Books=inner, is_archived=False, read_status=None)
-    pag = Pagination(1, 60, 1)
-
-    app = flask.Flask(__name__)
-    with app.test_request_context("/api/v1/books?sort=abc"):
-        with patch.object(books_mod.calibre_db, "fill_indexpage",
-                          return_value=([row], None, pag)) as mock_fill, \
-             patch.object(books_mod.config, "config_books_per_page", 60, create=True), \
-             patch.object(books_mod.config, "config_read_column", 0, create=True):
-            view = inspect.unwrap(books_mod.list_books)
-            view()
-
-    call_args = mock_fill.call_args
-    assert call_args is not None, "fill_indexpage was never called"
-    # 5th positional arg (index 4) is the order list
-    positional = call_args.args
-    assert len(positional) >= 5, f"Expected ≥5 positional args, got {len(positional)}"
-    assert positional[4] == books_mod.SORT_MAP["abc"], (
-        f"Expected SORT_MAP['abc'] for sort=abc, got {positional[4]!r}"
-    )
+# Alphabetical order is exercised through real SQL and the JSON view in
+# test_1050_nordic_request_collation.py; SQL expression identity is not behavior.
 
 
 @pytest.mark.unit
@@ -150,7 +124,6 @@ def test_list_books_search():
         with patch.object(books_mod, "_catalog_book_query", return_value=query) as mock_query, \
              patch.object(books_mod.config, "config_books_per_page", 60, create=True), \
              patch.object(books_mod.config, "config_read_column", 0, create=True), \
-             patch.object(books_mod, "book_in_progress_ids", return_value=set()), \
              patch.object(books_mod.user_cover, "overrides_for_user", return_value={}), \
              patch.object(books_mod.ub, "session", app_session), \
              patch.object(books_mod, "_visible_shelves_by_book", return_value={}), \
@@ -443,6 +416,7 @@ def test_select_all_discover_returns_only_the_current_random_page_ids():
              patch.object(books_mod.config, "config_books_per_page", 24, create=True), \
              patch.object(books_mod.config, "config_read_column", 0, create=True), \
              patch.object(books_mod, "_real_user_id", return_value=7), \
+             patch.object(books_mod, "book_ids_with_read_status", return_value=[]), \
              patch.object(books_mod, "_hidden_book_ids", return_value=set()):
             response = inspect.unwrap(books_mod.list_books)()
 
@@ -485,6 +459,7 @@ def test_select_all_discover_keeps_saved_source_filter_and_random_page_bound(ava
         with app.test_request_context("/api/v1/books?filter=discover&select_all=1"):
             with patch.object(books_mod, "current_user", account), \
                  patch.object(books_mod, "_real_user_id", return_value=7), \
+                 patch.object(books_mod, "book_ids_with_read_status", return_value=[]), \
                  patch.object(books_mod, "_hidden_book_ids", return_value=set()), \
                  patch.object(books_mod.config, "config_books_per_page", 2, create=True), \
                  patch.object(books_mod.config, "config_read_column", 0, create=True), \

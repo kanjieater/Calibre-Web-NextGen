@@ -227,6 +227,11 @@ msgid "Settings DB is not Writeable"
 msgstr "Instellingen database is niet schrijfbaar."
 
 #: cps/admin.py
+#, python-format
+msgid "Invalid OPDS filename template: %(error)s"
+msgstr "Ongeldig OPDS-bestandsnaamsjabloon: %(error)s"
+
+#: cps/admin.py
 msgid ""
 "Cannot select this Boolean column until incompatible global and user "
 "restrictions are corrected or cleared."
@@ -253,18 +258,18 @@ msgid "Invalid default display font option"
 msgstr "Ongeldige standaardlettertypeoptie voor koppen"
 
 #: cps/admin.py
-msgid ""
-"The title-sort rule was saved, but reordering the existing library failed — "
-"books may keep their previous order until you retry or edit them."
-msgstr ""
-
-#: cps/admin.py
 msgid "Invalid Read Column"
 msgstr "Ongeldige gelezen kolom"
 
 #: cps/admin.py
 msgid "Invalid Restricted Column"
 msgstr "Ongeldige beperkte kolom"
+
+#: cps/admin.py
+msgid ""
+"The title-sort rule was saved, but reordering the existing library failed — "
+"books may keep their previous order until you retry or edit them."
+msgstr ""
 
 #: cps/admin.py
 msgid "Calibre-Web NextGen configuration updated"
@@ -715,6 +720,17 @@ msgid "{} User Successfully Imported"
 msgstr "{} Gebruiker succesvol geïmporteerd"
 
 #: cps/admin.py
+msgid "Library maintenance is running; try again when it finishes."
+msgstr ""
+"Bibliotheekonderhoud is bezig; probeer het opnieuw wanneer het klaar is."
+
+#: cps/admin.py
+msgid "Disable the Calibre content server before enabling split library mode."
+msgstr ""
+"Schakel de Calibre-inhoudsserver uit voordat u de gesplitste bibliotheek "
+"inschakelt."
+
+#: cps/admin.py
 msgid "Books path not valid"
 msgstr "Boekenpad is niet geldig"
 
@@ -725,6 +741,62 @@ msgstr "Database niet gevonden, voer de juiste locatie in"
 #: cps/admin.py
 msgid "DB is not Writeable"
 msgstr "Kan niet schrijven naar database"
+
+#: cps/admin.py
+msgid ""
+"The managed Calibre content server requires a POSIX platform. Use the Linux "
+"container on Windows."
+msgstr ""
+"De beheerde Calibre-inhoudsserver vereist een POSIX-platform. Gebruik de "
+"Linux-container op Windows."
+
+#: cps/admin.py
+msgid ""
+"Please enter a content server username and password, or allow anonymous "
+"writes"
+msgstr ""
+"Voer een gebruikersnaam en wachtwoord voor de inhoudsserver in, of sta "
+"anoniem schrijven toe"
+
+#: cps/admin.py
+msgid "Content server port must be a number from 1 to 65535"
+msgstr "De poort van de inhoudsserver moet een getal van 1 tot 65535 zijn"
+
+#: cps/admin.py
+msgid "Content server port must differ from the port this server listens on"
+msgstr ""
+"De poort van de inhoudsserver moet verschillen van de luisterpoort van deze "
+"server"
+
+#: cps/admin.py
+msgid ""
+"Content server username may only use the letters A-Z, numbers, spaces, "
+"underscores and hyphens"
+msgstr ""
+"De gebruikersnaam van de inhoudsserver mag alleen letters A-Z, cijfers, "
+"spaties, onderstrepingstekens en koppeltekens bevatten"
+
+#: cps/admin.py
+msgid "Content server password must use only ASCII (English) characters"
+msgstr ""
+"Het wachtwoord van de inhoudsserver mag alleen ASCII-tekens (Engelse tekens) "
+"bevatten"
+
+#: cps/admin.py
+#, python-format
+msgid "Invalid content server listen address: %(address)s"
+msgstr "Ongeldig luisteradres voor de inhoudsserver: %(address)s"
+
+#: cps/admin.py
+#, python-format
+msgid "Invalid content server trusted IP/CIDR entry: %(entry)s"
+msgstr "Ongeldige vertrouwde IP/CIDR-invoer voor de inhoudsserver: %(entry)s"
+
+#: cps/admin.py
+msgid "Disable split library mode before enabling the Calibre content server."
+msgstr ""
+"Schakel de gesplitste bibliotheek uit voordat u de Calibre-inhoudsserver "
+"inschakelt."
 
 #: cps/admin.py
 msgid "Keyfile Location is not Valid, Please Enter Correct Path"
@@ -1256,13 +1328,30 @@ msgstr "Origineel Formaat"
 msgid "End Format"
 msgstr "afsluit formaat"
 
+#: cps/cwa_functions.py cps/templates/cwa_api_stats.html
+#: cps/templates/cwa_library_stats.html
+msgid "All Time"
+msgstr "Alle tijd"
+
 #: cps/cwa_functions.py
+#, python-format
+msgid "Last %(count)s day"
+msgid_plural "Last %(count)s days"
+msgstr[0] "Afgelopen %(count)s dag"
+msgstr[1] "Afgelopen %(count)s dagen"
+
+#: cps/cwa_functions.py
+#, python-format
+msgid "%(start)s to %(end)s"
+msgstr "Van %(start)s tot %(end)s"
+
+#: cps/cwa_functions.py cps/templates/cwa_user_activity.html
 msgid "Unknown User"
 msgstr "Onbekende gebruiker"
 
 #: cps/cwa_functions.py
 msgid "Calibre-Web NextGen Stats & Activity"
-msgstr ""
+msgstr "Calibre-Web NextGen — Statistieken en activiteit"
 
 #: cps/cwa_functions.py
 msgid "Calibre-Web NextGen - Full Enforcement History"
@@ -1551,8 +1640,8 @@ msgstr "De metagegevens zijn bijgewerkt"
 msgid "Error editing book: {}"
 msgstr "Fout tijdens bijwerken van boek: {}"
 
-#: cps/editbooks.py cps/templates/kobo_reconcile.html cps/updater.py
-#: cps/uploader.py
+#: cps/editbooks.py cps/templates/cwa_stats_i18n.html
+#: cps/templates/kobo_reconcile.html cps/updater.py cps/uploader.py
 msgid "Unknown"
 msgstr "Onbekend"
 
@@ -1750,6 +1839,14 @@ msgid "The requested file could not be read. Maybe wrong permissions?"
 msgstr ""
 "Het opgevraagde bestand kan niet worden gelezen. Ben je hiertoe gemachtigd?"
 
+#: cps/helper.py cps/spa_strings.py
+msgid "Invalid reading status"
+msgstr "Ongeldige leesstatus"
+
+#: cps/helper.py cps/spa_strings.py
+msgid "Read status could not be set"
+msgstr "Leesstatus kon niet worden ingesteld"
+
 #: cps/helper.py
 #, python-brace-format
 msgid "Read status could not set: {}"
@@ -1928,13 +2025,26 @@ msgstr "Onlangs toegevoegd"
 msgid "Highly Rated"
 msgstr "Hoog beoordeeld"
 
-#: cps/magic_shelf.py cps/opds.py cps/spa_strings.py
+#: cps/magic_shelf.py cps/opds.py cps/render_template.py cps/spa_strings.py
+#: cps/web.py
 msgid "Currently Reading"
 msgstr "Nu aan het lezen"
 
 #: cps/magic_shelf.py cps/spa_strings.py
 msgid "Yet to Read"
 msgstr "Nog te lezen"
+
+#: cps/magic_shelf.py cps/opds.py cps/render_template.py cps/spa_strings.py
+#: cps/templates/detail.html cps/templates/image.html
+#: cps/templates/search_form.html cps/web.py
+msgid "Did not finish"
+msgstr "Niet uitgelezen"
+
+#: cps/magic_shelf.py cps/opds.py cps/render_template.py cps/spa_strings.py
+#: cps/templates/detail.html cps/templates/image.html
+#: cps/templates/search_form.html cps/web.py
+msgid "On hold"
+msgstr "Gepauzeerd"
 
 #: cps/magic_shelf.py cps/spa_strings.py
 msgid "Recent Publications"
@@ -2150,6 +2260,14 @@ msgstr "Gelezen boeken"
 msgid "Books currently being read"
 msgstr "Huidige versie"
 
+#: cps/opds.py cps/spa_strings.py
+msgid "Books you chose not to finish"
+msgstr "Boeken die je niet wilde uitlezen"
+
+#: cps/opds.py cps/spa_strings.py
+msgid "Books you have paused for later"
+msgstr "Boeken die je later wilt verder lezen"
+
 #: cps/opds.py cps/render_template.py cps/web.py
 msgid "Unread Books"
 msgstr "Ongelezen boeken"
@@ -2228,7 +2346,7 @@ msgstr "Boekenplanken"
 msgid "Books organized in shelves"
 msgstr "Boeken georganiseerd op boekenplanken"
 
-#: cps/opds.py cps/templates/config_view_edit.html
+#: cps/opds.py
 #, fuzzy
 msgid "Magic Shelves"
 msgstr "Synchroniseer geselecteerde boekenplanken met Kobo"
@@ -2244,6 +2362,11 @@ msgstr "omschrijving"
 
 #: cps/opds.py
 #, python-format
+msgid "Books by %(name)s"
+msgstr "Boeken op %(name)s"
+
+#: cps/opds.py
+#, python-format
 msgid "Books by %(name)s, including every sub-category"
 msgstr ""
 
@@ -2253,9 +2376,9 @@ msgid "{} Stars"
 msgstr "{} sterren"
 
 #: cps/opds.py cps/search.py cps/spa_strings.py cps/templates/book_edit.html
-#: cps/templates/cwa_epub_fixer.html cps/templates/feed.xml
-#: cps/templates/index.html cps/templates/index.xml cps/templates/layout.html
-#: cps/templates/search_form.html
+#: cps/templates/cwa_epub_fixer.html cps/templates/cwa_stats_i18n.html
+#: cps/templates/feed.xml cps/templates/index.html cps/templates/index.xml
+#: cps/templates/layout.html cps/templates/search_form.html
 msgid "Search"
 msgstr "Zoeken"
 
@@ -2318,6 +2441,18 @@ msgstr "Gelezen/Ongelezen boeken tonen"
 #: cps/render_template.py
 msgid "Show unread"
 msgstr "Ongelezen boeken tonen"
+
+#: cps/render_template.py cps/spa_strings.py
+msgid "Show Currently Reading Books"
+msgstr "Boeken die je leest tonen"
+
+#: cps/render_template.py cps/spa_strings.py
+msgid "Show Books You Did Not Finish"
+msgstr "Niet uitgelezen boeken tonen"
+
+#: cps/render_template.py cps/spa_strings.py
+msgid "Show Books On Hold"
+msgstr "Gepauzeerde boeken tonen"
 
 #: cps/render_template.py cps/templates/user_table.html
 #, fuzzy
@@ -3591,7 +3726,8 @@ msgstr "Blauw"
 msgid "Book content"
 msgstr "Boekinhoud"
 
-#: cps/spa_strings.py cps/templates/layout.html
+#: cps/spa_strings.py cps/templates/cwa_stats_i18n.html
+#: cps/templates/layout.html
 msgid "Browse"
 msgstr "Verkennen"
 
@@ -3927,7 +4063,8 @@ msgstr "Uitgevers (komma-gescheiden)"
 msgid "Read"
 msgstr "Gelezen"
 
-#: cps/spa_strings.py cps/templates/image.html
+#: cps/spa_strings.py cps/templates/cwa_stats_i18n.html
+#: cps/templates/image.html
 msgid "Reading"
 msgstr "Lezen"
 
@@ -3952,7 +4089,8 @@ msgstr "{name} verwijderen"
 msgid "Request failed."
 msgstr "Aanvraag mislukt."
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/cwa_api_stats.html
+#: cps/templates/cwa_library_stats.html cps/templates/cwa_user_activity.html
 msgid "Reset"
 msgstr "Resetten"
 
@@ -4079,7 +4217,7 @@ msgstr "Labels (door komma's gescheiden)"
 msgid "Title"
 msgstr "Titel"
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/detail.html cps/templates/search_form.html
 msgid "Unread"
 msgstr "Ongelezen"
 
@@ -4887,6 +5025,23 @@ msgid "Shows the name a book had when it was imported."
 msgstr "Toont de naam die het boek had toen het werd geïmporteerd."
 
 #: cps/spa_strings.py
+msgid "Public"
+msgstr "Openbaar"
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr "Aangepaste weergavenaam"
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr "Aangepaste velden op boekkaarten"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Display name for {name}"
+msgstr "Weergavenaam voor {name}"
+
+#: cps/spa_strings.py
 msgid "(no text captured)"
 msgstr "(geen tekst vastgelegd)"
 
@@ -5074,6 +5229,14 @@ msgstr "Geavanceerd"
 msgid "Advanced search"
 msgstr "Geavanceerd zoeken"
 
+#: cps/spa_strings.py
+msgid "After children"
+msgstr "Na subcategorieën"
+
+#: cps/spa_strings.py
+msgid "After tree"
+msgstr "Na de lijst"
+
 # Cover designer v2 (SPA)
 #: cps/spa_strings.py
 msgid "Alignment"
@@ -5146,6 +5309,10 @@ msgstr ""
 "beschikbaar is."
 
 #: cps/spa_strings.py
+msgid "An unexpected error occurred"
+msgstr "Er is een onverwachte fout opgetreden"
+
+#: cps/spa_strings.py
 msgid "Annotation pages"
 msgstr "Annotatiepagina's"
 
@@ -5170,6 +5337,7 @@ msgid "Any tags"
 msgstr "Elk label"
 
 #: cps/spa_strings.py cps/templates/book_edit.html
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
 msgid "Apply"
 msgstr "Toepassen"
 
@@ -5242,7 +5410,7 @@ msgstr "Aan apparaat toewijzen"
 msgid "Assigned to {name}."
 msgstr "Toegewezen aan {name}."
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/cwa_stats_i18n.html
 msgid "Authentication"
 msgstr "Authenticatie"
 
@@ -5392,9 +5560,14 @@ msgstr "Boek {id}"
 msgid "Book {number}"
 msgstr "Boek {number}"
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
 msgid "Books"
 msgstr "Boeken"
+
+#: cps/spa_strings.py
+msgid "Books assigned a value in this column will appear here."
+msgstr "Boeken met een waarde in deze kolom verschijnen hier."
 
 #: cps/spa_strings.py
 msgid "Books awaiting authority"
@@ -5403,6 +5576,10 @@ msgstr "Boeken wachten op autoriteit"
 #: cps/spa_strings.py
 msgid "Books per page"
 msgstr "Aantal boeken per pagina"
+
+#: cps/spa_strings.py
+msgid "Books placement"
+msgstr "Plaatsing van boeken"
 
 #: cps/spa_strings.py
 msgid "Books seeding"
@@ -5425,6 +5602,10 @@ msgstr ""
 "Boeken die niet op een met e-readers gesynchroniseerde boekenplank staan, "
 "verdwijnen dan bij de volgende synchronisatie uit de bibliotheek van de e-"
 "reader. Ze blijven wel in je bibliotheek hier."
+
+#: cps/spa_strings.py
+msgid "Browse by Column"
+msgstr "Bladeren per kolom"
 
 #: cps/spa_strings.py
 msgid ""
@@ -5612,6 +5793,10 @@ msgstr "Een andere positie kiezen"
 #: cps/spa_strings.py
 msgid "Choose fields"
 msgstr "Kies velden"
+
+#: cps/spa_strings.py
+msgid "Choose visible columns"
+msgstr "Zichtbare kolommen kiezen"
 
 #: cps/spa_strings.py
 msgid "Choose your theme"
@@ -5826,8 +6011,20 @@ msgid "Could not export the book list. Please try again."
 msgstr "De boekenlijst kon niet worden geëxporteerd. Probeer het opnieuw."
 
 #: cps/spa_strings.py
+msgid "Could not load books"
+msgstr "Boeken konden niet worden geladen"
+
+#: cps/spa_strings.py
 msgid "Could not load candidates."
 msgstr "Kan kandidaten niet laden."
+
+#: cps/spa_strings.py
+msgid "Could not load column"
+msgstr "Kolom kon niet worden geladen"
+
+#: cps/spa_strings.py
+msgid "Could not load columns"
+msgstr "Kolommen konden niet worden geladen"
 
 #: cps/spa_strings.py
 msgid "Could not load device annotations."
@@ -6091,7 +6288,7 @@ msgid "Current password"
 msgstr "Huidig wachtwoord"
 
 #: cps/spa_strings.py cps/templates/detail.html cps/templates/image.html
-#: cps/templates/index.html
+#: cps/templates/index.html cps/templates/search_form.html
 msgid "Currently reading"
 msgstr "Momenteel aan het lezen"
 
@@ -6551,7 +6748,8 @@ msgstr ""
 "Werp de e-reader uit en start KOReader opnieuw met wifi aan. Je bibliotheek "
 "verschijnt zo."
 
-#: cps/spa_strings.py cps/templates/admin.html cps/templates/register.html
+#: cps/spa_strings.py cps/templates/admin.html
+#: cps/templates/cwa_stats_i18n.html cps/templates/register.html
 #: cps/templates/user_edit.html cps/templates/user_table.html
 msgid "Email"
 msgstr "E-mailadres"
@@ -6654,7 +6852,8 @@ msgid "Export"
 msgstr "Exporteren"
 
 #: cps/spa_strings.py cps/templates/_book_list_export.html
-#: cps/templates/annotations_view.html
+#: cps/templates/annotations_view.html cps/templates/cwa_api_stats.html
+#: cps/templates/cwa_library_stats.html cps/templates/cwa_user_activity.html
 msgid "Export CSV"
 msgstr "CSV exporteren"
 
@@ -6815,7 +7014,8 @@ msgstr "Opmaak blijft behouden waar de boekpagina dit ondersteunt."
 msgid "From address"
 msgstr "Van-adres"
 
-#: cps/spa_strings.py cps/templates/search_form.html
+#: cps/spa_strings.py cps/templates/cwa_user_activity.html
+#: cps/templates/search_form.html
 msgid "From:"
 msgstr "Van:"
 
@@ -7662,6 +7862,10 @@ msgid "No books are ready yet — they appear here as they become ready."
 msgstr "Nog geen boeken klaar — ze verschijnen hier zodra ze klaar zijn."
 
 #: cps/spa_strings.py
+msgid "No books here yet"
+msgstr "Hier zijn nog geen boeken"
+
+#: cps/spa_strings.py
 msgid "No books match this smart shelf right now."
 msgstr ""
 "Er zijn momenteel geen boeken die overeenkomen met deze slimme boekenplank."
@@ -7694,6 +7898,10 @@ msgstr "Nog geen catalogi."
 #: cps/spa_strings.py
 msgid "No contents found."
 msgstr "Geen inhoud gevonden."
+
+#: cps/spa_strings.py
+msgid "No custom columns to browse"
+msgstr "Geen aangepaste kolommen om te bekijken"
 
 #: cps/spa_strings.py
 msgid "No devices or browser reading data yet."
@@ -7782,6 +7990,10 @@ msgid "No valid ISBN found in the scanned text."
 msgstr "Geen geldig ISBN gevonden in de gescande tekst."
 
 #: cps/spa_strings.py
+msgid "No values in this column yet"
+msgstr "Deze kolom bevat nog geen waarden"
+
+#: cps/spa_strings.py
 #, python-brace-format
 msgid "No {items} yet."
 msgstr "Nog geen {items}."
@@ -7851,6 +8063,10 @@ msgstr ""
 msgid "Nothing in this category yet."
 msgstr "Nog niets in deze categorie."
 
+#: cps/spa_strings.py
+msgid "Nothing in this column matches the selected value."
+msgstr "Niets in deze kolom komt overeen met de gekozen waarde."
+
 #: cps/spa_strings.py cps/templates/index.html
 msgid ""
 "Nothing is missing — the global library is still on the server. What you see "
@@ -7860,6 +8076,10 @@ msgstr ""
 "Er ontbreekt niets — de globale bibliotheek staat nog steeds op de server. "
 "Wat je hier ziet is je selectie in Mijn bibliotheek. Voeg boeken toe vanuit "
 "de globale bibliotheek; ze verschijnen hier en op je e-reader."
+
+#: cps/spa_strings.py
+msgid "Nothing on this page"
+msgstr "Geen resultaten op deze pagina"
 
 #: cps/spa_strings.py
 msgid "Nothing requested yet."
@@ -8081,6 +8301,10 @@ msgid "Page {page} of {pages}"
 msgstr "Pagina {page} van {pages}"
 
 #: cps/spa_strings.py
+msgid "Pagination"
+msgstr "Paginering"
+
+#: cps/spa_strings.py
 msgid "Pair a Kobo or KOReader"
 msgstr "Een Kobo of KOReader koppelen"
 
@@ -8225,10 +8449,6 @@ msgid "Progress is not being saved."
 msgstr "Voortgang wordt niet opgeslagen."
 
 #: cps/spa_strings.py
-msgid "Public"
-msgstr "Openbaar"
-
-#: cps/spa_strings.py
 msgid "Published after"
 msgstr "Gepubliceerd na"
 
@@ -8283,6 +8503,10 @@ msgstr "Gelezen/ongelezen status filter"
 #: cps/spa_strings.py
 msgid "Reader settings saved."
 msgstr "Lezerinstellingen opgeslagen."
+
+#: cps/spa_strings.py
+msgid "Reading app"
+msgstr "Lees-app"
 
 #: cps/spa_strings.py
 msgid "Reading appearance"
@@ -8780,7 +9004,7 @@ msgstr "Deze catalogus doorzoeken…"
 msgid "Searching…"
 msgstr "Zoeken…"
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/cwa_user_activity.html
 msgid "Security"
 msgstr "Beveiliging"
 
@@ -8799,6 +9023,17 @@ msgstr "Geïnitialiseerde boeken"
 #: cps/spa_strings.py cps/templates/modal_dialogs.html
 msgid "Select"
 msgstr "Selecteer"
+
+#: cps/spa_strings.py cps/templates/cc_list.html
+msgid ""
+"Select a category to see the books assigned to it and all of its sub-"
+"categories."
+msgstr ""
+"Kies een categorie om de boeken ervan en van alle subcategorieën te zien."
+
+#: cps/spa_strings.py cps/templates/cc_list.html
+msgid "Select a value to see the books assigned to it."
+msgstr "Kies een waarde om de bijbehorende boeken te zien."
 
 #: cps/spa_strings.py
 msgid "Select all in group"
@@ -9347,6 +9582,11 @@ msgstr "Label verwijderd van {n} boek(en)."
 #, python-brace-format
 msgid "Tag removed from {succeeded}; {failed} failed."
 msgstr "Label verwijderd van {succeeded}; {failed} mislukt."
+
+#: cps/spa_strings.py
+msgid "Tag-like custom columns defined in the library appear here."
+msgstr ""
+"Aangepaste kolommen met tekstwaarden uit de bibliotheek verschijnen hier."
 
 #: cps/spa_strings.py cps/templates/book_edit.html
 #: cps/templates/cwa_settings.html cps/templates/search_form.html
@@ -9907,6 +10147,10 @@ msgstr ""
 "Deze magic link is verlopen. Genereer een nieuwe om het opnieuw te proberen."
 
 #: cps/spa_strings.py
+msgid "This node has fewer pages than the one you were reading."
+msgstr "Deze categorie heeft minder pagina’s dan de vorige."
+
+#: cps/spa_strings.py
 msgid "This page could not be refreshed, so what is shown may be out of date."
 msgstr ""
 "Deze pagina kon niet worden vernieuwd, dus wat je ziet kan verouderd zijn."
@@ -9981,7 +10225,8 @@ msgstr "Titeltekst"
 msgid "Title, author, or ISBN"
 msgstr "Titel, auteur of ISBN"
 
-#: cps/spa_strings.py cps/templates/search_form.html
+#: cps/spa_strings.py cps/templates/cwa_user_activity.html
+#: cps/templates/search_form.html
 msgid "To:"
 msgstr "Tot:"
 
@@ -10033,6 +10278,10 @@ msgstr "Bovenkant van de catalogus"
 #: cps/spa_strings.py
 msgid "Transmission download client"
 msgstr "Transmission-downloadclient"
+
+#: cps/spa_strings.py
+msgid "Tree"
+msgstr "Boomstructuur"
 
 #: cps/spa_strings.py
 msgid "Trust authentication header"
@@ -10549,7 +10798,8 @@ msgstr "qBittorrent-downloadclient"
 msgid "shared"
 msgstr "gedeeld"
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/cwa_api_stats.html
+#: cps/templates/cwa_library_stats.html
 msgid "to"
 msgstr "naar"
 
@@ -10583,6 +10833,16 @@ msgstr "{count} boeken"
 #, python-brace-format
 msgid "{count} catalogs have not been searched yet."
 msgstr "{count} catalogi zijn nog niet doorzocht."
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "{count} column"
+msgstr "{count} kolom"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "{count} columns"
+msgstr "{count} kolommen"
 
 #: cps/spa_strings.py
 #, python-brace-format
@@ -11084,6 +11344,231 @@ msgstr ""
 msgid "A few random picks from your Discover source"
 msgstr "Een paar willekeurige suggesties uit je bron voor ontdekken"
 
+#: cps/spa_strings.py cps/templates/detail.html
+msgid "Reading status"
+msgstr "Leesstatus"
+
+#: cps/spa_strings.py cps/tasks_status.py cps/templates/detail.html
+#: cps/templates/search_form.html
+msgid "Finished"
+msgstr "Voltooid"
+
+#: cps/spa_strings.py cps/templates/detail.html
+msgid "Update status"
+msgstr "Status bijwerken"
+
+#: cps/spa_strings.py
+msgid "Reading status updated"
+msgstr "Leesstatus bijgewerkt"
+
+#: cps/spa_strings.py cps/templates/detail.html
+msgid "Could not update reading status."
+msgstr "De leesstatus kon niet worden bijgewerkt."
+
+#: cps/spa_strings.py
+msgid "Could not update reading status. Please try again."
+msgstr "De leesstatus kon niet worden bijgewerkt. Probeer het opnieuw."
+
+#: cps/spa_strings.py
+msgid "Did not finish and On hold keep your reading position."
+msgstr "Niet uitgelezen en Gepauzeerd behouden je leespositie."
+
+# Grid-to-shelf drag (#946).
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Add {title} to a shelf"
+msgstr "{title} aan een plank toevoegen"
+
+#: cps/spa_strings.py
+msgid "Drag to a shelf, or choose a shelf"
+msgstr "Sleep naar een plank of kies een plank"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "{n} book(s) added to {shelf}."
+msgstr "{n} boek(en) toegevoegd aan {shelf}."
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid ""
+"{succeeded} added to {shelf}; {failed} failed. Failed books remain selected "
+"for retry."
+msgstr ""
+"{succeeded} toegevoegd aan {shelf}; {failed} mislukt. Mislukte boeken "
+"blijven geselecteerd om opnieuw te proberen."
+
+#: cps/spa_strings.py
+msgid "Could not add books to the shelf. Please try again."
+msgstr ""
+"Boeken konden niet aan de plank worden toegevoegd. Probeer het opnieuw."
+
+#: cps/spa_strings.py cps/templates/config_view_edit.html
+msgid "Example:"
+msgstr "Voorbeeld:"
+
+#: cps/spa_strings.py cps/templates/config_view_edit.html
+msgid "Filename template fields and examples"
+msgstr "Velden en voorbeelden voor bestandsnaamsjablonen"
+
+#: cps/spa_strings.py cps/templates/config_view_edit.html
+msgid "First character:"
+msgstr "Eerste teken:"
+
+#: cps/spa_strings.py cps/templates/config_view_edit.html
+msgid "In KOReader, enable Use server filenames for the OPDS catalog."
+msgstr ""
+"Schakel in KOReader Serverbestandsnamen gebruiken in voor de OPDS-catalogus."
+
+#: cps/spa_strings.py cps/templates/config_view_edit.html
+msgid ""
+"Leave blank to keep the current title and first-author filename. Do not "
+"include the file extension."
+msgstr ""
+"Laat leeg om de huidige bestandsnaam met titel en eerste auteur te behouden. "
+"Voeg geen bestandsextensie toe."
+
+#: cps/spa_strings.py cps/templates/config_view_edit.html
+msgid ""
+"Missing metadata becomes empty text. Title and series use their sort names. "
+"Slashes become underscores, not folders."
+msgstr ""
+"Ontbrekende metadata wordt lege tekst. Titel en reeks gebruiken hun "
+"sorteernamen. Schuine strepen worden onderstrepingstekens, geen mappen."
+
+#: cps/spa_strings.py cps/templates/config_view_edit.html
+msgid "OPDS download filename template"
+msgstr "Bestandsnaamsjabloon voor OPDS-downloads"
+
+#: cps/spa_strings.py cps/templates/config_view_edit.html
+msgid "Padded series number:"
+msgstr "Opgevuld reeksnummer:"
+
+#: cps/spa_strings.py
+msgid "Waiting for you to choose a book"
+msgstr "Wacht op je boekkeuze"
+
+#: cps/spa_strings.py
+msgid "Book requested. An administrator has to approve it."
+msgstr "Boek aangevraagd. Een beheerder moet het goedkeuren."
+
+#: cps/spa_strings.py
+msgid "Book added to your activity."
+msgstr "Boek toegevoegd aan je activiteit."
+
+#: cps/spa_strings.py
+msgid "That book choice was out of date. Refreshing the list…"
+msgstr "Die boekkeuze was verouderd. De lijst wordt vernieuwd…"
+
+#: cps/spa_strings.py
+msgid "Requests are paused. You can still view the available books."
+msgstr "Aanvragen zijn gepauzeerd. Je kunt de beschikbare boeken nog bekijken."
+
+#: cps/spa_strings.py
+msgid "That book could not be requested. Try again."
+msgstr "Dat boek kon niet worden aangevraagd. Probeer het opnieuw."
+
+#: cps/spa_strings.py
+msgid ""
+"The choice was out of date and the available books could not be refreshed. "
+"Try again."
+msgstr ""
+"De keuze was verouderd en de beschikbare boeken konden niet worden "
+"vernieuwd. Probeer het opnieuw."
+
+#: cps/spa_strings.py
+msgid "That book choice was out of date. The list was refreshed; choose again."
+msgstr "Die boekkeuze was verouderd. De lijst is vernieuwd; kies opnieuw."
+
+#: cps/spa_strings.py
+msgid "The available books could not be loaded. Try again."
+msgstr "De beschikbare boeken konden niet worden geladen. Probeer het opnieuw."
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Found {count} available books."
+msgstr "{count} beschikbare boeken gevonden."
+
+#: cps/spa_strings.py
+msgid "Choose a book from this download"
+msgstr "Kies een boek uit deze download"
+
+#: cps/spa_strings.py
+msgid "Hide available books"
+msgstr "Beschikbare boeken verbergen"
+
+#: cps/spa_strings.py
+msgid "Choose another book"
+msgstr "Nog een boek kiezen"
+
+#: cps/spa_strings.py
+msgid "Loading available books…"
+msgstr "Beschikbare boeken laden…"
+
+#: cps/spa_strings.py
+msgid "No books are available in this download."
+msgstr "Er zijn geen boeken beschikbaar in deze download."
+
+#: cps/spa_strings.py
+msgid "Import this book"
+msgstr "Dit boek importeren"
+
+#: cps/spa_strings.py
+msgid "Request this book"
+msgstr "Dit boek aanvragen"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Import this book: {filename}"
+msgstr "Dit boek importeren: {filename}"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Request this book: {filename}"
+msgstr "Dit boek aanvragen: {filename}"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "{size} bytes"
+msgstr "{size} bytes"
+
+#: cps/spa_strings.py
+msgid "Requested"
+msgstr "Aangevraagd"
+
+#: cps/spa_strings.py
+msgid ""
+"The chosen book is no longer in the completed download. Restore its original "
+"file before trying again."
+msgstr ""
+"Het gekozen boek staat niet meer in de voltooide download. Herstel het "
+"oorspronkelijke bestand voordat je het opnieuw probeert."
+
+#: cps/spa_strings.py
+msgid ""
+"The book or completed download changed. Restore its original files before "
+"trying again."
+msgstr ""
+"Het boek of de voltooide download is gewijzigd. Herstel de oorspronkelijke "
+"bestanden voordat je het opnieuw probeert."
+
+#: cps/spa_strings.py
+msgid ""
+"The completed download exceeds the safe file limits. Choose a smaller "
+"release."
+msgstr ""
+"De voltooide download overschrijdt de veilige bestandslimieten. Kies een "
+"kleinere uitgave."
+
+#: cps/spa_strings.py
+msgid "Unsupported rule"
+msgstr "Niet-ondersteunde regel"
+
+#: cps/spa_strings.py
+msgid "This rule cannot be edited here. It will be kept unless you remove it."
+msgstr ""
+"Deze regel kan hier niet worden bewerkt. Hij blijft behouden tenzij u hem "
+"verwijdert."
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "Wachten"
@@ -11091,10 +11576,6 @@ msgstr "Wachten"
 #: cps/tasks_status.py
 msgid "Started"
 msgstr "Gestart"
-
-#: cps/tasks_status.py
-msgid "Finished"
-msgstr "Voltooid"
 
 #: cps/tasks_status.py
 msgid "Ended"
@@ -11330,7 +11811,7 @@ msgstr ""
 msgid "Error unhiding shelf"
 msgstr "Fout bij zichtbaar maken boekenplank"
 
-#: cps/templates/admin.html cps/web.py
+#: cps/templates/admin.html cps/templates/cwa_stats_i18n.html cps/web.py
 msgid "Downloads"
 msgstr "Downloads"
 
@@ -11585,6 +12066,41 @@ msgstr ""
 #: cps/services/gmail.py
 msgid "Found no valid gmail.json file with OAuth information"
 msgstr "Geen geldig gmail.json bestand gevonden met OAuth informatie"
+
+#: cps/services/opds_filename.py
+msgid "Conditional text needs both prefix and suffix separators."
+msgstr ""
+"Voorwaardelijke tekst vereist scheidingstekens voor zowel voorvoegsel als "
+"achtervoegsel."
+
+#: cps/services/opds_filename.py
+msgid "Nested fields are not supported in conditional text."
+msgstr "Geneste velden worden niet ondersteund in voorwaardelijke tekst."
+
+#: cps/services/opds_filename.py
+msgid "Use a text template of at most 1024 characters."
+msgstr "Gebruik een tekstsjabloon van maximaal 1024 tekens."
+
+#: cps/services/opds_filename.py
+msgid "Unmatched braces in the OPDS filename template."
+msgstr "Niet-overeenkomende accolades in het OPDS-bestandsnaamsjabloon."
+
+#: cps/services/opds_filename.py
+#, python-format
+msgid "Unknown or unsupported OPDS filename field: %(field)s"
+msgstr "Onbekend of niet-ondersteund OPDS-bestandsnaamveld: %(field)s"
+
+#: cps/services/opds_filename.py
+msgid "Conversions such as !r are not supported in OPDS filenames."
+msgstr "Conversies zoals !r worden niet ondersteund in OPDS-bestandsnamen."
+
+#: cps/services/opds_filename.py
+msgid "Use string padding such as 0>3s, with a maximum width of 128."
+msgstr "Gebruik tekstopvulling zoals 0>3s, met een maximale breedte van 128."
+
+#: cps/services/opds_filename.py
+msgid "Use explicit alignment for zero padding, such as 0>3s."
+msgstr "Gebruik expliciete uitlijning voor opvulling met nullen, zoals 0>3s."
 
 #: cps/tasks/annotation_sync.py
 msgid "Syncing annotations to reading services"
@@ -12043,7 +12559,7 @@ msgstr "Externe poort"
 msgid "Books per Page"
 msgstr "Aantal boeken per pagina"
 
-#: cps/templates/admin.html
+#: cps/templates/admin.html cps/templates/cwa_stats_i18n.html
 msgid "Uploads"
 msgstr "Uploaden toestaan"
 
@@ -12742,12 +13258,6 @@ msgid "Send this announcement to __NUM__ recipient(s)?"
 msgstr ""
 
 #: cps/templates/cc_list.html
-msgid ""
-"Select a category to see the books assigned to it and all of its sub-"
-"categories."
-msgstr ""
-
-#: cps/templates/cc_list.html
 msgid "Expand all"
 msgstr ""
 
@@ -13246,6 +13756,78 @@ msgstr ""
 #: cps/templates/config_edit.html
 msgid "Only used when fill style is 'Solid: custom color'. Format: #RRGGBB."
 msgstr ""
+
+#: cps/templates/config_edit.html
+msgid "Enable Calibre Content Server"
+msgstr "Calibre-inhoudsserver inschakelen"
+
+#: cps/templates/config_edit.html
+msgid "Content Server Port"
+msgstr "Poort van de inhoudsserver"
+
+#: cps/templates/config_edit.html
+msgid "Content Server Listen Address"
+msgstr "Luisteradres van de inhoudsserver"
+
+#: cps/templates/config_edit.html
+msgid ""
+"127.0.0.1 keeps the content server reachable only from this machine. Enter "
+"0.0.0.0 to expose it on the network, which is required to reach it from "
+"another container or host."
+msgstr ""
+"Met 127.0.0.1 is de inhoudsserver alleen bereikbaar vanaf deze machine. Voer "
+"0.0.0.0 in om hem via het netwerk bereikbaar te maken; dit is nodig voor "
+"toegang vanuit een andere container of host."
+
+#: cps/templates/config_edit.html
+msgid "Allow Anonymous Writes (no username or password required)"
+msgstr "Anoniem schrijven toestaan (geen gebruikersnaam of wachtwoord vereist)"
+
+#: cps/templates/config_edit.html
+msgid ""
+"Without a username and password, anyone who can reach the listen address can "
+"read the whole library. Behind Docker port mapping or a reverse proxy on "
+"this machine, every client appears to come from the same address, so "
+"allowing that address lets everyone write."
+msgstr ""
+"Zonder gebruikersnaam en wachtwoord kan iedereen die het luisteradres "
+"bereikt de hele bibliotheek lezen. Bij Docker-poorttoewijzing of een reverse "
+"proxy op deze machine lijken alle clients van hetzelfde adres te komen. Als "
+"u dat adres toestaat, kan iedereen schrijven."
+
+#: cps/templates/config_edit.html
+msgid ""
+"Addresses Allowed to Write Without a Password (Comma Separated IPs/CIDRs)"
+msgstr ""
+"Adressen die zonder wachtwoord mogen schrijven (IP/CIDR, gescheiden door "
+"komma’s)"
+
+#: cps/templates/config_edit.html
+msgid ""
+"Leave empty to allow unauthenticated writes only from this machine. Every "
+"address listed here can add, edit and delete books in the library without "
+"any credentials, so keep it as narrow as possible."
+msgstr ""
+"Laat dit leeg om schrijven zonder authenticatie alleen vanaf deze machine "
+"toe te staan. Elk hier vermeld adres kan zonder inloggegevens boeken "
+"toevoegen, bewerken en verwijderen. Beperk de lijst daarom zoveel mogelijk."
+
+#: cps/templates/config_edit.html
+msgid "Content Server Username"
+msgstr "Gebruikersnaam van de inhoudsserver"
+
+#: cps/templates/config_edit.html
+msgid "Content Server Password"
+msgstr "Wachtwoord van de inhoudsserver"
+
+#: cps/templates/config_edit.html
+msgid "Reset Password"
+msgstr "Wachtwoord opnieuw instellen"
+
+#: cps/templates/config_edit.html
+msgid "The content server stays stopped until a new password is saved."
+msgstr ""
+"De inhoudsserver blijft gestopt totdat een nieuw wachtwoord is opgeslagen."
 
 #: cps/templates/config_edit.html
 msgid "Use Goodreads"
@@ -14057,6 +14639,10 @@ msgid ""
 msgstr ""
 
 #: cps/templates/config_view_edit.html
+msgid "OPDS Downloads"
+msgstr "OPDS-downloads"
+
+#: cps/templates/config_view_edit.html
 msgid "Default Visibilities for New Users"
 msgstr "Standaard zichtbaar voor nieuwe gebruikers"
 
@@ -14126,6 +14712,125 @@ msgstr ""
 #: cps/templates/cover_picker.html
 msgid "Rendering e-reader previews:"
 msgstr ""
+
+#: cps/templates/cwa_api_stats.html
+msgid "API Usage Analytics"
+msgstr "Analyse van API-gebruik"
+
+#: cps/templates/cwa_api_stats.html
+msgid "Track endpoint activity, integration usage, and API patterns"
+msgstr ""
+"Volg activiteit van eindpunten en het gebruik van integraties en de API"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "Last 7 Days"
+msgstr "Afgelopen 7 dagen"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "Last 30 Days"
+msgstr "Afgelopen 30 dagen"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "Last 90 Days"
+msgstr "Afgelopen 90 dagen"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "Last 6 Months"
+msgstr "Afgelopen 6 maanden"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "Last Year"
+msgstr "Afgelopen jaar"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "Custom Range"
+msgstr "Aangepaste periode"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "Show Demo Data"
+msgstr "Demogegevens tonen"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "DEMO MODE"
+msgstr "DEMOMODUS"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_stats_i18n.html
+msgid "Kobo Syncs"
+msgstr "Kobo-synchronisaties"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_stats_i18n.html
+msgid "OPDS Accesses"
+msgstr "OPDS-toegang"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_stats_i18n.html
+msgid "Email Deliveries"
+msgstr "Verzendingen per e-mail"
+
+#: cps/templates/cwa_api_stats.html
+msgid "Web UI Requests"
+msgstr "Verzoeken via de webinterface"
+
+#: cps/templates/cwa_api_stats.html
+msgid "API Usage Breakdown"
+msgstr "Verdeling van API-gebruik"
+
+#: cps/templates/cwa_api_stats.html
+msgid "API Activity Timing"
+msgstr "API-activiteit per uur"
+
+#: cps/templates/cwa_api_stats.html
+msgid "Endpoint Access Frequency"
+msgstr "Toegangsfrequentie per eindpunt"
+
+#: cps/templates/cwa_api_stats.html
+msgid "Endpoint"
+msgstr "Eindpunt"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_stats_i18n.html
+msgid "Category"
+msgstr "Categorie"
+
+#: cps/templates/cwa_api_stats.html
+msgid "Access Count"
+msgstr "Aantal toegangen"
+
+#: cps/templates/cwa_api_stats.html
+msgid "Last Accessed"
+msgstr "Laatste toegang"
+
+#: cps/templates/cwa_api_stats.html
+msgid "No endpoint data available"
+msgstr "Geen eindpuntgegevens beschikbaar"
+
+#: cps/templates/cwa_api_stats.html
+msgid "No API usage data available"
+msgstr "Geen gegevens over API-gebruik beschikbaar"
+
+#: cps/templates/cwa_api_stats.html
+msgid "No timing data available"
+msgstr "Geen tijdgegevens beschikbaar"
+
+#: cps/templates/cwa_api_stats.html
+#, python-format
+msgid "API Calls: %(count)s"
+msgstr "API-aanroepen: %(count)s"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+msgid "Please select both start and end dates"
+msgstr "Selecteer zowel een begin- als een einddatum"
+
+#: cps/templates/cwa_api_stats.html cps/templates/cwa_library_stats.html
+#: cps/templates/cwa_user_activity.html
+msgid "Show Real Data"
+msgstr "Werkelijke gegevens tonen"
 
 #: cps/templates/cwa_convert_library.html cps/templates/cwa_cover_enforcer.html
 #: cps/templates/cwa_epub_fixer.html
@@ -14257,6 +14962,189 @@ msgstr "Geselecteerde boeken samenvoegen"
 #, fuzzy
 msgid "Error starting EPUB Fixer"
 msgstr "Fout bij verwijderen boekenplank!"
+
+#: cps/templates/cwa_library_stats.html cps/templates/stats.html
+msgid "Library Statistics"
+msgstr "Calibre bibliotheekstatistieken"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Comprehensive insights into your Calibre library collection"
+msgstr "Uitgebreide statistieken van uw Calibre-collectie"
+
+#: cps/templates/cwa_library_stats.html cps/templates/cwa_stats_system.html
+msgid "Total Books"
+msgstr "Totaal aantal boeken"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Added Books"
+msgstr "Toegevoegde boeken"
+
+#: cps/templates/cwa_library_stats.html
+msgid "N/A"
+msgstr "N.v.t."
+
+#: cps/templates/cwa_library_stats.html
+msgid "All time view"
+msgstr "Weergave van alle tijd"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Conversions"
+msgstr "Conversies"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Total Formats"
+msgstr "Totaal aantal formaten"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Library Growth Over Time"
+msgstr "Groei van de bibliotheek"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Largest Series"
+msgstr "Grootste reeksen"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Publication Year Distribution"
+msgstr "Verdeling per publicatiejaar"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Rating Statistics"
+msgstr "Beoordelingsstatistieken"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Top Enforced Books"
+msgstr "Meest verwerkte boeken"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Import Source Flows"
+msgstr "Stromen van importbronnen"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Format Distribution"
+msgstr "Verdeling van formaten"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Most Fixed Books"
+msgstr "Meest gerepareerde boeken"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "%(count)s fix"
+msgid_plural "%(count)s fixes"
+msgstr[0] "%(count)s reparatie"
+msgstr[1] "%(count)s reparaties"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Last fixed: %(date)s"
+msgstr "Laatst gerepareerd: %(date)s"
+
+#: cps/templates/cwa_library_stats.html
+msgid "No EPUB fixes recorded"
+msgstr "Geen EPUB-reparaties geregistreerd"
+
+#: cps/templates/cwa_library_stats.html
+msgid "No growth data available"
+msgstr "Geen groeigegevens beschikbaar"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Added: %(count)s"
+msgstr "Toegevoegd: %(count)s"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Total: %(count)s"
+msgstr "Totaal: %(count)s"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Books Added"
+msgstr "Toegevoegde boeken"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Total Library Size"
+msgstr "Totale bibliotheekgrootte"
+
+#: cps/templates/cwa_library_stats.html
+msgid "No format data available"
+msgstr "Geen formaatgegevens beschikbaar"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "%(format)s — books: %(count)s (%(percent)s%%)"
+msgstr "%(format)s — boeken: %(count)s (%(percent)s%%)"
+
+#: cps/templates/cwa_library_stats.html
+msgid "No series data available"
+msgstr "Geen reeksgegevens beschikbaar"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Books: %(count)s"
+msgstr "Boeken: %(count)s"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Highest Index: %(index)s"
+msgstr "Hoogste reeksnummer: %(index)s"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Number of Books"
+msgstr "Aantal boeken"
+
+#: cps/templates/cwa_library_stats.html
+msgid "No publication year data available"
+msgstr "Geen publicatiejaargegevens beschikbaar"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "%(year)s — books: %(count)s"
+msgstr "%(year)s — boeken: %(count)s"
+
+#: cps/templates/cwa_library_stats.html
+msgid "No rating data available"
+msgstr "Geen beoordelingsgegevens beschikbaar"
+
+#: cps/templates/cwa_library_stats.html
+msgid "vs previous period"
+msgstr "vergeleken met de vorige periode"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "%(percent)s%% Unrated"
+msgstr "%(percent)s%% zonder beoordeling"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Rating: %(stars)s; books: %(count)s"
+msgstr "Beoordeling: %(stars)s; boeken: %(count)s"
+
+#: cps/templates/cwa_library_stats.html
+msgid "No enforcement data available"
+msgstr "Geen gegevens over toegepaste metadata beschikbaar"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Enforcements: %(count)s"
+msgstr "Toepassingen van metadata: %(count)s"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Last: %(date)s"
+msgstr "Laatste: %(date)s"
+
+#: cps/templates/cwa_library_stats.html
+msgid "Enforcements"
+msgstr "Toepassingen van metadata"
+
+#: cps/templates/cwa_library_stats.html
+msgid "No conversion data available"
+msgstr "Geen conversiegegevens beschikbaar"
+
+#: cps/templates/cwa_library_stats.html
+#, python-format
+msgid "Conversions: %(count)s"
+msgstr "Conversies: %(count)s"
 
 #: cps/templates/cwa_settings.html
 #, fuzzy
@@ -15287,11 +16175,395 @@ msgstr ""
 #: cps/templates/cwa_stats.html cps/templates/cwa_stats_system.html
 #, python-format
 msgid "Review %(count)s Pending Match(es)"
-msgstr ""
+msgstr "Openstaande koppelingen controleren: %(count)s"
 
 #: cps/templates/cwa_stats.html cps/templates/cwa_stats_system.html
 msgid "Click to See More"
 msgstr "Klik om meer te zien"
+
+#: cps/templates/cwa_stats_i18n.html cps/templates/cwa_user_activity.html
+msgid "Logins"
+msgstr "Aanmeldingen"
+
+#: cps/templates/cwa_stats_i18n.html cps/templates/cwa_user_activity.html
+msgid "Failed Login Attempts"
+msgstr "Mislukte aanmeldpogingen"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Logouts"
+msgstr "Afmeldingen"
+
+#: cps/templates/cwa_stats_i18n.html cps/templates/cwa_user_activity.html
+msgid "Searches"
+msgstr "Zoekopdrachten"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Added to Shelf"
+msgstr "Toegevoegd aan plank"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Removed from Shelf"
+msgstr "Verwijderd van plank"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Shelf Views"
+msgstr "Plankweergaven"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Magic Shelf Views"
+msgstr "Weergaven van slimme planken"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Kobo Sync"
+msgstr "Kobo-synchronisatie"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "OPDS Feed"
+msgstr "OPDS-feed"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Email Delivery"
+msgstr "Verzending per e-mail"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Web UI"
+msgstr "Webinterface"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Other"
+msgstr "Overig"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Desktop"
+msgstr "Computer"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Mobile"
+msgstr "Telefoon"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Tablet"
+msgstr "Tablet"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Book Detail"
+msgstr "Boekdetails"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Series Page"
+msgstr "Reekspagina"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Author Page"
+msgstr "Auteurspagina"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Shelf"
+msgstr "Plank"
+
+#: cps/templates/cwa_stats_i18n.html
+msgid "Direct Link"
+msgstr "Directe link"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Server Activity Dashboard"
+msgstr "Dashboard voor serveractiviteit"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Track server activity, file conversions, and automatic fixes."
+msgstr "Volg serveractiviteit, bestandsconversies en automatische reparaties."
+
+#: cps/templates/cwa_stats_system.html
+msgid "Calibre-Web NextGen - Server Stats"
+msgstr "Calibre-Web NextGen — serverstatistieken"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Books Enforced"
+msgstr "Boeken met toegepaste metadata"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Books Converted"
+msgstr "Geconverteerde boeken"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Books Fixed"
+msgstr "Gerepareerde boeken"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Hardcover Auto-Fetch Statistics"
+msgstr "Statistieken voor automatisch ophalen van Hardcover"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Total Processed"
+msgstr "Totaal verwerkt"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Auto-Matched"
+msgstr "Automatisch gekoppeld"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Pending Review"
+msgstr "Wachten op controle"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Manually Reviewed"
+msgstr "Handmatig gecontroleerd"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Calibre-Web NextGen Conversion History"
+msgstr "Calibre-Web NextGen — conversiegeschiedenis"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Calibre-Web NextGen Import History"
+msgstr "Calibre-Web NextGen — importgeschiedenis"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Calibre-Web NextGen EPUB Fixer History"
+msgstr "Calibre-Web NextGen — geschiedenis van EPUB-reparaties"
+
+#: cps/templates/cwa_stats_system.html
+msgid "EPUB Fixer History with Paths & Fixes"
+msgstr "Geschiedenis van EPUB-reparaties met paden en details"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Calibre-Web NextGen Enforcement History"
+msgstr "Calibre-Web NextGen — geschiedenis van toegepaste metadata"
+
+#: cps/templates/cwa_stats_system.html
+msgid "Enforcement History with Paths"
+msgstr "Geschiedenis van toegepaste metadata met paden"
+
+#: cps/templates/cwa_stats_tabs.html
+msgid "User Activity"
+msgstr "Gebruikersactiviteit"
+
+#: cps/templates/cwa_stats_tabs.html
+msgid "Library Stats"
+msgstr "Bibliotheekstatistieken"
+
+#: cps/templates/cwa_stats_tabs.html
+msgid "API Usage"
+msgstr "API-gebruik"
+
+#: cps/templates/cwa_stats_tabs.html
+msgid "System Stats"
+msgstr "Systeemstatistieken"
+
+#: cps/templates/cwa_user_activity.html
+msgid "User Activity Dashboard"
+msgstr "Dashboard voor gebruikersactiviteit"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Track library usage, downloads, and user engagement"
+msgstr "Volg bibliotheekgebruik, downloads en gebruikersactiviteit"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Filter by User:"
+msgstr "Filteren op gebruiker:"
+
+#: cps/templates/cwa_user_activity.html
+msgid "All Users"
+msgstr "Alle gebruikers"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Time Period:"
+msgstr "Periode:"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Large date ranges may take longer to load"
+msgstr "Het laden van langere perioden kan meer tijd kosten"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Active Users"
+msgstr "Actieve gebruikers"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Total Downloads"
+msgstr "Totaal aantal downloads"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Books Read"
+msgstr "Gelezen boeken"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Activity Timeline"
+msgstr "Activiteitstijdlijn"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Peak Usage Hours"
+msgstr "Piekuren"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Event Types"
+msgstr "Gebeurtenistypen"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Format Preferences by User"
+msgstr "Formaatvoorkeuren per gebruiker"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Discovery Sources"
+msgstr "Ontdekkingsbronnen"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Device Breakdown"
+msgstr "Verdeling per apparaat"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Most Active Days"
+msgstr "Actiefste dagen"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Top Users"
+msgstr "Actiefste gebruikers"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Popular Books"
+msgstr "Populaire boeken"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Recent Searches"
+msgstr "Recente zoekopdrachten"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Average Session Duration"
+msgstr "Gemiddelde sessieduur"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Avg Session Length"
+msgstr "Gemiddelde sessieduur"
+
+#: cps/templates/cwa_user_activity.html
+#, python-format
+msgid "%(minutes)s min"
+msgstr "%(minutes)s min"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Search Success Rate"
+msgstr "Succespercentage van zoekopdrachten"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Searches Leading to Actions"
+msgstr "Zoekopdrachten gevolgd door een actie"
+
+#: cps/templates/cwa_user_activity.html
+#, python-format
+msgid "Successful searches: %(successful)s / %(total)s"
+msgstr "Geslaagde zoekopdrachten: %(successful)s / %(total)s"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Shelf Activity"
+msgstr "Plankactiviteit"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No Activity Data Yet"
+msgstr "Nog geen activiteitsgegevens"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Start using your library to see beautiful visualizations and insights!"
+msgstr "Gebruik uw bibliotheek om grafieken en statistieken te bekijken!"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Downloads, reading sessions, and searches will be tracked here."
+msgstr "Downloads, leessessies en zoekopdrachten worden hier bijgehouden."
+
+#: cps/templates/cwa_user_activity.html
+msgid "Download Formats Distribution"
+msgstr "Verdeling van downloadformaten"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Reading Velocity (Books per Week)"
+msgstr "Leestempo (boeken per week)"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No format data yet"
+msgstr "Nog geen formaatgegevens"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No activity data yet"
+msgstr "Nog geen activiteitsgegevens"
+
+#: cps/templates/cwa_user_activity.html
+#, python-format
+msgid "Activity: %(count)s"
+msgstr "Activiteit: %(count)s"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Activity"
+msgstr "Activiteit"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No reading data yet"
+msgstr "Nog geen leesgegevens"
+
+#: cps/templates/cwa_user_activity.html
+msgid "4-Week Avg"
+msgstr "Gemiddelde over 4 weken"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No format preference data yet"
+msgstr "Nog geen gegevens over formaatvoorkeuren"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No discovery data yet"
+msgstr "Nog geen ontdekkingsgegevens"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No device data yet"
+msgstr "Nog geen apparaatgegevens"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No failed attempts"
+msgstr "Geen mislukte pogingen"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No user activity yet"
+msgstr "Nog geen gebruikersactiviteit"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No popular books yet"
+msgstr "Nog geen populaire boeken"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No searches yet"
+msgstr "Nog geen zoekopdrachten"
+
+#: cps/templates/cwa_user_activity.html
+#, python-format
+msgid "Minutes: %(start)s–%(end)s; sessions: %(count)s"
+msgstr "Minuten: %(start)s–%(end)s; sessies: %(count)s"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Minutes"
+msgstr "Minuten"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Sessions"
+msgstr "Sessies"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No session data available"
+msgstr "Geen sessiegegevens beschikbaar"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Success Rate"
+msgstr "Succespercentage"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Views"
+msgstr "Weergaven"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Added"
+msgstr "Toegevoegd"
+
+#: cps/templates/cwa_user_activity.html
+msgid "Removed"
+msgstr "Verwijderd"
+
+#: cps/templates/cwa_user_activity.html
+msgid "No shelf activity yet"
+msgstr "Nog geen plankactiviteit"
 
 #: cps/templates/cwng_feedback_popup.html
 msgid "Before you go — what made you switch back?"
@@ -16948,10 +18220,6 @@ msgstr ""
 #: cps/templates/shelf_reorder.html
 msgid "Order saved. The sidebar reflects the new order on next page load."
 msgstr ""
-
-#: cps/templates/stats.html
-msgid "Library Statistics"
-msgstr "Calibre bibliotheekstatistieken"
 
 #: cps/templates/stats.html
 msgid "Books in this Library"
@@ -18642,15 +19910,3 @@ msgstr "Toon gelezen/niet gelezen selectie"
 #~ msgstr ""
 #~ "Boeken moeten eerst worden gearchiveerd en het apparaat moet worden "
 #~ "gesynchroniseerd, voordat een boek veilig kan worden verwijderd."
-
-#: cps/spa_strings.py
-msgid "Custom display name"
-msgstr "Aangepaste weergavenaam"
-
-#: cps/spa_strings.py
-msgid "Custom fields on book cards"
-msgstr "Aangepaste velden op boekkaarten"
-
-#: cps/spa_strings.py
-msgid "Display name for {name}"
-msgstr "Weergavenaam voor {name}"

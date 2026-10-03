@@ -773,6 +773,8 @@ class ReadBook(Base):
     STATUS_UNREAD = 0
     STATUS_FINISHED = 1
     STATUS_IN_PROGRESS = 2
+    STATUS_DID_NOT_FINISH = 3
+    STATUS_ON_HOLD = 4
 
     id = Column(Integer, primary_key=True)
     book_id = Column(Integer, unique=False)
@@ -787,6 +789,10 @@ class ReadBook(Base):
     last_modified = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     last_time_started_reading = Column(DateTime, nullable=True)
     times_started_reading = Column(Integer, default=0, nullable=False)
+    # Explicit user intent is independent of device/status observation clocks.
+    # Automatic-created rows have no choice; migration snapshots legacy clocks
+    # once as an inferred historical baseline, never as a runtime fallback.
+    read_status_choice_at = Column(DateTime, nullable=True)
 
     # Audit 2026-05-11: enforce per-(user, book) uniqueness so concurrent
     # Kobo PUTs can't produce duplicate rows. The Kobo state handler reads
@@ -1726,6 +1732,11 @@ class Annotation(Base):
     # not safe to present to epub.js as CFIs.
     start_xpointer = Column(Text, nullable=True)
     end_xpointer = Column(Text, nullable=True)
+    # The passage as a word-based client named it: JSON
+    # ``{"exact", "prefix", "suffix"}`` (services/text_anchor). Kept after the
+    # server places it, so the words go back to that client unchanged and an
+    # unplaced one (``position_type`` 'text_quote') can be placed later.
+    text_quote = Column(Text, nullable=True)
     # Phase 2 (KOReader bridge) — opaque per-device id of the row a device last
     # wrote/saw for this annotation (e.g. the KoboReader.sqlite Bookmark.BookmarkID
     # the plugin created). Lets the plugin dedup + suppress feedback loops without
@@ -1776,9 +1787,10 @@ class Annotation(Base):
         ),
     )
 
-    _VALID_SOURCES = {"kobo", "webreader", "koreader"}
+    _VALID_SOURCES = {"kobo", "webreader", "koreader", "textquote"}
     _VALID_POSITION_TYPES = {
         "cfi", "pdf_quad", "comic_page", "koreader_xpointer", "unanchored",
+        "text_quote",
     }
 
     @validates("source")
@@ -3390,24 +3402,37 @@ def _merge_kobo_statistics(_session, winner, loser):
 
 
 def _dedupe_book_read_link(_session):
-    """ReadBook winner: prefer rows with the highest read_status (FINISHED
-    > IN_PROGRESS > UNREAD), tiebreak by newest last_modified, then by
-    highest times_started_reading. Sum times_started_reading from losers
-    into the winner so the user doesn't lose their read-counter total.
+    """Preserve legacy status ordering unless a paused choice is involved.
+
+    When any duplicate is paused, the newest explicit choice clock wins, so neither a
+    paused choice nor a later explicit resume is lost. Sum start counters from
+    losers into the winner so the user doesn't lose their read-counter total.
     """
     dup_groups = _find_duplicate_groups(_session, ReadBook)
     deleted = 0
     for (user_id, book_id), rows in dup_groups.items():
+        has_paused = any(r.read_status in (ReadBook.STATUS_DID_NOT_FINISH,
+                                           ReadBook.STATUS_ON_HOLD) for r in rows)
         rows.sort(
             key=lambda r: (
-                r.read_status or 0,
-                r.last_modified or datetime.min.replace(tzinfo=timezone.utc),
+                # Paused states are choices, not ordinal progress. A newer
+                # explicit resume must also survive duplicate recovery.
+                (0 if has_paused else r.read_status or 0),
+                ((r.read_status_choice_at if has_paused else r.last_modified)
+                 or datetime.min).replace(tzinfo=None),
+                (r.read_status in (ReadBook.STATUS_DID_NOT_FINISH,
+                                   ReadBook.STATUS_ON_HOLD)) if has_paused else False,
                 r.times_started_reading or 0,
                 r.id,
             ),
             reverse=True,
         )
         winner, losers = rows[0], rows[1:]
+        chosen_clock = winner.last_modified
+        if not has_paused:
+            known_choices = [r.read_status_choice_at for r in rows if r.read_status_choice_at is not None]
+            if known_choices:
+                winner.read_status_choice_at = max(known_choices, key=lambda stamp: stamp.replace(tzinfo=None))
         for loser in losers:
             winner.times_started_reading = (
                 (winner.times_started_reading or 0)
@@ -3419,6 +3444,9 @@ def _dedupe_book_read_link(_session):
                 winner.last_time_started_reading = loser.last_time_started_reading
             _session.delete(loser)
             deleted += 1
+        if has_paused:
+            winner.last_modified = chosen_clock
+            flag_modified(winner, "last_modified")
     if deleted:
         _session.flush()
     return deleted
@@ -5017,6 +5045,23 @@ def migrate_annotation_koreader_identity(engine, _session):
         ))
 
 
+def migrate_annotation_text_quote(engine, _session):
+    """Add the nullable ``text_quote`` column to ``annotation``. Idempotent."""
+    with engine.begin() as conn:
+        if not conn.execute(text(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='annotation'"
+        )).first():
+            return
+        existing = {row[1] for row in conn.execute(text("PRAGMA table_info(annotation)"))}
+        if "text_quote" in existing:
+            return
+        try:
+            conn.execute(text("ALTER TABLE annotation ADD COLUMN text_quote TEXT"))
+        except exc.OperationalError as e:
+            if "duplicate column" not in str(e).lower():
+                raise
+
+
 def migrate_annotation_decouple_source_target(engine, _session):
     """Decouple annotation origin from sync target.
 
@@ -5231,10 +5276,36 @@ def migrate_acquisition_schema(engine, metadata=None):
     return migrate(engine, metadata if metadata is not None else Base.metadata)
 
 
+def migrate_read_status_choice_at(engine, _session):
+    """Snapshot legacy activity clocks once, without inventing later choices.
+
+    Legacy app.db cannot recover which old status timestamps came from user
+    intent. Preserve them as an inferred upgrade baseline. New automatic rows
+    remain NULL, and subsequent boots never backfill those unknown choices.
+    The explicit SQLite transaction makes ADD and snapshot one atomic step.
+    """
+    with engine.connect() as connection:
+        columns = {row[1] for row in connection.execute(
+            text("PRAGMA table_info(book_read_link)"))}
+    if not columns or "read_status_choice_at" in columns:
+        return
+    try:
+        _run_ddl_with_retry(engine, [
+            "BEGIN IMMEDIATE",
+            "ALTER TABLE book_read_link ADD COLUMN read_status_choice_at DATETIME",
+            "UPDATE book_read_link SET read_status_choice_at = last_modified",
+        ])
+    except exc.OperationalError as error:
+        if "duplicate column" not in str(error).lower():
+            raise
+    log.info("[read-status-choice] added independent choice clock with historical baseline")
+
+
 def migrate_Database(_session):
     engine = _session.bind
     migrate_acquisition_schema(engine, Base.metadata)
     add_missing_tables(engine, _session)
+    migrate_read_status_choice_at(engine, _session)
     migrate_kobo_entitlement_ledger_columns(engine, _session)
     migrate_thumbnail_lookup_index(engine, _session)
     migrate_reading_activity_indexes(engine, _session)
@@ -5270,6 +5341,7 @@ def migrate_Database(_session):
     migrate_device_reading_position_slice(engine, _session)
     migrate_kobo_annotation_seed_pipeline(engine, _session)
     migrate_kobo_two_way_annotation_sync(engine, _session)
+    migrate_annotation_text_quote(engine, _session)
     from .services.browser_source import migrate_account_browser_source
     migrate_account_browser_source(engine)
     migrate_book_cover_preview_table(engine, _session)
