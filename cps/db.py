@@ -905,7 +905,9 @@ class AlchemyEncoder(json.JSONEncoder):
                         for ele in data:
                             if hasattr(ele, 'value'):       # converter for custom_column values
                                 if isinstance(ele.value, datetime):
-                                    el.append(ele.value.date().isoformat())
+                                    el.append(ele.value.date().isoformat() if ele.value.year > 101 else "")
+                                elif ele.value is None:
+                                    el.append("")
                                 else:
                                     el.append(str(ele.value))
                             elif ele.get:
@@ -2364,7 +2366,9 @@ class CalibreDB:
         query = self.generate_linked_query(config.config_read_column, Books, user=user)
         if len(join) == 6:
             query = query.outerjoin(join[0], join[1]).outerjoin(join[2]).outerjoin(join[3], join[4]).outerjoin(join[5])
-        if len(join) == 3:
+        elif len(join) == 5:
+            query = query.outerjoin(join[0], join[1]).outerjoin(join[2]).outerjoin(join[3], join[4])
+        elif len(join) == 3:
             query = query.outerjoin(join[0], join[1]).outerjoin(join[2])
         elif len(join) == 2:
             query = query.outerjoin(join[0], join[1])
