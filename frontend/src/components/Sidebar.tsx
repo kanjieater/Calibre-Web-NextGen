@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
-  Library, Globe, BookCopy, BookPlus,
+  Library, Globe, BookCopy, BookPlus, Tag,
   Info, ListChecks, Table2, Wand2, Files, SlidersHorizontal, Check, RotateCcw, X, Pin, PinOff, ChevronDown, Plus,
 } from 'lucide-react';
 import { useShelves, useMe, useMagicShelves, useUpdateSidebar } from '../lib/queries';
@@ -398,6 +398,25 @@ export function Sidebar({ open, onClose, onNavigate }: SidebarProps) {
 
             {/* Customizable region (browse-by + discovery + Shelves), in saved order. */}
             {renderOrderedRegion()}
+
+            {/* Custom columns (tag-like text/enumeration; a hierarchical one
+                renders as a tree, a flat one as a plain list of values) —
+                SPA parity with the classic sidebar's per-column entries. */}
+            {me?.sidebar?.category && (
+              <ul className={styles.list} role="list">
+                <li>
+                  <Link
+                    href="/cc"
+                    className={isActive(location, '/cc') ? styles.itemActive : styles.item}
+                    aria-current={isActive(location, '/cc') ? 'page' : undefined}
+                    onClick={onNavigate}
+                  >
+                    <Tag size={18} className={styles.icon} aria-hidden="true" focusable={false} />
+                    <span>{t('Custom columns')}</span>
+                  </Link>
+                </li>
+              </ul>
+            )}
 
             {/* Smart shelves + power features (pinned). */}
             <ul className={styles.list} role="list">
