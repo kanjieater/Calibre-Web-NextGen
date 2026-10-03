@@ -2339,7 +2339,7 @@ msgstr "Polcok"
 msgid "Books organized in shelves"
 msgstr "Könyvek sorozat szerint rendezve"
 
-#: cps/opds.py cps/templates/config_view_edit.html
+#: cps/opds.py
 msgid "Magic Shelves"
 msgstr "Varázspolcok"
 
@@ -4892,6 +4892,19 @@ msgstr ""
 #: cps/spa_strings.py
 msgid "Public"
 msgstr "Nyilvános"
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr ""
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Display name for {name}"
+msgstr ""
 
 #: cps/spa_strings.py
 msgid "(no text captured)"

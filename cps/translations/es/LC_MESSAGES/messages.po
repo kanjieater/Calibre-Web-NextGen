@@ -2405,7 +2405,7 @@ msgstr "Estanterías"
 msgid "Books organized in shelves"
 msgstr "Libros organizados en estanterías"
 
-#: cps/opds.py cps/templates/config_view_edit.html
+#: cps/opds.py
 msgid "Magic Shelves"
 msgstr "Estanterías mágicas"
 
@@ -5071,6 +5071,19 @@ msgstr ""
 #: cps/spa_strings.py
 msgid "Public"
 msgstr "Pública"
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr ""
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Display name for {name}"
+msgstr ""
 
 #: cps/spa_strings.py
 msgid "(no text captured)"

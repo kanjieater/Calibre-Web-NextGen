@@ -2445,7 +2445,7 @@ msgstr "Étagères"
 msgid "Books organized in shelves"
 msgstr "Livres organisés par étagères"
 
-#: cps/opds.py cps/templates/config_view_edit.html
+#: cps/opds.py
 #, fuzzy
 msgid "Magic Shelves"
 msgstr "Étagères magiques ✨"
@@ -5138,6 +5138,19 @@ msgstr "Affiche le nom du livre lors de son importation."
 #: cps/spa_strings.py
 msgid "Public"
 msgstr "Publique"
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr "Nom d’affichage personnalisé"
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr "Champs personnalisés sur les fiches de livres"
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Display name for {name}"
+msgstr "Nom d’affichage pour {name}"
 
 #: cps/spa_strings.py
 msgid "(no text captured)"
@@ -19620,15 +19633,3 @@ msgstr "Afficher la section Lu / Non lu"
 #~ msgstr ""
 #~ "Les livres doivent d'abord être archivés et l'appareil synchronisé avant "
 #~ "qu'un livre puisse être supprimé en tout sécurité."
-
-#: cps/spa_strings.py
-msgid "Custom display name"
-msgstr "Nom d’affichage personnalisé"
-
-#: cps/spa_strings.py
-msgid "Custom fields on book cards"
-msgstr "Champs personnalisés sur les fiches de livres"
-
-#: cps/spa_strings.py
-msgid "Display name for {name}"
-msgstr "Nom d’affichage pour {name}"

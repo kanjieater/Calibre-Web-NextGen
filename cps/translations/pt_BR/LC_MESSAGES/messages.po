@@ -2295,7 +2295,7 @@ msgstr "Estantes"
 msgid "Books organized in shelves"
 msgstr "Livros organizados em Estantes"
 
-#: cps/opds.py cps/templates/config_view_edit.html
+#: cps/opds.py
 #, fuzzy
 msgid "Magic Shelves"
 msgstr "Sincronizar Estantes Selecionadas com Kobo"
@@ -4870,6 +4870,19 @@ msgstr ""
 #: cps/spa_strings.py
 msgid "Public"
 msgstr "Público"
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr ""
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Display name for {name}"
+msgstr ""
 
 #: cps/spa_strings.py
 msgid "(no text captured)"

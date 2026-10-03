@@ -2223,7 +2223,7 @@ msgstr "書架列表"
 msgid "Books organized in shelves"
 msgstr "書架上的書"
 
-#: cps/opds.py cps/templates/config_view_edit.html
+#: cps/opds.py
 msgid "Magic Shelves"
 msgstr "魔法書架"
 
@@ -4778,6 +4778,19 @@ msgstr ""
 #: cps/spa_strings.py
 msgid "Public"
 msgstr "公開"
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr ""
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Display name for {name}"
+msgstr ""
 
 #: cps/spa_strings.py
 msgid "(no text captured)"

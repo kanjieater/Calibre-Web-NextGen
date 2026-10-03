@@ -2241,7 +2241,7 @@ msgstr "서재"
 msgid "Books organized in shelves"
 msgstr "서재별 정렬"
 
-#: cps/opds.py cps/templates/config_view_edit.html
+#: cps/opds.py
 #, fuzzy
 msgid "Magic Shelves"
 msgstr "선택한 서재 Kobo 동기화"
@@ -4798,6 +4798,19 @@ msgstr ""
 
 #: cps/spa_strings.py
 msgid "Public"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Custom display name"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Custom fields on book cards"
+msgstr ""
+
+#: cps/spa_strings.py
+#, python-brace-format
+msgid "Display name for {name}"
 msgstr ""
 
 #: cps/spa_strings.py
