@@ -1794,6 +1794,14 @@ msgstr "%(book)s inviato all'eReader"
 msgid "The requested file could not be read. Maybe wrong permissions?"
 msgstr "Il file richiesto non può essere letto. I permessi sono corretti?"
 
+#: cps/helper.py cps/spa_strings.py
+msgid "Invalid reading status"
+msgstr ""
+
+#: cps/helper.py cps/spa_strings.py
+msgid "Read status could not be set"
+msgstr ""
+
 #: cps/helper.py
 #, python-brace-format
 msgid "Read status could not set: {}"
@@ -1977,13 +1985,26 @@ msgstr "Aggiunti di recente"
 msgid "Highly Rated"
 msgstr "Valutazioni migliori"
 
-#: cps/magic_shelf.py cps/opds.py cps/spa_strings.py
+#: cps/magic_shelf.py cps/opds.py cps/render_template.py cps/spa_strings.py
+#: cps/web.py
 msgid "Currently Reading"
 msgstr "In lettura"
 
 #: cps/magic_shelf.py cps/spa_strings.py
 msgid "Yet to Read"
 msgstr "Da leggere"
+
+#: cps/magic_shelf.py cps/opds.py cps/render_template.py cps/spa_strings.py
+#: cps/templates/detail.html cps/templates/image.html
+#: cps/templates/search_form.html cps/web.py
+msgid "Did not finish"
+msgstr ""
+
+#: cps/magic_shelf.py cps/opds.py cps/render_template.py cps/spa_strings.py
+#: cps/templates/detail.html cps/templates/image.html
+#: cps/templates/search_form.html cps/web.py
+msgid "On hold"
+msgstr ""
 
 #: cps/magic_shelf.py cps/spa_strings.py
 msgid "Recent Publications"
@@ -2216,6 +2237,14 @@ msgstr "Libri letti"
 msgid "Books currently being read"
 msgstr "Libri in corso di lettura"
 
+#: cps/opds.py cps/spa_strings.py
+msgid "Books you chose not to finish"
+msgstr ""
+
+#: cps/opds.py cps/spa_strings.py
+msgid "Books you have paused for later"
+msgstr ""
+
 #: cps/opds.py cps/render_template.py cps/web.py
 msgid "Unread Books"
 msgstr "Libri da leggere"
@@ -2385,6 +2414,18 @@ msgstr "Mostra Libri letti e Libri da leggere"
 #: cps/render_template.py
 msgid "Show unread"
 msgstr "Mostra da leggere"
+
+#: cps/render_template.py cps/spa_strings.py
+msgid "Show Currently Reading Books"
+msgstr ""
+
+#: cps/render_template.py cps/spa_strings.py
+msgid "Show Books You Did Not Finish"
+msgstr ""
+
+#: cps/render_template.py cps/spa_strings.py
+msgid "Show Books On Hold"
+msgstr ""
 
 #: cps/render_template.py cps/templates/user_table.html
 msgid "Show Category Section"
@@ -4157,7 +4198,7 @@ msgstr "Etichette (separate da virgola)"
 msgid "Title"
 msgstr "Titolo"
 
-#: cps/spa_strings.py
+#: cps/spa_strings.py cps/templates/detail.html cps/templates/search_form.html
 msgid "Unread"
 msgstr "Non letto"
 
@@ -6126,7 +6167,7 @@ msgid "Current password"
 msgstr "Password attuale"
 
 #: cps/spa_strings.py cps/templates/detail.html cps/templates/image.html
-#: cps/templates/index.html
+#: cps/templates/index.html cps/templates/search_form.html
 msgid "Currently reading"
 msgstr "In lettura"
 
@@ -10940,6 +10981,35 @@ msgstr ""
 msgid "A few random picks from your Discover source"
 msgstr ""
 
+#: cps/spa_strings.py cps/templates/detail.html
+msgid "Reading status"
+msgstr ""
+
+#: cps/spa_strings.py cps/tasks_status.py cps/templates/detail.html
+#: cps/templates/search_form.html
+msgid "Finished"
+msgstr "Finito"
+
+#: cps/spa_strings.py cps/templates/detail.html
+msgid "Update status"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Reading status updated"
+msgstr ""
+
+#: cps/spa_strings.py cps/templates/detail.html
+msgid "Could not update reading status."
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Could not update reading status. Please try again."
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "Did not finish and On hold keep your reading position."
+msgstr ""
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "Attendi"
@@ -10947,10 +11017,6 @@ msgstr "Attendi"
 #: cps/tasks_status.py
 msgid "Started"
 msgstr "Avviato"
-
-#: cps/tasks_status.py
-msgid "Finished"
-msgstr "Finito"
 
 #: cps/tasks_status.py
 msgid "Ended"
