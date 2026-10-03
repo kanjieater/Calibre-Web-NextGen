@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
-from sqlalchemy import Column, DateTime, Integer, create_engine
+from sqlalchemy import Column, TIMESTAMP, Integer, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 pytestmark = pytest.mark.unit
@@ -16,7 +16,8 @@ pytestmark = pytest.mark.unit
     (datetime(101, 1, 1, tzinfo=timezone.utc), None),
     (None, None),
 ])
-def test_real_sql_list_and_detail_emit_the_same_custom_calendar(stored, expected, monkeypatch):
+@pytest.mark.parametrize("storage", ["orm", "calibre_text"])
+def test_real_sql_list_and_detail_emit_the_same_custom_calendar(stored, expected, storage, monkeypatch):
     from cps.api import books, serializers
     from cps import db
     base = declarative_base()
@@ -25,14 +26,18 @@ def test_real_sql_list_and_detail_emit_the_same_custom_calendar(stored, expected
         __tablename__ = "custom_column_31"
         id = Column(Integer, primary_key=True)
         book = Column(Integer)
-        value = Column(DateTime)
+        value = Column(TIMESTAMP(timezone=True))
 
     engine = create_engine("sqlite://")
     base.metadata.create_all(engine)
     definition = SimpleNamespace(id=31, name="Deadline", label="deadline", datatype="datetime", is_multiple=False)
     with sessionmaker(bind=engine)() as session:
-        session.add(Deadline(book=1, value=stored))
-        session.commit()
+        if storage == "orm":
+            session.add(Deadline(book=1, value=stored))
+            session.commit()
+        else:
+            with engine.begin() as connection:
+                connection.exec_driver_sql("INSERT INTO custom_column_31 (book,value) VALUES (?,?)", (1, stored.isoformat() if stored else None))
         monkeypatch.setitem(db.cc_classes, 31, Deadline)
         monkeypatch.setattr(books.calibre_db, "session", session)
         monkeypatch.setattr(books, "load_configured_columns", lambda _config: [definition])

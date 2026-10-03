@@ -33,3 +33,8 @@ test('Calibre no-date sentinel stays blank while detail can request the long cal
  assert.equal(formatCustomColumnDate('2026-01-10','de'),'10.1.2026');
  assert.equal(formatCustomColumnDate('2026-01-10','zh_Hans_CN'),'2026/1/10');
 });
+
+test('legacy invalid interface locale does not break a dated card or detail',()=>{
+ for(const locale of ['C','en_US.UTF-8'])
+  assert.equal(formatCustomColumnDate('2026-01-10',locale),formatCustomColumnDate('2026-01-10'));
+});

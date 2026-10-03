@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import re
 from typing import Any, Iterable
 
-from sqlalchemy import case
+from sqlalchemy import case, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -212,6 +212,12 @@ def resolve_magic_shelf_sort(
     if not isinstance(book_column, InstrumentedAttribute) \
             or not isinstance(value_column, InstrumentedAttribute):
         return _default_sort()
+
+    if live_column.datatype == "datetime":
+        # Calibre stores ISO text in SQLite. Sort the displayed calendar day,
+        # with the edit/API no-date sentinel joining absent and NULL rows.
+        calendar_day = func.substr(value_column, 1, 10)
+        value_column = case((calendar_day < "0102-01-01", None), else_=calendar_day)
 
     if direction == "desc":
         value_order = value_column.desc()

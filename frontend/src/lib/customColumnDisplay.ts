@@ -1,4 +1,5 @@
 import type { ListCustomColumnDefinition, Me } from './api';
+import { browserLocale } from './locale.ts';
 
 export const GUEST_CUSTOM_FIELDS_KEY = 'cwng:catalog-custom-fields-v1';
 export const GUEST_CUSTOM_LABELS_KEY = 'cwng:catalog-custom-field-labels-v1';
@@ -58,5 +59,5 @@ export function formatCustomColumnDate(value: string, locale?: string, options?:
   const parsed = new Date(0);
   parsed.setUTCFullYear(year, month - 1, day);
   if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) return value;
-  return parsed.toLocaleDateString(locale?.replace(/_/g, '-'), { ...options, timeZone: 'UTC' });
+  return parsed.toLocaleDateString(browserLocale(locale), { ...options, timeZone: 'UTC' });
 }

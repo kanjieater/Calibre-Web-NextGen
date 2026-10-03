@@ -1066,7 +1066,9 @@ export function BookDetail() {
                 </dd>
               </Fragment>
             ))}
-            {(book.custom_columns ?? []).map((column) => (
+            {(book.custom_columns ?? []).filter(column => column.datatype !== 'datetime'
+              || column.values.some(entry => typeof entry.value === 'string'
+                && formatCustomColumnDate(entry.value, locale))).map((column) => (
               <Fragment key={`custom-${column.id}`}>
                 <dt className={styles.metaLabel}>{column.name}</dt>
                 <dd className={styles.metaValue} dir="auto">

@@ -546,3 +546,37 @@ def test_ignored_configured_column_has_no_display_values_or_sort_options(sortabl
         assert definitions == [] and values == {1: {}}
         assert custom_column_sort.resolve_magic_shelf_sort("cc-12-asc", config).key == "new"
         assert custom_column_sort.resolve_magic_shelf_sort("cc-12-asc", config, [definition]).key == "new"
+
+@pytest.mark.parametrize("direction,expected", [
+    ("asc", [5, 1, 2, 3, 4, 6]),
+    ("desc", [2, 1, 5, 6, 4, 3]),
+])
+def test_calendar_sort_uses_displayed_day_and_puts_no_date_last(sortable_library, monkeypatch, direction, expected):
+    from cps.custom_column_sort import resolve_magic_shelf_sort
+    from datetime import datetime
+    from sqlalchemy import DateTime
+    from cps import db
+    engine, _difficulty, _decoy = sortable_library
+    base = declarative_base()
+
+    class Deadline(base):
+        __tablename__ = "custom_column_31"
+        id = Column(Integer, primary_key=True)
+        book = Column(Integer)
+        value = Column(DateTime)
+
+    base.metadata.create_all(engine)
+    monkeypatch.setitem(db.cc_classes, 31, Deadline)
+    config = SimpleNamespace(config_sortable_custom_columns="31", config_columns_to_ignore="")
+    order = resolve_magic_shelf_sort("cc-31-" + direction, config, [ColumnDefinition(31, "datetime")])
+    with sessionmaker(bind=engine)() as session:
+        session.add_all([
+            Deadline(book=1, value=datetime(2026, 1, 10, 23)),
+            Deadline(book=2, value=datetime(2026, 1, 10)),
+            Deadline(book=3, value=datetime(101, 1, 1)),
+            Deadline(book=4, value=None),
+            Deadline(book=5, value=datetime(2026, 1, 9)),
+        ])
+        session.commit()
+        query = session.query(db.Books.id).outerjoin(*order.join).order_by(*order.order_by)
+        assert [book_id for (book_id,) in query] == expected
