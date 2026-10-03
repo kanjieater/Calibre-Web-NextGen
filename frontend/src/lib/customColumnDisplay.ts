@@ -58,5 +58,5 @@ export function formatCustomColumnDate(value: string, locale?: string, options?:
   const parsed = new Date(0);
   parsed.setUTCFullYear(year, month - 1, day);
   if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) return value;
-  return parsed.toLocaleDateString(locale?.replace('_', '-'), { ...options, timeZone: 'UTC' });
+  return parsed.toLocaleDateString(locale?.replace(/_/g, '-'), { ...options, timeZone: 'UTC' });
 }

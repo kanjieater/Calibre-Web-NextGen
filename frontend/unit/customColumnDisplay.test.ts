@@ -31,4 +31,5 @@ test('Calibre no-date sentinel stays blank while detail can request the long cal
  assert.equal(formatCustomColumnDate('0099-12-31','en-US'),'');
  assert.equal(formatCustomColumnDate('2026-01-10','en-US',{year:'numeric',month:'long',day:'numeric'}),'January 10, 2026');
  assert.equal(formatCustomColumnDate('2026-01-10','de'),'10.1.2026');
+ assert.equal(formatCustomColumnDate('2026-01-10','zh_Hans_CN'),'2026/1/10');
 });
