@@ -50,6 +50,7 @@ def test_real_sql_list_and_detail_emit_the_same_custom_calendar(stored, expected
 
 @pytest.mark.parametrize("stored,expected", [
     (datetime(101, 1, 1), ""),
+    (None, ""),
     (datetime(2026, 1, 10, 23), "2026-01-10"),
 ])
 def test_classic_table_encoder_uses_the_same_calendar_and_empty_date_policy(stored, expected):
