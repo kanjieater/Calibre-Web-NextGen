@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { BookOpen, BookCheck, BookPlus, Check, EyeOff, List, X, Star } from 'lucide-react';
 import { Link } from 'wouter';
 import type { Book, ListCustomColumnDefinition } from '../lib/api';
-import { useT } from '../lib/i18n';
+import { useT, useI18n } from '../lib/i18n';
 import { BookCover } from './BookCover';
 import { getPrimaryReadTarget } from '../lib/readerTarget';
 import { formatAuthors } from '../lib/authors';
@@ -94,6 +94,7 @@ function BookCardInner({
   customColumnDefinitions = [],
 }: BookCardProps) {
   const t = useT();
+  const { locale } = useI18n();
   const authorStr = formatAuthors(book.authors);
   const seriesIndexLabel = showSeriesIndex ? formatSeriesIndex(book.series_index) : null;
   const readTarget = getPrimaryReadTarget(book.id, book.formats, canRead);
@@ -136,10 +137,11 @@ function BookCardInner({
     if (value === null || value === undefined || value === '') return [];
     let display = String(value);
     if (column.datatype === 'datetime' && typeof value === 'string') {
-      display = formatCustomColumnDate(value);
+      display = formatCustomColumnDate(value, locale);
     } else if ((column.datatype === 'int' || column.datatype === 'float') && typeof value === 'number') {
       display = new Intl.NumberFormat(undefined, { maximumFractionDigits: column.datatype === 'float' ? 2 : 0 }).format(value);
     }
+    if (!display) return [];
     return [{ id: column.id, text: `${column.name}: ${display}` }];
   });
 

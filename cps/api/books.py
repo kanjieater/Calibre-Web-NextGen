@@ -17,7 +17,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.functions import coalesce
 
 from . import api_v1
-from .serializers import serialize_book_list_item, serialize_book_detail
+from .serializers import serialize_book_list_item, serialize_book_detail, serialize_custom_column_value
 from .. import (
     calibre_db, config, constants, db, ub, isoLanguages, logger, user_library,
 )
@@ -213,9 +213,7 @@ def _list_custom_column_data(entries):
             rows = (calibre_db.session.query(model)
                     .filter(model.book.in_(book_ids)).all())
             for row in rows:
-                value = getattr(row, "value", None)
-                if hasattr(value, "isoformat"):
-                    value = value.isoformat()
+                value = serialize_custom_column_value(getattr(row, "value", None), column.datatype)
                 values.setdefault(int(row.book), {})[str(column.id)] = [{
                     "value": value,
                     "extra": getattr(row, "extra", None),

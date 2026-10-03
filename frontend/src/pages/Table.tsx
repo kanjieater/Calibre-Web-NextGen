@@ -5,7 +5,7 @@ import { ArrowUp, ArrowDown, Check, Columns3, Pencil, X } from 'lucide-react';
 import { useBooks, useMe, useUpdateMetadata } from '../lib/queries';
 import { Spinner, SpinnerCentered } from '../components/Spinner';
 import { EmptyState } from '../components/EmptyState';
-import { useT } from '../lib/i18n';
+import { useT, useI18n } from '../lib/i18n';
 import type { Book, ListCustomColumnDefinition } from '../lib/api';
 import { formatAuthors } from '../lib/authors';
 import { resourceUrl } from '../lib/api';
@@ -26,10 +26,10 @@ const COLUMNS: Col[] = [
   { key: 'read', label: 'Read' },
 ];
 
-function formatCustomCell(book: Book, column: ListCustomColumnDefinition): string {
+function formatCustomCell(book: Book, column: ListCustomColumnDefinition, locale: string): string {
   const value = book.custom_columns?.[String(column.id)]?.[0]?.value;
   if (value === null || value === undefined || value === '') return '—';
-  if (column.datatype === 'datetime' && typeof value === 'string') return formatCustomColumnDate(value);
+  if (column.datatype === 'datetime' && typeof value === 'string') return formatCustomColumnDate(value, locale) || '—';
   if ((column.datatype === 'int' || column.datatype === 'float') && typeof value === 'number') {
     return new Intl.NumberFormat(undefined, { maximumFractionDigits: column.datatype === 'float' ? 2 : 0 }).format(value);
   }
@@ -90,6 +90,7 @@ function dedupAppend(prev: Book[], next: Book[]): Book[] {
  *  visibility, infinite "load more". Replaces the legacy /table page. */
 export function Table() {
   const t = useT();
+  const { locale } = useI18n();
   const me = useMe().data;
   const canEdit = !!me?.role?.edit;
   const [sort, setSort] = useState('new');
@@ -220,7 +221,7 @@ export function Table() {
                         {c.key === 'read' && (b.read
                           ? <Check size={15} className={styles.readYes} role="img" aria-label={t('Read')} />
                           : <span aria-label={t('Unread')} role="img">—</span>)}
-                        {c.custom && formatCustomCell(b, c.custom)}
+                        {c.custom && formatCustomCell(b, c.custom, locale)}
                       </td>
                     ))}
                   </tr>

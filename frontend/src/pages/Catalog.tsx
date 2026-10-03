@@ -551,8 +551,10 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
       const trigger = settingsTriggerRef.current;
       const anchor = menu.parentElement;
       if (!trigger || !anchor) return;
+      const viewportWidth = document.documentElement.clientWidth;
+      menu.style.maxWidth = `${Math.max(0, viewportWidth - 16)}px`;
       const desiredLeft = trigger.getBoundingClientRect().right - menu.offsetWidth;
-      const left = Math.max(8, Math.min(desiredLeft, window.innerWidth - menu.offsetWidth - 8));
+      const left = Math.max(8, Math.min(desiredLeft, viewportWidth - menu.offsetWidth - 8));
       menu.style.left = `${left - anchor.getBoundingClientRect().left}px`;
       menu.style.right = 'auto';
       const available = window.innerHeight - trigger.getBoundingClientRect().bottom - 20;

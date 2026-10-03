@@ -25,3 +25,10 @@ test('Calibre custom calendar dates do not shift with the browser timezone',()=>
   assert.equal(formatCustomColumnDate('2026-02-30','en-US'),'2026-02-30');
  }} finally {if(previous===undefined)delete process.env.TZ;else process.env.TZ=previous;}
 });
+
+test('Calibre no-date sentinel stays blank while detail can request the long calendar form',()=>{
+ assert.equal(formatCustomColumnDate('0101-01-01T00:00:00+00:00','en-US'),'');
+ assert.equal(formatCustomColumnDate('0099-12-31','en-US'),'');
+ assert.equal(formatCustomColumnDate('2026-01-10','en-US',{year:'numeric',month:'long',day:'numeric'}),'January 10, 2026');
+ assert.equal(formatCustomColumnDate('2026-01-10','de'),'10.1.2026');
+});

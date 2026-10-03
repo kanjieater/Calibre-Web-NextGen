@@ -217,6 +217,15 @@ def serialize_book_list_item(book, read=False, archived=False, hidden=False,
     }
 
 
+def serialize_custom_column_value(value, datatype):
+    """Match the edit/Classic calendar policy, including Calibre's no-date sentinel."""
+    if datatype == "datetime" and isinstance(value, (datetime, date)):
+        if value.year <= 101:
+            return None
+        return value.date().isoformat() if isinstance(value, datetime) else value.isoformat()
+    return value.isoformat() if isinstance(value, (datetime, date)) else value
+
+
 def _serialize_custom_columns(book, definitions):
     result = []
     for column in definitions or []:
@@ -225,9 +234,7 @@ def _serialize_custom_columns(book, definitions):
             continue
         serialized_values = []
         for entry in values:
-            value = getattr(entry, "value", None)
-            if isinstance(value, (datetime, date)):
-                value = value.isoformat()
+            value = serialize_custom_column_value(getattr(entry, "value", None), column.datatype)
             item = {"value": value, "extra": getattr(entry, "extra", None)}
             if column.datatype == "comments" and isinstance(value, str):
                 item["value_html"] = clean_string(value, getattr(book, "id", None))
