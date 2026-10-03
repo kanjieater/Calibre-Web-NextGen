@@ -6,6 +6,7 @@ import { useT } from '../lib/i18n';
 import { BookCover } from './BookCover';
 import { getPrimaryReadTarget } from '../lib/readerTarget';
 import { formatAuthors } from '../lib/authors';
+import { formatCustomColumnDate } from '../lib/customColumnDisplay';
 import styles from './BookCard.module.css';
 import { Spinner } from './Spinner';
 import { BookCardActions } from './BookCardActions';
@@ -135,8 +136,7 @@ function BookCardInner({
     if (value === null || value === undefined || value === '') return [];
     let display = String(value);
     if (column.datatype === 'datetime' && typeof value === 'string') {
-      const date = new Date(value);
-      display = Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+      display = formatCustomColumnDate(value);
     } else if ((column.datatype === 'int' || column.datatype === 'float') && typeof value === 'number') {
       display = new Intl.NumberFormat(undefined, { maximumFractionDigits: column.datatype === 'float' ? 2 : 0 }).format(value);
     }

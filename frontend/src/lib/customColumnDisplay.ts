@@ -48,3 +48,14 @@ export function selectedCustomColumns(
     name: labels[String(field.id)]?.trim() || field.name,
   }));
 }
+
+/** Custom Calibre dates are calendar values, not browser-local instants. */
+export function formatCustomColumnDate(value: string, locale?: string): string {
+  const calendar = /^(\d{4})-(\d{2})-(\d{2})(?:$|T| )/.exec(value);
+  if (!calendar) return value;
+  const [year, month, day] = calendar.slice(1).map(Number);
+  const parsed = new Date(0);
+  parsed.setUTCFullYear(year, month - 1, day);
+  if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) return value;
+  return parsed.toLocaleDateString(locale, { timeZone: 'UTC' });
+}

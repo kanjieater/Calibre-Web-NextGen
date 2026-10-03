@@ -9,7 +9,7 @@ import { useT } from '../lib/i18n';
 import type { Book, ListCustomColumnDefinition } from '../lib/api';
 import { formatAuthors } from '../lib/authors';
 import { resourceUrl } from '../lib/api';
-import { selectedCustomColumns } from '../lib/customColumnDisplay';
+import { selectedCustomColumns, formatCustomColumnDate } from '../lib/customColumnDisplay';
 import styles from './Table.module.css';
 
 // Column key -> the API sort tokens for ascending / descending.
@@ -29,7 +29,7 @@ const COLUMNS: Col[] = [
 function formatCustomCell(book: Book, column: ListCustomColumnDefinition): string {
   const value = book.custom_columns?.[String(column.id)]?.[0]?.value;
   if (value === null || value === undefined || value === '') return '—';
-  if (column.datatype === 'datetime' && typeof value === 'string') return formatLibraryDate(value);
+  if (column.datatype === 'datetime' && typeof value === 'string') return formatCustomColumnDate(value);
   if ((column.datatype === 'int' || column.datatype === 'float') && typeof value === 'number') {
     return new Intl.NumberFormat(undefined, { maximumFractionDigits: column.datatype === 'float' ? 2 : 0 }).format(value);
   }
