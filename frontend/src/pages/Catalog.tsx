@@ -57,6 +57,9 @@ const READ_FILTERS: { label: string; value: ReadFilter }[] = [
   { label: 'All', value: 'all' },
   { label: 'Unread', value: 'unread' },
   { label: 'Read', value: 'read' },
+  { label: 'Currently reading', value: 'in_progress' },
+  { label: 'Did not finish', value: 'did_not_finish' },
+  { label: 'On hold', value: 'on_hold' },
 ];
 
 // Fork #640 — the plain Library view remembers its sort order and read filter
@@ -511,16 +514,61 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
   // the menu itself to the selected option.
   useLayoutEffect(() => {
     if (!settingsOpen) return;
+    let active = true;
     const constrainMenu = () => {
+      if (!active) return;
       const menu = settingsMenuRef.current;
       if (!menu) return;
+      // The toolbar can wrap at desktop widths too. A gear on the left
+      // cannot right-align a wider menu without putting its inputs offscreen.
+      // The mobile containing block is the toolbar; respect either anchor.
+      const parent = menu.offsetParent;
+      if (parent instanceof HTMLElement) {
+        const right = parent.getBoundingClientRect().right;
+        const left = Math.max(8, Math.min(right - menu.offsetWidth,
+          window.innerWidth - menu.offsetWidth - 8));
+        menu.style.right = `${right - left - menu.offsetWidth}px`;
+      }
       const available = window.innerHeight - menu.getBoundingClientRect().top - 12;
       menu.style.maxHeight = `${Math.max(160, available)}px`;
     };
     constrainMenu();
+    const toolbar = settingsMenuRef.current?.closest<HTMLElement>(`.${styles.toolbar}`);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(constrainMenu);
+    const observedItems = new Set<Element>();
+    const observeItems = () => {
+      if (!toolbar || !active) return;
+      for (const item of observedItems) {
+        if (item.parentElement !== toolbar) {
+          observer?.unobserve(item);
+          observedItems.delete(item);
+        }
+      }
+      for (const item of toolbar.children) {
+        if (!observedItems.has(item)) {
+          observer?.observe(item);
+          observedItems.add(item);
+        }
+      }
+      constrainMenu();
+    };
+    if (toolbar) observer?.observe(toolbar);
+    observeItems();
+    // Select mode inserts a control after the menu has opened. Its later
+    // loading-label size changes must be observed too, without a resize.
+    const mutations = typeof MutationObserver === 'undefined' ? null : new MutationObserver(observeItems);
+    if (toolbar) mutations?.observe(toolbar, { childList: true });
+    void document.fonts?.ready.then(constrainMenu);
+    document.fonts?.addEventListener('loadingdone', constrainMenu);
     window.addEventListener('resize', constrainMenu);
-    return () => window.removeEventListener('resize', constrainMenu);
-  }, [settingsOpen]);
+    return () => {
+      active = false;
+      observer?.disconnect();
+      mutations?.disconnect();
+      document.fonts?.removeEventListener('loadingdone', constrainMenu);
+      window.removeEventListener('resize', constrainMenu);
+    };
+  }, [settingsOpen, t, canUpload]);
 
   // The saved default view is part of the filter identity: turning it on/off (or
   // saving a different one) changes which books belong here, so the accumulator
@@ -1269,7 +1317,7 @@ export function Catalog({ entityKind, entityId, view, defaultFilter }: CatalogPr
             search && !filtered
               ? t('No results for "{q}".', { q: search })
               : readFilter !== 'all'
-                ? t('No {filter} books here.', { filter: readFilter })
+                ? t('No {filter} books here.', { filter: t(READ_FILTERS.find(rf => rf.value === readFilter)!.label) })
                 : view === 'discover' ? t('No unread books in this Discover source.') : t('No books here.')
           }>
           {search && !filtered && personalLibrary && me?.role?.browse_global && (
