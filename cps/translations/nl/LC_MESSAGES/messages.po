@@ -11528,6 +11528,16 @@ msgstr ""
 "De voltooide download overschrijdt de veilige bestandslimieten. Kies een "
 "kleinere uitgave."
 
+#: cps/spa_strings.py
+msgid "Unsupported rule"
+msgstr "Niet-ondersteunde regel"
+
+#: cps/spa_strings.py
+msgid "This rule cannot be edited here. It will be kept unless you remove it."
+msgstr ""
+"Deze regel kan hier niet worden bewerkt. Hij blijft behouden tenzij u hem "
+"verwijdert."
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "Wachten"
@@ -19187,11 +19197,3 @@ msgstr "Toon gelezen/niet gelezen selectie"
 #~ msgstr ""
 #~ "Boeken moeten eerst worden gearchiveerd en het apparaat moet worden "
 #~ "gesynchroniseerd, voordat een boek veilig kan worden verwijderd."
-
-#: cps/spa_strings.py
-msgid "Unsupported rule"
-msgstr "Niet-ondersteunde regel"
-
-#: cps/spa_strings.py
-msgid "This rule cannot be edited here. It will be kept unless you remove it."
-msgstr "Deze regel kan hier niet worden bewerkt. Hij blijft behouden tenzij u hem verwijdert."

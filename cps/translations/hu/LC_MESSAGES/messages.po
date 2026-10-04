@@ -11088,6 +11088,14 @@ msgstr ""
 "A befejezett letöltés túllépi a biztonságos fájlkorlátokat. Válassz kisebb "
 "kiadást."
 
+#: cps/spa_strings.py
+msgid "Unsupported rule"
+msgstr ""
+
+#: cps/spa_strings.py
+msgid "This rule cannot be edited here. It will be kept unless you remove it."
+msgstr ""
+
 #: cps/tasks_status.py
 msgid "Waiting"
 msgstr "Várakozás"
