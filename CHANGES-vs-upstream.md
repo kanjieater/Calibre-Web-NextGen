@@ -1,5 +1,6 @@
 # Changes vs upstream Calibre-Web-Automated
 
+- **Stats & Activity follows the account language across all four tabs (#1173).** Activity, Library, API and System headings, controls, chart labels/tooltips, empty/demo states and request-time history headers now use gettext. New messages are exposed in all28 catalogs, with Russian/French/Dutch draft text. Raw metric/category identities and CSV schema stay stable; touched dynamic text is escaped, and all-time filtering uses raw state independently of its translated label. Reported by @standhaftsohnsergius. Behavioral compiled-catalog/render/actual-script/handler checks reproduce the original translation and HTML failures. | PR [#2446](https://github.com/new-usemame/Calibre-Web-NextGen/pull/2446) | SHA `TBD` | release `TBD`.
 Tracks every divergence between this fork and `crocodilestick/Calibre-Web-Automated@main` since the fork point. Updated per release.
 
 Format: each row is one fork-PR, mapped to its upstream PR or issue (if any), with a one-line description and the squash-merge SHA.
