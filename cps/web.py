@@ -2392,7 +2392,6 @@ def list_books():
         terms.append(db.Books.id)
         return [term.asc() if ascending else term.desc() for term in terms]
 
-
     custom_column_match = re.fullmatch(r"custom_column_(\d+)", sort_param or "")
     custom_sort = resolve_custom_column_sort(
         "cc-{}-{}".format(custom_column_match.group(1), direction if direction in ("asc", "desc") else "asc"),
