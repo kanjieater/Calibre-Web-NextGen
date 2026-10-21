@@ -157,7 +157,7 @@ def lookup_restored_book(reference):
     guard = _require_book_delete()
     if guard:
         return guard
-    if not re.fullmatch(r"bookhelper-undo-[0-9a-f]{32}-[0-9]+\\.epub", reference):
+    if not re.fullmatch(r"bookhelper-undo-[0-9a-f]{32}-[0-9]+\.epub", reference):
         return jsonify({"error": {"code": "invalid_reference", "message": "Invalid restore reference"}}), 400
     rows = ub.session.query(ub.BookOriginalFilename).filter(
         ub.BookOriginalFilename.filename == reference).limit(2).all()
