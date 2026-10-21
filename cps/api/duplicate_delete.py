@@ -125,6 +125,10 @@ def preflight(source, keeper, reference_session=None):
         "keeper_id": keeper.id,
         "source_uuid": source_uuid,
         "keeper_uuid": keeper_uuid,
+        "quarantine_id": (duplicate_quarantine.transaction_id_for(
+            source.id, source_uuid, keeper_uuid, str(source.path))
+            if isinstance(source_uuid, str) and source_uuid and
+               isinstance(keeper_uuid, str) and keeper_uuid else None),
         "token": pair_token,
         "allowed": not blockers,
         "blockers": blockers,
