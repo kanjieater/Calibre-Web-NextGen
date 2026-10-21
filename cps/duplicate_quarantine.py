@@ -81,7 +81,8 @@ def _tree_inventory(directory):
 def _origin(calibre_root, relative):
     root = Path(calibre_root).resolve(strict=True)
     pieces = Path(relative).parts
-    if len(pieces) != 2 or any(p in ("", ".", "..") for p in pieces):
+    if Path(relative).is_absolute() or len(pieces) != 2 or any(
+            p in ("", ".", "..", "/", "\\\\") for p in pieces):
         raise QuarantineError("invalid Calibre relative book path")
     origin = root.joinpath(*pieces)
     if origin.is_symlink() or origin.parent.is_symlink():
@@ -108,31 +109,6 @@ def _paths(qroot, name):
             qroot / ".transactions" / (name + ".json"))
 
 
-def _copy_tree(source, stage):
-    # Refuse symlink traversal and never follow a link to external bytes.
-    if stage.exists():
-        raise QuarantineError("unexpected existing staging directory")
-    stage.mkdir(parents=True)
-    for base, dirs, files in os.walk(source, followlinks=False):
-        directory = stage / Path(base).relative_to(source)
-        for name in dirs:
-            path = Path(base) / name
-            if path.is_symlink():
-                raise QuarantineError("symlink not supported")
-            (directory / name).mkdir()
-        for name in files:
-            path = Path(base) / name
-            if path.is_symlink() or not path.is_file():
-                raise QuarantineError("symlink/special file not supported")
-            target = directory / name
-            # Copy to an owned private stage; never overwrite a published item.
-            with open(path, "rb") as src, open(target, "xb") as dst:
-                shutil.copyfileobj(src, dst, 1024 * 1024)
-                dst.flush()
-                os.fsync(dst.fileno())
-        _sync_dir(directory)
-
-
 def publish(calibre_root, book_path, source_id, source_uuid, keeper_uuid):
     """Publish verified original bytes *before* metadata.db deletes the row.
 
@@ -147,6 +123,8 @@ def publish(calibre_root, book_path, source_id, source_uuid, keeper_uuid):
     key = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:32]
     name = f"{source_id}-{key}"
     final, stage, journal_path = _paths(qroot, name)
+    if (origin / MARKER).exists():
+        raise QuarantineError("original directory contains reserved ownership marker")
     observed = _tree_inventory(origin)
     expected = {"key": key, "book_id": source_id, "source_uuid": source_uuid,
                 "keeper_uuid": keeper_uuid, "book_path": book_path,
