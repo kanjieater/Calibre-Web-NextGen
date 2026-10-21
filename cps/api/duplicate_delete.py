@@ -10,7 +10,6 @@ import json
 import re
 
 from flask import jsonify, request
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from . import api_v1
@@ -95,12 +94,10 @@ def resolve_candidates(source_id, keeper_id):
 
 def preflight(source, keeper, reference_session=None):
     blockers = []
-    # The Calibre SQLite book id is not guaranteed AUTOINCREMENT. Deleting
-    # the maximum live id permits a later ingest to reuse that numeric ID,
-    # defeating Bookhelper's exact-ID redirect for external consumers.
-    max_id = calibre_db.session.query(func.max(db.Books.id)).scalar()
-    if max_id is None or int(source.id) >= int(max_id):
-        blockers.append("id_reuse_risk_maximum_book_id")
+    # Highest IDs may be recycled by Calibre. Bookhelper validates BOTH
+    # source and keeper UUID-qualified aliases before any exact-ID operation;
+    # rejecting the highest ID would strand perfectly valid duplicates.
+    # Recycled-ID safety is an identity contract, not a maximum-ID heuristic.
     if any(tag.name in PROTECTED_TAGS for tag in (source.tags or [])):
         blockers.append("protected_book_sync_tag")
     if not any(row.format.upper() == "EPUB" for row in (source.data or [])):
