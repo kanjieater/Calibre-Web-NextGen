@@ -22,6 +22,7 @@ from ..usermanagement import login_required_if_no_ano
 import time
 
 from ..editbooks import edit_book_param, delete_book_from_table, modify_identifiers
+from ..services.calibre_db_lock import metadata_db_write_lock
 from ..helper import (convert_book_format, save_cover, save_cover_from_url, tags_filters,
                      get_convert_options, mark_book_modified, log_metadata_change,
                      replace_cover_thumbnail_cache, book_cover_is_locked)
@@ -168,6 +169,45 @@ def _remove_tags(book, raw):
     if len(keep) == len(existing):
         return None
     return ", ".join(keep)
+
+
+def _mutate_tags_serialized(book_id, raw, mode):
+    """Atomic tags-only add/remove across independent CWA editor requests.
+
+    Calculate the remaining tag list only AFTER taking metadata.db's actual
+    SQLite writer slot. This prevents another editor's unrelated addition
+    from disappearing between the read and edit_book_param's replacement.
+    Hold the shared CWA metadata lock for ingest coordination too.
+    """
+    with metadata_db_write_lock():
+        conn = calibre_db.session.connection()
+        if conn.dialect.name != "sqlite":
+            return False, "Atomic list mutation requires the SQLite Calibre backend"
+        if conn.connection.driver_connection.in_transaction:
+            # A transaction started before this lock might hold a stale read
+            # snapshot. Never compute a replacement list from that state.
+            calibre_db.session.rollback()
+            return False, "An existing metadata transaction must finish before updating tags"
+        try:
+            conn.exec_driver_sql("BEGIN IMMEDIATE")
+            calibre_db.session.expire_all()
+            current = _editable_book(book_id)
+            if current is None:
+                calibre_db.session.rollback()
+                return False, "Book not found"
+            value = (_remove_tags(current, raw) if mode == "remove"
+                     else _add_list_values(current, "tags", raw))
+            if value is None:
+                calibre_db.session.rollback()
+                return True, ""
+            vals = {"pk": str(book_id), "value": value, "checkA": "true"}
+            ok, message = _parse_edit_result(edit_book_param("tags", vals))
+            if not ok:
+                calibre_db.session.rollback()
+            return ok, message
+        except Exception:
+            calibre_db.session.rollback()
+            raise
 
 
 def _delete_api_response(result):
@@ -482,12 +522,13 @@ def update_metadata(book_id):
         if field not in data:
             continue
         raw = data[field]
+        if field == "tags" and list_mode in ("add", "remove"):
+            ok, message = _mutate_tags_serialized(book_id, raw, list_mode)
+            if not ok:
+                errors[field] = message
+            continue
         if list_mode == "remove":
-            if field != "tags":
-                return _err("invalid_request", "list_mode 'remove' supports only tags", 400)
-            value = _remove_tags(book, raw)
-            if value is None:
-                continue  # A no-op removal must not touch other metadata.
+            return _err("invalid_request", "list_mode 'remove' supports only tags", 400)
         elif list_mode == "add" and field in LIST_FIELD_SEPARATORS:
             value = _add_list_values(book, field, raw)
             if value is None:
@@ -500,6 +541,14 @@ def update_metadata(book_id):
         ok, message = _parse_edit_result(edit_book_param(field, vals))
         if not ok:
             errors[field] = message
+
+    # Other concurrent editors may have committed while this request ran.
+    # The response must reflect current persisted metadata, not the stale
+    # relationship list captured before the serialized tag mutation.
+    calibre_db.session.expire_all()
+    book = _editable_book(book_id)
+    if book is None:
+        return _err("not_found", "Book not found", 404)
 
     # Custom columns (#997). edit_book_param already has a custom_column_ branch
     # feeding edit_single_cc_data — the core the classic inline table editor has
