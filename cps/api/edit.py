@@ -542,13 +542,12 @@ def update_metadata(book_id):
         if not ok:
             errors[field] = message
 
-    # Other concurrent editors may have committed while this request ran.
-    # The response must reflect current persisted metadata, not the stale
-    # relationship list captured before the serialized tag mutation.
-    calibre_db.session.expire_all()
-    book = _editable_book(book_id)
-    if book is None:
-        return _err("not_found", "Book not found", 404)
+    # Respond from the current stored tag list, not the pre-lock snapshot.
+    if list_mode in ("add", "remove") and "tags" in data:
+        calibre_db.session.expire_all()
+        book = _editable_book(book_id)
+        if book is None:
+            return _err("not_found", "Book not found", 404)
 
     # Custom columns (#997). edit_book_param already has a custom_column_ branch
     # feeding edit_single_cc_data — the core the classic inline table editor has
