@@ -176,6 +176,71 @@ def test_real_metadata_route_removes_only_selected_tags(monkeypatch):
         assert response.get_json()["error"]["code"] == "invalid_request"
 
 
+def test_serialized_tag_removal_preserves_concurrent_and_unrelated_additions(
+        tmp_path, monkeypatch):
+    """Read/replace runs under SQLite's actual metadata writer reservation."""
+    import sqlite3
+    from contextlib import nullcontext
+    from sqlalchemy import create_engine, text
+    from sqlalchemy.orm import Session
+    from cps.api import edit as module
+
+    path = tmp_path / "metadata.db"
+    engine = create_engine(f"sqlite:///{path}", connect_args={"timeout": 0.1})
+    with engine.begin() as conn:
+        conn.exec_driver_sql("CREATE TABLE book_tags (book_id INTEGER, name TEXT)")
+        conn.exec_driver_sql(
+            "INSERT INTO book_tags VALUES (42,'remove-me'),(42,'Manual'),(42,'From another editor')")
+    session = Session(engine)
+    monkeypatch.setattr(module.calibre_db, "session", session)
+    monkeypatch.setattr(module, "metadata_db_write_lock", lambda: nullcontext())
+    attempted = []
+
+    def fresh_book(_book_id):
+        outsider = sqlite3.connect(path, timeout=0.05)
+        try:
+            try:
+                outsider.execute("INSERT INTO book_tags VALUES (42, 'Racing')")
+                outsider.commit()
+                attempted.append(False)
+            except sqlite3.OperationalError as exc:
+                assert "locked" in str(exc)
+                attempted.append(True)
+        finally:
+            outsider.close()
+        names = session.execute(text(
+            "SELECT name FROM book_tags WHERE book_id=42 ORDER BY rowid")).scalars().all()
+        return SimpleNamespace(tags=[SimpleNamespace(name=n) for n in names])
+
+    def write_tags(_field, payload):
+        session.execute(text("DELETE FROM book_tags WHERE book_id=42"))
+        for name in payload["value"].split(", "):
+            if name:
+                session.execute(text("INSERT INTO book_tags VALUES (42,:name)"), {"name": name})
+        session.commit()
+        return ""
+
+    monkeypatch.setattr(module, "_editable_book", fresh_book)
+    monkeypatch.setattr(module, "edit_book_param", write_tags)
+    assert module._mutate_tags_serialized(42, "remove-me", "remove") == (True, "")
+    assert attempted == [True]
+    with engine.connect() as conn:
+        names = conn.exec_driver_sql(
+            "SELECT name FROM book_tags WHERE book_id=42").scalars().all()
+    assert set(names) == {"Manual", "From another editor"}
+
+    # Another editor succeeds AFTER the first transaction commits; a later
+    # remove of one unrelated tag must retain their newly added membership.
+    with engine.begin() as conn:
+        conn.exec_driver_sql("INSERT INTO book_tags VALUES (42,'Fresh')")
+    assert module._mutate_tags_serialized(42, "Manual", "remove") == (True, "")
+    with engine.connect() as conn:
+        names = conn.exec_driver_sql(
+            "SELECT name FROM book_tags WHERE book_id=42").scalars().all()
+    assert set(names) == {"Fresh", "From another editor"}
+    session.close()
+
+
 def test_real_restore_ref_handler_accepts_matching_marker(monkeypatch):
     from flask import Flask
     from cps.api import duplicate_delete as module
