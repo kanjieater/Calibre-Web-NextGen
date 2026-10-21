@@ -1608,30 +1608,36 @@ class _DeletedBookFileRef:
         self.path = path
 
 
-def delete_whole_book(book_id, book):
-    # Capture a tombstone for every Kobo-synced user BEFORE we touch
-    # any of the metadata.db / app.db rows. The Kobo protocol needs the
-    # book's UUID to address the archived ChangedEntitlement on the device;
-    # once
-    # the book row is gone there is no way to recover it. Sync handler
-    # consumes these on the next sync and tells each affected device to
-    # archive its local copy. Without this, hard-deleted books linger on
-    # synced devices forever.
-    try:
-        kobo_sync_status.record_book_deletion(book_id, getattr(book, "uuid", None))
-    except Exception as e:
-        # Tombstone capture is best-effort; a failure here must not
-        # block the user's delete action. Worst case: the device keeps
-        # the orphan (same as pre-fix behavior), no data loss.
-        log.warning("Could not record kobo deletion tombstone for book %s: %s", book_id, e)
+def delete_whole_book(book_id, book, *, guarded_unreferenced=False):
+    # The dedicated duplicate-delete API already holds app.db's SQLite writer
+    # transaction and has verified zero user references. It must NOT call the
+    # generic purge/tombstone core: that core commits app.db mid-delete and
+    # releases the guard, allowing a concurrent reader/shelf write to be lost.
+    # Ordinary classic/API deletes retain their existing behavior.
+    if not guarded_unreferenced:
+        # Capture a tombstone for every Kobo-synced user BEFORE we touch
+        # any of the metadata.db / app.db rows. The Kobo protocol needs the
+        # book's UUID to address the archived ChangedEntitlement on the device;
+        # once
+        # the book row is gone there is no way to recover it. Sync handler
+        # consumes these on the next sync and tells each affected device to
+        # archive its local copy. Without this, hard-deleted books linger on
+        # synced devices forever.
+        try:
+            kobo_sync_status.record_book_deletion(book_id, getattr(book, "uuid", None))
+        except Exception as e:
+            # Tombstone capture is best-effort; a failure here must not
+            # block the user's delete action. Worst case: the device keeps
+            # the orphan (same as pre-fix behavior), no data loss.
+            log.warning("Could not record kobo deletion tombstone for book %s: %s", book_id, e)
 
-    # Delete every per-user-book row (shelves, read status, annotations,
-    # Kobo state, downloads…) through the single enumerator (D4). The
-    # annotation-backup snapshots are deliberately retained — they're the
-    # recovery path for an accidental delete; retention keeps managing them.
-    user_book_data.purge_user_book_data(book_id=book_id, remove_backup_files=False)
-    ub.session.query(ub.BookOriginalFilename).filter(ub.BookOriginalFilename.book_id == book_id).delete()
-    ub.session_commit()
+        # Delete every per-user-book row (shelves, read status, annotations,
+        # Kobo state, downloads…) through the single enumerator (D4). The
+        # annotation-backup snapshots are deliberately retained — they're the
+        # recovery path for an accidental delete; retention keeps managing them.
+        user_book_data.purge_user_book_data(book_id=book_id, remove_backup_files=False)
+        ub.session.query(ub.BookOriginalFilename).filter(ub.BookOriginalFilename.book_id == book_id).delete()
+        ub.session_commit()
 
     # check if only this book links to:
     # author, language, series, tags, custom columns
@@ -1652,20 +1658,23 @@ def delete_whole_book(book_id, book):
                     getattr(book, cc_string).remove(del_cc)
                     log.debug('remove ' + str(c.id))
                     calibre_db.session.delete(del_cc)
-                    calibre_db.session.commit()
+                    if not guarded_unreferenced:
+                        calibre_db.session.commit()
                 elif c.datatype == 'rating':
                     del_cc = getattr(book, cc_string)[0]
                     getattr(book, cc_string).remove(del_cc)
                     if len(del_cc.books) == 0:
                         log.debug('remove ' + str(c.id))
                         calibre_db.session.delete(del_cc)
+                        if not guarded_unreferenced:
                         calibre_db.session.commit()
                 else:
                     del_cc = getattr(book, cc_string)[0]
                     getattr(book, cc_string).remove(del_cc)
                     log.debug('remove ' + str(c.id))
                     calibre_db.session.delete(del_cc)
-                    calibre_db.session.commit()
+                    if not guarded_unreferenced:
+                        calibre_db.session.commit()
         else:
             modify_database_object([u''], getattr(book, cc_string), db.cc_classes[c.id],
                                    calibre_db.session, 'custom')
