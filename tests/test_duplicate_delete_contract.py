@@ -335,6 +335,44 @@ def test_guarded_proof_tracks_both_stable_identities(monkeypatch):
     assert "source_stable_uuid_missing" in module.preflight(source, keeper)["blockers"]
 
 
+def test_guarded_legacy_core_never_purges_user_data_or_commits_midflight(
+        monkeypatch):
+    """Verify the actual Calibre delete helper keeps BOTH DB locks intact."""
+    from cps import editbooks as module
+
+    class Query:
+        def filter(self, *_):
+            return self
+        def all(self):
+            return []
+        def delete(self):
+            removed.append("book row")
+            return 1
+
+    class NoCommitSession:
+        def query(self, *_):
+            return Query()
+        def commit(self):
+            raise AssertionError("guarded delete cannot commit mid-flight")
+
+    removed = []
+    monkeypatch.setattr(module.calibre_db, "session", NoCommitSession())
+    monkeypatch.setattr(module, "modify_database_object", lambda *_: None)
+
+    def reject_user_mutation(*_args, **_kwargs):
+        raise AssertionError("guarded delete must not purge or commit app.db")
+
+    monkeypatch.setattr(module.user_book_data, "purge_user_book_data",
+                        reject_user_mutation)
+    monkeypatch.setattr(module.kobo_sync_status, "record_book_deletion",
+                        reject_user_mutation)
+    monkeypatch.setattr(module.ub, "session_commit", reject_user_mutation)
+    source = SimpleNamespace(id=5, uuid="source-uuid", authors=[], tags=[],
+                             series=[], languages=[], publishers=[])
+    module.delete_whole_book(5, source, guarded_unreferenced=True)
+    assert removed == ["book row"]
+
+
 def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch):
     """Exercise two SQLite files and a competing app.db writer connection.
 
