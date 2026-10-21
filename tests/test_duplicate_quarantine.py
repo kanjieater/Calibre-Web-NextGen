@@ -123,3 +123,24 @@ def test_conflicting_snapshot_refuses_resuming_old_journal(library):
     original.joinpath("novel.epub").write_bytes(b"changed")
     with pytest.raises(q.QuarantineError, match="conflict"):
         _published(library)
+
+
+def test_reconcile_after_db_commit_crash_removes_only_orphan(library):
+    _, original, _ = library
+    ticket = _published(library)
+    result = q.reconcile(library[0], lambda _book_id: None)
+    assert result["finished"] == [ticket["key"]], result
+    assert not original.exists()
+    assert Path(ticket["destination"]).joinpath("cover.jpg").is_file()
+    assert q.reconcile(library[0], lambda _book_id: None)["finished"] == []
+
+
+def test_reconcile_when_book_still_active_does_not_remove_source(library):
+    _, original, _ = library
+    ticket = _published(library)
+    result = q.reconcile(library[0], lambda _book_id: object())
+    assert result["finished"] == []
+    assert result["pending"] == [
+        {"key": ticket["key"], "reason": "book_id_currently_occupied"}]
+    assert original.joinpath("novel.epub").is_file()
+    assert Path(ticket["destination"]).is_dir()
