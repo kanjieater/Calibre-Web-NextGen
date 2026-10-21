@@ -229,3 +229,63 @@ def test_deletion_rechecks_user_references_after_approved_preflight(monkeypatch)
         reply, code = module.duplicate_delete.__wrapped__(5)
         assert code == 409
         assert "all_user_book_references" in reply.get_json()["blockers"]
+
+
+def test_guarded_proof_tracks_both_stable_identities(monkeypatch):
+    from cps.api import duplicate_delete as module
+
+    class MaxIdQuery:
+        def scalar(self):
+            return 500
+
+    monkeypatch.setattr(module.calibre_db.session, "query", lambda *_: MaxIdQuery())
+    monkeypatch.setattr(module, "user_book_references", lambda *_: [])
+    source, keeper = _book(5), _book(1)
+    source.uuid = "source-uuid"
+    keeper.uuid = "keeper-uuid"
+    approved = module.preflight(source, keeper)
+    assert approved["allowed"]
+    assert approved["source_uuid"] == "source-uuid"
+    assert approved["keeper_uuid"] == "keeper-uuid"
+
+    keeper.uuid = "recycled-keeper"
+    assert module.preflight(source, keeper)["token"] != approved["token"]
+    keeper.uuid = "keeper-uuid"
+    keeper.title = "Other edition"
+    assert module.preflight(source, keeper)["token"] != approved["token"]
+    keeper.title = "銀河英雄伝説"
+    source.uuid = "recycled-source"
+    assert module.preflight(source, keeper)["token"] != approved["token"]
+    source.uuid = ""
+    assert "source_stable_uuid_missing" in module.preflight(source, keeper)["blockers"]
+
+
+def test_clean_snapshot_is_not_permission_for_unserialized_delete(monkeypatch):
+    """The real deletion core is unsafe until app.db writer exclusion exists."""
+    from flask import Flask
+    from cps.api import duplicate_delete as module
+
+    class MaxIdQuery:
+        def scalar(self):
+            return 500
+
+    monkeypatch.setattr(module.calibre_db.session, "query", lambda *_: MaxIdQuery())
+    monkeypatch.setattr(module, "user_book_references", lambda *_: [])
+    source, keeper = _book(5), _book(1)
+    source.uuid = "source"
+    keeper.uuid = "keeper"
+    token = module.preflight(source, keeper)["token"]
+    monkeypatch.setattr(module, "_require_book_delete", lambda: None)
+    monkeypatch.setattr(module, "resolve_candidates", lambda *_: (source, keeper))
+
+    def must_not_delete(*_args, **_kwargs):
+        raise AssertionError("unsynchronized core must not delete any record")
+
+    monkeypatch.setattr(module, "delete_book_from_table", must_not_delete)
+    app = Flask("guarded-delete-must-fail-closed")
+    with app.test_request_context(
+            "/api/v1/books/5/duplicates/delete", method="POST",
+            json={"keeper_id": 1, "token": token}):
+        reply, status = module.duplicate_delete.__wrapped__(5)
+        assert status == 503
+        assert reply.get_json()["error"]["code"] == "atomic_guarded_delete_unavailable"
