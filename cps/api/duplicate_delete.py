@@ -278,8 +278,8 @@ def duplicate_delete(book_id):
         return jsonify({"error": {"code": "stale_or_referenced",
                                   "message": "Identity changed or user state exists"},
                         "blockers": blockers}), 409
-    response = jsonify({"quarantine_id": _, "state": "quarantined"})
-    return response, 200
+    return jsonify({"deleted": True, "quarantine_id": _,
+                    "state": "quarantined"}), 200
 
 
 def valid_restore_reference(reference):
