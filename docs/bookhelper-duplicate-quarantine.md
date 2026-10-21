@@ -98,29 +98,70 @@ Keep a *single purpose-specific* quarantine journal and Bookhelper's existing
 receipt. Do not add Redis, a new database, a shared Book-sync coordinator, or
 a generic retention framework.
 
-## Release and confidence ladder
+## Automatic release, evidence and recovery contract
 
-- **First full-library scan:** inspection/report only; compute verified counts,
-  raw-EPUB-identical groups, equivalent-but-repackaged groups, blockers, expected
-  bytes to quarantine, and source IDs. No actual removal.
-- **Initial approved small batch:** human reviews plan SHA and executes a
-  bounded transaction batch. Compare removed-ID counts, intact quarantine
-  directories, hash inventory, active survivor metadata and undo. Use this to
-  validate against a representative cwa-scale snapshot, not only mock HTTP.
-- **Automatic maintenance:** once a reviewed deployment proves the cutover and
-  quarantine API, the existing Bookhelper scheduled pass automatically
-  quarantines only the strict **raw-SHA-256 + compatible identity** tier. It
-  never needs a per-batch opt-in switch, but rechecks per-book safety live.
-- **Expansion:** only after an auditable history of successful operations and
-  exercised rollback may equivalent-text/different-ZIP cases be considered
-  for automatic quarantine. Ambiguous or explicitly different editions
-  remain visible and untouched.
+The owner does **not** require an initial manual dry run or per-batch
+approval. Once the NextGen quarantine implementation and Bookhelper writer
+ownership cutover have passed engineering tests, the **default existing
+Bookhelper maintenance loop** automatically processes strict raw-EPUB-hash,
+identity-compatible duplicate groups without further user actions.
 
-Required tests: transaction journal before/after each file and DB step,
-crash after quarantine publication before DB commit, crash after DB commit
-before source cleanup, cross-mount partial copy, hash mismatch, path/symlink
-attacks, destination collision, duplicate retry, retained unrelated book,
-concurrent app.db user writer, changed source/keeper UUID and end-to-end
-restart/restore with Book-sync stopped. Tests must use actual NextGen
-app.db + metadata.db, a temporary library, and CWA's production image as
-appropriate; a fake-CWA 204 response is not proof of recovery.
+Quarantine is **not permanent deletion**: the redundant row disappears from
+CWA's active catalog while its complete source directory remains in the
+separate persistent `maintenance/potentialDupes/` destination.
+
+NextGen receives one verified pair at a time from Bookhelper and:
+- Reserves both CWA/app.db and Calibre metadata.db SQLite writer slots and
+  rechecks source UUID, keeper UUID, user references and token.
+- Stages a complete original-directory copy on the destination filesystem,
+  fsyncs a source/keeper UUID-qualified journal and content hashes, and
+  publishes with an owned marker using atomic rename before the Calibre
+  delete commit.
+- Removes the Calibre row with no protected user-state purge, then clears the
+  orphan original only after confirming the published bytes. There is no
+  `helper.delete_book` permanent-cleanup fallback in the guarded route.
+- Returns an explicit quarantine transaction ID on confirmed success. For an
+  interrupted commit/cleanup, a bounded authenticated reconcile endpoint
+  checks the actual Calibre database for a live owner of *either* the original
+  numeric ID or directory path and finishes cleanup only when neither is in
+  use.
+- Blocks and records unsupported Google Drive libraries, missing persistent
+  quarantine mount, reserved path/traversal, symlink, corrupted file, hash
+  mismatch, changed source or keeper identity, current user references,
+  collision or ambiguous replay.
+
+Bookhelper's existing durable receipt records **why** it chose that source:
+stable decision rule/version/reason code, date, both IDs/UUIDs, exact raw
+EPUB hashes, identity/edition evidence, all preserved data, CWA guard result,
+quarantine transaction ID and undo state. NextGen's private journal holds
+only physical ownership/path/full file inventory and cleanup state. Inspect
+both when a suspect match is found. `bookhelper duplicates pause` stops
+subsequent quarantines immediately without disabling matching/preservation.
+`history --receipt` shows the full reason; `undo --receipt` restores the
+original hash-verified EPUB and metadata through CWA. A ZFS snapshot remains
+the broader recovery fallback.
+
+No automatic purge/retention window in this initial release. Same-text,
+different-ZIP EPUBs remain review-only even if normalized spine hashes
+match. Explicitly different volume, work, edition or ISBN always vetoes
+automatic quarantine, regardless of file hash.
+
+**Acceptance tests (before deploy, not a manual operator approval gate):**
+- Actual NextGen/Bookhelper production-container integration with Book-sync
+  stopped, exact-hash quarantine, reason ledger and restored aliases.
+- Two actual SQLite DB connections plus a concurrent writer racing delete.
+- Source+keeper UUID recycle, user annotation/shelf/member references,
+  pending/failed/uncertain API calls, crash between staging/DB commit/cleanup,
+  cross-mount partial copies, symlink/path collision and restart reconciliation.
+- Per-file full-directory SHA-256 validation; no recovered book is called
+  verified unless original EPUB ZIP bytes and metadata match its receipt.
+- Confirm `BOOKHELPER_DUPLICATE_QUARANTINE_DIR` points to a persistent
+  writable mount outside the active Calibre root. Fail closed if absent.
+
+## Current implementation caveat
+
+These requirements are implemented in the PR's new
+`cps/duplicate_quarantine.py` helper, the guarded endpoint and direct
+filesystem tests, but **the current branch still needs a passing complete
+test run and real-image integration before merge/deploy.** Do not mistake
+a fake CWA's success response for a production-grade commit.
