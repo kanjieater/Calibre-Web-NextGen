@@ -95,6 +95,7 @@ def preflight(source, keeper):
     return {
         "book_id": source.id,
         "keeper_id": keeper.id,
+        "source_uuid": getattr(source, "uuid", None),
         "token": snapshot_token(source),
         "allowed": not blockers,
         "blockers": blockers,
