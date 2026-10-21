@@ -84,7 +84,7 @@ def test_json_book_ids_in_magic_shelf_cache_block_delete(monkeypatch):
 
 
 
-def test_max_id_guard_and_cross_media_tag_veto(monkeypatch):
+def test_highest_id_can_be_deleted_with_uuid_identity_and_tag_veto(monkeypatch):
     from cps.api import duplicate_delete as module
     class Query:
         def scalar(self):
@@ -92,7 +92,7 @@ def test_max_id_guard_and_cross_media_tag_veto(monkeypatch):
     monkeypatch.setattr(module.calibre_db.session, "query", lambda *_: Query())
     monkeypatch.setattr(module, "user_book_references", lambda *_: [])
     blocked = module.preflight(_book(20), _book(1))
-    assert "id_reuse_risk_maximum_book_id" in blocked["blockers"]
+    assert blocked["allowed"] is True  # Reused highest ID is handled by stable aliases.
     tagged = module.preflight(_book(19, tags=["pNext"]), _book(1))
     assert "protected_book_sync_tag" in tagged["blockers"]
     clean = module.preflight(_book(19), _book(1))
