@@ -14,8 +14,8 @@ from sqlalchemy.orm import Session
 
 from . import api_v1
 from .edit import _require_book_delete, _editable_book
-from .. import calibre_db, db, ub, logger, helper, config
-from ..editbooks import delete_whole_book, _DeletedBookFileRef
+from .. import calibre_db, db, ub, logger, config, duplicate_quarantine
+from ..editbooks import delete_whole_book
 from ..services.calibre_db_lock import metadata_db_write_lock
 from ..cw_login import current_user
 from ..usermanagement import login_required_if_no_ano
@@ -175,15 +175,21 @@ def _delete_guarded_unreferenced(source_id, keeper_id, expected_token):
     non-user-state original filename provenance. All preflight validation
     happens AGAIN after both SQLite writer reservations have been acquired.
 
+    Before committing the Calibre row, stage the COMPLETE original book
+    directory into CWA-owned persistent quarantine with a verified journal.
     Separate SQLite files cannot be crash-atomically committed in WAL mode:
     commit Calibre first, then delete the orphanable provenance row. A crash
-    can leave that harmless provenance row, but cannot delete user data.
+    can leave harmless provenance and/or original file remnants; the staged
+    verified quarantine is not destroyed or mistaken for an active book.
     """
     with metadata_db_write_lock():
+        if config.config_use_google_drive:
+            raise RuntimeError("guarded quarantine requires a local Calibre library")
         app_engine = ub.session.get_bind()
         with app_engine.connect() as app_connection:
             app_session = Session(bind=app_connection, autoflush=False)
-            deleted_path = None
+            ticket = None
+            calibre_committed = False
             try:
                 _begin_immediate(app_connection, "app.db")
                 calibre_connection = calibre_db.session.connection()
@@ -201,10 +207,16 @@ def _delete_guarded_unreferenced(source_id, keeper_id, expected_token):
                 # delete. app.db's writer reservation remains held throughout.
                 if user_book_references(source_id, app_session):
                     return "stale", ["all_user_book_references"], None
-                deleted_path = str(source.path)
+                # Publish a hash-verified intact quarantine before deleting
+                # metadata. A crash here leaves the Calibre record and original
+                # directory intact, plus a transaction-owned staged copy.
+                ticket = duplicate_quarantine.publish(
+                    config.get_book_path(), str(source.path), source_id,
+                    getattr(source, "uuid"), getattr(keeper, "uuid"))
                 delete_whole_book(source_id, source, guarded_unreferenced=True)
                 # No interior commits are permitted in the guarded path.
                 calibre_db.session.commit()
+                calibre_committed = True
                 # Only provenance, never personal reading, shelf or Kobo state.
                 app_session.query(ub.BookOriginalFilename).filter(
                     ub.BookOriginalFilename.book_id == source_id).delete(
@@ -214,6 +226,14 @@ def _delete_guarded_unreferenced(source_id, keeper_id, expected_token):
             except Exception:
                 calibre_db.session.rollback()
                 app_connection.rollback()
+                if ticket is not None and not calibre_committed:
+                    try:
+                        duplicate_quarantine.cancel(ticket)
+                    except Exception:
+                        log.error("Could not cancel uncommitted guarded quarantine", exc_info=True)
+                # Once Calibre commits, its original file bytes remain in
+                # quarantine. Never cancel the only recovery copy if the
+                # separate app.db provenance commit fails.
                 raise
             finally:
                 app_session.close()
@@ -222,20 +242,17 @@ def _delete_guarded_unreferenced(source_id, keeper_id, expected_token):
                     app_connection.rollback()
                 calibre_db.session.rollback()
 
-    # Files are never touched until metadata.db's commit succeeded.
-    result, error = helper.delete_book(
-        _DeletedBookFileRef(source_id, deleted_path),
-        config.get_book_path(), book_format="")
-    if not result or error:
-        log.warning("Guarded duplicate %s metadata removed, file cleanup pending: %s",
-                    source_id, error)
+    # The DB row is gone. Verify quarantine ownership once again before
+    # clearing the orphaned original. Failure returns an uncertain 503, but
+    # the hash-verified published directory is retained for recovery.
+    confirmation = duplicate_quarantine.finish(ticket)
     try:
         from cps.cwa_db_loader import load_cwa_db
         cwa_db = load_cwa_db().CWA_DB()
         cwa_db.invalidate_duplicate_cache()
     except Exception:
-        log.warning("Could not invalidate duplicate index after deletion", exc_info=True)
-    return "deleted", [], deleted_path
+        log.warning("Could not invalidate duplicate index after quarantine", exc_info=True)
+    return "deleted", [], confirmation["quarantine_id"]
 
 
 @api_v1.route("/books/<int:book_id>/duplicates/delete", methods=["POST"])
@@ -261,7 +278,8 @@ def duplicate_delete(book_id):
         return jsonify({"error": {"code": "stale_or_referenced",
                                   "message": "Identity changed or user state exists"},
                         "blockers": blockers}), 409
-    return "", 204
+    response = jsonify({"quarantine_id": _, "state": "quarantined"})
+    return response, 200
 
 
 def valid_restore_reference(reference):
