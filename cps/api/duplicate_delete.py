@@ -145,6 +145,11 @@ def duplicate_delete(book_id):
     return _delete_api_response(delete_book_from_table(book_id, "", True))
 
 
+def valid_restore_reference(reference):
+    """Validate precisely the provenance filename produced by Bookhelper undo."""
+    return bool(re.fullmatch(r"bookhelper-undo-[0-9a-f]{32}-[0-9]+\.epub", reference))
+
+
 @api_v1.route("/books/duplicates/restore-ref/<reference>", methods=["GET"])
 @login_required_if_no_ano
 def lookup_restored_book(reference):
@@ -157,7 +162,7 @@ def lookup_restored_book(reference):
     guard = _require_book_delete()
     if guard:
         return guard
-    if not re.fullmatch(r"bookhelper-undo-[0-9a-f]{32}-[0-9]+\.epub", reference):
+    if not valid_restore_reference(reference):
         return jsonify({"error": {"code": "invalid_reference", "message": "Invalid restore reference"}}), 400
     rows = ub.session.query(ub.BookOriginalFilename).filter(
         ub.BookOriginalFilename.filename == reference).limit(2).all()
