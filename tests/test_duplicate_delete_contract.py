@@ -73,3 +73,27 @@ def test_max_id_guard_and_cross_media_tag_veto(monkeypatch):
     clean = module.preflight(_book(19), _book(1))
     assert clean["allowed"] is True
     assert clean["source_uuid"] == "book-uuid"
+
+
+def test_real_bookhelper_restore_reference_is_accepted():
+    from cps.api.duplicate_delete import valid_restore_reference
+    from hashlib import sha256
+    receipt_hash = sha256(b"approved-plan:2").hexdigest()[:32]
+    valid = f"bookhelper-undo-{receipt_hash}-2.epub"
+    assert valid_restore_reference(valid)
+    assert not valid_restore_reference(valid.replace(".epub", "Xepub"))
+    assert not valid_restore_reference(valid.replace(".epub", ".zip"))
+    assert not valid_restore_reference("../" + valid)
+    assert not valid_restore_reference(valid + ".bak")
+
+
+def test_metadata_remove_tags_is_exact_and_preserves_unrelated_values():
+    from cps.api.edit import _remove_tags
+    stored = _book(tags=("hasAudiobook", "User note", "pNext", "Other"))
+    assert _remove_tags(stored, "hasAudiobook") == "User note, pNext, Other"
+    assert _remove_tags(stored, "HASaudiobook, Other") == "User note, pNext"
+    assert _remove_tags(stored, "not-installed-tag") is None
+    assert _remove_tags(stored, "") is None
+    assert [tag.name for tag in stored.tags] == [
+        "hasAudiobook", "User note", "pNext", "Other"
+    ]
