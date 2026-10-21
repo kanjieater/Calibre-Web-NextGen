@@ -293,10 +293,12 @@ def test_deletion_rechecks_user_references_after_approved_preflight(monkeypatch)
     monkeypatch.setattr(module, "_require_book_delete", lambda: None)
     monkeypatch.setattr(module, "resolve_candidates", lambda *_: (original, keeper))
 
-    def unexpected_delete(*_args, **_kwargs):
-        raise AssertionError("must not delete after a user reference appears")
+    def stale_storage_result(*_args, **_kwargs):
+        # The actual SQLite race is covered below. The route must convey
+        # storage-level stale state without claiming success.
+        return "stale", ["all_user_book_references"], None
 
-    monkeypatch.setattr(module, "delete_book_from_table", unexpected_delete)
+    monkeypatch.setattr(module, "_delete_guarded_unreferenced", stale_storage_result)
     app = Flask("guarded-delete-current-references")
     with app.test_request_context("/api/v1/books/5/duplicates/delete",
                                   method="POST",
@@ -423,8 +425,15 @@ def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch)
     monkeypatch.setattr(module.ub, "MagicShelfCache", MagicShelfCache)
     monkeypatch.setattr(module.calibre_db, "session", metadata)
     monkeypatch.setattr(module, "metadata_db_write_lock", lambda: nullcontext())
-    monkeypatch.setattr(module.config, "get_book_path", lambda: str(tmp_path))
-    monkeypatch.setattr(module.helper, "delete_book", lambda *_args, **_kw: (True, None))
+    calibre_root = tmp_path / "calibre"
+    book_dir = calibre_root / "author" / "5"
+    book_dir.mkdir(parents=True)
+    (book_dir / "original.epub").write_bytes(b"original-for-two-db-test")
+    (book_dir / "cover.jpg").write_bytes(b"saved-original-cover")
+    qroot = tmp_path / "maintenance" / "potentialDupes"
+    monkeypatch.setenv("BOOKHELPER_DUPLICATE_QUARANTINE_DIR", str(qroot))
+    monkeypatch.setattr(module.config, "get_book_path", lambda: str(calibre_root))
+    monkeypatch.setattr(module.config, "config_use_google_drive", False)
 
     def resolve(source_id, keeper_id):
         def one(bid):
@@ -481,8 +490,13 @@ def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch)
         return original_preflight(*args, **kwargs)
     monkeypatch.setattr(module, "preflight", wrapped_preflight)
 
-    result, blockers, _path = module._delete_guarded_unreferenced(5, 1, token)
+    result, blockers, quarantine_id = module._delete_guarded_unreferenced(5, 1, token)
     assert (result, blockers) == ("deleted", [])
+    assert len(quarantine_id) == 32
+    owned = qroot / f"5-{quarantine_id}"
+    assert (owned / "original.epub").read_bytes() == b"original-for-two-db-test"
+    assert (owned / "cover.jpg").read_bytes() == b"saved-original-cover"
+    assert not book_dir.exists()
     assert deleted == [5]
     assert blocked_writer == [True]
     assert metadata.execute(text("SELECT id FROM books WHERE id=5")).first() is None
@@ -517,12 +531,16 @@ def test_clean_guarded_delete_route_delegates_to_serialized_storage(monkeypatch)
     captured = []
     def guarded(source, keeper, token):
         captured.append((source, keeper, token))
-        return "deleted", [], "author/book"
+        return "deleted", [], "a" * 32
     monkeypatch.setattr(module, "_delete_guarded_unreferenced", guarded)
     app = Flask("guarded-delete-contract")
     with app.test_request_context(
             "/api/v1/books/5/duplicates/delete", method="POST",
             json={"keeper_id": 1, "token": "f" * 64}):
-        reply = module.duplicate_delete.__wrapped__(5)
-        assert reply == ("", 204)
+        reply, code = module.duplicate_delete.__wrapped__(5)
+        assert code == 200
+        assert reply.get_json() == {
+            "deleted": True, "state": "quarantined",
+            "quarantine_id": "a" * 32,
+        }
     assert captured == [(5, 1, "f" * 64)]
