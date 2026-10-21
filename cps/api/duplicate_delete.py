@@ -13,11 +13,10 @@ from flask import jsonify, request
 from sqlalchemy import func
 
 from . import api_v1
-from .edit import _require_book_delete, _editable_book, _delete_api_response
+from .edit import _require_book_delete, _editable_book
 from .. import calibre_db, db, ub, logger
 from ..cw_login import current_user
 from ..usermanagement import login_required_if_no_ano
-from ..editbooks import delete_book_from_table
 
 log = logger.create()
 PROTECTED_TAGS = frozenset({
