@@ -72,3 +72,4 @@ def test_max_id_guard_and_cross_media_tag_veto(monkeypatch):
     assert "protected_book_sync_tag" in tagged["blockers"]
     clean = module.preflight(_book(19), _book(1))
     assert clean["allowed"] is True
+    assert clean["source_uuid"] == "book-uuid"
