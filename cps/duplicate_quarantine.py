@@ -229,3 +229,49 @@ def cancel(ticket):
         _sync_dir(destination.parent)
     item["state"] = "aborted"
     _atomic_json(journal, item)
+
+
+
+def reconcile(calibre_root, book_lookup, max_transactions=32):
+    """Finish orphan cleanup after a crash following a successful Calibre commit.
+
+    Caller holds CWA's metadata writer exclusion while book_lookup inspects
+    the real metadata.db. Never remove a directory still owned by a live book,
+    and never infer absence from an unavailable DB lookup.
+    """
+    qroot = _quarantine_root(calibre_root)
+    journals = qroot / ".transactions"
+    if not journals.exists():
+        return {"finished": [], "pending": [], "blocked": []}
+    result = {"finished": [], "pending": [], "blocked": []}
+    count = 0
+    for path in sorted(journals.glob("*.json")):
+        if count >= max_transactions:
+            break
+        entry = json.loads(path.read_text(encoding="utf-8"))
+        if entry.get("state") in ("complete", "aborted"):
+            continue
+        count += 1
+        key = entry.get("key")
+        if (not isinstance(key, str)
+                or not re.fullmatch(r"[0-9a-f]{32}", key)
+                or not isinstance(entry.get("book_id"), int)):
+            result["blocked"].append({"journal": path.name, "reason": "invalid_journal"})
+            continue
+        existing = book_lookup(entry["book_id"])
+        if existing is not None:
+            # A new unrelated work may reuse the numeric ID. In either case
+            # an occupied ID is not grounds to remove arbitrary live files.
+            result["pending"].append({
+                "key": key, "reason": "book_id_currently_occupied"})
+            continue
+        destination = qroot / f"{entry['book_id']}-{key}"
+        original = Path(calibre_root).resolve() / entry["book_path"]
+        ticket = {"key": key, "journal": str(path),
+                  "destination": str(destination), "original": str(original)}
+        try:
+            finish(ticket)
+            result["finished"].append(key)
+        except (QuarantineError, OSError, ValueError) as exc:
+            result["blocked"].append({"key": key, "reason": str(exc)})
+    return result
