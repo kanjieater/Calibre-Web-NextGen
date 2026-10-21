@@ -282,6 +282,36 @@ def duplicate_delete(book_id):
                     "state": "quarantined"}), 200
 
 
+@api_v1.route("/books/duplicates/quarantine/reconcile", methods=["POST"])
+@login_required_if_no_ano
+def reconcile_duplicate_quarantine():
+    """Bounded restart recovery; no Bookhelper filesystem/database access."""
+    guard = _require_book_delete()
+    if guard:
+        return guard
+    if config.config_use_google_drive:
+        return jsonify({"error": {"code": "unsupported_backend",
+                                  "message": "Local quarantine requires local Calibre storage"}}), 409
+    try:
+        with metadata_db_write_lock():
+            calibre_connection = calibre_db.session.connection()
+            _begin_immediate(calibre_connection, "metadata.db")
+            try:
+                result = duplicate_quarantine.reconcile(
+                    config.get_book_path(),
+                    lambda book_id: calibre_db.session.query(db.Books).filter(
+                        db.Books.id == book_id).first(),
+                    max_transactions=32,
+                )
+            finally:
+                calibre_db.session.rollback()
+    except Exception:
+        log.error("Duplicate quarantine reconciliation failed", exc_info=True)
+        return jsonify({"error": {"code": "reconcile_unavailable",
+                                  "message": "Cannot verify quarantine journal"}}), 503
+    return jsonify(result), 200
+
+
 def valid_restore_reference(reference):
     """Validate precisely the provenance filename produced by Bookhelper undo."""
     return bool(re.fullmatch(r"bookhelper-undo-[0-9a-f]{32}-[0-9]+\.epub", reference))
