@@ -109,6 +109,14 @@ def _paths(qroot, name):
             qroot / ".transactions" / (name + ".json"))
 
 
+def transaction_id_for(source_id, source_uuid, keeper_uuid, book_path):
+    """Stable operation ID, available before the HTTP delete is attempted."""
+    if not source_uuid or not keeper_uuid or not book_path:
+        raise QuarantineError("complete source/keeper identity required")
+    identity = f"{source_id}|{source_uuid}|{keeper_uuid}|{book_path}"
+    return hashlib.sha256(identity.encode("utf-8")).hexdigest()[:32]
+
+
 def publish(calibre_root, book_path, source_id, source_uuid, keeper_uuid):
     """Publish verified original bytes *before* metadata.db deletes the row.
 
@@ -119,8 +127,7 @@ def publish(calibre_root, book_path, source_id, source_uuid, keeper_uuid):
     qroot = _quarantine_root(root)
     if not source_uuid or not keeper_uuid:
         raise QuarantineError("stable source and keeper UUIDs required")
-    identity = f"{source_id}|{source_uuid}|{keeper_uuid}|{book_path}"
-    key = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:32]
+    key = transaction_id_for(source_id, source_uuid, keeper_uuid, book_path)
     name = f"{source_id}-{key}"
     final, stage, journal_path = _paths(qroot, name)
     if (origin / MARKER).exists():
