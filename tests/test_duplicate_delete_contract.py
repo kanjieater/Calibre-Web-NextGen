@@ -197,3 +197,35 @@ def test_real_restore_ref_handler_accepts_matching_marker(monkeypatch):
         response, code = module.lookup_restored_book.__wrapped__("bad-name")
         assert code == 400
         assert response.get_json()["error"]["code"] == "invalid_reference"
+
+def test_deletion_rechecks_user_references_after_approved_preflight(monkeypatch):
+    """A clean old token is not permission to delete after a new user link."""
+    from flask import Flask
+    from cps.api import duplicate_delete as module
+
+    class MaxIdQuery:
+        def scalar(self):
+            return 500
+
+    monkeypatch.setattr(module.calibre_db.session, "query", lambda *_: MaxIdQuery())
+    live = {"references": []}
+    monkeypatch.setattr(module, "user_book_references",
+                        lambda *_: list(live["references"]))
+    original, keeper = _book(5), _book(1)
+    initial = module.preflight(original, keeper)
+    assert initial["allowed"]
+    live["references"] = ["Bookmark"]
+    monkeypatch.setattr(module, "_require_book_delete", lambda: None)
+    monkeypatch.setattr(module, "resolve_candidates", lambda *_: (original, keeper))
+
+    def unexpected_delete(*_args, **_kwargs):
+        raise AssertionError("must not delete after a user reference appears")
+
+    monkeypatch.setattr(module, "delete_book_from_table", unexpected_delete)
+    app = Flask("guarded-delete-current-references")
+    with app.test_request_context("/api/v1/books/5/duplicates/delete",
+                                  method="POST",
+                                  json={"keeper_id": 1, "token": initial["token"]}):
+        reply, code = module.duplicate_delete.__wrapped__(5)
+        assert code == 409
+        assert "all_user_book_references" in reply.get_json()["blockers"]
