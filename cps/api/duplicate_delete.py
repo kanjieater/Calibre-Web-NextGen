@@ -11,10 +11,13 @@ import re
 
 from flask import jsonify, request
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from . import api_v1
 from .edit import _require_book_delete, _editable_book
-from .. import calibre_db, db, ub, logger
+from .. import calibre_db, db, ub, logger, helper, config
+from ..editbooks import delete_whole_book, _DeletedBookFileRef
+from ..services.calibre_db_lock import metadata_db_write_lock
 from ..cw_login import current_user
 from ..usermanagement import login_required_if_no_ano
 
@@ -45,12 +48,13 @@ def snapshot_token(book):
                                       default=str).encode("utf-8")).hexdigest()
 
 
-def user_book_references(book_id):
+def user_book_references(book_id, session=None):
     """Conservative all-accounts check over every mapped app.db book_id.
 
     This dynamically picks up new book-scoped models. A missing/unqueryable
     model is not evidence that a book has no state: fail closed on errors.
     """
+    session = session if session is not None else ub.session
     found = []
     for mapper in sorted(ub.Base.registry.mappers, key=lambda m: m.class_.__name__):
         if "book_id" not in mapper.columns:
@@ -60,13 +64,13 @@ def user_book_references(book_id):
         # reading/ownership state. Bookhelper archives this before deletion.
         if model.__name__ == "BookOriginalFilename":
             continue
-        if ub.session.query(model).filter(
+        if session.query(model).filter(
                 getattr(model, "book_id") == book_id).limit(1).first() is not None:
             found.append(model.__name__)
     # MagicShelfCache.book_ids stores numeric Calibre IDs in JSON, not in a
     # mapped book_id column. A stale cached reference cannot be ignored by an
     # all-user reference-free deletion assertion. Cap this scan and fail closed.
-    cache_rows = ub.session.query(ub.MagicShelfCache.book_ids).limit(10001).all()
+    cache_rows = session.query(ub.MagicShelfCache.book_ids).limit(10001).all()
     if len(cache_rows) > 10000:
         raise ValueError("magic-shelf cache reference inventory exceeds safety bound")
     for (ids,) in cache_rows:
@@ -89,7 +93,7 @@ def resolve_candidates(source_id, keeper_id):
     return source, keeper
 
 
-def preflight(source, keeper):
+def preflight(source, keeper, reference_session=None):
     blockers = []
     # The Calibre SQLite book id is not guaranteed AUTOINCREMENT. Deleting
     # the maximum live id permits a later ingest to reuse that numeric ID,
@@ -109,7 +113,9 @@ def preflight(source, keeper):
         blockers.append("source_stable_uuid_missing")
     if not isinstance(keeper_uuid, str) or not keeper_uuid.strip():
         blockers.append("keeper_stable_uuid_missing")
-    refs = user_book_references(source.id)
+    refs = (user_book_references(source.id, reference_session)
+            if reference_session is not None
+            else user_book_references(source.id))
     if refs:
         blockers.append("all_user_book_references")
     # Bind the proof to BOTH rows. A recycled or edited keeper cannot inherit
@@ -146,6 +152,95 @@ def duplicate_delete_preflight(book_id):
         return jsonify({"error": {"code": "preflight_unavailable", "message": "Reference check failed"}}), 503
 
 
+def _begin_immediate(connection, database):
+    """Reserve SQLite's real writer slot, not a thread-local application mutex.
+
+    The app.db writer slot blocks all connections/processes inserting any
+    user-book reference while the metadata row is deleted. The Calibre slot
+    freezes both numeric ID and UUID through commit, including ingest workers.
+    An existing transaction cannot be promoted safely after a stale read.
+    """
+    if connection.dialect.name != "sqlite":
+        raise RuntimeError(f"{database}: guarded delete needs SQLite transactions")
+    driver = connection.connection.driver_connection
+    if driver.in_transaction:
+        raise RuntimeError(f"{database}: existing transaction prevents guarded delete")
+    connection.exec_driver_sql("BEGIN IMMEDIATE")
+
+
+def _delete_guarded_unreferenced(source_id, keeper_id, expected_token):
+    """DB-first, files-last removal with app.db+Calibre SQLite writer exclusion.
+
+    The generic delete core purges all-user data and commits app.db mid-flight.
+    This dedicated path instead holds app.db BEGIN IMMEDIATE while checking
+    references AND deleting in Calibre, and never purges any protected data.
+    There are no user references to migrate. The only app.db row removed is
+    non-user-state original filename provenance. All preflight validation
+    happens AGAIN after both SQLite writer reservations have been acquired.
+
+    Separate SQLite files cannot be crash-atomically committed in WAL mode:
+    commit Calibre first, then delete the orphanable provenance row. A crash
+    can leave that harmless provenance row, but cannot delete user data.
+    """
+    with metadata_db_write_lock():
+        app_engine = ub.session.get_bind()
+        with app_engine.connect() as app_connection:
+            app_session = Session(bind=app_connection, autoflush=False)
+            deleted_path = None
+            try:
+                _begin_immediate(app_connection, "app.db")
+                calibre_connection = calibre_db.session.connection()
+                _begin_immediate(calibre_connection, "metadata.db")
+                # Re-fetch the full identity under BOTH writer reservations.
+                calibre_db.session.expire_all()
+                source, keeper = resolve_candidates(source_id, keeper_id)
+                if source is None or keeper is None:
+                    return "stale", ["source_or_keeper_unavailable"], None
+                latest = preflight(source, keeper, reference_session=app_session)
+                if not latest["allowed"] or latest["token"] != expected_token:
+                    return "stale", latest["blockers"], None
+
+                # Defensive second check before issuing the supported Calibre
+                # delete. app.db's writer reservation remains held throughout.
+                if user_book_references(source_id, app_session):
+                    return "stale", ["all_user_book_references"], None
+                deleted_path = str(source.path)
+                delete_whole_book(source_id, source, guarded_unreferenced=True)
+                # No interior commits are permitted in the guarded path.
+                calibre_db.session.commit()
+                # Only provenance, never personal reading, shelf or Kobo state.
+                app_session.query(ub.BookOriginalFilename).filter(
+                    ub.BookOriginalFilename.book_id == source_id).delete(
+                    synchronize_session=False)
+                app_session.flush()
+                app_connection.commit()
+            except Exception:
+                calibre_db.session.rollback()
+                app_connection.rollback()
+                raise
+            finally:
+                app_session.close()
+                # Even a rejected preflight must release reserved writer slots.
+                if app_connection.in_transaction():
+                    app_connection.rollback()
+                calibre_db.session.rollback()
+
+    # Files are never touched until metadata.db's commit succeeded.
+    result, error = helper.delete_book(
+        _DeletedBookFileRef(source_id, deleted_path),
+        config.get_book_path(), book_format="")
+    if not result or error:
+        log.warning("Guarded duplicate %s metadata removed, file cleanup pending: %s",
+                    source_id, error)
+    try:
+        from cps.cwa_db_loader import load_cwa_db
+        cwa_db = load_cwa_db().CWA_DB()
+        cwa_db.invalidate_duplicate_cache()
+    except Exception:
+        log.warning("Could not invalidate duplicate index after deletion", exc_info=True)
+    return "deleted", [], deleted_path
+
+
 @api_v1.route("/books/<int:book_id>/duplicates/delete", methods=["POST"])
 @login_required_if_no_ano
 def duplicate_delete(book_id):
@@ -153,29 +248,23 @@ def duplicate_delete(book_id):
     if guard:
         return guard
     body = request.get_json(silent=True) or {}
-    if not isinstance(body.get("token"), str) or len(body["token"]) != 64:
-        return jsonify({"error": {"code": "invalid_request", "message": "Preflight token required"}}), 400
-    source, keeper = resolve_candidates(book_id, body.get("keeper_id"))
-    if not source or not keeper:
-        return jsonify({"error": {"code": "not_found", "message": "Source or keeper unavailable"}}), 404
+    token = body.get("token")
+    keeper_id = body.get("keeper_id")
+    if (not isinstance(token, str) or not re.fullmatch(r"[0-9a-f]{64}", token)
+            or type(keeper_id) is not int or keeper_id < 1 or keeper_id == book_id):
+        return jsonify({"error": {"code": "invalid_request",
+                                  "message": "Preflight token and keeper ID required"}}), 400
     try:
-        current = preflight(source, keeper)
+        result, blockers, _ = _delete_guarded_unreferenced(book_id, keeper_id, token)
     except Exception:
-        log.error("Duplicate deletion reference validation unavailable", exc_info=True)
-        return jsonify({"error": {"code": "preflight_unavailable", "message": "Reference check failed"}}), 503
-    if not current["allowed"] or current["token"] != body["token"]:
-        return jsonify({"error": {"code": "stale_or_referenced", "message": "State changed or book has protected references"},
-                        "blockers": current["blockers"]}), 409
-    # The general-purpose delete commits app.db before removing the Calibre row.
-    # Merely checking references above is a TOCTOU check: a concurrent app.db
-    # writer can create a protected row between the snapshot and those commits.
-    # Until there is storage-level exclusion that spans both databases and the
-    # actual deletion core, this dedicated destructive API MUST NOT delete.
-    # A second process mutex here would not protect other CWA workers.
-    return jsonify({"error": {
-        "code": "atomic_guarded_delete_unavailable",
-        "message": "All-user reference exclusion is not transactional; deletion disabled",
-    }}), 503
+        log.error("Guarded duplicate deletion failed (no success implied)", exc_info=True)
+        return jsonify({"error": {"code": "guarded_delete_failed",
+                                  "message": "Cannot confirm guarded deletion outcome"}}), 503
+    if result == "stale":
+        return jsonify({"error": {"code": "stale_or_referenced",
+                                  "message": "Identity changed or user state exists"},
+                        "blockers": blockers}), 409
+    return "", 204
 
 
 def valid_restore_reference(reference):
