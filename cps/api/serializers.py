@@ -353,6 +353,9 @@ def serialize_book_detail(book, read=False, archived=False, favorited=False, hid
 
     return {
         "id": bid,
+        # Stable identity for clients holding legacy numeric IDs. A deleted
+        # Calibre row ID may later be reused for an unrelated work.
+        "uuid": getattr(book, "uuid", None),
         "title": book.title,
         # Un-escape the Calibre '|' comma in author names (#730), same as the
         # list serializer above and every classic display path.
