@@ -128,17 +128,28 @@ def test_conflicting_snapshot_refuses_resuming_old_journal(library):
 def test_reconcile_after_db_commit_crash_removes_only_orphan(library):
     _, original, _ = library
     ticket = _published(library)
-    result = q.reconcile(library[0], lambda _book_id: None)
+    result = q.reconcile(library[0], lambda _book_id, _book_path: None)
     assert result["finished"] == [ticket["key"]], result
     assert not original.exists()
     assert Path(ticket["destination"]).joinpath("cover.jpg").is_file()
-    assert q.reconcile(library[0], lambda _book_id: None)["finished"] == []
+    assert q.reconcile(library[0], lambda _book_id, _book_path: None)["finished"] == []
+
+
+def test_resume_after_partial_original_cleanup(library):
+    _, original, _ = library
+    receipt = _published(library)
+    (original / "novel.epub").unlink()
+    (original / "cover.jpg").unlink()
+    # Simulate crash after two original files were removed but before last one.
+    q.finish(receipt)
+    assert not original.exists()
+    assert Path(receipt["destination"], "metadata.opf").is_file()
 
 
 def test_reconcile_when_book_still_active_does_not_remove_source(library):
     _, original, _ = library
     ticket = _published(library)
-    result = q.reconcile(library[0], lambda _book_id: object())
+    result = q.reconcile(library[0], lambda _book_id, _book_path: object())
     assert result["finished"] == []
     assert result["pending"] == [
         {"key": ticket["key"], "reason": "book_id_currently_occupied"}]
