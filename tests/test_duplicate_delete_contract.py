@@ -97,3 +97,78 @@ def test_metadata_remove_tags_is_exact_and_preserves_unrelated_values():
     assert [tag.name for tag in stored.tags] == [
         "hasAudiobook", "User note", "pNext", "Other"
     ]
+
+
+
+def test_real_metadata_route_removes_only_selected_tags(monkeypatch):
+    """Exercise the actual handler logic, not a fake permissive CWA server."""
+    from flask import Flask
+    from cps.api import edit as module
+    item = _book(book_id=42, tags=("hasAudiobook", "pNext", "Manual"))
+    calls = []
+
+    def edit_field(field, values):
+        calls.append((field, values["value"]))
+        item.tags = [SimpleNamespace(name=name) for name in values["value"].split(", ")]
+        return ""
+
+    monkeypatch.setattr(module, "_require_edit", lambda: None)
+    monkeypatch.setattr(module, "_editable_book", lambda book_id: item if book_id == 42 else None)
+    monkeypatch.setattr(module, "edit_book_param", edit_field)
+    monkeypatch.setattr(module, "_editable_metadata", lambda book: {
+        "tags": ", ".join(tag.name for tag in book.tags)
+    })
+    app = Flask("bookhelper-contract-test")
+    with app.test_request_context("/api/v1/books/42/metadata",
+                                  method="POST",
+                                  json={"list_mode": "remove", "tags": "hasAudiobook"}):
+        response = module.update_metadata.__wrapped__(42)
+        assert response.status_code == 200
+        assert response.get_json()["tags"] == "pNext, Manual"
+    assert calls == [("tags", "pNext, Manual")]
+
+    with app.test_request_context("/api/v1/books/42/metadata",
+                                  method="POST",
+                                  json={"list_mode": "remove", "tags": "not-installed"}):
+        response = module.update_metadata.__wrapped__(42)
+        assert response.status_code == 200
+        assert calls == [("tags", "pNext, Manual")]  # no extra mutation
+
+    with app.test_request_context("/api/v1/books/42/metadata",
+                                  method="POST",
+                                  json={"list_mode": "remove", "authors": "bad"}):
+        response, code = module.update_metadata.__wrapped__(42)
+        assert code == 400
+        assert response.get_json()["error"]["code"] == "invalid_request"
+
+
+def test_real_restore_ref_handler_accepts_matching_marker(monkeypatch):
+    from flask import Flask
+    from cps.api import duplicate_delete as module
+    from hashlib import sha256
+    marker = f"bookhelper-undo-{sha256(b'plan:4').hexdigest()[:32]}-4.epub"
+
+    class NoImportRows:
+        def filter(self, *_):
+            return self
+        def limit(self, *_):
+            return self
+        def all(self):
+            return []
+
+    class ImportSession:
+        def query(self, *_):
+            return NoImportRows()
+
+    monkeypatch.setattr(module, "_require_book_delete", lambda: None)
+    monkeypatch.setattr(module.ub, "session", ImportSession())
+    app = Flask("bookhelper-restore-ref-test")
+    with app.test_request_context("/api/v1/books/duplicates/restore-ref/" + marker):
+        response, code = module.lookup_restored_book.__wrapped__(marker)
+        assert code == 200
+        assert response.get_json() == {"book_id": None}
+
+    with app.test_request_context("/api/v1/books/duplicates/restore-ref/bad-name"):
+        response, code = module.lookup_restored_book.__wrapped__("bad-name")
+        assert code == 400
+        assert response.get_json()["error"]["code"] == "invalid_reference"
