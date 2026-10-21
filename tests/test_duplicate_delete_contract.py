@@ -52,7 +52,7 @@ def test_all_users_are_scanned_and_original_filename_is_not_user_state(monkeypat
             return object() if self.cls in (Bookmark, UserLibraryBook) else None
     class Session:
         def query(self, cls):
-            if cls == module.ub.MagicShelfCache.book_ids:
+            if cls is module.ub.MagicShelfCache.book_ids:
                 return SimpleNamespace(limit=lambda _: SimpleNamespace(all=lambda: []))
             return Query(cls)
     monkeypatch.setattr(module.ub, "Base", SimpleNamespace(
@@ -70,7 +70,7 @@ def test_json_book_ids_in_magic_shelf_cache_block_delete(monkeypatch):
         def __init__(self, data):
             self.data = data
         def query(self, column):
-            assert column == module.ub.MagicShelfCache.book_ids
+            assert column is module.ub.MagicShelfCache.book_ids
             return SimpleNamespace(limit=lambda _: SimpleNamespace(
                 all=lambda: [(ids,) for ids in self.data]))
 
