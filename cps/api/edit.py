@@ -150,6 +150,26 @@ def _add_list_values(book, field, raw):
     return joiner.join(existing + additions)
 
 
+def _remove_tags(book, raw):
+    """Remove only named tags, preserving all unrelated manually set tags.
+
+    This is the inverse of list_mode=add for Bookhelper's managed-tag and
+    duplicate-undo paths. Use a fresh per-request book read, then the existing
+    canonical edit_book_param writer rather than a separate DB mutation path.
+    Empty/no-match requests do not touch timestamps.
+    """
+    existing = _book_list_values(book, "tags")
+    removals = {part.strip().casefold()
+                for part in ("" if raw is None else str(raw)).split(",")
+                if part.strip()}
+    if not removals:
+        return None
+    keep = [tag for tag in existing if tag.strip().casefold() not in removals]
+    if len(keep) == len(existing):
+        return None
+    return ", ".join(keep)
+
+
 def _delete_api_response(result):
     """Translate the legacy delete core's message list into an API contract."""
     try:
@@ -450,15 +470,25 @@ def update_metadata(book_id):
 
     data = request.get_json(silent=True) or {}
     list_mode = data.get("list_mode", "replace")
-    if list_mode not in ("add", "replace"):
-        return _err("invalid_request", "list_mode must be 'add' or 'replace'", 400)
+    if list_mode not in ("add", "replace", "remove"):
+        return _err("invalid_request", "list_mode must be 'add', 'replace' or 'remove'", 400)
+    # Remove is deliberately tags-only. Refusing unrelated fields prevents a
+    # malformed removal payload from replacing an entire author/publisher list.
+    if list_mode == "remove" and (set(data) - {"tags", "list_mode"}):
+        return _err("invalid_request", "list_mode 'remove' supports only tags", 400)
 
     errors = {}
     for field in EDITABLE_FIELDS:
         if field not in data:
             continue
         raw = data[field]
-        if list_mode == "add" and field in LIST_FIELD_SEPARATORS:
+        if list_mode == "remove":
+            if field != "tags":
+                return _err("invalid_request", "list_mode 'remove' supports only tags", 400)
+            value = _remove_tags(book, raw)
+            if value is None:
+                continue  # A no-op removal must not touch other metadata.
+        elif list_mode == "add" and field in LIST_FIELD_SEPARATORS:
             value = _add_list_values(book, field, raw)
             if value is None:
                 continue  # A no-op add must not touch modified time or metadata.
