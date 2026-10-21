@@ -52,11 +52,36 @@ def test_all_users_are_scanned_and_original_filename_is_not_user_state(monkeypat
             return object() if self.cls in (Bookmark, UserLibraryBook) else None
     class Session:
         def query(self, cls):
+            if cls == module.ub.MagicShelfCache.book_ids:
+                return SimpleNamespace(limit=lambda _: SimpleNamespace(all=lambda: []))
             return Query(cls)
     monkeypatch.setattr(module.ub, "Base", SimpleNamespace(
         registry=SimpleNamespace(mappers=fake_mappers)))
     monkeypatch.setattr(module.ub, "session", Session())
     assert module.user_book_references(12) == ["Bookmark", "UserLibraryBook"]
+
+
+def test_json_book_ids_in_magic_shelf_cache_block_delete(monkeypatch):
+    from cps.api import duplicate_delete as module
+    monkeypatch.setattr(module.ub, "Base", SimpleNamespace(
+        registry=SimpleNamespace(mappers=[])))
+
+    class CacheSession:
+        def __init__(self, data):
+            self.data = data
+        def query(self, column):
+            assert column == module.ub.MagicShelfCache.book_ids
+            return SimpleNamespace(limit=lambda _: SimpleNamespace(
+                all=lambda: [(ids,) for ids in self.data]))
+
+    monkeypatch.setattr(module.ub, "session", CacheSession([[7, 12], [18]]))
+    assert module.user_book_references(12) == ["MagicShelfCache"]
+    assert module.user_book_references(11) == []
+    # Corrupted/incomplete JSON cannot certify that all references are absent.
+    monkeypatch.setattr(module.ub, "session", CacheSession([{"unexpected": 12}]))
+    with pytest.raises(ValueError, match="malformed magic-shelf"):
+        module.user_book_references(12)
+
 
 
 def test_max_id_guard_and_cross_media_tag_veto(monkeypatch):
