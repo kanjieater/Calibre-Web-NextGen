@@ -56,7 +56,7 @@ def _sha(path):
     return h.hexdigest()
 
 
-def _tree_inventory(directory):
+def _tree_inventory(directory, allow_empty=False):
     if not directory.is_dir() or directory.is_symlink():
         raise QuarantineError("source/quarantine is not a real directory")
     result = {}
@@ -73,7 +73,7 @@ def _tree_inventory(directory):
             if rel == MARKER:
                 continue
             result[rel] = {"sha256": _sha(path), "size": path.stat().st_size}
-    if not result:
+    if not result and not allow_empty:
         raise QuarantineError("cannot quarantine an empty book directory")
     return result
 
@@ -201,7 +201,12 @@ def finish(ticket):
     item["state"] = "db_committed"
     _atomic_json(journal, item)
     if origin.exists():
-        if _tree_inventory(origin) != item["inventory"]:
+        # A process can die *during* orphan cleanup. Missing entries are
+        # expected then; any new/changed remaining file is not. Never erase
+        # an unrelated new file merely because its path resembles an orphan.
+        remaining = _tree_inventory(origin, allow_empty=True)
+        if any(item["inventory"].get(rel) != fingerprint
+               for rel, fingerprint in remaining.items()):
             raise QuarantineError("orphaned original changed; preserved for manual recovery")
         shutil.rmtree(origin)
         _sync_dir(origin.parent)
@@ -258,10 +263,10 @@ def reconcile(calibre_root, book_lookup, max_transactions=32):
                 or not isinstance(entry.get("book_id"), int)):
             result["blocked"].append({"journal": path.name, "reason": "invalid_journal"})
             continue
-        existing = book_lookup(entry["book_id"])
+        existing = book_lookup(entry["book_id"], entry["book_path"])
         if existing is not None:
-            # A new unrelated work may reuse the numeric ID. In either case
-            # an occupied ID is not grounds to remove arbitrary live files.
+            # A new unrelated work may reuse either numeric ID or original
+            # directory path. Neither case authorizes removing live files.
             result["pending"].append({
                 "key": key, "reason": "book_id_currently_occupied"})
             continue
