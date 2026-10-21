@@ -149,6 +149,7 @@ def test_real_metadata_route_removes_only_selected_tags(monkeypatch):
             edit_field("tags", {"value": remaining})
         return True, ""
     monkeypatch.setattr(module, "_mutate_tags_serialized", serialized)
+    monkeypatch.setattr(module.calibre_db, "session", SimpleNamespace(expire_all=lambda: None))
     monkeypatch.setattr(module, "_editable_metadata", lambda book: {
         "tags": ", ".join(tag.name for tag in book.tags)
     })
