@@ -1667,7 +1667,7 @@ def delete_whole_book(book_id, book, *, guarded_unreferenced=False):
                         log.debug('remove ' + str(c.id))
                         calibre_db.session.delete(del_cc)
                         if not guarded_unreferenced:
-                        calibre_db.session.commit()
+                            calibre_db.session.commit()
                 else:
                     del_cc = getattr(book, cc_string)[0]
                     getattr(book, cc_string).remove(del_cc)
