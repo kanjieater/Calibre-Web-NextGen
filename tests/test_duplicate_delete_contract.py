@@ -140,6 +140,15 @@ def test_real_metadata_route_removes_only_selected_tags(monkeypatch):
     monkeypatch.setattr(module, "_require_edit", lambda: None)
     monkeypatch.setattr(module, "_editable_book", lambda book_id: item if book_id == 42 else None)
     monkeypatch.setattr(module, "edit_book_param", edit_field)
+    # The handler dispatches add/remove through the serialized helper.
+    # Its transaction/race behavior is exercised independently below.
+    def serialized(book_id, raw, mode):
+        assert book_id == 42 and mode == "remove"
+        remaining = module._remove_tags(item, raw)
+        if remaining is not None:
+            edit_field("tags", {"value": remaining})
+        return True, ""
+    monkeypatch.setattr(module, "_mutate_tags_serialized", serialized)
     monkeypatch.setattr(module, "_editable_metadata", lambda book: {
         "tags": ", ".join(tag.name for tag in book.tags)
     })
@@ -260,32 +269,156 @@ def test_guarded_proof_tracks_both_stable_identities(monkeypatch):
     assert "source_stable_uuid_missing" in module.preflight(source, keeper)["blockers"]
 
 
-def test_clean_snapshot_is_not_permission_for_unserialized_delete(monkeypatch):
-    """The real deletion core is unsafe until app.db writer exclusion exists."""
+def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch):
+    """Exercise two SQLite files and a competing app.db writer connection.
+
+    The competing connection cannot add a protected reference after guarded
+    deletion reserves app.db. A reference committed before reservation instead
+    prevents removal. This does NOT mock away the storage lock.
+    """
+    import sqlite3
+    from contextlib import nullcontext
+    from sqlalchemy import create_engine, Column, Integer, JSON, String, text
+    from sqlalchemy.orm import declarative_base, Session
+    from cps.api import duplicate_delete as module
+
+    Base = declarative_base()
+
+    class BookOriginalFilename(Base):
+        __tablename__ = "book_original_filename"
+        id = Column(Integer, primary_key=True)
+        book_id = Column(Integer)
+        filename = Column(String)
+
+    class Bookmark(Base):
+        __tablename__ = "bookmark"
+        id = Column(Integer, primary_key=True)
+        book_id = Column(Integer)
+
+    class MagicShelfCache(Base):
+        __tablename__ = "magic_shelf_cache"
+        id = Column(Integer, primary_key=True)
+        book_ids = Column(JSON)
+
+    app_path = tmp_path / "app.db"
+    calibre_path = tmp_path / "metadata.db"
+    app_engine = create_engine(f"sqlite:///{app_path}", connect_args={"timeout": 0.1})
+    calibre_engine = create_engine(f"sqlite:///{calibre_path}", connect_args={"timeout": 0.1})
+    Base.metadata.create_all(app_engine)
+    with calibre_engine.begin() as conn:
+        conn.exec_driver_sql("CREATE TABLE books (id INTEGER PRIMARY KEY, uuid TEXT, title TEXT)")
+        conn.exec_driver_sql("INSERT INTO books VALUES (1, 'keeper', 'Keeper'), (5, 'source', 'Source'), (50, 'other', 'Other')")
+    with app_engine.begin() as conn:
+        conn.exec_driver_sql("INSERT INTO book_original_filename VALUES (1, 5, 'original.epub')")
+
+    app_owner = Session(app_engine)
+    metadata = Session(calibre_engine)
+    monkeypatch.setattr(module.ub, "session", app_owner)
+    monkeypatch.setattr(module.ub, "Base", Base)
+    monkeypatch.setattr(module.ub, "BookOriginalFilename", BookOriginalFilename)
+    monkeypatch.setattr(module.ub, "MagicShelfCache", MagicShelfCache)
+    monkeypatch.setattr(module.calibre_db, "session", metadata)
+    monkeypatch.setattr(module, "metadata_db_write_lock", lambda: nullcontext())
+    monkeypatch.setattr(module.config, "get_book_path", lambda: str(tmp_path))
+    monkeypatch.setattr(module.helper, "delete_book", lambda *_args, **_kw: (True, None))
+
+    def resolve(source_id, keeper_id):
+        def one(bid):
+            row = metadata.execute(text("SELECT uuid, title FROM books WHERE id = :id"),
+                                   {"id": bid}).first()
+            if row is None:
+                return None
+            value = _book(bid, title=row.title)
+            value.uuid = row.uuid
+            value.path = f"author/{bid}"
+            return value
+        return one(source_id), one(keeper_id)
+
+    monkeypatch.setattr(module, "resolve_candidates", resolve)
+    class MaxId:
+        def scalar(self):
+            return 50
+    real_query = metadata.query
+    # The actual mapped CWA Books model is not used for this isolated
+    # two-file database setup; supply the same max-ID SQLite result.
+    monkeypatch.setattr(metadata, "query", lambda *_: MaxId())
+
+    blocked_writer = []
+    deleted = []
+    def remove_row(book_id, book, *, guarded_unreferenced=False):
+        assert guarded_unreferenced
+        assert not module.user_book_references(book_id, read_session)
+        assert metadata.execute(text("SELECT uuid FROM books WHERE id=5")).scalar() == "source"
+        competing = sqlite3.connect(app_path, timeout=0.05)
+        try:
+            try:
+                competing.execute("INSERT INTO bookmark (book_id) VALUES (5)")
+                competing.commit()
+                blocked_writer.append(False)
+            except sqlite3.OperationalError as exc:
+                assert "locked" in str(exc)
+                blocked_writer.append(True)
+        finally:
+            competing.close()
+        metadata.execute(text("DELETE FROM books WHERE id=:bid"), {"bid": book_id})
+        deleted.append(book_id)
+
+    monkeypatch.setattr(module, "delete_whole_book", remove_row)
+    source, keeper = resolve(5, 1)
+    token = module.preflight(source, keeper)["token"]
+
+    # Capture the real guarded Session passed to the preflight in order to
+    # assert it sees the exclusive app.db snapshot during deletion.
+    original_preflight = module.preflight
+    read_session = None
+    def wrapped_preflight(*args, **kwargs):
+        nonlocal read_session
+        read_session = kwargs.get("reference_session")
+        return original_preflight(*args, **kwargs)
+    monkeypatch.setattr(module, "preflight", wrapped_preflight)
+
+    result, blockers, _path = module._delete_guarded_unreferenced(5, 1, token)
+    assert (result, blockers) == ("deleted", [])
+    assert deleted == [5]
+    assert blocked_writer == [True]
+    assert metadata.execute(text("SELECT id FROM books WHERE id=5")).first() is None
+    assert metadata.execute(text("SELECT id FROM books WHERE id=1")).first() is not None
+    with app_engine.connect() as conn:
+        assert conn.exec_driver_sql("SELECT COUNT(*) FROM book_original_filename WHERE book_id=5").scalar() == 0
+
+    # A protected reference submitted BEFORE the writer reservation blocks
+    # removal, rather than disappearing in the generic purge function.
+    with calibre_engine.begin() as conn:
+        conn.exec_driver_sql("INSERT INTO books VALUES (5, 'newsource', 'Another')")
+    with app_engine.begin() as conn:
+        conn.exec_driver_sql("INSERT INTO bookmark (book_id) VALUES (5)")
+    source, keeper = resolve(5, 1)
+    new_token = original_preflight(source, keeper)["token"]
+    result, blockers, _ = module._delete_guarded_unreferenced(5, 1, new_token)
+    assert result == "stale"
+    assert "all_user_book_references" in blockers
+    assert deleted == [5]
+    assert metadata.execute(text("SELECT uuid FROM books WHERE id=5")).scalar() == "newsource"
+    with app_engine.connect() as conn:
+        assert conn.exec_driver_sql("SELECT COUNT(*) FROM bookmark WHERE book_id=5").scalar() == 1
+    metadata.close()
+    app_owner.close()
+
+
+def test_clean_guarded_delete_route_delegates_to_serialized_storage(monkeypatch):
     from flask import Flask
     from cps.api import duplicate_delete as module
 
-    class MaxIdQuery:
-        def scalar(self):
-            return 500
-
-    monkeypatch.setattr(module.calibre_db.session, "query", lambda *_: MaxIdQuery())
-    monkeypatch.setattr(module, "user_book_references", lambda *_: [])
-    source, keeper = _book(5), _book(1)
-    source.uuid = "source"
-    keeper.uuid = "keeper"
-    token = module.preflight(source, keeper)["token"]
     monkeypatch.setattr(module, "_require_book_delete", lambda: None)
-    monkeypatch.setattr(module, "resolve_candidates", lambda *_: (source, keeper))
-
-    def must_not_delete(*_args, **_kwargs):
-        raise AssertionError("unsynchronized core must not delete any record")
-
-    monkeypatch.setattr(module, "delete_book_from_table", must_not_delete)
-    app = Flask("guarded-delete-must-fail-closed")
+    captured = []
+    def guarded(source, keeper, token):
+        captured.append((source, keeper, token))
+        return "deleted", [], "author/book"
+    monkeypatch.setattr(module, "_delete_guarded_unreferenced", guarded)
+    app = Flask("guarded-delete-contract")
     with app.test_request_context(
             "/api/v1/books/5/duplicates/delete", method="POST",
-            json={"keeper_id": 1, "token": token}):
-        reply, status = module.duplicate_delete.__wrapped__(5)
-        assert status == 503
-        assert reply.get_json()["error"]["code"] == "atomic_guarded_delete_unavailable"
+            json={"keeper_id": 1, "token": "f" * 64}):
+        reply = module.duplicate_delete.__wrapped__(5)
+        assert reply == ("", 204)
+    assert captured == [(5, 1, "f" * 64)]
