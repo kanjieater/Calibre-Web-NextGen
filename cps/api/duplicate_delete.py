@@ -7,6 +7,7 @@ The caller must independently verify content equivalence and durable recovery.
 """
 import hashlib
 import json
+import re
 
 from flask import jsonify, request
 
@@ -134,3 +135,29 @@ def duplicate_delete(book_id):
     # Delegate to the supported DB-first/file-last deletion. The client must
     # journal the request before sending it and reconcile 204/timeout by GET.
     return _delete_api_response(delete_book_from_table(book_id, "", True))
+
+
+@api_v1.route("/books/duplicates/restore-ref/<reference>", methods=["GET"])
+@login_required_if_no_ano
+def lookup_restored_book(reference):
+    """Identify an asynchronous undo import by its unique original filename.
+
+    A queued import is not a created book. The caller must reconcile this
+    stable marker after ingestion and must never submit the same import again
+    while its outcome is unknown.
+    """
+    guard = _require_book_delete()
+    if guard:
+        return guard
+    if not re.fullmatch(r"bookhelper-undo-[0-9a-f]{32}-[0-9]+\\.epub", reference):
+        return jsonify({"error": {"code": "invalid_reference", "message": "Invalid restore reference"}}), 400
+    rows = ub.session.query(ub.BookOriginalFilename).filter(
+        ub.BookOriginalFilename.filename == reference).limit(2).all()
+    if len(rows) > 1:
+        return jsonify({"error": {"code": "ambiguous_reference", "message": "Multiple imports match"}}), 409
+    if not rows:
+        return jsonify({"book_id": None}), 200
+    book_id = int(rows[0].book_id)
+    if not _editable_book(book_id):
+        return jsonify({"error": {"code": "not_found", "message": "Restored book not visible"}}), 404
+    return jsonify({"book_id": book_id}), 200
