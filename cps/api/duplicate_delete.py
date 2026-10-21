@@ -55,6 +55,10 @@ def user_book_references(book_id):
         if "book_id" not in mapper.columns:
             continue
         model = mapper.class_
+        # Original filenames are import provenance rather than a user's
+        # reading/ownership state. Bookhelper archives this before deletion.
+        if model.__name__ == "BookOriginalFilename":
+            continue
         if ub.session.query(model).filter(
                 getattr(model, "book_id") == book_id).limit(1).first() is not None:
             found.append(model.__name__)
