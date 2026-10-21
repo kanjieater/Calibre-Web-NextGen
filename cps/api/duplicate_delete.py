@@ -104,14 +104,26 @@ def preflight(source, keeper):
         blockers.append("source_epub_missing")
     if not any(row.format.upper() == "EPUB" for row in (keeper.data or [])):
         blockers.append("keeper_epub_missing")
+    source_uuid = getattr(source, "uuid", None)
+    keeper_uuid = getattr(keeper, "uuid", None)
+    if not isinstance(source_uuid, str) or not source_uuid.strip():
+        blockers.append("source_stable_uuid_missing")
+    if not isinstance(keeper_uuid, str) or not keeper_uuid.strip():
+        blockers.append("keeper_stable_uuid_missing")
     refs = user_book_references(source.id)
     if refs:
         blockers.append("all_user_book_references")
+    # Bind the proof to BOTH rows. A recycled or edited keeper cannot inherit
+    # a still-valid source-only deletion token.
+    pair_token = hashlib.sha256(
+        (snapshot_token(source) + ":" + snapshot_token(keeper)).encode("ascii")
+    ).hexdigest()
     return {
         "book_id": source.id,
         "keeper_id": keeper.id,
-        "source_uuid": getattr(source, "uuid", None),
-        "token": snapshot_token(source),
+        "source_uuid": source_uuid,
+        "keeper_uuid": keeper_uuid,
+        "token": pair_token,
         "allowed": not blockers,
         "blockers": blockers,
         "referencing_models": refs,
@@ -155,9 +167,16 @@ def duplicate_delete(book_id):
     if not current["allowed"] or current["token"] != body["token"]:
         return jsonify({"error": {"code": "stale_or_referenced", "message": "State changed or book has protected references"},
                         "blockers": current["blockers"]}), 409
-    # Delegate to the supported DB-first/file-last deletion. The client must
-    # journal the request before sending it and reconcile 204/timeout by GET.
-    return _delete_api_response(delete_book_from_table(book_id, "", True))
+    # The general-purpose delete commits app.db before removing the Calibre row.
+    # Merely checking references above is a TOCTOU check: a concurrent app.db
+    # writer can create a protected row between the snapshot and those commits.
+    # Until there is storage-level exclusion that spans both databases and the
+    # actual deletion core, this dedicated destructive API MUST NOT delete.
+    # A second process mutex here would not protect other CWA workers.
+    return jsonify({"error": {
+        "code": "atomic_guarded_delete_unavailable",
+        "message": "All-user reference exclusion is not transactional; deletion disabled",
+    }}), 503
 
 
 def valid_restore_reference(reference):
