@@ -10,10 +10,11 @@ import json
 import re
 
 from flask import jsonify, request
+from sqlalchemy import func
 
 from . import api_v1
 from .edit import _require_book_delete, _editable_book, _delete_api_response
-from .. import calibre_db, ub, logger
+from .. import calibre_db, db, ub, logger
 from ..cw_login import current_user
 from ..usermanagement import login_required_if_no_ano
 from ..editbooks import delete_book_from_table
@@ -76,6 +77,12 @@ def resolve_candidates(source_id, keeper_id):
 
 def preflight(source, keeper):
     blockers = []
+    # The Calibre SQLite book id is not guaranteed AUTOINCREMENT. Deleting
+    # the maximum live id permits a later ingest to reuse that numeric ID,
+    # defeating Bookhelper's exact-ID redirect for external consumers.
+    max_id = calibre_db.session.query(func.max(db.Books.id)).scalar()
+    if max_id is None or int(source.id) >= int(max_id):
+        blockers.append("id_reuse_risk_maximum_book_id")
     if any(tag.name in PROTECTED_TAGS for tag in (source.tags or [])):
         blockers.append("protected_book_sync_tag")
     if not any(row.format.upper() == "EPUB" for row in (source.data or [])):
