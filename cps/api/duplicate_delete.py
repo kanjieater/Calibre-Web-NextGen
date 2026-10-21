@@ -64,6 +64,21 @@ def user_book_references(book_id):
         if ub.session.query(model).filter(
                 getattr(model, "book_id") == book_id).limit(1).first() is not None:
             found.append(model.__name__)
+    # MagicShelfCache.book_ids stores numeric Calibre IDs in JSON, not in a
+    # mapped book_id column. A stale cached reference cannot be ignored by an
+    # all-user reference-free deletion assertion. Cap this scan and fail closed.
+    cache_rows = ub.session.query(ub.MagicShelfCache.book_ids).limit(10001).all()
+    if len(cache_rows) > 10000:
+        raise ValueError("magic-shelf cache reference inventory exceeds safety bound")
+    for (ids,) in cache_rows:
+        if ids is None:
+            continue
+        if (not isinstance(ids, list) or len(ids) > 300000
+                or any(type(value) is not int or value <= 0 for value in ids)):
+            raise ValueError("malformed magic-shelf cached book ID inventory")
+        if book_id in ids:
+            found.append("MagicShelfCache")
+            break
     return found
 
 
