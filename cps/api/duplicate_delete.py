@@ -299,8 +299,9 @@ def reconcile_duplicate_quarantine():
             try:
                 result = duplicate_quarantine.reconcile(
                     config.get_book_path(),
-                    lambda book_id: calibre_db.session.query(db.Books).filter(
-                        db.Books.id == book_id).first(),
+                    lambda book_id, book_path: calibre_db.session.query(db.Books).filter(
+                        (db.Books.id == book_id) | (db.Books.path == book_path)
+                    ).first(),
                     max_transactions=32,
                 )
             finally:
