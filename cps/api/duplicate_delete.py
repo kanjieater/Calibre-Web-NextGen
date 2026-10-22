@@ -307,6 +307,30 @@ def duplicate_delete(book_id):
                     "state": "quarantined"}), 200
 
 
+@api_v1.route(
+    "/books/<int:book_id>/duplicates/quarantine/<quarantine_id>",
+    methods=["GET"])
+@login_required_if_no_ano
+def quarantine_status(book_id, quarantine_id):
+    """Attest a committed, complete-file quarantine after a lost HTTP reply.
+
+    The caller must independently recheck its prior source/keeper UUIDs and
+    original deletion journal. No delete or cleanup is initiated by GET.
+    """
+    guard = _require_book_delete()
+    if guard:
+        return guard
+    try:
+        result = duplicate_quarantine.inspect(
+            config.get_book_path(), book_id, quarantine_id)
+    except (duplicate_quarantine.QuarantineError, OSError, ValueError, KeyError):
+        return jsonify({"error": {
+            "code": "quarantine_unverified",
+            "message": "No verified quarantine exists for this identity",
+        }}), 404
+    return jsonify(result), 200
+
+
 @api_v1.route("/books/duplicates/quarantine/reconcile", methods=["POST"])
 @login_required_if_no_ano
 def reconcile_duplicate_quarantine():
