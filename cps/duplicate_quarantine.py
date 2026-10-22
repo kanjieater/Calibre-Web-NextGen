@@ -244,6 +244,44 @@ def cancel(ticket):
 
 
 
+def inspect(calibre_root, source_id, quarantine_id):
+    """Verify the original-byte quarantine before trusting a lost delete reply.
+
+    An absent Calibre row alone cannot prove this transaction kept recoverable
+    bytes. Look up the exact owned journal rather than scanning unrelated
+    quarantines, and rehash the COMPLETE saved directory on every recovery
+    attestation. A merely published copy is not a committed deletion.
+    """
+    if (type(source_id) is not int or source_id < 1 or
+            not isinstance(quarantine_id, str) or
+            not re.fullmatch(r"[0-9a-f]{32}", quarantine_id)):
+        raise QuarantineError("invalid quarantine identity")
+    qroot = _quarantine_root(calibre_root)
+    name = f"{source_id}-{quarantine_id}"
+    final, _, journal = _paths(qroot, name)
+    if not journal.is_file():
+        raise QuarantineError("quarantine journal not found")
+    item = json.loads(journal.read_text(encoding="utf-8"))
+    if (item.get("key") != quarantine_id or item.get("book_id") != source_id
+            or not isinstance(item.get("source_uuid"), str)
+            or not item["source_uuid"]
+            or not isinstance(item.get("keeper_uuid"), str)
+            or not item["keeper_uuid"]
+            or not isinstance(item.get("book_path"), str)
+            or not isinstance(item.get("inventory"), dict)):
+        raise QuarantineError("quarantine journal identity invalid")
+    _verify(final, item)
+    return {
+        "quarantine_id": quarantine_id, "book_id": source_id,
+        "source_uuid": item["source_uuid"],
+        "keeper_uuid": item["keeper_uuid"],
+        "book_path": item["book_path"],
+        "state": item.get("state"),
+        "committed": item.get("state") in ("db_committed", "complete"),
+        "files_verified": len(item["inventory"]),
+    }
+
+
 def reconcile(calibre_root, book_lookup, max_transactions=32):
     """Finish orphan cleanup after a crash following a successful Calibre commit.
 
