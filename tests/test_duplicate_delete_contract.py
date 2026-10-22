@@ -552,7 +552,7 @@ def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch)
         assert conn.exec_driver_sql(
             "SELECT uuid FROM books WHERE id=77").scalar() == "other-book"
     expected_id = module.duplicate_quarantine.transaction_id_for(
-        5, "newsource", "book-uuid", "author/5")
+        5, "newsource", "keeper", "author/5")
     assert (qroot / f"5-{expected_id}" / "original.epub").is_file()
     metadata.close()
     app_owner.close()
