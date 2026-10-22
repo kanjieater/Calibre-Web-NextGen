@@ -47,6 +47,31 @@ def test_duplicate_quarantine_retains_every_original_file(library):
     assert journal["state"] == "complete"
 
 
+def test_read_only_quarantine_attestation_rejects_uncommitted_and_corrupt(library):
+    root, original, _ = library
+    receipt = _published(library)
+    unpublished = q.inspect(root, 42, receipt["key"])
+    assert unpublished["committed"] is False
+    assert unpublished["state"] == "published"
+    assert unpublished["files_verified"] == 3
+    assert unpublished["source_uuid"] == "source-uuid"
+    assert unpublished["keeper_uuid"] == "keeper-uuid"
+
+    finished = q.finish(receipt)
+    proof = q.inspect(root, 42, finished["quarantine_id"])
+    assert proof["committed"] is True
+    assert proof["state"] == "complete"
+    assert proof["files_verified"] == 3
+    with pytest.raises(q.QuarantineError, match="journal not found"):
+        q.inspect(root, 999, receipt["key"])
+    with pytest.raises(q.QuarantineError, match="invalid"):
+        q.inspect(root, 42, "../bad")
+
+    Path(receipt["destination"], "novel.epub").write_bytes(b"not-original")
+    with pytest.raises(q.QuarantineError, match="differs"):
+        q.inspect(root, 42, receipt["key"])
+
+
 def test_crash_after_publishing_reuses_owned_quarantine(library):
     receipt = _published(library)
     again = _published(library)
