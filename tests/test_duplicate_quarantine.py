@@ -116,7 +116,9 @@ def test_rejects_path_traversal_and_nested_quarantine(library, monkeypatch):
         q.publish(root, "../Author/Novel (42)", 42, "source", "keeper")
     with pytest.raises(q.QuarantineError, match="path"):
         q.publish(root, "/Author/Novel (42)", 42, "source", "keeper")
-    monkeypatch.setenv(q.ENV, str(root / "maintenance" / "potentialDupes"))
+    nested = root / "maintenance" / "potentialDupes"
+    nested.mkdir(parents=True)
+    monkeypatch.setenv(q.ENV, str(nested))
     with pytest.raises(q.QuarantineError, match="outside"):
         q.publish(root, "Author/Novel (42)", 42, "source", "keeper")
 
