@@ -558,6 +558,42 @@ def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch)
     app_owner.close()
 
 
+def test_quarantine_status_route_is_read_only_and_fail_closed(monkeypatch):
+    from flask import Flask
+    from cps.api import duplicate_delete as module
+
+    monkeypatch.setattr(module, "_require_book_delete", lambda: None)
+    monkeypatch.setattr(module.config, "get_book_path", lambda: "/test/calibre")
+    captured = []
+
+    def inspect(root, book_id, quarantine_id):
+        captured.append((root, book_id, quarantine_id))
+        return {
+            "book_id": book_id, "quarantine_id": quarantine_id,
+            "source_uuid": "source", "keeper_uuid": "keeper",
+            "committed": True, "state": "complete", "files_verified": 3,
+        }
+
+    monkeypatch.setattr(module.duplicate_quarantine, "inspect", inspect)
+    app = Flask("quarantine-status-proof")
+    with app.test_request_context(
+            "/api/v1/books/5/duplicates/quarantine/" + "a" * 32):
+        response, status = module.quarantine_status.__wrapped__(5, "a" * 32)
+        assert status == 200
+        assert response.get_json()["source_uuid"] == "source"
+    assert captured == [("/test/calibre", 5, "a" * 32)]
+
+    def missing(*_args):
+        raise module.duplicate_quarantine.QuarantineError("unverified")
+
+    monkeypatch.setattr(module.duplicate_quarantine, "inspect", missing)
+    with app.test_request_context(
+            "/api/v1/books/5/duplicates/quarantine/" + "b" * 32):
+        response, status = module.quarantine_status.__wrapped__(5, "b" * 32)
+        assert status == 404
+        assert response.get_json()["error"]["code"] == "quarantine_unverified"
+
+
 def test_clean_guarded_delete_route_delegates_to_serialized_storage(monkeypatch):
     from flask import Flask
     from cps.api import duplicate_delete as module
