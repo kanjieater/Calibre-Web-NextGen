@@ -19,6 +19,7 @@ def library(tmp_path, monkeypatch):
     (book / "cover.jpg").write_bytes(b"original cover bytes")
     (book / "metadata.opf").write_bytes(b"<package>metadata</package>")
     qroot = tmp_path / "maintenance" / "potentialDupes"
+    qroot.mkdir(parents=True)
     monkeypatch.setenv(q.ENV, str(qroot))
     return root, book, qroot
 
@@ -118,6 +119,24 @@ def test_rejects_path_traversal_and_nested_quarantine(library, monkeypatch):
     monkeypatch.setenv(q.ENV, str(root / "maintenance" / "potentialDupes"))
     with pytest.raises(q.QuarantineError, match="outside"):
         q.publish(root, "Author/Novel (42)", 42, "source", "keeper")
+
+
+def test_missing_quarantine_mount_never_created_inside_container(library, monkeypatch):
+    root, original, configured = library
+    import shutil
+    shutil.rmtree(configured)
+    with pytest.raises(q.QuarantineError, match="existing persistent"):
+        _published(library)
+    assert not configured.exists()
+    assert original.joinpath("novel.epub").is_file()
+
+    link = configured.parent / "symlinked-potentialDupes"
+    external = configured.parent / "other-volume"
+    external.mkdir()
+    link.symlink_to(external, target_is_directory=True)
+    monkeypatch.setenv(q.ENV, str(link))
+    with pytest.raises(q.QuarantineError, match="existing persistent"):
+        _published(library)
 
 
 def test_rejects_symlinked_external_file(library):
