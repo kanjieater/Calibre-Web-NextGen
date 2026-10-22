@@ -1,8 +1,10 @@
 # Bookhelper duplicate quarantine — DramaCD-style release contract
 
-**Status:** required design and acceptance criteria for PR #11; **not implemented
-at this head**. Do not merge the current hard-delete path as the first
-automatic duplicate-removal release.
+**Status:** filesystem quarantine and guarded-delete implementation are on
+PR #11. **Draft and unverified in the real deployment**: full production-image
+transaction/race/restart/restore tests and the separate one-time Book-sync
+legacy-writer retirement are still required before merging or deployment.
+The guarded duplicate route never falls back to permanent file deletion.
 
 ## Scope and ownership
 
@@ -56,7 +58,7 @@ owner-reviewed policy revision. No title-only/fuzzy auto-removal.
 
 ## Quarantine transaction and reconciliation
 
-The guarded NextGen route must replace the current post-commit
+The guarded NextGen route replaces the earlier post-commit
 `helper.delete_book(..., book_format="")` **permanent file delete** with a
 crash-resumable, application-owned quarantine of the *complete* original
 Calibre book directory, including EPUBs, alternate formats, cover, OPF and
@@ -75,10 +77,12 @@ unrecognized files:
    stage; do not remove the original yet. A failure leaves the live book
    untouched and the journal resumable.
 4. Revalidate identity/reference state with both database writer slots held.
-   Commit the removal of the active Calibre record. Only *after this commit*,
-   remove the now-orphaned original path when full quarantined bytes have been
-   verified and the journal proves ownership. A crash in between preserves the
-   bytes, and recovery finishes the owned step without a second delete.
+   Commit removal of the active Calibre record, then **reacquire the Calibre
+   SQLite writer reservation**, verify neither the original numeric ID nor
+   original directory path has been reused, and hold the reservation until
+   safe orphan cleanup finishes. The complete original bytes must already
+   exist in verified quarantine. A race or crash preserves the quarantine
+   and leaves cleanup pending, never deleting a newly reoccupied path.
 5. Keep a small durable transaction receipt and the published quarantined
    directory; reconcile `submitted`, `published`, `db_committed`,
    `source_cleanup_pending` and `complete`. HTTP success only means
@@ -124,7 +128,11 @@ NextGen receives one verified pair at a time from Bookhelper and:
   interrupted commit/cleanup, a bounded authenticated reconcile endpoint
   checks the actual Calibre database for a live owner of *either* the original
   numeric ID or directory path and finishes cleanup only when neither is in
-  use.
+  use. A separate authenticated read-only quarantine-status endpoint verifies
+  the full original directory hashes, source/keeper UUID, operation ID and
+  committed journal state. Bookhelper requires this independent attestation
+  before resolving an uncertain HTTP delete as successful. A missing CWA book
+  row alone is never sufficient proof.
 - Blocks and records unsupported Google Drive libraries, missing persistent
   quarantine mount, reserved path/traversal, symlink, corrupted file, hash
   mismatch, changed source or keeper identity, current user references,
