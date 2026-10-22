@@ -11,6 +11,7 @@ import re
 
 from flask import jsonify, request
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 from . import api_v1
 from .edit import _require_book_delete, _editable_book
@@ -214,8 +215,9 @@ def _delete_guarded_unreferenced(source_id, keeper_id, expected_token):
                 # Publish a hash-verified intact quarantine before deleting
                 # metadata. A crash here leaves the Calibre record and original
                 # directory intact, plus a transaction-owned staged copy.
+                original_path = str(source.path)
                 ticket = duplicate_quarantine.publish(
-                    config.get_book_path(), str(source.path), source_id,
+                    config.get_book_path(), original_path, source_id,
                     getattr(source, "uuid"), getattr(keeper, "uuid"))
                 delete_whole_book(source_id, source, guarded_unreferenced=True)
                 # No interior commits are permitted in the guarded path.
@@ -227,6 +229,26 @@ def _delete_guarded_unreferenced(source_id, keeper_id, expected_token):
                     synchronize_session=False)
                 app_session.flush()
                 app_connection.commit()
+                # metadata.db commit releases its SQLite writer reservation.
+                # Reacquire it BEFORE removing the orphaned source directory:
+                # another writer might have reused the source ID or path in
+                # that interval. A held app.db lock alone does not protect
+                # Calibre's path namespace.
+                cleanup_connection = calibre_db.session.connection()
+                _begin_immediate(cleanup_connection, "metadata.db orphan cleanup")
+                occupied = cleanup_connection.execute(
+                    text("SELECT id FROM books WHERE id = :book_id "
+                         "OR path = :book_path LIMIT 1"),
+                    {"book_id": source_id, "book_path": original_path},
+                ).first()
+                if occupied is not None:
+                    raise duplicate_quarantine.QuarantineError(
+                        "original Calibre ID/path reoccupied after metadata commit; "
+                        "verified quarantine retained, refusing orphan cleanup")
+                # The exclusive Calibre writer reservation stays active
+                # THROUGH fs cleanup, not merely through the DB commit.
+                confirmation = duplicate_quarantine.finish(ticket)
+                calibre_db.session.rollback()
             except Exception:
                 calibre_db.session.rollback()
                 app_connection.rollback()
@@ -246,10 +268,9 @@ def _delete_guarded_unreferenced(source_id, keeper_id, expected_token):
                     app_connection.rollback()
                 calibre_db.session.rollback()
 
-    # The DB row is gone. Verify quarantine ownership once again before
-    # clearing the orphaned original. Failure returns an uncertain 503, but
-    # the hash-verified published directory is retained for recovery.
-    confirmation = duplicate_quarantine.finish(ticket)
+    # The DB row is gone and orphan cleanup completed under a fresh Calibre
+    # writer reservation. Any failure above reports an uncertain result and
+    # leaves the committed, verified quarantine available for reconciliation.
     try:
         from cps.cwa_db_loader import load_cwa_db
         cwa_db = load_cwa_db().CWA_DB()
