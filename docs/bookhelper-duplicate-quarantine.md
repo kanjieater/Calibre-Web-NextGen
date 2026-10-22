@@ -64,8 +64,10 @@ crash-resumable, application-owned quarantine of the *complete* original
 Calibre book directory, including EPUBs, alternate formats, cover, OPF and
 unrecognized files:
 
-1. Validate canonical paths and required persistent quarantine mount. Reject
-   symlinks, traversal, collisions, duplicate ownership or unsupported
+1. Validate canonical paths and required **pre-created writable persistent**
+   quarantine directory/mount. Missing or symlinked destinations must fail
+   closed; never create a fallback inside ephemeral container storage. Reject
+   traversal, collisions, duplicate ownership or unsupported
    backend (including Google Drive) rather than silently hard-deleting.
 2. Write/fsync a journal with transaction ID, exact source/keeper UUIDs and
    IDs, expected evidence digest, original relative path, chosen unique
