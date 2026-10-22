@@ -412,8 +412,11 @@ def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch)
     calibre_engine = create_engine(f"sqlite:///{calibre_path}", connect_args={"timeout": 0.1})
     Base.metadata.create_all(app_engine)
     with calibre_engine.begin() as conn:
-        conn.exec_driver_sql("CREATE TABLE books (id INTEGER PRIMARY KEY, uuid TEXT, title TEXT)")
-        conn.exec_driver_sql("INSERT INTO books VALUES (1, 'keeper', 'Keeper'), (5, 'source', 'Source'), (50, 'other', 'Other')")
+        conn.exec_driver_sql("CREATE TABLE books (id INTEGER PRIMARY KEY, uuid TEXT, title TEXT, path TEXT)")
+        conn.exec_driver_sql("INSERT INTO books VALUES "
+                             "(1, 'keeper', 'Keeper', 'author/1'),"
+                             "(5, 'source', 'Source', 'author/5'),"
+                             "(50, 'other', 'Other', 'author/50')")
     with app_engine.begin() as conn:
         conn.exec_driver_sql("INSERT INTO book_original_filename VALUES (1, 5, 'original.epub')")
 
@@ -507,7 +510,7 @@ def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch)
     # A protected reference submitted BEFORE the writer reservation blocks
     # removal, rather than disappearing in the generic purge function.
     with calibre_engine.begin() as conn:
-        conn.exec_driver_sql("INSERT INTO books VALUES (5, 'newsource', 'Another')")
+        conn.exec_driver_sql("INSERT INTO books VALUES (5, 'newsource', 'Another', 'author/5')")
     with app_engine.begin() as conn:
         conn.exec_driver_sql("INSERT INTO bookmark (book_id) VALUES (5)")
     source, keeper = resolve(5, 1)
@@ -519,6 +522,38 @@ def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch)
     assert metadata.execute(text("SELECT uuid FROM books WHERE id=5")).scalar() == "newsource"
     with app_engine.connect() as conn:
         assert conn.exec_driver_sql("SELECT COUNT(*) FROM bookmark WHERE book_id=5").scalar() == 1
+    # Simulate a different process claiming the original Calibre *path*
+    # after the source DB commit but immediately before orphan cleanup.
+    # It must not cause a freshly imported book's directory to be erased.
+    with app_engine.begin() as conn:
+        conn.exec_driver_sql("DELETE FROM bookmark WHERE book_id=5")
+    book_dir.mkdir(parents=True)
+    (book_dir / "original.epub").write_bytes(b"second-original")
+    source, keeper = resolve(5, 1)
+    token = original_preflight(source, keeper)["token"]
+    original_begin = module._begin_immediate
+    observed = []
+
+    def racing_cleanup_reservation(connection, database):
+        if database == "metadata.db orphan cleanup":
+            with calibre_engine.begin() as rival:
+                rival.exec_driver_sql(
+                    "INSERT INTO books VALUES (77, 'other-book', 'Racer', 'author/5')")
+            observed.append(True)
+        return original_begin(connection, database)
+
+    monkeypatch.setattr(module, "_begin_immediate", racing_cleanup_reservation)
+    import pytest
+    with pytest.raises(module.duplicate_quarantine.QuarantineError, match="reoccupied"):
+        module._delete_guarded_unreferenced(5, 1, token)
+    assert observed == [True]
+    assert book_dir.joinpath("original.epub").read_bytes() == b"second-original"
+    with calibre_engine.connect() as conn:
+        assert conn.exec_driver_sql(
+            "SELECT uuid FROM books WHERE id=77").scalar() == "other-book"
+    expected_id = module.duplicate_quarantine.transaction_id_for(
+        5, "newsource", "book-uuid", "author/5")
+    assert (qroot / f"5-{expected_id}" / "original.epub").is_file()
     metadata.close()
     app_owner.close()
 
