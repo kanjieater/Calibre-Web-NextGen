@@ -434,6 +434,7 @@ def test_real_sqlite_guarded_delete_and_concurrent_writer(tmp_path, monkeypatch)
     (book_dir / "original.epub").write_bytes(b"original-for-two-db-test")
     (book_dir / "cover.jpg").write_bytes(b"saved-original-cover")
     qroot = tmp_path / "maintenance" / "potentialDupes"
+    qroot.mkdir(parents=True)
     monkeypatch.setenv("BOOKHELPER_DUPLICATE_QUARANTINE_DIR", str(qroot))
     monkeypatch.setattr(module.config, "get_book_path", lambda: str(calibre_root))
     monkeypatch.setattr(module.config, "config_use_google_drive", False)
