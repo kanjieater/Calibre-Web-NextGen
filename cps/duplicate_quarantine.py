@@ -97,10 +97,18 @@ def _quarantine_root(calibre_root):
     if not destination or not os.path.isabs(destination):
         raise QuarantineError(f"{ENV} must be a persistent absolute directory")
     root = Path(calibre_root).resolve(strict=True)
-    qroot = Path(destination).resolve()
+    configured = Path(destination)
+    # Never create the mount point on demand. A typo/missing Docker bind or
+    # volume must not silently store the ONLY retained originals on ephemeral
+    # container storage. The operator must pre-create the persistent target.
+    if configured.is_symlink() or not configured.is_dir():
+        raise QuarantineError(
+            f"{ENV} must be an existing persistent directory/mount")
+    qroot = configured.resolve(strict=True)
     if qroot == root or root in qroot.parents:
         raise QuarantineError("quarantine must be outside the active Calibre library")
-    qroot.mkdir(parents=True, exist_ok=True)
+    if not os.access(qroot, os.W_OK | os.X_OK):
+        raise QuarantineError("quarantine directory is not writable")
     return qroot
 
 
