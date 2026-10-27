@@ -1844,43 +1844,39 @@ def delete_book_from_table(
                             ex,
                         )
 
-            refreshed_duplicate_cache = False
+            # A whole-book DELETE must not hydrate/rebuild the entire duplicate
+            # index inside this gevent HTTP request. At library scale that can
+            # monopolize the worker long after metadata.db has committed and
+            # make a successful delete look like a timeout to API clients.
+            indexed_delete_recorded = False
             if not book_format:
                 try:
-                    from cps.duplicate_index import (
-                        _current_max_book_id,
-                        delete_book_keys,
-                        get_duplicate_groups_from_index,
-                    )
-                    from cps.cwa_db_loader import load_cwa_db
+                    from cps.duplicate_index import retire_deleted_book_from_index
 
-                    CWA_DB = load_cwa_db().CWA_DB
-
-                    delete_book_keys([book_id])
-                    cwa_db = CWA_DB()
-                    duplicate_groups = get_duplicate_groups_from_index(
-                        cwa_db.cwa_settings, include_dismissed=True
+                    retire_deleted_book_from_index(
+                        book_id, mark_cache_pending=not skip_cache_invalidation
                     )
-                    cwa_db.update_duplicate_cache(
-                        duplicate_groups, len(duplicate_groups), _current_max_book_id()
-                    )
-                    refreshed_duplicate_cache = True
+                    indexed_delete_recorded = True
                 except Exception as e:
+                    # The book has already been committed deleted: never replay
+                    # the DELETE to repair auxiliary duplicate-index state.
                     log.warning(
-                        "Failed to refresh duplicate index/cache after deleting book %s: %s",
-                        book_id,
-                        str(e),
+                        "Failed to retire duplicate index key after deleting book %s: %s",
+                        book_id, str(e),
                     )
 
-            # Skip cache invalidation when batching, or when the indexed refresh
-            # above already handled it; otherwise mark the cache as stale.
-            if not skip_cache_invalidation and not refreshed_duplicate_cache:
+            # Format-only deletes still require a cache refresh. If key removal
+            # failed, fall back to the existing inexpensive stale-cache marker;
+            # the next normal scan can repair the index. Batch callers keep
+            # their existing one-refresh-at-the-end behavior.
+            if not skip_cache_invalidation and (book_format or not indexed_delete_recorded):
                 try:
                     from cps.cwa_db_loader import load_cwa_db
 
                     CWA_DB = load_cwa_db().CWA_DB
                     cwa_db = CWA_DB()
-                    cwa_db.invalidate_duplicate_cache()
+                    if not cwa_db.invalidate_duplicate_cache():
+                        log.warning("Failed to mark duplicate cache pending after deletion")
                 except Exception as e:
                     log.error(
                         "Failed to invalidate duplicate cache after deletion: %s",
