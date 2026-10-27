@@ -1853,9 +1853,7 @@ def delete_book_from_table(
                 try:
                     from cps.duplicate_index import retire_deleted_book_from_index
 
-                    retire_deleted_book_from_index(
-                        book_id, mark_cache_pending=not skip_cache_invalidation
-                    )
+                    retire_deleted_book_from_index(book_id)
                     indexed_delete_recorded = True
                 except Exception as e:
                     # The book has already been committed deleted: never replay
@@ -1865,11 +1863,12 @@ def delete_book_from_table(
                         book_id, str(e),
                     )
 
-            # Format-only deletes still require a cache refresh. If key removal
-            # failed, fall back to the existing inexpensive stale-cache marker;
-            # the next normal scan can repair the index. Batch callers keep
-            # their existing one-refresh-at-the-end behavior.
-            if not skip_cache_invalidation and (book_format or not indexed_delete_recorded):
+            # Format-only deletes keep the existing optional invalidation.
+            # Whole-book deletes always mark the summary pending, even in a
+            # batch where automatic rescanning may be disabled. If retiring a
+            # key failed, try the cheap marker again, never redo the DELETE.
+            if ((not book_format and not indexed_delete_recorded)
+                    or (book_format and not skip_cache_invalidation)):
                 try:
                     from cps.cwa_db_loader import load_cwa_db
 
