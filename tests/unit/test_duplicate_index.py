@@ -657,6 +657,64 @@ def test_mark_duplicate_index_pending_sets_cache_pending(duplicate_index):
     assert cache["last_scanned_book_id"] == 4
 
 
+def test_http_delete_retirement_only_touches_deleted_key_and_marks_cache_pending(
+    duplicate_index, monkeypatch
+):
+    """The request must never hydrate every duplicate group after metadata commit."""
+    books = [_book(1, "Dune", "Frank Herbert"),
+             _book(2, "Dune", "Frank Herbert"),
+             _book(3, "Dune", "Frank Herbert")]
+    settings = {"duplicate_detection_title": 1, "duplicate_detection_author": 1,
+                "duplicate_detection_language": 0}
+    duplicate_index.calibre_db.session = _Session(books)
+    duplicate_index.upsert_book_keys({1, 2, 3}, settings)
+    _seed_cache(scan_pending=False, last_scanned_book_id=3)
+
+    def forbidden_rebuild(*args, **kwargs):
+        raise AssertionError("whole-library duplicate scan must not run in HTTP deletion")
+
+    monkeypatch.setattr(duplicate_index, "get_duplicate_groups_from_index", forbidden_rebuild)
+    monkeypatch.setattr(duplicate_index, "rebuild_duplicate_index", forbidden_rebuild)
+    monkeypatch.setattr(duplicate_index, "_current_library_book_ids", forbidden_rebuild)
+
+    assert duplicate_index.retire_deleted_book_from_index(2) == 1
+    rows = _FakeCwaDB().cur.execute(
+        "SELECT book_id FROM cwa_duplicate_book_keys ORDER BY book_id"
+    ).fetchall()
+    assert rows == [(1,), (3,)]
+    cache = _FakeCwaDB().get_duplicate_cache()
+    assert cache["scan_pending"] is True
+    assert cache["last_scanned_book_id"] == 3
+    # Idempotent if called for a row already absent; no deleted book is re-added.
+    assert duplicate_index.retire_deleted_book_from_index(2) == 0
+
+
+def test_batch_retirements_mark_cache_pending_without_rebuilding(duplicate_index, monkeypatch):
+    books = [_book(1, "Dune", "Frank Herbert"),
+             _book(2, "Dune", "Frank Herbert"),
+             _book(3, "Dune", "Frank Herbert")]
+    duplicate_index.calibre_db.session = _Session(books)
+    settings = {"duplicate_detection_title": 1, "duplicate_detection_author": 1,
+                "duplicate_detection_language": 0}
+    duplicate_index.upsert_book_keys({1, 2, 3}, settings)
+    _seed_cache(scan_pending=False, last_scanned_book_id=3)
+
+    def fail_scan(*args, **kwargs):
+        raise AssertionError("batch deletion must not run a duplicate scan")
+
+    monkeypatch.setattr(duplicate_index, "get_duplicate_groups_from_index", fail_scan)
+    assert duplicate_index.retire_deleted_book_from_index(2) == 1
+    assert duplicate_index.retire_deleted_book_from_index(3) == 1
+    # The UI snapshot is honestly stale; no automatic scan is guaranteed
+    # when duplicate scanning is configured as manual/disabled.
+    cache = _FakeCwaDB().get_duplicate_cache()
+    assert cache["scan_pending"] is True
+    assert cache["last_scanned_book_id"] == 3
+    assert _FakeCwaDB().cur.execute(
+        "SELECT book_id FROM cwa_duplicate_book_keys ORDER BY book_id"
+    ).fetchall() == [(1,)]
+
+
 def test_schema_contains_duplicate_book_key_table():
     schema = pathlib.Path(__file__).resolve().parents[2] / "scripts" / "cwa_schema.sql"
     sql = schema.read_text()
