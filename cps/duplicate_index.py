@@ -291,18 +291,18 @@ def delete_book_keys(book_ids: Iterable[int]):
     return deleted
 
 
-def retire_deleted_book_from_index(book_id, mark_cache_pending=True):
+def retire_deleted_book_from_index(book_id):
     """Retire one deleted key without rebuilding every duplicate group.
 
     This runs inside the HTTP delete request *after* the metadata DB commit.
     Rehydrating all duplicate groups here stalls the web worker on large libraries.
-    The full index remains valid for all surviving books; the serialized UI
-    cache is marked pending for a later background/manual refresh, not rebuilt
-    synchronously for each deletion.
+    The full index remains valid for all surviving books. Mark the serialized
+    cache pending even during batch deletion: those callers do not guarantee a
+    later scan when automatic scans are disabled. This is a single cheap SQL
+    update, not a synchronous cache rebuild.
     """
     deleted = delete_book_keys([book_id])
-    if mark_cache_pending:
-        mark_duplicate_index_pending("book deletion")
+    mark_duplicate_index_pending("book deletion")
     return deleted
 
 
